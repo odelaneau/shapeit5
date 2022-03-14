@@ -1,0 +1,63 @@
+
+SHAPEIT
+  * Author        : Olivier DELANEAU, University of Lausanne
+  * Contact       : olivier.delaneau@gmail.com
+  * Version       : 4.0.0
+  * Run date      : 07/12/2018 - 13:38:37
+
+Files:
+  * Input VCF     : [unphased.bcf]
+  * Reference VCF : [reference.bcf]
+  * Scaffold VCF  : [scaffold.bcf]
+  * Genetic Map   : [chr20.b37.gmap.gz]
+  * Output VCF    : [phased.bcf]
+  * Output LOG    : [phased.log]
+
+Parameters:
+  * Seed    : 15052011
+  * Threads : 4 threads
+  * MCMC    : 15 iterations [5b + 1p + 1b + 1p + 1b + 1p + 5m]
+  * PBWT    : Store indexes every 8 variants
+  * PBWT    : Depth of PBWT neighbours to condition on: 4
+  * HMM     : K is variable / min W is 2.00Mb / Ne is 15000
+  * HMM     : Inform phasing using VCF/PS field / Error rate of PS field is 0.0001
+
+Initialization:
+  * VCF/BCF scanning [Nm=203 / Nr=300 / L=24990 / Reg=20] (0.09s)
+  * VCF/BCF parsing [Hom=90.0% / Het=10.0% / Pha=2.668%/ / Sca=0.778% / Mis=0.0%] (0.22s)
+  * GMAP parsing [n=82962] (0.03s)
+  * cM interpolation [s=3296 / i=21694] (0.63s)
+  * HAP update (0.02s)
+  * H2V transpose (0.01s)
+  * IBD2 mask [l=16662 / n=0] (0.02s)
+  * PBWT phase sweep (0.19s)
+  * Build genotype graphs [seg=164449] (0.02s)
+
+Burn-in iteration [1/5]
+  * V2H transpose (0.00s)
+  * PBWT selection (0.06s)
+  * C2H transpose (0.00s)
+  * HMM computations [K=712.9+/-44.9 / W=3.00Mb] (14.93s)
+  * HAP update (0.01s)
+  * H2V transpose (0.00s)
+
+Burn-in iteration [2/5]
+  * V2H transpose (0.00s)
+  * PBWT selection (0.06s)
+  * C2H transpose (0.00s)
+  * HMM computations [K=658.7+/-50.0 / W=3.00Mb] (13.76s)
+  * HAP update (0.01s)
+  * H2V transpose (0.00s)
+
+Burn-in iteration [3/5]
+  * V2H transpose (0.00s)
+  * PBWT selection (0.06s)
+  * C2H transpose (0.00s)
+  * HMM computations [K=650.4+/-50.9 / W=3.00Mb] (13.65s)
+  * HAP update (0.01s)
+  * H2V transpose (0.00s)
+
+Burn-in iteration [4/5]
+  * V2H transpose (0.00s)
+  * PBWT selection (0.06s)
+  * C2H transpose (0.00s)
