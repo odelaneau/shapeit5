@@ -11,7 +11,7 @@ CXXFLAG=-O3
 LDFLAG=-O3
 
 #DYNAMIC LIBRARIES
-DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
+DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -19,11 +19,21 @@ OFILE=$(shell for file in `find src -name *.cpp`; do echo obj/$$(basename $$file
 VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); done)
 
 NAME=$(shell basename $(CURDIR))
-BFILE=bin/SHAPEIT_$(NAME)
-EXEFILE=bin/SHAPEIT_$(NAME)_static
+BFILE=bin/GLIMPSE_$(NAME)
+EXEFILE=bin/GLIMPSE_$(NAME)_static
 
 #CONDITIONAL PATH DEFINITON
-desktop: HTSSRC=/home/srubinac/Dropbox/workspace
+system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
+system: HTSSRC=/usr/local
+system: HTSLIB_INC=$(HTSSRC)/include/htslib
+system: HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
+system: BOOST_INC=/usr/include
+system: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+system: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+system: BOOST_LIB_SE=/usr/lib/x86_64-linux-gnu/libboost_serialization.a
+system: $(BFILE)
+
+desktop: HTSSRC=../..
 desktop: HTSLIB_INC=$(HTSSRC)/htslib
 desktop: HTSLIB_LIB=$(HTSSRC)/htslib/libhts.a
 desktop: BOOST_INC=/usr/include
@@ -66,7 +76,7 @@ wally: $(BFILE)
 
 static_exe: CXXFLAG=-O2
 static_exe: LDFLAG=-O2
-static_exe: HTSSRC=/home/srubinac/git
+static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal
 static_exe: HTSLIB_LIB=$(HTSSRC)/htslib_minimal/libhts.a
 static_exe: BOOST_INC=/usr/include
@@ -87,4 +97,4 @@ obj/%.o: %.cpp $(HFILE)
 	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I$(HTSLIB_INC) -I$(BOOST_INC)
 
 clean: 
-	rm -f obj/* $(BFILE)
+	rm -f obj/*.o $(BFILE)
