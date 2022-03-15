@@ -19,13 +19,69 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#ifndef _VERSION_H
-#define _VERSION_H
+#ifndef _WINDOW_SET_H
+#define _WINDOW_SET_H
 
-#define PHASE1_VERSION "5.0.0"
-#define PHASE2_VERSION "1.0.0"
-#define LIGATE_VERSION "1.0.0"
-#define SAMPLE_VERSION "1.0.0"
-#define SWITCH_VERSION "1.0.0"
+#include <utils/otools.h>
+
+#include <objects/genotype/genotype_header.h>
+
+#include <containers/variant_map.h>
+
+class window {
+public:
+	int start_locus;
+	int start_segment;
+	int start_ambiguous;
+	int start_missing;
+	int start_transition;
+	int stop_locus;
+	int stop_segment;
+	int stop_ambiguous;
+	int stop_missing;
+	int stop_transition;
+
+	window() {
+		start_locus = 0;
+		start_segment = 0;
+		start_ambiguous = 0;
+		start_missing = 0;
+		start_transition = 0;
+		stop_locus = 0;
+		stop_segment = 0;
+		stop_ambiguous = 0;
+		stop_missing = 0;
+		stop_transition = 0;
+	}
+
+	~window() {
+	}
+
+	string toString() {
+		string str="";
+		str += "L=[" + stb.str(start_locus) + "->" + stb.str(stop_locus) + "]";
+		return str;
+	}
+
+	int lengthBP(variant_map & V) {
+		return V.vec_pos[stop_locus]->bp - V.vec_pos[start_locus]->bp;
+	}
+};
+
+class window_set {
+public:
+	//
+	vector < window > W;
+
+	//
+	window_set();
+	~window_set();
+	void clear();
+
+	//
+	int size();
+	bool split(double, int, int, vector < int > &, vector < int > &, vector < double > &, vector < double > &, vector < int > &);
+	int build (variant_map &, genotype *, float);
+};
 
 #endif

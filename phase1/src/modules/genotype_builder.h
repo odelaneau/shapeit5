@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2018 Olivier Delaneau, University of Lausanne
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,13 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#ifndef _VERSION_H
-#define _VERSION_H
+#ifndef _BUILDER_H
+#define _BUILDER_H
 
-#define PHASE1_VERSION "5.0.0"
-#define PHASE2_VERSION "1.0.0"
-#define LIGATE_VERSION "1.0.0"
-#define SAMPLE_VERSION "1.0.0"
-#define SWITCH_VERSION "1.0.0"
+#include <utils/otools.h>
+#include <containers/genotype_set.h>
+
+class genotype_builder {
+public:
+	//DATA
+	genotype_set & G;
+
+	//MULTI-THREADING
+	int i_workers;
+	int n_thread;
+	pthread_mutex_t mutex_workers;
+	vector < pthread_t > id_workers;
+
+	//CONSTRUCTOR/DESTRUCTOR
+	genotype_builder(genotype_set &, int n_thread = 1);
+	~genotype_builder();
+
+	//METHODS
+	void build();
+	void build(int);
+};
 
 #endif

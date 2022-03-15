@@ -19,13 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#ifndef _VERSION_H
-#define _VERSION_H
+#ifndef _IBD2_TRACKS_H
+#define _IBD2_TRACKS_H
 
-#define PHASE1_VERSION "5.0.0"
-#define PHASE2_VERSION "1.0.0"
-#define LIGATE_VERSION "1.0.0"
-#define SAMPLE_VERSION "1.0.0"
-#define SWITCH_VERSION "1.0.0"
+#include <utils/otools.h>
+
+struct track {
+	int ind, from, to;
+
+	track(int _ind, int _from, int _to) {
+		ind = _ind;
+		from = _from;
+		to = _to;
+	}
+
+	bool operator<(const track & rhs) const {
+		if (ind < rhs.ind) return true;
+		if (ind > rhs.ind) return false;
+		return (from < rhs.from);
+	}
+
+	bool overlap (const track & rhs) const {
+		return ((ind==rhs.ind) && (rhs.to >= from) && (rhs.from <= to));
+	}
+
+	void merge (const track & rhs) {
+		from = min(from, rhs.from);
+		to = max(to, rhs.to);
+	}
+};
+
+class ibd2_tracks {
+public:
+
+	vector < vector < track > > IBD2;
+
+
+	ibd2_tracks ();
+	~ibd2_tracks ();
+	void clear();
+	void initialize(int);
+
+	bool noIBD2(int, int, int);
+	void pushIBD2(int, vector < track > &);
+
+	int collapse(vector < track > &);
+	void collapse();
+};
 
 #endif
