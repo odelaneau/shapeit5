@@ -61,9 +61,9 @@ curnagl: $(BFILE)
 jura: HTSSRC=/scratch/beegfs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/htslib-1.12
 jura: HTSLIB_INC=$(HTSSRC)
 jura: HTSLIB_LIB=$(HTSSRC)/libhts.a
-jura: BOOST_INC=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/include
-jura: BOOST_LIB_IO=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_iostreams.a
-jura: BOOST_LIB_PO=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_program_options.a
+jura: BOOST_INC=/scratch/beegfs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/include
+jura: BOOST_LIB_IO=/scratch/beegfs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_iostreams.a
+jura: BOOST_LIB_PO=/scratch/beegfs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_program_options.a
 jura: $(BFILE)
 
 wally: HTSSRC=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/htslib_v1.12

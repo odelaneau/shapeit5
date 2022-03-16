@@ -50,11 +50,17 @@ void genotype_reader::scanGenotypes() {
 		//Not in the intersect of ref and main panels
 		if (panels[1] && nset == 1) { n_variants_noverlap++; continue; }
 
+		//cout << "TEST1" << endl;
+
 		//Not a bi-alleleic variant
 		if (line_main->n_allele != 2) { n_variants_multi++; continue; }
 
+		//cout << "TEST2" << endl;
+
 		//Unpack information if filtering
 		if (filter_snp_only || (filter_min_maf > 0)) bcf_unpack(line_main, BCF_UN_STR);
+
+		//cout << "TEST3" << endl;
 
 		//Keep SNPs only
 		if (filter_snp_only) {
@@ -66,6 +72,8 @@ void genotype_reader::scanGenotypes() {
 			if (!bref || !balt) continue;
 		}
 
+		//cout << "TEST4" << endl;
+
 		//Keep common SNPs only
 		if (filter_min_maf > 0) {
 			rAN_main = bcf_get_info_int32(sr->readers[0].header, line_main, "AN", &vAN_main, &nAN_main);
@@ -76,6 +84,7 @@ void genotype_reader::scanGenotypes() {
 			n_variants_rare += (maf < filter_min_maf);
 			if (maf < filter_min_maf) continue;
 		}
+		//cout << "TEST5" << endl;
 
 		//Push variant information
 		bcf_unpack(line_main, BCF_UN_STR);

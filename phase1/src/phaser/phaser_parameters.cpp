@@ -62,7 +62,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_filter ("FILTER parameters");
 	opt_filter.add_options()
 			("filter-snp", "Only consider SNPs")
-			("filter-maf", bpo::value < double >()->default_value(0.001), "Only consider variants with at lest this MAF, requires AC/AN tags");
+			("filter-maf", bpo::value < double >()->default_value(0.0), "Only consider variants with at lest this MAF, requires AC/AN tags");
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
@@ -137,9 +137,15 @@ void phaser::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
+
 	vrb.bullet("MCMC    : " + get_iteration_scheme());
 
 	vrb.bullet("PBWT    : [window = " + stb.str(options["pbwt-window"].as < double > ()) + "cM / depth = " + stb.str(options["pbwt-depth"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / missing = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
+
 	if (options.count("map"))  vrb.bullet("HMM     : [window = " + stb.str(options["hmm-window"].as < double > ()) + "cM / Ne = " + stb.str(options["hmm-ne"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [window = " + stb.str(options["hmm-window"].as < double > ()) + "cM / Ne = " + stb.str(options["hmm-ne"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
+
+	if (options.count("filter-snp") || (!options["filter-maf"].defaulted()))
+		vrb.bullet("FILTERS : [snp only = " + stb.str(options.count("filter-snp")) + " / MAF = " + stb.str(options["filter-maf"].as < double > ()) + "]");
+
 }
