@@ -477,7 +477,7 @@ inline
 bool haplotype_segment::TRANS_HAP() {
 	sumHProbs = 0.0f;
 	float fact1 = M.nt[curr_locus-1] / AlphaSumSum[curr_segment_index - 1];
-	float fact1 = nt / AlphaSumSum[curr_segment_index - 1];
+	//float fact1 = nt / AlphaSumSum[curr_segment_index - 1];
 	fill_n(HProbs, HAP_NUMBER*HAP_NUMBER, 0.0f);
 	for (int h1 = 0 ; h1 < HAP_NUMBER ; h1++) {
 		float fact2 = (AlphaSum[curr_segment_index-1][h1]/AlphaSumSum[curr_segment_index-1]) * M.t[curr_locus - 1] / n_states;

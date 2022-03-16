@@ -1,16 +1,16 @@
 FROM ubuntu:20.04
 
-LABEL org.opencontainers.image.created="2022-02-02"
-LABEL org.opencontainers.image.url="https://github.com/odelaneau/GLIMPSE"
-LABEL org.opencontainers.image.version="0.0.1"
+LABEL org.opencontainers.image.created="2022-03-16"
+LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
+LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.licences="MIT"
-LABEL org.opencontainers.image.title="glimpse2"
-LABEL org.opencontainers.image.authors="simone.rubinacci@unil.ch"
+LABEL org.opencontainers.image.title="shapeit5"
+LABEL org.opencontainers.image.authors="olivier.delaneau@unil.ch"
 
 # set the environment variables
 ENV HOME /root
 
-ENV htslib_version 1.14
+ENV htslib_version 1.15
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
@@ -40,11 +40,11 @@ RUN curl -SL https://github.com/samtools/bcftools/releases/download/${htslib_ver
     rm -rf bcftools-${htslib_version}
 
 # get GLIMPSE v2.0.0 [binary]
-ADD resources/GLIMPSE_phase_static /bin/GLIMPSE_phase_v2.0.0
-ADD resources/GLIMPSE_split_reference_static /bin/GLIMPSE_split_reference_v2.0.0
-ADD resources/GLIMPSE_call_static /bin/GLIMPSE_call_v2.0.0
-ADD resources/GLIMPSE_concordance_static /bin/GLIMPSE_concordance_v2.0.0
+ADD ../static_bins/SHAPEIT5_phase1_static /bin/SHAPEIT5_phase1_static
+ADD ../static_bins/SHAPEIT5_phase2_static /bin/SHAPEIT5_phase2_static
+ADD ../static_bins/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
+ADD ../static_bins/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
 
-RUN chmod +x /bin/GLIMPSE*
+RUN chmod +x /bin/SHAPEIT5*
 
 WORKDIR $HOME

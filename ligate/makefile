@@ -97,4 +97,4 @@ obj/%.o: %.cpp $(HFILE)
 	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I$(HTSLIB_INC) -I$(BOOST_INC)
 
 clean: 
-	rm -f obj/*.o $(BFILE)
+	rm -f obj/*.o $(BFILE) $(EXEFILE)
