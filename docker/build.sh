@@ -21,5 +21,5 @@ cp bin/SHAPEIT5_ligate_static ../static_bins/.
 
 cd ../docker/
 cp ../static_bins/SHAPEIT5* ressources/.
-docker build -t shapeit5:0.0.1 -f Dockerfile .
-docker save shapeit5:0.0.1 | gzip -c > shapeit5:0.0.1.tar.gz
+docker build -t shapeit5_0.0.1 -f Dockerfile .
+docker save shapeit5_0.0.1 | gzip -c > shapeit5_0.0.1.tar.gz
