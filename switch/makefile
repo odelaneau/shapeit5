@@ -58,12 +58,12 @@ curnagl: BOOST_LIB_IO=/dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen
 curnagl: BOOST_LIB_PO=/dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/boost-1.74.0-yazg3k7kwtk64o3ljufuoewuhcjqdtqp/lib/libboost_program_options.a
 curnagl: $(BFILE)
 
-jura: HTSSRC=/scratch/beefgs/FAC/FBM/DBC/odeleanea/default_sensitive/data/libs/htslib-1.12
+jura: HTSSRC=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/htslib-1.12
 jura: HTSLIB_INC=$(HTSSRC)
 jura: HTSLIB_LIB=$(HTSSRC)/libhts.a
-jura: BOOST_INC=/scratch/beefgs/FAC/FBM/DBC/odeleanea/default_sensitive/data/libs/boost/include
-jura: BOOST_LIB_IO=/scratch/beefgs/FAC/FBM/DBC/odeleanea/default_sensitive/data/libs/boost/lib/libboost_iostreams.a
-jura: BOOST_LIB_PO=/scratch/beefgs/FAC/FBM/DBC/odeleanea/default_sensitive/data/libs/boost/lib/libboost_program_options.a
+jura: BOOST_INC=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/include
+jura: BOOST_LIB_IO=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_iostreams.a
+jura: BOOST_LIB_PO=/scratch/beefgs/FAC/FBM/DBC/odelanea/default_sensitive/data/libs/boost/lib/libboost_program_options.a
 jura: $(BFILE)
 
 wally: HTSSRC=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/htslib_v1.12

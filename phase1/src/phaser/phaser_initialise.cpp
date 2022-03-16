@@ -45,7 +45,7 @@ void phaser::read_files_and_initialise() {
 	if (options.count("reference")) readerG.addReferenceFilename(options["reference"].as < string > ());
 	if (options.count("scaffold")) readerG.addReferenceFilename(options["scaffold"].as < string > ());
 	if (options.count("filter-snp")) readerG.setFilterSNP();
-	if (options.count("filter-maf")) readerG.setFilterMAF(options["filter-maf"].as < double > ());
+	if (!options["filter-maf"].defaulted()) readerG.setFilterMAF(options["filter-maf"].as < double > ());
 
 	//step2: Read the genotype data
 	readerG.scanGenotypes();
