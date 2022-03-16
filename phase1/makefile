@@ -7,7 +7,7 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3
+CXXFLAG=-O3 -mavx2 -mfma
 LDFLAG=-O3
 
 #DYNAMIC LIBRARIES
@@ -74,8 +74,6 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2
-static_exe: LDFLAG=-O2
 static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal
 static_exe: HTSLIB_LIB=$(HTSSRC)/htslib_minimal/libhts.a

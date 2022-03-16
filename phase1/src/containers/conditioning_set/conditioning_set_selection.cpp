@@ -163,7 +163,7 @@ void conditioning_set::select() {
 	fill(indexes_pbwt_neighbour.begin(), indexes_pbwt_neighbour.end() , -1);
 
 	//Perform multi-threaded selection
-	vrb.progress("  * PBWT phasing sweep", 0.0f);
+	vrb.progress("  * PBWT section", 0.0f);
 	if (nthread > 1) {
 		for (int t = 0 ; t < nthread ; t++) pthread_create( &id_workers[t] , NULL, selecter_callback, static_cast<void *>(this));
 		for (int t = 0 ; t < nthread ; t++) pthread_join( id_workers[t] , NULL);
