@@ -20,6 +20,8 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "../../versions/versions.h"
+
 #include <phaser/phaser_header.h>
 
 void phaser::declare_options() {
@@ -77,10 +79,10 @@ void phaser::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT] Estimate haplotypes for sequencing data");
-	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
-	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : 4.3.0");
+	vrb.title("[SHAPEIT5] Phase rare variants and indels onto a dense haplotype scaffold");
+	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");
+	vrb.bullet("Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com");
+	vrb.bullet("Version       : " + string(PHASE2_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
 }
 

@@ -20,6 +20,9 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "../../versions/versions.h"
+
+
 #include <switcher/switcher_header.h>
 
 void switcher::declare_options() {
@@ -55,11 +58,12 @@ void switcher::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT] Validate haplotype estimates");
+	vrb.title("[SHAPEIT5] Phasing jointly multiple markers");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : 4.3.0");
+	vrb.bullet("Version       : " + string(SWITCH_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
+
 }
 
 void switcher::check_options() {

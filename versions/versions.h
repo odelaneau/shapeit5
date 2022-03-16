@@ -22,7 +22,7 @@
 #ifndef _VERSION_H
 #define _VERSION_H
 
-#define PHASE1_VERSION "5.0.0"
+#define PHASE1_VERSION "1.0.0"
 #define PHASE2_VERSION "1.0.0"
 #define LIGATE_VERSION "1.0.0"
 #define SAMPLE_VERSION "1.0.0"

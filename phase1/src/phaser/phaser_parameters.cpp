@@ -84,7 +84,7 @@ void phaser::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT] Phasing jointly multiple markers");
+	vrb.title("[SHAPEIT5] Phasing jointly multiple markers");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
 	vrb.bullet("Version       : " + string(PHASE1_VERSION));
