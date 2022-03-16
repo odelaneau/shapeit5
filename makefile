@@ -1,4 +1,4 @@
-projects = phase1 phase2 switch
+projects = phase1 phase2 switch ligate
 
 .PHONY: all $(projects)
 
