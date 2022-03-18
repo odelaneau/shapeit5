@@ -23,7 +23,7 @@
 
 void genotype_reader::readGenotypes() {
 	tac.clock();
-	vrb.wait("  * VCF/BCF reading");
+	vrb.wait("  * VCF/BCF parsing");
 
 	//Initialize VCF/BCF reader(s)
 	bcf_srs_t * sr =  bcf_sr_init();

@@ -109,40 +109,13 @@ void phaser::phaseWindow() {
 }
 
 void phaser::phase() {
-	unsigned long n_old_segments = G.numberOfSegments(), n_new_segments = 0, current_iteration = 0;
-	for (iteration_stage = 0 ; iteration_stage < iteration_counts.size() ; iteration_stage ++) {
-		for (int iter = 0 ; iter < iteration_counts[iteration_stage] ; iter ++) {
-			switch (iteration_types[iteration_stage]) {
-			case STAGE_BURN:	vrb.title("Burn-in iteration [" + stb.str(iter+1) + "/" + stb.str(iteration_counts[iteration_stage]) + "]"); break;
-			case STAGE_PRUN:	vrb.title("Pruning iteration [" + stb.str(iter+1) + "/" + stb.str(iteration_counts[iteration_stage]) + "]"); break;
-			case STAGE_MAIN:	vrb.title("Main iteration [" + stb.str(iter+1) + "/" + stb.str(iteration_counts[iteration_stage]) + "]"); break;
-			}
-			//H.transposeHaplotypes_V2H(false);
-			H.updatePBWTmapping();
-			H.selectPBWTarrays();
-			//H.transposePBWTarrays();
-			phaseWindow();
-			H.mergeIBD2constraints();
-			H.updateHaplotypes(G);
-			H.transposeHaplotypes_H2V(false);
-			if (iteration_types[iteration_stage] == STAGE_PRUN) {
-				n_new_segments = G.numberOfSegments();
-				vrb.bullet("Trimming [pc=" + stb.str((1-n_new_segments*1.0/n_old_segments)*100, 2) + "%]");
-				if (options.count("use-PS")) G.masking();
-			}
-		}
-	}
+	//STEP1: haplotype selection
+	H.select();
 
-	vrb.title("Final iteration [1/1]");
-	iteration_stage --;
-	iteration_types[iteration_stage] = STAGE_RARE;
-	G.solve();
-	H.updateHaplotypes(G);
-	H.transposeHaplotypes_H2V(false);
-	H.updatePBWTmapping();
-	H.selectPBWTarrays();
-	//H.transposePBWTarrays();
-	phaseWindow();
-	H.updateHaplotypes(G);
-	H.transposeHaplotypes_H2V(false);
+	//STEP2: HMM pass
+
+
+
+
+
 }

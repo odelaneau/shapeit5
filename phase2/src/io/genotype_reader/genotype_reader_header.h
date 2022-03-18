@@ -32,43 +32,37 @@ public:
 	//DATA
 	int nthreads;
 	haplotype_set & H;
-	genotype_set & G;
 	variant_map & V;
-	string region;
-
-	//PARAMS
-	bool use_PS_field;
-	float maf_threshold;
 
 	//COUNTS
-	unsigned int n_common_variants;
+	unsigned int n_scaffold_variants;
 	unsigned int n_rare_variants;
-	unsigned int n_total_variants;
-	unsigned int n_target_samples;
-	unsigned int n_reference_samples;
-	unsigned int n_total_samples;
-	vector < unsigned long > n_genotypes;
+	unsigned int n_common_variants;
+	unsigned int n_samples;
+	vector < unsigned long > n_scaffold_genotypes;
+	vector < unsigned long > n_common_genotypes;
+	vector < unsigned long > n_rare_genotypes;
 
-	//FLAGS
-	vector < bool > flag_common;
-
-	//PHASESETS
-	unordered_map < int, int > PSmap;
-	vector < int > PScodes;
+	//PARAMETERS
+	string funphased;
+	string fphased;
+	string region;
+	int threads;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	genotype_reader(haplotype_set &, genotype_set &, variant_map &, string , bool _use_PS_field, int _nthreads);
+	genotype_reader(haplotype_set &, variant_map &);
 	~genotype_reader();
 
+	//PARAMS
+	void setFilenames(string, string);
+	void setThreads(int);
+	void setRegion(string);
+
 	//IO
-	void scanGenotypes(string funphased);
-	void scanGenotypes(string funphased, string fphased);
+	void scanGenotypes();
+	void readGenotypes();
 	void allocateGenotypes();
-	void readGenotypes0(string);
-	void readGenotypes1(string, string);
-	//void readGenotypes2(string, string);
-	//void readGenotypes3(string, string, string);
-	void setPScodes(int * ps_arr, int nps);
 };
+
 
 #endif
