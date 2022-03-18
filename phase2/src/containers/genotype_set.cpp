@@ -61,6 +61,7 @@ void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_va
 		GRindexes = vector < vector < unsigned int > > (n_rare_variants);
 		GRhets = vector < vector < bool > > (n_rare_variants);
 		GRmissing = vector < vector < bool > > (n_rare_variants);
+		GRalleles = vector < vector < bool > > (n_rare_variants);
 	}
 
 	vrb.bullet("GEN allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");

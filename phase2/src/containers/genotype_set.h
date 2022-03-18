@@ -44,6 +44,7 @@ public:
 	vector < vector < unsigned int > > GRindexes;	//Indexes of [ Maj/Min + Min/Min + ./.]
 	vector < vector < bool > > GRhets;				//Maj/Min OR Min/Min?
 	vector < vector < bool > > GRmissing;			//./.?
+	vector < vector < bool > > GRalleles;			//
 
 	//
 	genotype_set();
@@ -80,6 +81,8 @@ void genotype_set::pushRareMissing(unsigned int vr, unsigned int i) {
 	GRindexes[vr].push_back(i);
 	GRhets[vr].push_back(false);
 	GRmissing[vr].push_back(true);
+	GRalleles[vr].push_back(false);
+	GRalleles[vr].push_back(false);
 }
 
 inline
@@ -87,6 +90,8 @@ void genotype_set::pushRareHet(unsigned int vr, unsigned int i) {
 	GRindexes[vr].push_back(i);
 	GRhets[vr].push_back(true);
 	GRmissing[vr].push_back(false);
+	GRalleles[vr].push_back(false);
+	GRalleles[vr].push_back(false);
 }
 
 inline
@@ -94,4 +99,6 @@ void genotype_set::pushRareHom(unsigned int vr, unsigned int i) {
 	GRindexes[vr].push_back(i);
 	GRhets[vr].push_back(false);
 	GRmissing[vr].push_back(false);
+	GRalleles[vr].push_back(false);
+	GRalleles[vr].push_back(false);
 }

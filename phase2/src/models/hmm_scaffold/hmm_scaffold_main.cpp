@@ -48,6 +48,9 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set * _G, conditioning_set
 	alpha = vector < float > (n_total_states, 0.0f);
 	beta = vector < float > (n_total_states, 1.0f);
 	cprobs = vector < vector < prob_state > > (C.n_haplotypes);
+
+	//
+	MCMC.allocate(G.n_samples, 50, 20);	//50 iterations w/ 20 burnin
 }
 
 hmm_scaffold::~hmm_scaffold() {
@@ -111,14 +114,11 @@ void hmm_scaffold::backward(float threshold) {
 		//Are there any M/m or ./. at these variants
 		G.getUnphasedIndexes(VC, VR, IDX);
 
-		//If yes prepare MCMC data structures
-
-
-		//
-		for (int h = 0, i = 0 ; h < C.n_haplotypes ; h ++) {
+		//Loading MCMC conditional probs
+		for (int h = 0, idx = 0 ; h < C.n_haplotypes ; h ++) {
 
 			//If there are unphased genotypes in [l, l+1] for sample h/2
-			if (IDX.size() > 0 && IDX[i] == h/2) {
+			if (IDX.size() > 0 && IDX[idx] == h/2) {
 				//Allocate vector to store alphaXbeta products
 				alphaXbeta_prev = vector < float > (nstates[h], 0.0f);
 				alphaXbeta_curr = vector < float > (nstates[h], 0.0f);
@@ -142,13 +142,27 @@ void hmm_scaffold::backward(float threshold) {
 			forward_normalize(vs, h);
 
 			//If there are unphased genotypes in [l, l+1] for sample h/2
-			if (IDX.size() > 0 && IDX[i] == h/2) {
+			if (IDX.size() > 0 && IDX[idx] == h/2) {
 				//Get alphaXbeta product at l
 				getAlphaBetaProduct(alphaXbeta_curr);
 
-				//Compress alphaXbeta products at l and l + 1
+				//Compress and store alphaXbeta products at l and l + 1
+				MCMC.loadStateSpace(h, C.indexes_pbwt_neighbour[h/2], alphaXbeta_curr, alphaXbeta_prev, threshold);
+			} else idx ++;
+		}
 
-			}
+		//Running MCMC at rare variants
+		for (int vr = 0 ; vr < VR.size() ; vr ++) {
+			MCMC.loadRareUnphasedGenotypes(VR[vr], GS, !V.vec_rare[VR[vr]]->minor);
+			MCMC.iterate();
+			MCMC.pushRarePhasedGenotypes(VR[vr], GS);
+		}
+
+		//Running MCMC at common variants
+		for (int vc = 0 ; vc < VC.size() ; vc ++) {
+			MCMC.loadCommonUnphasedGenotypes(VC[vc], GS);
+			MCMC.iterate();
+			MCMC.pushCommonPhasedGenotypes(VC[vc], GS);
 		}
 
 		vrb.progress("  * Processing", (C.n_scaffold_variants-vs)*1.0/C.n_scaffold_variants);
@@ -157,125 +171,3 @@ void hmm_scaffold::backward(float threshold) {
 }
 
 
-
-
-
-
-
-
-			//Compression
-			for (int k = 0 ; k < nstates[h] ; k ++)
-				if (alphaXbeta_prev[k] >= threshold || alphaXbeta_curr[k] >= threshold)
-					cprobs[h].emplace_back(k, alphaXbeta_curr[k], alphaXbeta_prev[k]);
-
-
-
-
-
-
-
-
-
-
-
-		}
-	}
-}
-
-
-
-
-
-
-
-
-
-
-			}
-
-
-
-
-
-		}
-
-
-		bool a1 = C.HSvar.get(vs, 2 * i_sample + 1);
-		if (vs == 0) {
-			fill (alpha.begin(), alpha.begin() + 2 * n_states, 1.0f / n_states);
-		} else {
-			for (int k = 0 ; k < n_states ; k ++) {
-				bool ah = C.Hvar.get(vc, k);
-				alpha[(2*vs*n_states) + 2*k + 0] = (alpha[(2*(vs-1)*n_states) + 2*k + 0] * f20 + f1) * emit[ah!=a0];
-				alpha[(2*vs*n_states) + 2*k + 1] = (alpha[(2*(vs-1)*n_states) + 2*k + 1] * f20 + f1) * emit[ah!=a1];
-				alphaSum[2*(vs-1) + 0] += alpha[(2*vs*n_states) + 2*k + 0];
-				alphaSum[2*(vs-1) + 1] += alpha[(2*vs*n_states) + 2*k + 1];
-			}
-		}
-	}
-}
-
-void hmm_scaffold::backward(vector < cfloat > & compressed_probabilities_hap0, vector < cfloat > & compressed_probabilities_hap1, float threshold) {
-	float emit [2], betaSum_prev[2], betaSum_curr[2], prodSum [2], scale [2];
-	emit[0] = 1.0f;
-	emit[1] = M.ed/M.ee;
-	vector < float > beta = vector < float > (2 * n_states, 0.0f);
-	vector < float > alphaXbeta_curr = vector < float > (2 * n_states, 0.0f);
-	vector < float > alphaXbeta_prev = vector < float > (2 * n_states, 0.0f);
-	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
-		bool a0 = C.HSvar.get(vs, 2 * i_sample + 0);
-		bool a1 = C.HSvar.get(vs, 2 * i_sample + 1);
-
-		//Backward recursion part 1
-		if (vs == (C.n_scaffold_variants - 1)) {
-			fill (beta.begin(), beta.begin() + 2 * n_states, 1.0f / n_states);
-			betaSum_curr[0] = betaSum_curr[1] = 1.0f;
-		} else {
-			float f1 = M.t[vs] / n_states;
-			float f20 = M.nt[vs] / betaSum_prev[0];
-			float f21 = M.nt[vs] / betaSum_prev[1];
-			for (int k = 0 ; k < n_states ; k ++) {
-				beta[2*k + 0] = ([2*k + 0] * f20 + f1);
-				beta[2*k + 1] = ([2*k + 1] * f20 + f1);
-			}
-		}
-
-		//Product of forward and backward probs
-		prodSum[0] = prodSum[1] = 1.0f;
-		scale[0] = 1.0f * alphaSum[2*vs+0];
-		scale[1] = 1.0f * alphaSum[2*vs+1];
-		for (int k = 0 ; k < 2*n_states ; k ++) {
-			alphaXbeta_curr[k] = (alpha[(2*vs*n_states) + k] * scale[k%2]) * beta[k];
-			prodSum[k%2] += alphaXbeta_curr[k];
-		}
-
-		//Normalization of product
-		prodSum[0] = 1.0f / prodSum[0];
-		prodSum[1] = 1.0f / prodSum[1];
-		for (int k = 0 ; k < 2*n_states ; k ++) alphaXbeta_curr[k] *= prodSum[k%2];
-
-		//Compression
-		if (vs < (C.n_scaffold_variants - 1)) {
-			for (int k = 0 ; k < n_states ; k ++) {
-				if ((alphaXbeta_curr[2*k+0] >= threshold) || (alphaXbeta_prev[2*k+0] >= threshold)) {
-
-				}
-			}
-		}
-
-		//Backward recursion part 2
-		betaSum_curr[0] = betaSum_curr[1] = 0.0f;
-		for (int k = 0 ; k < n_states ; k ++) {
-			bool ah = C.Hvar.get(vc, k);
-			beta[2*k + 0] *= emit[ah!=a0];
-			beta[2*k + 1] *= emit[ah!=a1];
-			betaSum_curr[0] += beta[2*k + 0];
-			betaSum_curr[1] += beta[2*k + 1];
-		}
-
-		//Saving beta sums
-		betaSum_prev[0] = betaSum_curr[0];
-		betaSum_prev[1] = betaSum_curr[1];
-		alphaXbeta_prev = alphaXbeta_curr;
-	}
-}

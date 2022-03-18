@@ -24,7 +24,10 @@
 
 #include <utils/otools.h>
 #include <objects/conditioning_set.h>
+#include <objects/genotype_set.h>
 #include <objects/hmm_parameters.h>
+
+#include <models/gibbs_sampler.h>
 
 class prob_state {
 public:
@@ -46,6 +49,9 @@ public:
 	genotype_set & G;
 	variant_map & V;
 	hmm_parameters & M;
+
+	//GIBBS SAMPLER
+	gibbs_sampler MCMC;
 
 	//CONSTANT
 	float emit[2];
