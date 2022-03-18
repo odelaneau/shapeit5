@@ -25,7 +25,6 @@
 #include <utils/otools.h>
 
 #include <containers/haplotype_set.h>
-#include <containers/ibd2_tracks.h>
 
 class conditioning_set : public haplotype_set {
 public:

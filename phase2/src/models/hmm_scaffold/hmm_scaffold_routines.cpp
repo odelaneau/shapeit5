@@ -25,7 +25,6 @@
  * ALL THESE ROUTINES CAN BE VECTORIZED BIG TIME ...
  */
 
-
 void hmm_scaffold::forward_initTransitions(h) {
 	assert(vs == 0);
 	fill(alpha.begin() + sstates[h], alpha.begin() + sstates[h] + nstates[h], 1.0f / nstates[h]);
