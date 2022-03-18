@@ -35,7 +35,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq)
 	vrb.title("Reading VCF/BCF input files");
 	vrb.bullet("Validation ["  + ftruth + "]");
 	vrb.bullet("Estimation ["  + festi + "]");
-	vrb.bullet("Freqeuncy  ["  + ffreq + "]");
+	vrb.bullet("Frequency  ["  + ffreq + "]");
 
 	bcf_srs_t * sr =  bcf_sr_init();
 	sr->collapse = COLLAPSE_NONE;

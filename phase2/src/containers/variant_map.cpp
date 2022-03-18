@@ -40,6 +40,34 @@ unsigned int variant_map::sizeCommon() {
 	return vec_common.size();
 }
 
+unsigned int variant_map::sizeRare() {
+	return vec_rare.size();
+}
+
+unsigned int variant_map::sizeScaffold() {
+	return vec_scaffold.size();
+}
+
+void variant_map::getCommonVariants(unsigned int vs0, unsigned int vs1, vector < unsigned int > & VC) {
+	assert(vs1>vs0);
+	VC.clear();
+	unsigned int idx_vf0 = vec_scaffold[vs0]->idx_full;
+	unsigned int idx_vf1 = vec_scaffold[vs1]->idx_full;
+	for (int v = idx_vf0 ; v <= idx_vf1 ; v++)
+		if (vec_full[v]->type == VARTYPE_COMM)
+			VC.push_back(vec_full[v]->idx_common);
+}
+
+void variant_map::getRareVariants(unsigned int vs0, unsigned int vs1, vector < unsigned int > & VR) {
+	assert(vs1>vs0);
+	VR.clear();
+	unsigned int idx_vf0 = vec_scaffold[vs0]->idx_full;
+	unsigned int idx_vf1 = vec_scaffold[vs1]->idx_full;
+	for (int v = idx_vf0 ; v <= idx_vf1 ; v++)
+		if (vec_full[v]->type == VARTYPE_RARE)
+			VR.push_back(vec_full[v]->idx_rare);
+}
+
 vector < variant * > variant_map::getByPos (int pos) {
 	vector < variant * > vecS;
 	pair < multimap < int , variant * >::iterator , multimap < int , variant * >::iterator > ret = map_pos.equal_range(pos);
@@ -48,8 +76,18 @@ vector < variant * > variant_map::getByPos (int pos) {
 }
 
 void variant_map::push(variant * v) {
+	if (v->type == VARTYPE_SCAF) {
+		v->idx_scaffold = vec_scaffold.size();
+		vec_scaffold.push_back(v);
+	} else if if (v->type == VARTYPE_COMM) {
+		v->idx_common = vec_common.size();
+		vec_common.push_back(v);
+	} else {
+		v->idx_rare = vec_rare.size();
+		vec_rare.push_back(v);
+	}
+	v->idx_full = vec_full.size();
 	vec_full.push_back(v);
-	if (!v->rare) vec_common.push_back(v);
 	map_pos.insert(pair < int , variant * > (v->bp, v));
 }
 
@@ -112,7 +150,7 @@ int variant_map::interpolateCentiMorgan(vector < int > & pos_bp, vector < double
 	return n_interpolated;
 }
 
-unsigned int variant_map::length() {
+unsigned int variant_map::lengthBP() {
 	return vec_full.back()->bp - vec_full[0]->bp + 1;
 }
 

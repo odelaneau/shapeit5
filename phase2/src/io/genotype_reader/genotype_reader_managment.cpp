@@ -19,15 +19,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
-#include <switcher/switcher_header.h>
+#include <io/genotype_reader/genotype_reader_header.h>
 
-#include <io/haplotype_reader.h>
-
-void switcher::read_files_and_initialise() {
-	//step1: Read input files
-	haplotype_reader(H, options["region"].as < string > (), options["thread"].as < int > ()).readHaplotypes(options["validation"].as < string > (), options["estimation"].as < string > (), options["frequency"].as < string > ());
-
-	//step2: read pedigrees if necessary
-	if (options.count("pedigree")) H.readPedigrees(options["pedigree"].as < string > ());
-	else H.assumePhased();
+genotype_reader::genotype_reader(haplotype_set & _H, variant_map & _V) : H(_H), V(_V) {
+	nthreads = 1;
+	n_common_variants = 0;
+	n_scaffold_variants = 0;
+	n_rare_variants = 0;
+	n_samples = 0;
+	funphased = "";
+	fphased = "";
+	region = "";
+	n_scaffold_genotypes = vector < unsigned long > (4, 0);
+	n_common_genotypes = vector < unsigned long > (4, 0);
+	n_rare_genotypes = vector < unsigned long > (4, 0);
 }
+
+genotype_reader::~genotype_reader() {
+	nthreads = 1;
+	n_common_variants = 0;
+	n_scaffold_variants = 0;
+	n_rare_variants = 0;
+	n_samples = 0;
+	funphased = "";
+	fphased = "";
+	region = "";
+	n_scaffold_genotypes = vector < unsigned long > (4, 0);
+	n_common_genotypes = vector < unsigned long > (4, 0);
+	n_rare_genotypes = vector < unsigned long > (4, 0);
+}
+
+void genotype_reader::allocateGenotypes() {
+
+
+	H.allocate(n_samples, n_scaffold_variants, n_rare_variants, n_common_variants, V);
+}
+
+void genotype_reader::setFilenames (string _funphased, string _fphased) { fphased = _fphased; funphased = _funphased; }
+
+void genotype_reader::setThreads(int _threads) { threads = _threads; }
+
+void genotype_reader::setRegion(string _region) { region = _region; }
+

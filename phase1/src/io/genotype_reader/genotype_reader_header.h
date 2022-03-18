@@ -36,7 +36,6 @@ public:
 	variant_map & V;
 
 	//COUNTS
-	bool use_PS_field;
 	unsigned long n_variants;
 	unsigned long n_main_samples;
 	unsigned long n_ref_samples;

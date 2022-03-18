@@ -24,6 +24,10 @@
 
 #include <utils/otools.h>
 
+#define VARTYPE_SCAF	0
+#define VARTYPE_COMM	1
+#define VARTYPE_RARE	2
+
 class variant {
 public :
 	//DATA
@@ -34,13 +38,19 @@ public :
 	string alt;
 	bool minor;
 	double cm;
-	bool rare;
 	unsigned int cref;
 	unsigned int calt;
 	unsigned int cmis;
+	//NEW DATA FIELDS
+	char type;
+	int idx_full;
+	int idx_scaffold;
+	int idx_common;
+	int idx_rare;
+
 
 	//CONSTRUCTOR/DESTRUCTOR
-	variant(string & chr, int bp, string & id, string & ref, string & alt);
+	variant(string & chr, int bp, string & id, string & ref, string & alt, bool, char);
 	~variant();
 
 	bool isSingleton();

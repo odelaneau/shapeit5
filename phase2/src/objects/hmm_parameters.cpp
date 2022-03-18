@@ -35,10 +35,10 @@ hmm_parameters::~hmm_parameters() {
 
 void hmm_parameters::initialise(variant_map & V, unsigned int _Neff, unsigned int _Nhap) {
 	Neff = _Neff; Nhap = _Nhap;
-	cm = vector < float > (V.sizeCommon(), 0.0);
-	for (int l = 0 ; l < V.sizeCommon() ; l ++) cm[l] = V.vec_common[l]->cm;
-	t = vector < float > (V.sizeCommon() - 1, 0.0);
-	nt = vector < float > (V.sizeCommon() - 1, 0.0);
+	cm = vector < float > (V.sizeScaffold(), 0.0);
+	for (int l = 0 ; l < V.sizeScaffold() ; l ++) cm[l] = V.vec_scaffold[l]->cm;
+	t = vector < float > (V.sizeScaffold() - 1, 0.0);
+	nt = vector < float > (V.sizeScaffold() - 1, 0.0);
 	for (int l = 1 ; l < cm.size() ; l ++) {
 		float dist_cm = cm[l] - cm[l-1];
 		t[l-1] = getTransProb(dist_cm);

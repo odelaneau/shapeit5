@@ -22,7 +22,7 @@
 #define _GLOBAL
 #include <objects/variant.h>
 
-variant::variant(string & chr, int bp, string & id, string & ref, string & alt) {
+variant::variant(string & chr, int bp, string & id, string & ref, string & alt, bool _minor, char _type) {
 	this->chr = chr;
 	this->bp = bp;
 	this->id = id;
@@ -31,9 +31,13 @@ variant::variant(string & chr, int bp, string & id, string & ref, string & alt) 
 	this->cref = 0;
 	this->calt = 0;
 	this->cmis = 0;
-	minor = true;
-	rare = false;
+	type = _type ;
+	minor = _minor;
 	cm = -1;
+	idx_full = -1;
+	idx_scaffold = -1;
+	idx_common = -1;
+	idx_rare = -1;
 }
 
 variant::~variant() {

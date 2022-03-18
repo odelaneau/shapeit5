@@ -19,43 +19,70 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#ifndef _HAPLOTYPE_SET_H
-#define _HAPLOTYPE_SET_H
+#ifndef _HMM_SCAFFOLD_H
+#define _HMM_SCAFFOLD_H
 
 #include <utils/otools.h>
-#include <containers/bitmatrix.h>
-#include <containers/variant_map.h>
+#include <objects/conditioning_set.h>
+#include <objects/hmm_parameters.h>
 
-class haplotype_set {
+class prob_state {
 public:
-	//Counts
-	unsigned int n_scaffold_variants;			//#variants in scaffold
-	unsigned int n_rare_variants;				//#variants rare to be phased
-	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
-	unsigned int n_total_variants;				//#variants in total
-	unsigned int n_haplotypes;					//#haplotypes
-	unsigned int n_samples;						//#samples
+	unsigned int idx;
+	float lprob;
+	float rprob;
 
-	//Scaffold data
-	bitmatrix HShap;							//Bit matrix of haplotypes (haplotype first).
-	bitmatrix HSvar;							//Bit matrix of haplotypes (variant first).
-
-	//Unphased data / common sites
-	bitmatrix HChap;							//Bit matrix of haplotypes (haplotype first).
-	bitmatrix HCvar;							//Bit matrix of haplotypes (variant first).
-
-	//Unphased data / rare sites
-	vector < vector < unsigned int > > HRhap;	//Sparse matrix of haplotypes (haplotype first).
-	vector < vector < unsigned int > > HRvar;	//Sparse matrix of haplotypes (variant first).
-
-	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
-	haplotype_set();
-	~haplotype_set();
-	void clear();
-	void allocate(unsigned int,unsigned int , unsigned int , unsigned int, variant_map &);
-
-	//Haplotype routines
-	void transposeHaplotypes_H2V();
-	void transposeHaplotypes_V2H();
+	prob_state(unsigned int _idx, float _lprob, float _rprob) {
+		idx = _idx;
+		lprob = _lprob;
+		rprob = _idrob;
+	}
 };
+
+class hmm_scaffold {
+public:
+	//EXTERNAL DATA
+	conditioning_set & C;
+	genotype_set & G;
+	variant_map & V;
+	hmm_parameters & M;
+
+	//CONSTANT
+	float emit[2];
+	float rev_emit[2];
+
+	//ARRAYS
+	vector < bool > bufferA0;
+	vector < bool > bufferA1;
+	vector < unsigned int > K;
+	vector < unsigned long > nstates;
+	vector < unsigned long > sstates;
+	vector < float > alpha;
+	vector < float > beta;
+	vector < vector < prob_state > > cprobs;
+
+public:
+	//CONSTRUCTOR/DESTRUCTOR
+	hmm_scaffold(variant_map & V, genotype_set &, conditioning_set &, hmm_parameters &);
+	~hmm_scaffold();
+
+	//
+	void prefetchAlleles();
+
+	void forward();
+	void backward(vector < cfloat > &);
+};
+
+inline
+void hmm_scaffold::prefetchAlleles0(unsigned int vs) {
+	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA[h] = C.HSvar.get(vs, h);
+}
+
+inline
+void hmm_scaffold::prefetchAlleles1(unsigned int vs) {
+	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA1[h] = C.HSvar.get(vs, h);
+}
+
 #endif
+
+

@@ -22,99 +22,62 @@
 #include <containers/genotype_set.h>
 
 genotype_set::genotype_set() {
-	n_target_samples = 0;
-	n_common_variants = 0;
+	clear();
 }
 
 genotype_set::~genotype_set() {
-	for (int i = 0 ; i< vecG.size() ; i ++) delete vecG[i];
-	vecG.clear();
-	n_target_samples = 0;
-	n_common_variants = 0;
+	clear();
 }
 
-void genotype_set::allocate(unsigned int _n_target_samples, unsigned int _n_common_variants) {
-	n_target_samples = _n_target_samples;
+void genotype_set::clear() {
+	n_scaffold_variants = 0.0;
+	n_rare_variants = 0.0;
+	n_common_variants = 0.0;
+	n_total_variants = 0.0;
+	n_genotypes = 0.0;
+	n_samples = 0.0;
+	GCalleles.clear();
+	GCmissing.clear();
+	GRindexes.clear();
+	GRhets.clear();
+	GRmissing.clear();
+}
+
+void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants, variant_map &) {
+	tac.clock();
+
+	n_scaffold_variants = _n_scaffold_variants;
+	n_rare_variants = _n_rare_variants;
 	n_common_variants = _n_common_variants;
-	vecG = vector < genotype * > (n_target_samples);
-	for (unsigned int i = 0 ; i < n_target_samples ; i ++) vecG[i] = new genotype (i, n_common_variants);
+	n_total_variants = n_scaffold_variants + n_rare_variants + n_common_variants;
+	n_samples = _n_samples;
+
+	if (n_common_variants > 0) {
+		GCalleles = vector < vector < bool > > (n_common_variants, vector < bool > (2 * n_samples, false));
+		GCmissing = vector < vector < bool > > (n_common_variants, vector < bool > (n_samples, false));
+	}
+
+	if (n_rare_variants > 0) {
+		GRindexes = vector < vector < unsigned int > > (n_rare_variants);
+		GRhets = vector < vector < bool > > (n_rare_variants);
+		GRmissing = vector < vector < bool > > (n_rare_variants);
+	}
+
+	vrb.bullet("GEN allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-
-void genotype_set::imputeMonomorphic(variant_map & V) {
-	for (unsigned int vt = 0, vc = 0 ; vt < V.sizeFull() ; vt ++) {
-		if (!V.vec_full[vt]->rare) {
-			if (V.vec_full[vt]->isMonomorphic()) {
-				bool uallele = (V.vec_full[vt]->cref)?false:true;
-				for (unsigned int i = 0 ; i < vecG.size() ; i ++) {
-					VAR_SET_HOM(MOD2(vc), vecG[i]->Variants[DIV2(vc)]);
-					uallele?VAR_SET_HAP0(MOD2(vc), vecG[i]->Variants[DIV2(vc)]):VAR_CLR_HAP0(MOD2(vc), vecG[i]->Variants[DIV2(vc)]);
-					uallele?VAR_SET_HAP1(MOD2(vc), vecG[i]->Variants[DIV2(vc)]):VAR_CLR_HAP1(MOD2(vc), vecG[i]->Variants[DIV2(vc)]);
-				}
-				if (uallele) V.vec_full[vt]->cref = 0;
-				else V.vec_full[vt]->calt = 0;
-				V.vec_full[vt]->cmis = 0;
-			}
-			vc++;
-		} else {
-			if (V.vec_full[vt]->isMonomorphic() && V.vec_full[vt]->cmis > 0) {
-				bool uallele = (V.vec_full[vt]->cref)?false:true;
-				for (unsigned int i = 0 ; i < vecG.size() ; i ++) {
-					int idx_rare = -1;
-					for (int r = 0 ; r < vecG[i]->RareIndexes.size() && idx_rare < 0 ; r ++) if (vecG[i]->RareIndexes[r] == vt) idx_rare = r;
-					if (idx_rare >= 0) {
-						VAR_SET_HOM(MOD2(idx_rare), vecG[i]->RareVariants[DIV2(idx_rare)]);
-						uallele?VAR_SET_HAP0(MOD2(idx_rare), vecG[i]->RareVariants[DIV2(idx_rare)]):VAR_CLR_HAP0(MOD2(idx_rare), vecG[i]->RareVariants[DIV2(idx_rare)]);
-						uallele?VAR_SET_HAP1(MOD2(idx_rare), vecG[i]->RareVariants[DIV2(idx_rare)]):VAR_CLR_HAP1(MOD2(idx_rare), vecG[i]->RareVariants[DIV2(idx_rare)]);
-					}
-				}
-				if (uallele) V.vec_full[vt]->cref = 0;
-				else V.vec_full[vt]->calt = 0;
-				V.vec_full[vt]->cmis = 0;
-			}
+void genotype_set::getUnphasedIndexes(vector < unsigned int > & VC, vector < unsigned int > & VR, vector < unsigned int > & IDX) {
+	IDX.clear();
+	for (int vc = 0 ; vc < VC.size() ; vc ++) {
+		for (int i = 0 ; i < n_samples ; i++) {
+			if (GCmissing[VC[vc]][i] || GCalleles[VC[vc]][2*i+0] != GCalleles[VC[vc]][2*i+1]) IDX.push_back(i);
 		}
 	}
-}
-
-unsigned int genotype_set::largestNumberOfTransitions() {
-	unsigned int maxT = 0;
-	for (int i = 0 ; i < n_target_samples ; i ++) {
-		unsigned int nTrans = vecG[i]->n_transitions;
-		if (nTrans > maxT) maxT = nTrans;
+	for (int vr = 0 ; vr < VR.size() ; vr ++) {
+		for (int i = 0 ; i < GRindexes[VR[vr]].size() ; i++) {
+			if (GRhets[VR[vr]][i] || GRmissing[VR[vr]][i]) IDX.push_back(GRindexes[VR[vr]][i]);
+		}
 	}
-	return maxT;
-}
-
-unsigned int genotype_set::largestNumberOfMissings() {
-	unsigned int maxM = 0;
-	for (int i = 0 ; i < n_target_samples ; i ++) {
-		unsigned int nMis = vecG[i]->n_missing;
-		if (nMis> maxM) maxM = nMis;
-	}
-	return maxM;
-}
-
-unsigned int genotype_set::largestNumberOfRares() {
-	unsigned int maxR = 0;
-	for (int i = 0 ; i < n_target_samples ; i ++) {
-		unsigned int nRare = vecG[i]->RareIndexes.size();
-		if (nRare> maxR) maxR = nRare;
-	}
-	return maxR;
-}
-
-unsigned long genotype_set::numberOfSegments() {
-	unsigned long size = 0;
-	for (int i = 0 ; i < n_target_samples ; i ++) size += vecG[i]->n_segments;
-	return size;
-}
-
-void genotype_set::masking() {
-	for (int i = 0 ; i < n_target_samples ; i ++) vecG[i]->mask();
-}
-
-void genotype_set::solve() {
-	tac.clock();
-	for (int i = 0 ; i < vecG.size() ; i ++) vecG[i]->solve();
-	vrb.bullet("HAP solving (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	sort(IDX.begin(), IDX.end());
+	IDX.erase(unique(IDX.begin(), IDX.end()), IDX.end());
 }

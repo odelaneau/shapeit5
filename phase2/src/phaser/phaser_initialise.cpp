@@ -29,8 +29,6 @@
 #include <modules/pbwt_solver.h>
 
 void phaser::read_files_and_initialise() {
-	vrb.title("Initialization:");
-
 	//step0: Initialize seed and multi-threading
 	rng.setSeed(options["seed"].as < int > ());
 	if (options["thread"].as < int > () > 1) {
@@ -39,43 +37,34 @@ void phaser::read_files_and_initialise() {
 		pthread_mutex_init(&mutex_workers, NULL);
 	}
 
-	//step2: Read input files
-	genotype_reader readerG(H, G, V, options["region"].as < string > (), options.count("use-PS"), options["thread"].as < int > ());
-	readerG.scanGenotypes(options["input"].as < string > ());
+	//step1: Set up the genotype reader
+	vrb.title("Reading genotype data:");
+	genotype_reader readerG(H, G, V);
+	readerG.setThreads(options["thread"].as < int > ());
+	readerG.setRegion(options["region"].as < string > ());
+	readerG.setFilenames(options["input"].as < string > (), options["scaffold"].as < string > ());
+
+	//step2: Read the genotype data
+	readerG.scanGenotypes();
 	readerG.allocateGenotypes();
-	if (!options.count("scaffold")) readerG.readGenotypes0(options["input"].as < string > ());
-	if ( options.count("scaffold")) readerG.readGenotypes1(options["input"].as < string > (), options["scaffold"].as < string > ());
-	G.imputeMonomorphic(V);
+	readerG.readGenotypes();
 
 	//step3: Read and initialise genetic map
+	vrb.title("Setting up genetic map:");
 	if (options.count("map")) {
 		gmap_reader readerGM;
 		readerGM.readGeneticMapFile(options["map"].as < string > ());
 		V.setGeneticMap(readerGM);
 	} else V.setGeneticMap();
-	M.initialise(V, options["effective-size"].as < int > (), (readerG.n_target_samples+readerG.n_reference_samples)*2);
+	M.initialise(V, options["hmm-ne"].as < int > (), (readerG.n_main_samples+readerG.n_ref_samples)*2);
 
-	//step4: Initialize haplotypes
-	H.parametrizePBWT(options["pbwt-depth"].as < int > (), pbwt_modulo, options["pbwt-mac"].as < int > (), options["pbwt-mdr"].as < double > (), options["thread"].as < int > ());
-	H.initializePBWTmapping(V);
-	H.allocatePBWTarrays();
-	H.updateHaplotypes(G, true);
-	H.transposeHaplotypes_H2V(true);
+	//step4: Initialize haplotype set
+	vrb.title("Initializing data structures:");
+	H.transposeHaplotypes_V2H();
+	H.initialize(V,	options["pbwt-modulo"].as < double > (),
+					options["pbwt-window"].as < double > (),
+					options["pbwt-depth"].as < int > (),
+					options["pbwt-mac"].as < int > ());
 
-
-	if (!options.count("pbwt-disable-init")) {
-		pbwt_solver solver = pbwt_solver(H);
-		solver.sweep(G);
-		solver.free();
-		H.transposeHaplotypes_V2H(true);
-	}
-
-	//step5: Initialize genotype structures
-	builder(G, options["thread"].as < int > ()).build();
-	if (options.count("use-PS")) G.masking();
-
-	//step6: Allocate data structures for computations
-	unsigned int max_number_transitions = G.largestNumberOfTransitions();
-	unsigned int max_number_missing = G.largestNumberOfMissings();
-	threadData = vector < conditioning_set >(options["thread"].as < int > (), conditioning_set(V, G, H, max_number_transitions, max_number_missing));
+	//step5: Allocate data structures for MT computations
 }

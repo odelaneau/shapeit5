@@ -12,22 +12,30 @@ haplotype_checker::~haplotype_checker() {
 
 void haplotype_checker::check() {
 	vrb.title("Check phasing discordances"); tac.clock();
-	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
+	//for (int i = 0 ; i < H.IDXesti.size() ; i++) {
+	for (int i = 1 ; i < 2 ; i++) {
 		for (int l_curr = 0, l_prev = -1 ; l_curr < H.n_variants ; l_curr ++) {
 			bool curr_t0 = H.Htrue[2*H.IDXesti[i]+0][l_curr];
 			bool curr_t1 = H.Htrue[2*H.IDXesti[i]+1][l_curr];
 			bool curr_e0 = H.Hesti[2*H.IDXesti[i]+0][l_curr];
 			bool curr_e1 = H.Hesti[2*H.IDXesti[i]+1][l_curr];
-			bool het_check1 = (curr_e0 != curr_e1);								//Phased haplotypes are hets here
-			bool het_check2 = het_check1 && (curr_t0 != curr_t1);				//Validation haplotypes are hets here
+			bool prev_t0, prev_t1, prev_e0, prev_e1;
+			bool het_check1 = (curr_e0 != curr_e1);								//Phased haplotypes are hets
+			bool het_check2 = het_check1 && (curr_t0 != curr_t1);				//Validation haplotypes are hets
 			bool het_check3 = het_check2 && !(H.Missing[H.IDXesti[i]][l_curr]); //Validation haplotypes are non-missing
 			bool het_check4 = het_check3 && H.Phased[H.IDXesti[i]][l_curr];		//Validation haplotypes are phased
 			if (het_check4) {
 				if (l_prev >= 0) {
-					Errors[i][l_curr] = ((curr_t0==H.Htrue[2*H.IDXesti[i]+0][l_prev]) != (curr_e0==H.Hesti[2*H.IDXesti[i]+0][l_prev]));
+					prev_t0 = H.Htrue[2*H.IDXesti[i]+0][l_prev];
+					prev_t1 = H.Htrue[2*H.IDXesti[i]+1][l_prev];
+					prev_e0 = H.Hesti[2*H.IDXesti[i]+0][l_prev];
+					prev_e1 = H.Hesti[2*H.IDXesti[i]+1][l_prev];
+					Errors[i][l_curr] = ((curr_t0==prev_t0) != (curr_e0==prev_e0));
 					Checked[i][l_curr] = true;
 				}
+				cout << l_curr << " " << l_prev << " " << Errors[i][l_curr] << " / " << prev_t0 << curr_t0 << " " << prev_t1 << curr_t1 << " " << prev_e0 << curr_e0 << " " << prev_e1 << curr_e1 << endl;
 				l_prev = l_curr;
+
 			}
 		}
 	}
@@ -109,6 +117,7 @@ void haplotype_checker::writeBlock(string fout) {
 			if (Errors[i][l])
 				fdo << H.vecSamples[H.IDXesti[i]] << " " << H.Positions[l] << endl;
 		}
+		fdo << H.vecSamples[H.IDXesti[i]] << " " << H.Positions.back() << endl;
 	}
 	fdo.close();
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");

@@ -67,38 +67,18 @@ void haplotype_writer::writeHaplotypes(string fname) {
 		bcf_update_id(hdr, rec, V.vec_full[lt]->id.c_str());
 		string alleles = V.vec_full[lt]->ref + "," + V.vec_full[lt]->alt;
 		bcf_update_alleles_str(hdr, rec, alleles.c_str());
-		int count_alt = 0;
 
-		if (V.vec_full[lt]->rare) {
-			bool uallele = (V.vec_full[lt]->calt > V.vec_full[lt]->cref);
-			for (int i = 0 ; i < G.n_target_samples ; i++) {
-				genotypes[2*i+0] = bcf_gt_phased(uallele);
-				genotypes[2*i+1] = bcf_gt_phased(uallele);
-				count_alt += 2 * uallele;
-			}
-			for (int r = 0 ; r < H.Svar[lt].size() ; r ++) {
-				if (H.Svar[lt][r] < H.n_target_haplotypes) {
-					genotypes[H.Svar[lt][r]] = bcf_gt_phased(!uallele);
-					count_alt += !uallele;
-				}
-			}
-		} else {
-			for (int i = 0 ; i < G.n_target_samples ; i++) {
-				bool a0 = H.Hvar.get(lc, 2*i+0);
-				bool a1 = H.Hvar.get(lc, 2*i+1);
-				count_alt += a0+a1;
-				genotypes[2*i+0] = bcf_gt_phased(a0);
-				genotypes[2*i+1] = bcf_gt_phased(a1);
-			}
-			lc++;
+
+		int count_alt = 0;
+		bool uallele = false;
+		for (int i = 0 ; i < G.n_samples ; i++) {
+			genotypes[2*i+0] = bcf_gt_phased(uallele);
+			genotypes[2*i+1] = bcf_gt_phased(uallele);
+			count_alt += 2 * uallele;
 		}
+
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
-		float freq_alt = count_alt * 1.0 / (2 * G.n_target_samples);
-		bcf_update_info_float(hdr, rec, "AF", &freq_alt, 1);
-		if (V.vec_full[lt]->cm >= 0) {
-			float val = (float)V.vec_full[lt]->cm;
-			bcf_update_info_float(hdr, rec, "CM", &val, 1);
-		}
+		bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
 		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 		vrb.progress("  * VCF writing", (lt+1)*1.0/V.sizeFull());
