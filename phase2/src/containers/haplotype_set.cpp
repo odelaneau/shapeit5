@@ -31,69 +31,18 @@ haplotype_set::~haplotype_set() {
 
 void haplotype_set::clear() {
 	n_scaffold_variants = 0.0;
-	n_rare_variants = 0.0;
-	n_common_variants = 0.0;
-	n_total_variants = 0.0;
 	n_haplotypes = 0.0;
 	n_samples = 0.0;
 }
 
-void haplotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants, variant_map &) {
+void haplotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_variants) {
 	tac.clock();
 
 	n_scaffold_variants = _n_scaffold_variants;
-	n_rare_variants = _n_rare_variants;
-	n_common_variants = _n_common_variants;
-	n_total_variants = n_scaffold_variants + n_rare_variants + n_common_variants;
 	n_haplotypes = 2 * _n_samples;
 	n_samples = _n_samples;
 
-	var_type = vector < char > (n_total_variants, -1);
-	for (int v = 0 ; v < n_total_variants ; v ++) var_type[v] = V.vec_pos[v]->type;
+	Hvar.allocate(n_scaffold_variants, n_haplotypes);
 
-	HSvar.allocate(n_scaffold_variants, n_haplotypes);
-	HShap.allocate(n_haplotypes, n_scaffold_variants);
-
-	if (n_common_variants > 0) {
-		HCvar.allocate(n_common_variants, n_haplotypes);
-		HChap.allocate(n_haplotypes, n_common_variants);
-	}
-
-	if (n_rare_variants > 0) {
-		HRvar = vector < vector < unsigned int > > (n_rare_variants, vector < unsigned int > ());
-		HRhap = vector < vector < unsigned int > > (n_haplotypes, vector < unsigned int > ());
-	}
-
-	vrb.bullet("HAP allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("HAP allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
-
-void haplotype_set::transposeHaplotypes_H2V() {
-	tac.clock();
-
-	HShap.transpose(HSvar, n_haplotypes, n_scaffold_variants);
-
-	if (n_common_variants > 0) HChap.transpose(HCvar, n_haplotypes, n_common_variants);
-
-	if (n_rare_variants > 0) {
-		for (unsigned int vr = 0 ; vr < n_rare_variants ; vr ++) HRvar[vr].clear();
-		for (unsigned int h = 0 ; h < n_haplotypes ; h ++) for (unsigned int r = 0 ; r < HRhap[h].size() ; r ++) HRvar[HRhap[h][r]].push_back(h);
-	}
-
-	vrb.bullet("H2V transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-}
-
-void haplotype_set::transposeHaplotypes_V2H(bool full) {
-	tac.clock();
-
-	HSvar.transpose(HShap, n_scaffold_variants, n_haplotypes);
-
-	if (n_common_variants > 0) HCvar.transpose(HChap, n_common_variants, n_haplotypes);
-
-	if (n_rare_variants > 0) {
-		for (unsigned int h = 0 ; h < n_haplotypes ; h ++) HRhap[h].clear();
-		for (unsigned int vr = 0 ; vr < n_rare_variants ; vr ++) for (unsigned int r = 0 ; r < HRvar[vr].size() ; r ++) HRhap[HRvar[vr][r]].push_back(vr);
-	}
-
-	vrb.bullet("V2H transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-}
-

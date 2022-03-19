@@ -24,38 +24,21 @@
 
 #include <utils/otools.h>
 #include <containers/bitmatrix.h>
-#include <containers/variant_map.h>
 
 class haplotype_set {
 public:
 	//Counts
 	unsigned int n_scaffold_variants;			//#variants in scaffold
-	unsigned int n_rare_variants;				//#variants rare to be phased
-	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
-	unsigned int n_total_variants;				//#variants in total
 	unsigned int n_haplotypes;					//#haplotypes
 	unsigned int n_samples;						//#samples
 
 	//Scaffold data
-	bitmatrix HShap;							//Bit matrix of haplotypes (haplotype first).
-	bitmatrix HSvar;							//Bit matrix of haplotypes (variant first).
-
-	//Unphased data / common sites
-	bitmatrix HChap;							//Bit matrix of haplotypes (haplotype first).
-	bitmatrix HCvar;							//Bit matrix of haplotypes (variant first).
-
-	//Unphased data / rare sites
-	vector < vector < unsigned int > > HRhap;	//Sparse matrix of haplotypes (haplotype first).
-	vector < vector < unsigned int > > HRvar;	//Sparse matrix of haplotypes (variant first).
+	bitmatrix Hvar;							//Bit matrix of haplotypes (variant first).
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	haplotype_set();
 	~haplotype_set();
 	void clear();
-	void allocate(unsigned int,unsigned int , unsigned int , unsigned int, variant_map &);
-
-	//Haplotype routines
-	void transposeHaplotypes_H2V();
-	void transposeHaplotypes_V2H();
+	void allocate(unsigned int, unsigned int);
 };
 #endif

@@ -48,16 +48,17 @@ public:
 	vector < float > phasing_probs;
 
 	//CONSTRUCTOR/DESTRUCTOR
-	gibbs_sampler(unsigned int);
+	gibbs_sampler();
 	~gibbs_sampler();
+	void allocate(unsigned int, unsigned int, unsigned int);
 
 	//INPUT
 	bool loadCommonUnphasedGenotypes(unsigned int, genotype_set &);
 	bool loadRareUnphasedGenotypes(unsigned int, genotype_set &, bool);
-	void loadStateSpace(vector < vector < unsigned int > > &, vector < vector < float > > &, vector < vector < float > > &, float);
+	void loadStateSpace(unsigned int hap, vector < unsigned int > & states, vector < float > & lprod, vector < float > & rprod, float threshold);
 
 	//MCMC
-	void iterate();
+	void iterate(float weight);
 
 	//OUTPUT
 	void pushCommonPhasedGenotypes(unsigned int, genotype_set &);

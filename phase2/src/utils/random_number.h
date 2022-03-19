@@ -76,6 +76,16 @@ public:
 		return (getDouble() < 0.5);
 	}
 
+	int sample(std::vector < float > & vec, float sum) {
+		float csum = vec[0];
+		float u = getDouble() * sum;
+		for (int i = 0; i < vec.size() - 1; ++i) {
+			if ( u < csum ) return i;
+			csum += vec[i+1];
+		}
+		return vec.size() - 1;
+	}
+
 	int sample(std::vector < double > & vec, double sum) {
 		double csum = vec[0];
 		double u = getDouble() * sum;

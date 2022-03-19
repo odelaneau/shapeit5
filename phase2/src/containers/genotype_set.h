@@ -24,17 +24,17 @@
 
 #include <utils/otools.h>
 #include <containers/bitmatrix.h>
-#include <containers/variant_map.h>
 
 class genotype_set {
 public:
 
 	//Counts
-	unsigned int n_scaffold_variants;			//#variants in scaffold
 	unsigned int n_rare_variants;				//#variants rare to be phased
 	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
-	unsigned int n_total_variants;				//#variants in total
 	unsigned int n_samples;						//#samples
+
+	//Sample IDs
+	vector < string > names;
 
 	//Genotypes at common unphased variants
 	vector < vector < bool > > GCalleles;	//Alleles
@@ -49,7 +49,8 @@ public:
 	//
 	genotype_set();
 	~genotype_set();
-	void allocate(unsigned int,unsigned int , unsigned int , unsigned int, variant_map &);
+	void clear();
+	void allocate(unsigned int, unsigned int , unsigned int);
 
 	//
 	void setCommonMissing(unsigned int vc, unsigned int i);
@@ -61,7 +62,6 @@ public:
 	//
 	void getUnphasedIndexes(vector < unsigned int > &, vector < unsigned int > &, vector < unsigned int > &);
 };
-#endif
 
 inline
 void genotype_set::setCommonMissing(unsigned int vc, unsigned int i) {
@@ -102,3 +102,5 @@ void genotype_set::pushRareHom(unsigned int vr, unsigned int i) {
 	GRalleles[vr].push_back(false);
 	GRalleles[vr].push_back(false);
 }
+
+#endif

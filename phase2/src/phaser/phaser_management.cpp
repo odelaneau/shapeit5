@@ -25,10 +25,6 @@ phaser::phaser() {
 }
 
 phaser::~phaser() {
-	id_workers.clear();
-	threadData.clear();
-	iteration_types.clear();
-	iteration_counts.clear();
 }
 
 void phaser::phase(vector < string > & args) {

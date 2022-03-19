@@ -30,11 +30,8 @@ genotype_set::~genotype_set() {
 }
 
 void genotype_set::clear() {
-	n_scaffold_variants = 0.0;
 	n_rare_variants = 0.0;
 	n_common_variants = 0.0;
-	n_total_variants = 0.0;
-	n_genotypes = 0.0;
 	n_samples = 0.0;
 	GCalleles.clear();
 	GCmissing.clear();
@@ -43,13 +40,11 @@ void genotype_set::clear() {
 	GRmissing.clear();
 }
 
-void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants, variant_map &) {
+void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_rare_variants, unsigned int _n_common_variants) {
 	tac.clock();
 
-	n_scaffold_variants = _n_scaffold_variants;
 	n_rare_variants = _n_rare_variants;
 	n_common_variants = _n_common_variants;
-	n_total_variants = n_scaffold_variants + n_rare_variants + n_common_variants;
 	n_samples = _n_samples;
 
 	if (n_common_variants > 0) {
@@ -64,7 +59,7 @@ void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_va
 		GRalleles = vector < vector < bool > > (n_rare_variants);
 	}
 
-	vrb.bullet("GEN allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("GEN allocation [#common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void genotype_set::getUnphasedIndexes(vector < unsigned int > & VC, vector < unsigned int > & VR, vector < unsigned int > & IDX) {
