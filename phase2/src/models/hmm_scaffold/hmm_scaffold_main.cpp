@@ -21,13 +21,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <models/hmm_scaffold/hmm_scaffold_header.h>
 
-hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set * _G, conditioning_set & _C, hmm_parameters & _M) : V(_V), G(_G), C(_C), M(_M){
+hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M) : V(_V), G(_G), C(_C), M(_M){
 	//
 	nstates = vector < unsigned long > (C.n_haplotypes, 0);
 	sstates = vector < unsigned long > (C.n_haplotypes, 0);
 	for (int i = 0; i < G.n_samples ; i ++) nstates[i] = C.indexes_pbwt_neighbour[i].size();
 	for (int i = 1; i < G.n_samples ; i ++) sstates[i] = sstates[i-1] + C.indexes_pbwt_neighbour[i-1].size();
-	n_total_states = sstates.back() + nstates.back();
+	unsigned int n_total_states = sstates.back() + nstates.back();
 
 	//
 	emit[0] = 1.0f;
@@ -47,7 +47,6 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set * _G, conditioning_set
 	bufferA1 = vector < bool > (C.n_haplotypes, false);
 	alpha = vector < float > (n_total_states, 0.0f);
 	beta = vector < float > (n_total_states, 1.0f);
-	cprobs = vector < vector < prob_state > > (C.n_haplotypes);
 
 	//
 	MCMC.allocate(G.n_samples, 50, 20);	//50 iterations w/ 20 burnin
@@ -88,12 +87,15 @@ void hmm_scaffold::forward() {
 	vrb.bullet("Timing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void hmm_scaffold::backward(float threshold) {
+void hmm_scaffold::backward(float threshold, unsigned int niterations, unsigned int nburnin) {
 	tac.clock();
 
 	//Variables
-	vector < unsigned int > VC, VR;
+	vector < unsigned int > VC, VR, IDX;
 	vector < float > alphaXbeta_prev, alphaXbeta_curr;
+
+	//
+	MCMC.allocate(C.n_samples, niterations, nburnin);
 
 	vrb.title("Backward pass");
 
@@ -112,6 +114,7 @@ void hmm_scaffold::backward(float threshold) {
 		V.getRareVariants(vs, vs+1, VR);
 
 		//Are there any M/m or ./. at these variants
+
 		G.getUnphasedIndexes(VC, VR, IDX);
 
 		//Loading MCMC conditional probs
@@ -124,7 +127,7 @@ void hmm_scaffold::backward(float threshold) {
 				alphaXbeta_curr = vector < float > (nstates[h], 0.0f);
 
 				//Get alphaXbeta product at l+1 [redundant / to be optimized out]
-				getAlphaBetaProduct(alphaXbeta_prev);
+				getAlphaBetaProduct(h, alphaXbeta_prev);
 			}
 
 			//Update backward with emission at l+1
@@ -144,7 +147,7 @@ void hmm_scaffold::backward(float threshold) {
 			//If there are unphased genotypes in [l, l+1] for sample h/2
 			if (IDX.size() > 0 && IDX[idx] == h/2) {
 				//Get alphaXbeta product at l
-				getAlphaBetaProduct(alphaXbeta_curr);
+				getAlphaBetaProduct(h, alphaXbeta_curr);
 
 				//Compress and store alphaXbeta products at l and l + 1
 				MCMC.loadStateSpace(h, C.indexes_pbwt_neighbour[h/2], alphaXbeta_curr, alphaXbeta_prev, threshold);
@@ -152,17 +155,17 @@ void hmm_scaffold::backward(float threshold) {
 		}
 
 		//Running MCMC at rare variants
-		for (int vr = 0 ; vr < VR.size() ; vr ++) {
-			MCMC.loadRareUnphasedGenotypes(VR[vr], GS, !V.vec_rare[VR[vr]]->minor);
-			MCMC.iterate();
-			MCMC.pushRarePhasedGenotypes(VR[vr], GS);
+		for (int vr = 0 ; vr < VR.size() && IDX.size() > 0 ; vr ++) {
+			MCMC.loadRareUnphasedGenotypes(VR[vr], G, !V.vec_rare[VR[vr]]->minor);
+			MCMC.iterate( (V.vec_rare[VR[vr]]->cm - V.vec_scaffold[vs]->cm) / (V.vec_scaffold[vs+1]->cm - V.vec_scaffold[vs]->cm));
+			MCMC.pushRarePhasedGenotypes(VR[vr], G);
 		}
 
 		//Running MCMC at common variants
-		for (int vc = 0 ; vc < VC.size() ; vc ++) {
-			MCMC.loadCommonUnphasedGenotypes(VC[vc], GS);
-			MCMC.iterate();
-			MCMC.pushCommonPhasedGenotypes(VC[vc], GS);
+		for (int vc = 0 ; vc < VC.size() && IDX.size() > 0 ; vc ++) {
+			MCMC.loadCommonUnphasedGenotypes(VC[vc], G);
+			MCMC.iterate( (V.vec_common[VC[vc]]->cm - V.vec_scaffold[vs]->cm) / (V.vec_scaffold[vs+1]->cm - V.vec_scaffold[vs]->cm));
+			MCMC.pushCommonPhasedGenotypes(VC[vc], G);
 		}
 
 		vrb.progress("  * Processing", (C.n_scaffold_variants-vs)*1.0/C.n_scaffold_variants);

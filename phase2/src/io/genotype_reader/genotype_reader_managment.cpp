@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <io/genotype_reader/genotype_reader_header.h>
 
-genotype_reader::genotype_reader(haplotype_set & _H, variant_map & _V) : H(_H), V(_V) {
+genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_map & _V) : H(_H), V(_V), G(_G) {
 	nthreads = 1;
 	n_common_variants = 0;
 	n_scaffold_variants = 0;
@@ -50,14 +50,14 @@ genotype_reader::~genotype_reader() {
 }
 
 void genotype_reader::allocateGenotypes() {
-
-
-	H.allocate(n_samples, n_scaffold_variants, n_rare_variants, n_common_variants, V);
+	H.allocate(n_samples, n_scaffold_variants);
+	G.allocate(n_samples, n_rare_variants, n_common_variants);
 }
 
 void genotype_reader::setFilenames (string _funphased, string _fphased) { fphased = _fphased; funphased = _funphased; }
 
-void genotype_reader::setThreads(int _threads) { threads = _threads; }
+void genotype_reader::setThreads(int _nthreads) { nthreads = _nthreads; }
 
 void genotype_reader::setRegion(string _region) { region = _region; }
 
+void genotype_reader::setMAF(float _minmaf) { minmaf = _minmaf; }

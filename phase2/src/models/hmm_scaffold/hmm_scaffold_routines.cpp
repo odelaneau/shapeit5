@@ -25,8 +25,7 @@
  * ALL THESE ROUTINES CAN BE VECTORIZED BIG TIME ...
  */
 
-void hmm_scaffold::forward_initTransitions(h) {
-	assert(vs == 0);
+void hmm_scaffold::forward_initTransitions(unsigned int h) {
 	fill(alpha.begin() + sstates[h], alpha.begin() + sstates[h] + nstates[h], 1.0f / nstates[h]);
 }
 
@@ -62,8 +61,7 @@ void hmm_scaffold::forward_reverseTransitions(unsigned int vs, unsigned int h) {
 		alpha[sstates[h]+k] = (alpha[sstates[h]+k]  - f1) * f0;
 }
 
-void hmm_scaffold::backward_initTransitions(h) {
-	assert(vs == (C.n_scaffold_variants-1));
+void hmm_scaffold::backward_initTransitions(unsigned int h) {
 	fill(beta.begin() + sstates[h], beta.begin() + sstates[h] + nstates[h], 1.0f / nstates[h]);
 }
 
@@ -86,11 +84,11 @@ void hmm_scaffold::backward_normalize(unsigned int vs, unsigned int h) {
 	for (int k = 0 ; k < nstates[h] ; k ++) beta[sstates[h]+k] *= scale;
 }
 
-void hmm_scaffold::getAlphaBetaProduct(vector < float > & alphaXbeta) {
+void hmm_scaffold::getAlphaBetaProduct(unsigned int h, vector < float > & alphaXbeta) {
 	float scale = 0.0f;
 	for (int k = 0 ; k < nstates[h] ; k ++) {
 		alphaXbeta[k] = alpha[sstates[h]+k] * beta[sstates[h]+k];
-		scale += alphaXbeta_prev[k];
+		scale += alphaXbeta[k];
 	}
 	scale = 1.0f / scale;
 	for (int k = 0 ; k < nstates[h] ; k ++) alphaXbeta[k] *= scale;

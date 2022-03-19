@@ -26,15 +26,17 @@
 
 #include <containers/variant_map.h>
 #include <containers/haplotype_set.h>
+#include <containers/genotype_set.h>
 
 class genotype_reader {
 public:
 	//DATA
-	int nthreads;
 	haplotype_set & H;
+	genotype_set & G;
 	variant_map & V;
 
 	//COUNTS
+	unsigned int n_total_variants;
 	unsigned int n_scaffold_variants;
 	unsigned int n_rare_variants;
 	unsigned int n_common_variants;
@@ -47,16 +49,18 @@ public:
 	string funphased;
 	string fphased;
 	string region;
-	int threads;
+	int nthreads;
+	float minmaf;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	genotype_reader(haplotype_set &, variant_map &);
+	genotype_reader(haplotype_set &, genotype_set &, variant_map &);
 	~genotype_reader();
 
 	//PARAMS
 	void setFilenames(string, string);
 	void setThreads(int);
 	void setRegion(string);
+	void setMAF(float);
 
 	//IO
 	void scanGenotypes();

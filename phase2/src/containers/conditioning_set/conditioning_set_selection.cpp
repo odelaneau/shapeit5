@@ -36,8 +36,8 @@ void conditioning_set::select() {
 
 	//Select new sites at which to trigger storage
 	vector < vector < int > > candidates = vector < vector < int > > (sites_pbwt_grouping.back() + 1);
-	for (int l = 0 ; l < n_total_variants ; l++) if (sites_pbwt_evaluation[l]) candidates[sites_pbwt_grouping[l]].push_back(l);
-	sites_pbwt_selection = vector < bool > (n_site , false);
+	for (int l = 0 ; l < n_scaffold_variants ; l++) if (sites_pbwt_evaluation[l]) candidates[sites_pbwt_grouping[l]].push_back(l);
+	sites_pbwt_selection = vector < bool > (n_scaffold_variants , false);
 	for (int g = 0 ; g < candidates.size() ; g++) {
 		if (candidates[g].size() > 0) {
 			sites_pbwt_selection[candidates[g][rng.getInt(candidates[g].size())]] = true;
@@ -48,7 +48,7 @@ void conditioning_set::select() {
 	indexes_pbwt_neighbour = vector < vector < unsigned int > > (n_samples);
 
 	//PBWT sweep
-	for (int l = 0 ; l < n_total_variants ; l ++) {
+	for (int l = 0 ; l < n_scaffold_variants ; l ++) {
 		bool eval = sites_pbwt_evaluation[l];
 		bool selc = sites_pbwt_selection[l];
 
@@ -58,7 +58,7 @@ void conditioning_set::select() {
 				int alookup = A[h], dlookup = C[h];
 				if (dlookup > p) p = dlookup;
 				if (dlookup > q) q = dlookup;
-				if (!H_opt_var.get(l, alookup)) {
+				if (!Hvar.get(l, alookup)) {
 					A[u] = alookup;
 					C[u] = p;
 					p = 0;
@@ -75,7 +75,7 @@ void conditioning_set::select() {
 			if (selc) store(l, A, C, M);
 		}
 
-		vrb.progress("  * PBWT section", l * 1.0 / n_total_variants);
+		vrb.progress("  * PBWT section", l * 1.0 / n_scaffold_variants);
 	}
 	vrb.bullet("PBWT selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
@@ -89,7 +89,7 @@ void conditioning_set::store(int l, vector < int > & A, vector < int > & C, vect
 				div_guess0 = max(C[h-offset0+1], div_guess0);
 				add_guess0 = 1;
 			} else { add_guess0 = 0; div_guess0 = l+1; }
-			if ((h+offset1)<n_hap) {
+			if ((h+offset1)<n_haplotypes) {
 				hap_guess1 = A[h+offset1];
 				div_guess1 = max(C[h+offset1], div_guess1);
 				add_guess1 = 1;

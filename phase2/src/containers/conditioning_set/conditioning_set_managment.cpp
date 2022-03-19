@@ -42,14 +42,14 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 
 	//MAPPING EVAL+GRP
 	int n_evaluated = 0;
-	sites_pbwt_evaluation = vector < bool > (V.size(), false);
-	sites_pbwt_grouping = vector < int > (V.size(), -1);
-	for (int l = 0 ; l < V.size() ; l ++) {
-		sites_pbwt_evaluation[l] = (V.vec_pos[l]->getMAC() >= _mac && V.vec_pos[l]->getMDR() <= _mdr);
-		sites_pbwt_grouping[l] = (int)round(V.vec_pos[l]->cm / _modulo_selection);
+	sites_pbwt_evaluation = vector < bool > (V.sizeScaffold(), false);
+	sites_pbwt_grouping = vector < int > (V.sizeScaffold(), -1);
+	for (int l = 0 ; l < V.sizeScaffold() ; l ++) {
+		sites_pbwt_evaluation[l] = (V.vec_scaffold[l]->getMAC() >= _mac && V.vec_scaffold[l]->getMDR() <= _mdr);
+		sites_pbwt_grouping[l] = (int)round(V.vec_scaffold[l]->cm / _modulo_selection);
 		n_evaluated += sites_pbwt_evaluation[l];
 	}
-	for (int l = 0, src = -1, tar = -1 ; l < V.size() ; l ++) {
+	for (int l = 0, src = -1, tar = -1 ; l < V.sizeScaffold() ; l ++) {
 		if (src == sites_pbwt_grouping[l]) sites_pbwt_grouping[l] = tar;
 		else { src = sites_pbwt_grouping[l]; sites_pbwt_grouping[l] = ++tar; }
 	}
@@ -57,5 +57,5 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 
 	//ALLOCATE
 	indexes_pbwt_neighbour = vector < vector < unsigned int > > (n_samples);
-	vrb.bullet("PBWT initialization [#eval=" + stb.str(n_evaluated) + " / #select=" + stb.str(sites_pbwt_grouping.back() + 1) + " / #chunk=" + stb.str(sites_pbwt_mthreading.back() + 1) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("PBWT initialization [#eval=" + stb.str(n_evaluated) + " / #select=" + stb.str(sites_pbwt_grouping.back() + 1) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

@@ -25,16 +25,20 @@
 gibbs_sampler::gibbs_sampler() {
 }
 
+gibbs_sampler::~gibbs_sampler() {
+}
+
 void gibbs_sampler::allocate(unsigned int _nsamples, unsigned int _niterations, unsigned int _nburnin) {
 	nsamples = _nsamples;
 	niterations = _niterations;
 	nburnin = _nburnin;
-	alleles0 = vector < bool > (2 * nsamples);
-	alleles1 = vector < bool > (2 * nsamples);
+	alleles0 = vector < bool > (nsamples);
+	alleles1 = vector < bool > (nsamples);
 	missing = vector < bool > (nsamples);
-	state_indexes = vector < vector < unsigned int > > (2 * n_samples);
-	state_cprobs = vector < vector < float > > (2 * n_samples);
-	phasing_probs = vector < float > (2 * n_samples);
+	state_indexes = vector < vector < unsigned int > > (2 * nsamples);
+	state_lprobs = vector < vector < float > > (2 * nsamples);
+	state_rprobs = vector < vector < float > > (2 * nsamples);
+	phasing_probs = vector < float > (4 * nsamples);
 }
 
 bool gibbs_sampler::loadCommonUnphasedGenotypes(unsigned int vc, genotype_set & GS) {
@@ -64,18 +68,18 @@ bool gibbs_sampler::loadRareUnphasedGenotypes(unsigned int vr, genotype_set & GS
 	std::fill(missing.begin(), missing.end(), false);
 	for (int i = 0 ; i < GS.GRindexes[vr].size() ; i++) {
 		if (GS.GRmissing[vr][i]) {
-			unphased_indexes.push_back(i);
-			missing[i] = true;
-			alleles0[i] = major_allele;
-			alleles1[i] = major_allele;
+			unphased_indexes.push_back(GS.GRindexes[vr][i]);
+			missing[GS.GRindexes[vr][i]] = true;
+			alleles0[GS.GRindexes[vr][i]] = major_allele;
+			alleles1[GS.GRindexes[vr][i]] = major_allele;
 		} else if (GS.GRhets[vr][i]) {
-			unphased_indexes.push_back(i);
+			unphased_indexes.push_back(GS.GRindexes[vr][i]);
 			bool rcoin = rng.flipCoin();
-			alleles0[i] = rcoin?true:false;
-			alleles1[i] = rcoin?false:true;
+			alleles0[GS.GRindexes[vr][i]] = rcoin?true:false;
+			alleles1[GS.GRindexes[vr][i]] = rcoin?false:true;
 		} else {
-			alleles0[i] = !major_allele;
-			alleles1[i] = !major_allele;
+			alleles0[GS.GRindexes[vr][i]] = !major_allele;
+			alleles1[GS.GRindexes[vr][i]] = !major_allele;
 		}
 	}
 	return (unphased_indexes.size() > 0);
@@ -90,9 +94,9 @@ void gibbs_sampler::pushCommonPhasedGenotypes(unsigned int vc, genotype_set & GS
 
 void gibbs_sampler::pushRarePhasedGenotypes(unsigned int vr, genotype_set & GS) {
 	for (int i = 0 ; i < GS.GRindexes[vr].size() ; i++) {
-		if (GS.GRmissing[vr][i] || GS.GRhets[vr][i]) {
-			GS.GRalleles[vr][2*i+0] = alleles0[i];
-			GS.GRalleles[vr][2*i+1] = alleles1[i];
+		if (GS.GRmissing[vr][i] || GS.GRhets[vr][i]) {
+			GS.GRalleles[vr][2*i+0] = alleles0[GS.GRindexes[vr][i]];
+			GS.GRalleles[vr][2*i+1] = alleles1[GS.GRindexes[vr][i]];
 		}
 	}
 }
@@ -101,7 +105,7 @@ void gibbs_sampler::loadStateSpace(unsigned int hap, vector < unsigned int > & s
 	state_indexes[hap].clear();
 	state_lprobs[hap].clear();
 	state_rprobs[hap].clear();
-	for (int k = 0 ; k < nstates[h] ; k ++) {
+	for (int k = 0 ; k < states.size() ; k ++) {
 		if (lprod[k] >= threshold || rprod[k] >= threshold) {
 			state_indexes[hap].push_back(states[k]);
 			state_lprobs[hap].push_back(lprod[k]);

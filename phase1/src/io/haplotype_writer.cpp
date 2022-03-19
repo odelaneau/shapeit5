@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
+#include "../../versions/versions.h"
 #include <io/haplotype_writer.h>
 
 #define OFILE_VCFU	0
@@ -46,11 +47,10 @@ void haplotype_writer::writeHaplotypes(string fname) {
 
 	// Create VCF header
 	bcf_hdr_append(hdr, string("##fileDate="+tac.date()).c_str());
-	bcf_hdr_append(hdr, "##source=shapeit4.1.3");
+	bcf_hdr_append(hdr, string("##source=shapeit5 phase 1 v" + string(PHASE1_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_pos[0]->chr + ">").c_str());
 	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
-	bcf_hdr_append(hdr, "##INFO=<ID=CM,Number=A,Type=Float,Description=\"Interpolated cM position\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
 
 	//Add samples
@@ -71,8 +71,6 @@ void haplotype_writer::writeHaplotypes(string fname) {
 		for (int i = 0 ; i < G.n_ind ; i++) {
 			bool a0 = H.H_opt_var.get(l, 2*i+0);
 			bool a1 = H.H_opt_var.get(l, 2*i+1);
-			//bool a0 = H.H_opt_hap.get(2*i+0, l);
-			//bool a1 = H.H_opt_hap.get(2*i+1, l);
 			count_alt += a0+a1;
 			genotypes[2*i+0] = bcf_gt_phased(a0);
 			genotypes[2*i+1] = bcf_gt_phased(a1);
@@ -80,10 +78,6 @@ void haplotype_writer::writeHaplotypes(string fname) {
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 		float freq_alt = count_alt * 1.0 / (2 * G.n_ind);
 		bcf_update_info_float(hdr, rec, "AF", &freq_alt, 1);
-		if (V.vec_pos[l]->cm >= 0) {
-			float val = (float)V.vec_pos[l]->cm;
-			bcf_update_info_float(hdr, rec, "CM", &val, 1);
-		}
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
 		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 		vrb.progress("  * VCF writing", (l+1)*1.0/V.size());

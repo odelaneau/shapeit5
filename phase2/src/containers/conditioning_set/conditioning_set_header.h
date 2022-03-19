@@ -24,7 +24,9 @@
 
 #include <utils/otools.h>
 
+#include <containers/variant_map.h>
 #include <containers/haplotype_set.h>
+
 
 class conditioning_set : public haplotype_set {
 public:

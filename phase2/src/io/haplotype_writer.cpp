@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
+#include "../../versions/versions.h"
 #include <io/haplotype_writer.h>
 
 #define OFILE_VCFU	0
@@ -45,51 +46,85 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf1_t *rec = bcf_init1();
 
 	// Create VCF header
-	bcf_hdr_append(hdr, string("##fileDate="+tac.date()).c_str());
-	bcf_hdr_append(hdr, "##source=shapeit4.1.3");
+	bcf_hdr_append(hdr, string("##source=shapeit5 phase 2 v" + string(PHASE2_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
 	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
-	bcf_hdr_append(hdr, "##INFO=<ID=CM,Number=A,Type=Float,Description=\"Interpolated cM position\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
 
 	//Add samples
-	for (int i = 0 ; i < G.n_target_samples ; i ++) bcf_hdr_add_sample(hdr, G.vecG[i]->name.c_str());
+	for (int i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
 	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
 	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write VCF/header");
 
 	//Add records
 	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
-	for (int lt = 0, lc = 0 ; lt < V.sizeFull() ; lt ++) {
+	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
+
+		//Variant informations
 		bcf_clear1(rec);
-		rec->rid = bcf_hdr_name2id(hdr, V.vec_full[lt]->chr.c_str());
-		rec->pos = V.vec_full[lt]->bp - 1;
-		bcf_update_id(hdr, rec, V.vec_full[lt]->id.c_str());
-		string alleles = V.vec_full[lt]->ref + "," + V.vec_full[lt]->alt;
+		rec->rid = bcf_hdr_name2id(hdr, V.vec_full[vt]->chr.c_str());
+		rec->pos = V.vec_full[vt]->bp - 1;
+		bcf_update_id(hdr, rec, V.vec_full[vt]->id.c_str());
+		string alleles = V.vec_full[vt]->ref + "," + V.vec_full[vt]->alt;
 		bcf_update_alleles_str(hdr, rec, alleles.c_str());
 
-
+		//Genotypes
 		int count_alt = 0;
-		bool uallele = false;
-		for (int i = 0 ; i < G.n_samples ; i++) {
-			genotypes[2*i+0] = bcf_gt_phased(uallele);
-			genotypes[2*i+1] = bcf_gt_phased(uallele);
-			count_alt += 2 * uallele;
+		if (V.vec_full[vt]->type == VARTYPE_RARE) {
+			bool major_allele = !V.vec_full[vt]->minor;
+			for (int i = 0 ; i < G.n_samples ; i++) {
+				genotypes[2*i+0] = bcf_gt_phased(major_allele);
+				genotypes[2*i+1] = bcf_gt_phased(major_allele);
+				count_alt += 2 * major_allele;
+			}
+			for (int i = 0 ; i < G.GRindexes[vr].size() ; i++) {
+				bool a0 = G.GRalleles[vr][2*i+0];
+				bool a1 = G.GRalleles[vr][2*i+1];
+				genotypes[2*G.GRindexes[vr][i]+0] = bcf_gt_phased(a0);
+				genotypes[2*G.GRindexes[vr][i]+1] = bcf_gt_phased(a1);
+				count_alt -= 2 * major_allele;
+				count_alt += a0+a1;
+			}
+		} else if (V.vec_full[vt]->type == VARTYPE_COMM) {
+			for (int i = 0 ; i < G.n_samples ; i++) {
+				bool a0 = G.GCalleles[vc][2*i+0];
+				bool a1 = G.GCalleles[vc][2*i+1];
+				genotypes[2*i+0] = bcf_gt_phased(a0);
+				genotypes[2*i+1] = bcf_gt_phased(a1);
+				count_alt += a0+a1;
+			}
+		} else {
+			for (int i = 0 ; i < H.n_samples ; i++) {
+				bool a0 = H.Hvar.get(vs, 2*i+0);
+				bool a1 = H.Hvar.get(vs, 2*i+1);
+				count_alt += a0+a1;
+				genotypes[2*i+0] = bcf_gt_phased(a0);
+				genotypes[2*i+1] = bcf_gt_phased(a1);
+				count_alt += a0+a1;
+			}
 		}
 
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 		bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
 		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
-		vrb.progress("  * VCF writing", (lt+1)*1.0/V.sizeFull());
+
+		switch (V.vec_full[vt]->type) {
+		case VARTYPE_SCAF :	vs++; break;
+		case VARTYPE_COMM :	vc++; break;
+		case VARTYPE_RARE :	vr++; break;
+		}
+
+		vrb.progress("  * VCF writing", (vt+1)*1.0/V.sizeFull());
 	}
 	free(genotypes);
 	bcf_destroy1(rec);
 	bcf_hdr_destroy(hdr);
 	if (hts_close(fp)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
 	switch (file_type) {
-	case OFILE_VCFU: vrb.bullet("VCF writing [Uncompressed / N=" + stb.str(G.n_target_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
-	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_target_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
-	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_target_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
+	case OFILE_VCFU: vrb.bullet("VCF writing [Uncompressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
+	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
+	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
 }

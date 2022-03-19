@@ -39,7 +39,10 @@ void genotype_reader::readGenotypes() {
 	//Sample processing // Needs to be improved to handle cases where sample lists do not properly overlap (in number and ordering)
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);
 
-	bcf1_t * line_phased, line_unphased;
+	for (int i = 0 ; i < n_samples ; i ++)
+		G.names.push_back(string(sr->readers[0].header->samples[i]));
+
+	bcf1_t * line_phased, * line_unphased;
 	int nset, vt = 0, vr = 0, vc = 0, vs = 0;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 	int ngt_unphased, *gt_arr_unphased = NULL, ngt_arr_unphased = 0;
@@ -48,10 +51,11 @@ void genotype_reader::readGenotypes() {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
-		if (line_main->n_allele != 2) continue;
+		if (line_phased && line_phased->n_allele != 2) continue;
+		if (line_unphased && line_phased->n_allele != 2) continue;
 
-		char vartype = V.vec_pos[vt]->type;
-		bool minor =  V.vec_pos[vt]->minor;
+		char vartype = V.vec_full[vt]->type;
+		bool minor =  V.vec_full[vt]->minor;
 
 		if (line_phased) {
 			assert(vartype == VARTYPE_SCAF);
@@ -59,9 +63,9 @@ void genotype_reader::readGenotypes() {
 			for(int i = 0 ; i < 2 * n_samples ; i += 2) {
 				bool a0 = (bcf_gt_allele(gt_arr_phased[i+0])==1);
 				bool a1 = (bcf_gt_allele(gt_arr_phased[i+1])==1);
-				assert (gt_arr_main[i+0] != bcf_gt_missing && gt_arr_main[i+1] != bcf_gt_missing);
-				H.HSvar.set(vs, i+0, a0);
-				H.HSvar.set(vs, i+1, a1);
+				assert (gt_arr_phased[i+0] != bcf_gt_missing && gt_arr_phased[i+1] != bcf_gt_missing);
+				H.Hvar.set(vs, i+0, a0);
+				H.Hvar.set(vs, i+1, a1);
 				n_scaffold_genotypes[a0 + a1] ++;
 			}
 		} else if (vartype == VARTYPE_COMM) {
@@ -110,7 +114,6 @@ void genotype_reader::readGenotypes() {
 	bcf_sr_destroy(sr);
 
 	// Report
-	string str5 = ;
 	vrb.bullet("VCF/BCF parsing ("+stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("  + Scaffold : R/R=" + stb.str(n_scaffold_genotypes[0]) + " R/A=" + stb.str(n_scaffold_genotypes[1]) + " A/A=" + stb.str(n_scaffold_genotypes[2]) + " ./.=" + stb.str(n_scaffold_genotypes[3]));
 	vrb.bullet("  + Common   : R/R=" + stb.str(n_common_genotypes[0]) + " R/A=" + stb.str(n_common_genotypes[1]) + " A/A=" + stb.str(n_common_genotypes[2]) + " ./.=" + stb.str(n_common_genotypes[3]));

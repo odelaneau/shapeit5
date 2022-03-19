@@ -23,24 +23,11 @@
 #define _HMM_SCAFFOLD_H
 
 #include <utils/otools.h>
-#include <objects/conditioning_set.h>
-#include <objects/genotype_set.h>
+#include <containers/conditioning_set/conditioning_set_header.h>
+#include <containers/genotype_set.h>
 #include <objects/hmm_parameters.h>
 
-#include <models/gibbs_sampler.h>
-
-class prob_state {
-public:
-	unsigned int idx;
-	float lprob;
-	float rprob;
-
-	prob_state(unsigned int _idx, float _lprob, float _rprob) {
-		idx = _idx;
-		lprob = _lprob;
-		rprob = _idrob;
-	}
-};
+#include <models/gibbs_sampler/gibbs_sampler_header.h>
 
 class hmm_scaffold {
 public:
@@ -65,30 +52,50 @@ public:
 	vector < unsigned long > sstates;
 	vector < float > alpha;
 	vector < float > beta;
-	vector < vector < prob_state > > cprobs;
 
 public:
 	//CONSTRUCTOR/DESTRUCTOR
-	hmm_scaffold(variant_map & V, genotype_set &, conditioning_set &, hmm_parameters &);
+	hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M);
 	~hmm_scaffold();
 
 	//
-	void prefetchAlleles();
+	void prefetchAlleles0(unsigned int vs);
+	void prefetchAlleles1(unsigned int vs);
 
 	void forward();
-	void backward(vector < cfloat > &);
+	void backward(float threshold, unsigned int niterations, unsigned int nburnin);
+
+	//
+	void forward_initTransitions(unsigned int h);
+	void forward_updateTransitions(unsigned int vs, unsigned int h);
+	void forward_updateEmission(unsigned int vs, unsigned int h);
+	void forward_normalize(unsigned int vs, unsigned int h);
+	void forward_reverseEmission(unsigned int vs, unsigned int h);
+	void forward_reverseTransitions(unsigned int vs, unsigned int h);
+	void backward_initTransitions(unsigned int h);
+	void backward_updateTransitions(unsigned int vs, unsigned int h);
+	void backward_updateEmission(unsigned int vs, unsigned int h);
+	void backward_normalize(unsigned int vs, unsigned int h);
+	void getAlphaBetaProduct(unsigned int h, vector < float > & alphaXbeta);
+
 };
 
 inline
 void hmm_scaffold::prefetchAlleles0(unsigned int vs) {
-	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA[h] = C.HSvar.get(vs, h);
+	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA0[h] = C.Hvar.get(vs, h);
 }
 
 inline
 void hmm_scaffold::prefetchAlleles1(unsigned int vs) {
-	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA1[h] = C.HSvar.get(vs, h);
+	for (int h = 0 ; h < C.n_haplotypes ; h ++) bufferA1[h] = C.Hvar.get(vs, h);
 }
 
 #endif
+
+
+
+
+
+
 
 

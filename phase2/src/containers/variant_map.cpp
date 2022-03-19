@@ -79,7 +79,7 @@ void variant_map::push(variant * v) {
 	if (v->type == VARTYPE_SCAF) {
 		v->idx_scaffold = vec_scaffold.size();
 		vec_scaffold.push_back(v);
-	} else if if (v->type == VARTYPE_COMM) {
+	} else if (v->type == VARTYPE_COMM) {
 		v->idx_common = vec_common.size();
 		vec_common.push_back(v);
 	} else {
