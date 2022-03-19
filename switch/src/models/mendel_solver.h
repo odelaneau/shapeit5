@@ -38,7 +38,7 @@ public:
 
 	//Routines
 	void solveT(int locus, int cidx, int fidx, int midx);
-	void solveD(int locus, int cidx, int pidx);
+	void solveD(int locus, int cidx, int pidx, bool father);
 	void solve();
 	void set();
 
