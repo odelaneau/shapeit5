@@ -12,8 +12,7 @@ haplotype_checker::~haplotype_checker() {
 
 void haplotype_checker::check() {
 	vrb.title("Check phasing discordances"); tac.clock();
-	//for (int i = 0 ; i < H.IDXesti.size() ; i++) {
-	for (int i = 1 ; i < 2 ; i++) {
+	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
 		for (int l_curr = 0, l_prev = -1 ; l_curr < H.n_variants ; l_curr ++) {
 			bool curr_t0 = H.Htrue[2*H.IDXesti[i]+0][l_curr];
 			bool curr_t1 = H.Htrue[2*H.IDXesti[i]+1][l_curr];
@@ -33,7 +32,6 @@ void haplotype_checker::check() {
 					Errors[i][l_curr] = ((curr_t0==prev_t0) != (curr_e0==prev_e0));
 					Checked[i][l_curr] = true;
 				}
-				cout << l_curr << " " << l_prev << " " << Errors[i][l_curr] << " / " << prev_t0 << curr_t0 << " " << prev_t1 << curr_t1 << " " << prev_e0 << curr_e0 << " " << prev_e1 << curr_e1 << endl;
 				l_prev = l_curr;
 
 			}
