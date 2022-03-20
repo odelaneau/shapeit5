@@ -25,8 +25,8 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set
 	//
 	nstates = vector < unsigned long > (C.n_haplotypes, 0);
 	sstates = vector < unsigned long > (C.n_haplotypes, 0);
-	for (int i = 0; i < G.n_samples ; i ++) nstates[i] = C.indexes_pbwt_neighbour[i].size();
-	for (int i = 1; i < G.n_samples ; i ++) sstates[i] = sstates[i-1] + C.indexes_pbwt_neighbour[i-1].size();
+	for (int h = 0; h < C.n_haplotypes ; h ++) nstates[h] = C.indexes_pbwt_neighbour[h].size();
+	for (int h = 1; h < C.n_haplotypes ; h ++) sstates[h] = sstates[h-1] + C.indexes_pbwt_neighbour[h-1].size();
 	unsigned int n_total_states = sstates.back() + nstates.back();
 
 	//
@@ -38,8 +38,8 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set
 	//
 	K = vector < unsigned int > (n_total_states);
 	for (unsigned int h = 0, k = 0 ; h < C.n_haplotypes ; h ++) {
-		copy(K.begin() + k, C.indexes_pbwt_neighbour[h/2].begin(), C.indexes_pbwt_neighbour[h/2].end());
-		k += C.indexes_pbwt_neighbour[h/2].size();
+		copy(C.indexes_pbwt_neighbour[h].begin(), C.indexes_pbwt_neighbour[h].end(), K.begin() + k);
+		k += C.indexes_pbwt_neighbour[h].size();
 	}
 
 	//
@@ -84,7 +84,7 @@ void hmm_scaffold::forward() {
 		}
 		vrb.progress("  * Processing", (vs+1)*1.0/C.n_scaffold_variants);
 	}
-	vrb.bullet("Timing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void hmm_scaffold::backward(float threshold, unsigned int niterations, unsigned int nburnin) {
@@ -150,7 +150,7 @@ void hmm_scaffold::backward(float threshold, unsigned int niterations, unsigned 
 				getAlphaBetaProduct(h, alphaXbeta_curr);
 
 				//Compress and store alphaXbeta products at l and l + 1
-				MCMC.loadStateSpace(h, C.indexes_pbwt_neighbour[h/2], alphaXbeta_curr, alphaXbeta_prev, threshold);
+				MCMC.loadStateSpace(h, C.indexes_pbwt_neighbour[h], alphaXbeta_curr, alphaXbeta_prev, threshold);
 			} else idx ++;
 		}
 

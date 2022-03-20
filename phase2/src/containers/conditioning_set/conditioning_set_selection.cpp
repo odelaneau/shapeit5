@@ -24,13 +24,12 @@
 
 void conditioning_set::select() {
 	tac.clock();
-	vrb.progress("  * PBWT selection", 0.0f);
 
 	vector < int > A = vector < int > (n_haplotypes, 0);
 	vector < int > B = vector < int > (n_haplotypes, 0);
 	vector < int > C = vector < int > (n_haplotypes, 0);
 	vector < int > D = vector < int > (n_haplotypes, 0);
-	vector < int > M = vector < int > (n_haplotypes, -1);
+	vector < int > M = vector < int > (depth * n_haplotypes, -1);
 	iota(A.begin(), A.end(), 0);
 	fill(C.begin(), C.end(), 0);
 
@@ -43,9 +42,6 @@ void conditioning_set::select() {
 			sites_pbwt_selection[candidates[g][rng.getInt(candidates[g].size())]] = true;
 		}
 	}
-
-	//Clean up previous selected states
-	indexes_pbwt_neighbour = vector < vector < unsigned int > > (n_samples);
 
 	//PBWT sweep
 	for (int l = 0 ; l < n_scaffold_variants ; l ++) {
@@ -75,14 +71,21 @@ void conditioning_set::select() {
 			if (selc) store(l, A, C, M);
 		}
 
-		vrb.progress("  * PBWT section", l * 1.0 / n_scaffold_variants);
+		vrb.progress("  * PBWT selection", l * 1.0 / n_scaffold_variants);
 	}
-	vrb.bullet("PBWT selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	//Summary
+	basic_stats statK;
+	for (int h = 0 ; h < n_haplotypes ; h ++)
+		statK.push(indexes_pbwt_neighbour[h].size());
+
+
+	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void conditioning_set::store(int l, vector < int > & A, vector < int > & C, vector < int > & M) {
 	for (int h = 0 ; h < n_haplotypes ; h ++) {
-		int chap = A[h], cind = chap / 2, add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1, div_guess0 = -1, div_guess1 = -1;
+		int chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1, div_guess0 = -1, div_guess1 = -1;
 		for (int n_added = 0 ; n_added < depth ; ) {
 			if ((h-offset0)>=0) {
 				hap_guess0 = A[h-offset0];
@@ -97,26 +100,26 @@ void conditioning_set::store(int l, vector < int > & A, vector < int > & C, vect
 			if (add_guess0 && add_guess1) {
 				if (div_guess0 < div_guess1) {
 					if (hap_guess0 != M[chap * depth + n_added]) {
-						indexes_pbwt_neighbour[cind].push_back(hap_guess0);
+						indexes_pbwt_neighbour[chap].push_back(hap_guess0);
 						M[chap * depth + n_added] = hap_guess0;
 					}
 					offset0++; n_added++;
 				} else {
 					if (hap_guess1 != M[chap * depth + n_added]) {
-						indexes_pbwt_neighbour[cind].push_back(hap_guess1);
+						indexes_pbwt_neighbour[chap].push_back(hap_guess1);
 						M[chap * depth + n_added] = hap_guess1;
 					}
 					offset1++; n_added++;
 				}
 			} else if (add_guess0) {
 				if (hap_guess0 != M[chap * depth + n_added]) {
-					indexes_pbwt_neighbour[cind].push_back(hap_guess0);
+					indexes_pbwt_neighbour[chap].push_back(hap_guess0);
 					M[chap * depth + n_added] = hap_guess0;
 				}
 				offset0++; n_added++;
 			} else if (add_guess1) {
 				if (hap_guess1 != M[chap * depth + n_added]) {
-					indexes_pbwt_neighbour[cind].push_back(hap_guess1);
+					indexes_pbwt_neighbour[chap].push_back(hap_guess1);
 					M[chap * depth + n_added] = hap_guess1;
 				}
 				offset1++; n_added++;

@@ -41,14 +41,16 @@ void genotype_reader::scanGenotypes() {
 	int n_samples2 = bcf_hdr_nsamples(sr->readers[1].header);
 	assert(n_samples == n_samples2);
 
-	bcf1_t * line_phased, * line_unphased;
+	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, rAC=0, nAC=0, *vAC=NULL, rAN=0, nAN=0, *vAN=NULL;
 	while (nset = bcf_sr_next_line (sr)) {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
+		assert(line_unphased);
+
 		if (line_phased && line_phased->n_allele != 2) continue;
-		if (line_unphased && line_phased->n_allele != 2) continue;
+		if (line_unphased && line_unphased->n_allele != 2) continue;
 
 		if (line_phased) {
 			bcf_unpack(line_phased, BCF_UN_STR);
@@ -74,12 +76,12 @@ void genotype_reader::scanGenotypes() {
 			n_rare_variants += (maf<minmaf);
 			n_common_variants += (maf>=minmaf);
 		}
-
 		n_total_variants ++;
+		vrb.progress("  * VCF/BCF scanning", (n_total_variants) * 1.0 / n_total_variants);
 	}
 
 	bcf_sr_destroy(sr);
 	if ((n_rare_variants + n_common_variants) == 0) vrb.error("No variants to be phased!");
-	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("VCF/BCF scanning (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 

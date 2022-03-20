@@ -87,6 +87,7 @@ void hmm_scaffold::backward_normalize(unsigned int vs, unsigned int h) {
 void hmm_scaffold::getAlphaBetaProduct(unsigned int h, vector < float > & alphaXbeta) {
 	float scale = 0.0f;
 	for (int k = 0 ; k < nstates[h] ; k ++) {
+		//cout << h << " " << k << " " << alpha[sstates[h]+k] << " " << beta[sstates[h]+k] << endl;
 		alphaXbeta[k] = alpha[sstates[h]+k] * beta[sstates[h]+k];
 		scale += alphaXbeta[k];
 	}
