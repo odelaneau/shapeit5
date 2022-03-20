@@ -51,10 +51,14 @@ void phaser::read_files_and_initialise() {
 	} else V.setGeneticMap();
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
 
-	//step4: Initialize haplotype set
-	vrb.title("Initializing data structures:");
+	//step4: Initialize conditioning set
+	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
-					options["pbwt-window"].as < double > (),
+					options["pbwt-mdr"].as < double > (),
 					options["pbwt-depth"].as < int > (),
 					options["pbwt-mac"].as < int > ());
+
+
+
+
 }

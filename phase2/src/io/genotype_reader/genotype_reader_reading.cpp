@@ -42,7 +42,7 @@ void genotype_reader::readGenotypes() {
 	for (int i = 0 ; i < n_samples ; i ++)
 		G.names.push_back(string(sr->readers[0].header->samples[i]));
 
-	bcf1_t * line_phased, * line_unphased;
+	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, vt = 0, vr = 0, vc = 0, vs = 0;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 	int ngt_unphased, *gt_arr_unphased = NULL, ngt_arr_unphased = 0;
@@ -52,7 +52,7 @@ void genotype_reader::readGenotypes() {
 		line_phased =  bcf_sr_get_line(sr, 1);
 
 		if (line_phased && line_phased->n_allele != 2) continue;
-		if (line_unphased && line_phased->n_allele != 2) continue;
+		if (line_unphased && line_unphased->n_allele != 2) continue;
 
 		char vartype = V.vec_full[vt]->type;
 		bool minor =  V.vec_full[vt]->minor;
@@ -64,6 +64,8 @@ void genotype_reader::readGenotypes() {
 				bool a0 = (bcf_gt_allele(gt_arr_phased[i+0])==1);
 				bool a1 = (bcf_gt_allele(gt_arr_phased[i+1])==1);
 				assert (gt_arr_phased[i+0] != bcf_gt_missing && gt_arr_phased[i+1] != bcf_gt_missing);
+				V.vec_full[vt]->cref += 2-(a0+a1);
+				V.vec_full[vt]->calt += a0+a1;
 				H.Hvar.set(vs, i+0, a0);
 				H.Hvar.set(vs, i+1, a1);
 				n_scaffold_genotypes[a0 + a1] ++;
@@ -75,10 +77,13 @@ void genotype_reader::readGenotypes() {
 				bool a1 = (bcf_gt_allele(gt_arr_unphased[i+1])==1);
 				bool mi = (gt_arr_unphased[i+0] == bcf_gt_missing || gt_arr_unphased[i+1] == bcf_gt_missing);
 				if (mi) {
-					G.setCommonMissing(vc, i);
+					G.setCommonMissing(vc, i/2);
+					V.vec_full[vt]->cmis ++;
 					n_common_genotypes[3] ++;
 				} else {
-					G.setCommonGenotype(vc, i, a0+a1);
+					G.setCommonGenotype(vc, i/2, a0+a1);
+					V.vec_full[vt]->cref += 2-(a0+a1);
+					V.vec_full[vt]->calt += a0+a1;
 					n_common_genotypes[a0+a1] ++;
 				}
 			}
@@ -88,14 +93,19 @@ void genotype_reader::readGenotypes() {
 				bool a0 = (bcf_gt_allele(gt_arr_unphased[i+0])==1);
 				bool a1 = (bcf_gt_allele(gt_arr_unphased[i+1])==1);
 				bool mi = (gt_arr_unphased[i+0] == bcf_gt_missing || gt_arr_unphased[i+1] == bcf_gt_missing);
+				if (mi) V.vec_full[vt]->cmis ++;
+				else {
+					V.vec_full[vt]->cref += 2-(a0+a1);
+					V.vec_full[vt]->calt += a0+a1;
+				}
 				if (mi) {
-					G.pushRareMissing(vr, i);
+					G.pushRareMissing(vr, i/2);
 					n_rare_genotypes[3] ++;
 				} else if ((a0+a1) == 1) {
-					G.pushRareHet(vr, i);
+					G.pushRareHet(vr, i/2);
 					n_rare_genotypes[1] ++;
 				} else if (a0 == minor) {
-					G.pushRareHom(vr, i);
+					G.pushRareHom(vr, i/2);
 					n_rare_genotypes[a0*2] ++;
 				} else n_rare_genotypes[a0*2] ++;
 			}
@@ -105,7 +115,6 @@ void genotype_reader::readGenotypes() {
 		case VARTYPE_SCAF :	vs ++; vt ++; break;
 		case VARTYPE_COMM :	vc ++; vt ++; break;
 		case VARTYPE_RARE :	vr ++; vt ++; break;
-		default: vrb.error("Unrecognized variant type!");
 		}
 		vrb.progress("  * VCF/BCF parsing", vt * 1.0 / n_total_variants);
 	}

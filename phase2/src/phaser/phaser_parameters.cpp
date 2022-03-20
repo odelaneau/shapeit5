@@ -29,14 +29,14 @@ void phaser::declare_options() {
 	opt_base.add_options()
 			("help", "Produce help message")
 			("seed", bpo::value<int>()->default_value(15052011), "Seed of the random number generator")
-			("thread,T", bpo::value<int>()->default_value(1), "Number of thread used");
+			("thread", bpo::value<int>()->default_value(1), "Number of thread used");
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
-			("input,I", bpo::value< string >(), "Genotypes to be phased in VCF/BCF format")
-			("scaffold,S", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
-			("map,M", bpo::value< string >(), "Genetic map")
-			("region,R", bpo::value< string >(), "Target region")
+			("input", bpo::value< string >(), "Genotypes to be phased in VCF/BCF format")
+			("region", bpo::value< string >(), "Region ")
+			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
+			("map", bpo::value< string >(), "Genetic map")
 			("maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation");
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
@@ -48,7 +48,8 @@ void phaser::declare_options() {
 	opt_pbwt.add_options()
 			("pbwt-modulo", bpo::value< double >()->default_value(0.01), "Storage frequency of PBWT indexes in cM")
 			("pbwt-depth", bpo::value< int >()->default_value(8), "Depth of PBWT indexes to condition on")
-			("pbwt-mac", bpo::value< int >()->default_value(2), "Minimal Minor Allele Count at which PBWT is evaluated");
+			("pbwt-mac", bpo::value< int >()->default_value(2), "Minimal Minor Allele Count at which PBWT is evaluated")
+			("pbwt-mdr", bpo::value < double >()->default_value(0.10), "Maximal Missing Data Rate at which PBWT is evaluated");
 	
 	bpo::options_description opt_hmm ("HMM parameters");
 	opt_hmm.add_options()
@@ -122,7 +123,7 @@ void phaser::verbose_options() {
 
 	vrb.bullet("MCMC    : #iterations=" + stb.str(options["mcmc-iterations"].as < int > ()) + " / #burn-in=" + stb.str(options["mcmc-burnin"].as < int > ()));
 
-	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + "]");
+	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
 
 	if (options.count("map"))  vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
