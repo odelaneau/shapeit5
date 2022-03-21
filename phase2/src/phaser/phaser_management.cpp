@@ -25,6 +25,7 @@ phaser::phaser() {
 }
 
 phaser::~phaser() {
+	id_workers.clear();
 }
 
 void phaser::phase(vector < string > & args) {

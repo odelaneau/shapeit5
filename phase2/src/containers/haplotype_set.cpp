@@ -43,6 +43,19 @@ void haplotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_v
 	n_samples = _n_samples;
 
 	Hvar.allocate(n_scaffold_variants, n_haplotypes);
+	Hhap.allocate(n_haplotypes, n_scaffold_variants);
 
 	vrb.bullet("HAP allocation [#scaffold=" + stb.str(n_scaffold_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
+
+void haplotype_set::transposeHaplotypes_H2V() {
+	tac.clock();
+	Hhap.transpose(Hvar, n_haplotypes, n_scaffold_variants);
+	vrb.bullet("H2V transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
+
+void haplotype_set::transposeHaplotypes_V2H() {
+	tac.clock();
+	Hvar.transpose(Hhap, n_scaffold_variants, n_haplotypes);
+	vrb.bullet("V2H transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

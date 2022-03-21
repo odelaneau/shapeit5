@@ -99,13 +99,13 @@ void genotype_reader::readGenotypes() {
 					V.vec_full[vt]->calt += a0+a1;
 				}
 				if (mi) {
-					G.pushRareMissing(vr, i/2);
+					G.pushRareMissing(vr, i/2, !minor);
 					n_rare_genotypes[3] ++;
 				} else if ((a0+a1) == 1) {
 					G.pushRareHet(vr, i/2);
 					n_rare_genotypes[1] ++;
 				} else if (a0 == minor) {
-					G.pushRareHom(vr, i/2);
+					G.pushRareHom(vr, i/2, !minor);
 					n_rare_genotypes[a0*2] ++;
 				} else n_rare_genotypes[a0*2] ++;
 			}

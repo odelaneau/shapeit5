@@ -23,12 +23,39 @@
 #define _GENOTYPE_SET_H
 
 #include <utils/otools.h>
+
 #include <containers/bitmatrix.h>
+#include <containers/variant_map.h>
+
+
+class rare_genotype {
+public:
+	unsigned int idx : 28;
+	unsigned int het : 1;
+	unsigned int mis : 1;
+	unsigned int al0 : 1;
+	unsigned int al1 : 1;
+
+	rare_genotype() { idx = het = mis = al0 = al1 = 0; }
+
+	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
+		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
+	}
+
+	~rare_genotype() {
+		idx = het = mis = al0 = al1 = 0;
+	}
+
+	bool operator < (const rare_genotype & rg) const {
+		return idx < rg.idx;
+	}
+};
 
 class genotype_set {
 public:
 
 	//Counts
+	unsigned int n_scaffold_variants;				//#variants rare to be phased
 	unsigned int n_rare_variants;				//#variants rare to be phased
 	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
 	unsigned int n_samples;						//#samples
@@ -36,71 +63,73 @@ public:
 	//Sample IDs
 	vector < string > names;
 
+	//Mapping on scaffold
+	vector < int > MAPC_vs_left;
+	vector < int > MAPC_vs_right;
+	vector < int > MAPR_vs_left;
+	vector < int > MAPR_vs_right;
+
 	//Genotypes at common unphased variants
-	vector < vector < bool > > GCalleles;	//Alleles
-	vector < vector < bool > > GCmissing;	//Missing?
+	bitmatrix GCvar_alleles;
+	bitmatrix GCind_alleles;
+	bitmatrix GCvar_missing;
+	bitmatrix GCind_missing;
 
 	//Genotypes at rare unphased variants
-	vector < vector < unsigned int > > GRindexes;	//Indexes of [ Maj/Min + Min/Min + ./.]
-	vector < vector < bool > > GRhets;				//Maj/Min OR Min/Min?
-	vector < vector < bool > > GRmissing;			//./.?
-	vector < vector < bool > > GRalleles;			//
+	vector < vector < rare_genotype > > GRvar_genotypes;
+	vector < vector < rare_genotype > > GRind_genotypes;
 
 	//
 	genotype_set();
 	~genotype_set();
 	void clear();
-	void allocate(unsigned int, unsigned int , unsigned int);
+	void allocate(variant_map &, unsigned int, unsigned int , unsigned int, unsigned int);
+	void transpose();
+	void mapUnphasedOntoScaffold(int ind, vector < bool > & map);
 
 	//
 	void setCommonMissing(unsigned int vc, unsigned int i);
 	void setCommonGenotype(unsigned int vc, unsigned int i, unsigned int g);
-	void pushRareMissing(unsigned int vr, unsigned int i);
+	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
 	void pushRareHet(unsigned int vr, unsigned int i);
-	void pushRareHom(unsigned int vr, unsigned int i);
-
-	//
-	void getUnphasedIndexes(vector < unsigned int > &, vector < unsigned int > &, vector < unsigned int > &);
+	void pushRareHom(unsigned int vr, unsigned int i, bool major);
 };
 
 inline
 void genotype_set::setCommonMissing(unsigned int vc, unsigned int i) {
-	GCmissing[vc][i] = true;
+	GCvar_missing.set(vc, i, true);
+	GCvar_alleles.set(vc, 2*i+0, false);
+	GCvar_alleles.set(vc, 2*i+1, false);
 }
 
 inline
 void genotype_set::setCommonGenotype(unsigned int vc, unsigned int i, unsigned int g) {
-	if (g == 2) {
-		GCalleles[vc][2*i+0] = true;
-		GCalleles[vc][2*i+1] = true;
-	} else if (g == 1) GCalleles[vc][2*i+1] = true;
+	GCvar_missing.set(vc, i, false);
+	if (g == 0) {
+		GCvar_alleles.set(vc, 2*i+0, false);
+		GCvar_alleles.set(vc, 2*i+1, false);
+	} else if (g == 2) {
+		GCvar_alleles.set(vc, 2*i+0, true);
+		GCvar_alleles.set(vc, 2*i+1, true);
+	} else {
+		GCvar_alleles.set(vc, 2*i+0, false);
+		GCvar_alleles.set(vc, 2*i+1, true);
+	}
 }
 
 inline
-void genotype_set::pushRareMissing(unsigned int vr, unsigned int i) {
-	GRindexes[vr].push_back(i);
-	GRhets[vr].push_back(false);
-	GRmissing[vr].push_back(true);
-	GRalleles[vr].push_back(false);
-	GRalleles[vr].push_back(false);
+void genotype_set::pushRareMissing(unsigned int vr, unsigned int i, bool major) {
+	GRvar_genotypes[vr].emplace_back(i, 0, 1, major, major);
 }
 
 inline
 void genotype_set::pushRareHet(unsigned int vr, unsigned int i) {
-	GRindexes[vr].push_back(i);
-	GRhets[vr].push_back(true);
-	GRmissing[vr].push_back(false);
-	GRalleles[vr].push_back(false);
-	GRalleles[vr].push_back(false);
+	GRvar_genotypes[vr].emplace_back(i, 1, 0, 0, 1);
 }
 
 inline
-void genotype_set::pushRareHom(unsigned int vr, unsigned int i) {
-	GRindexes[vr].push_back(i);
-	GRhets[vr].push_back(false);
-	GRmissing[vr].push_back(false);
-	GRalleles[vr].push_back(false);
-	GRalleles[vr].push_back(false);
+void genotype_set::pushRareHom(unsigned int vr, unsigned int i, bool major) {
+	GRvar_genotypes[vr].emplace_back(i, 0, 0, !major, !major);
 }
 
 #endif

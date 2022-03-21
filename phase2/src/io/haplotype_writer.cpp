@@ -78,18 +78,18 @@ void haplotype_writer::writeHaplotypes(string fname) {
 				genotypes[2*i+1] = bcf_gt_phased(major_allele);
 				count_alt += 2 * major_allele;
 			}
-			for (int i = 0 ; i < G.GRindexes[vr].size() ; i++) {
-				bool a0 = G.GRalleles[vr][2*i+0];
-				bool a1 = G.GRalleles[vr][2*i+1];
-				genotypes[2*G.GRindexes[vr][i]+0] = bcf_gt_phased(a0);
-				genotypes[2*G.GRindexes[vr][i]+1] = bcf_gt_phased(a1);
+			for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+				bool a0 = G.GRvar_genotypes[vr][i].al0;
+				bool a1 = G.GRvar_genotypes[vr][i].al1;
+				genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
+				genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
 				count_alt -= 2 * major_allele;
 				count_alt += a0+a1;
 			}
 		} else if (V.vec_full[vt]->type == VARTYPE_COMM) {
 			for (int i = 0 ; i < G.n_samples ; i++) {
-				bool a0 = G.GCalleles[vc][2*i+0];
-				bool a1 = G.GCalleles[vc][2*i+1];
+				bool a0 = G.GCvar_alleles.get(vc, 2*i+0);
+				bool a1 = G.GCvar_alleles.get(vc, 2*i+1);
 				genotypes[2*i+0] = bcf_gt_phased(a0);
 				genotypes[2*i+1] = bcf_gt_phased(a1);
 				count_alt += a0+a1;
