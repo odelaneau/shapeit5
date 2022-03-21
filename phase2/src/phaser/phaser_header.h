@@ -46,10 +46,9 @@ public:
 	compressed_set P;
 
 	//MULTI-THREADING
-	int i_jobs;
+	int i_jobs, nthreads;
 	vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
-
 	basic_stats Kstored;
 
 	//CONSTRUCTOR

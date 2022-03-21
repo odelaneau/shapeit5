@@ -49,6 +49,16 @@ olivier: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 olivier: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 olivier: $(BFILE)
 
+debug: CXXFLAG=-g
+debug: LDFLAG=-g
+debug: HTSSRC=$(HOME)/Tools
+debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
+debug: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
+debug: BOOST_INC=/usr/include
+debug: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+debug: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+debug: $(BFILE)
+
 curnagl: DYN_LIBS=-lz -lpthread -lcrypto /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/xz-5.2.5-3zvzfm67t6ebuerybemshylrysbphghz/lib/liblzma.so /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/bzip2-1.0.8-tsmb67uwhlqn5g6h6etjvftugq7y6mtl/lib/libbz2.so /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/curl-7.74.0-fcqjhj645xhqp2ilrzafwqtqqnu7g42v/lib/libcurl.so
 curnagl: HTSSRC=/dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/htslib-1.12-p4n5q4icj4g5e4of7mxq2i5xly4v4tax
 curnagl: HTSLIB_INC=$(HTSSRC)/include

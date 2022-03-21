@@ -61,12 +61,12 @@ void hmm_scaffold::forward() {
 	}
 }
 
-void hmm_scaffold::backward(vector < bool > & cevents, vector < cprob > & cstates, vector < unsigned int > & cindexes, float threshold) {
+unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs > & cstates, float threshold) {
+	unsigned int n_total_states = 0;
 	float sum = 0.0f, scale = 0.0f;
 	vector < float > alphaXbeta_curr = vector < float >(nstates, 0.0f);
 	vector < float > alphaXbeta_prev = vector < float >(nstates, 0.0f);
 
-	cindexes.clear();
 	cstates.clear();
 	fill (beta.begin(), beta.end(), 1.0f / nstates);
 
@@ -86,7 +86,10 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cprob > & cstate
 			scale += alphaXbeta_curr[k];
 		}
 		scale = 1.0f / scale;
-		for (int k = 0 ; k < nstates ; k ++) alphaXbeta_curr[k] *= scale;
+		for (int k = 0 ; k < nstates ; k ++) {
+			alphaXbeta_curr[k] *= scale;
+			//cout << hap << " " << vs << " " << k << " " << alphaXbeta_curr[k] << endl;
+		}
 
 		//Emission
 		sum = 0.0f;
@@ -97,11 +100,13 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cprob > & cstate
 
 		//Storage
 		if (cevents[vs+1]) {
-			cindexes.push_back(cstates.size());
+			cstates.emplace_back(hap, vs + 1);
 			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
-			for (int k = 0 ; k < nstates ; k ++)
+			for (int k = 0 ; k < nstates ; k ++) {
 				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold)
-					cstates.emplace_back(cprob((unsigned int)k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_prev[k] * 256)));
+					cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_prev[k] * 256));
+			}
+			n_total_states += cstates.back().size();
 		}
 
 		//Saving products
@@ -109,9 +114,12 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cprob > & cstate
 	}
 
 	if (cevents[0]) {
-		cindexes.push_back(cstates.size());
+		cstates.emplace_back(hap, 0);
 		for (int k = 0 ; k < nstates ; k ++)
 			if (alphaXbeta_curr[k] >= threshold)
-				cstates.emplace_back(cprob((unsigned int)k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_curr[k] * 256)));
+				cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_curr[k] * 256));
+		n_total_states += cstates.back().size();
 	}
+
+	return n_total_states;
 }

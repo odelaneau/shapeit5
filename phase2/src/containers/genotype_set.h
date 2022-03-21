@@ -64,10 +64,10 @@ public:
 	vector < string > names;
 
 	//Mapping on scaffold
-	vector < int > MAPC_vs_left;
-	vector < int > MAPC_vs_right;
-	vector < int > MAPR_vs_left;
-	vector < int > MAPR_vs_right;
+	vector < unsigned int > MAPC_vs_left;
+	vector < unsigned int > MAPC_vs_right;
+	vector < unsigned int > MAPR_vs_left;
+	vector < unsigned int > MAPR_vs_right;
 
 	//Genotypes at common unphased variants
 	bitmatrix GCvar_alleles;
