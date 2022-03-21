@@ -30,14 +30,22 @@ compressed_set::~compressed_set() {
 }
 
 void compressed_set::clear() {
-	Phap_states.clear();
-	Phap_indexes.clear();
+	Pstates.clear();
 }
 
-void compressed_set::allocate(unsigned int _n_haplotypes) {
+void compressed_set::transpose() {
 	tac.clock();
-	n_haplotypes = _n_haplotypes;
-	Phap_states = vector < vector < cprob > > (n_haplotypes);
-	Phap_indexes = vector < vector < unsigned int > > (n_haplotypes);
-	vrb.bullet("Compressed set allocation [#haplotypes=" + stb.str(n_haplotypes) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) swap(Pstates[e].idx0, Pstates[e].idx1);
+	sort(Pstates.begin(), Pstates.end());
+	vrb.bullet("Transpose compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
+
+
+unsigned long int compressed_set::sizeBytes() {
+	unsigned long int nbytes = 0;
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
+		nbytes += 20;		//2 x unsigned int
+		nbytes += Pstates[e].probs.size() * 4;
+	}
+	return nbytes;
 }

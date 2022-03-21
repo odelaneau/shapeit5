@@ -59,7 +59,7 @@ public:
 	~hmm_scaffold();
 
 	void forward();
-	void backward(vector < bool > & cevents, vector < cprob > & cstates, vector < unsigned int > & cindexes, float threshold);
+	unsigned int backward(vector < bool > & cevents, vector < cprobs > & cstates, float threshold);
 };
 
 #endif

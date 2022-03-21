@@ -28,7 +28,8 @@
 void phaser::read_files_and_initialise() {
 	//step0: Initialize seed
 	rng.setSeed(options["seed"].as < int > ());
-	if (options["thread"].as < int > () > 1) {
+	nthreads = options["thread"].as < int > ();
+	if (nthreads > 1) {
 		i_jobs = 0;
 		id_workers = vector < pthread_t > (options["thread"].as < int > ());
 		pthread_mutex_init(&mutex_workers, NULL);
@@ -56,6 +57,8 @@ void phaser::read_files_and_initialise() {
 	} else V.setGeneticMap();
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
 	H.transposeHaplotypes_V2H();
+	G.transpose();
+
 
 	//step4: Initialize conditioning set
 	vrb.title("PBWT pass");
@@ -63,7 +66,4 @@ void phaser::read_files_and_initialise() {
 					options["pbwt-mdr"].as < double > (),
 					options["pbwt-depth"].as < int > (),
 					options["pbwt-mac"].as < int > ());
-
-	//step5:
-	P.allocate(H.n_haplotypes);
 }

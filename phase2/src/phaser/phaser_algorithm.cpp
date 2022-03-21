@@ -39,24 +39,26 @@ void * hmmcompute_callback(void * ptr) {
 
 void phaser::hmmcompute(int id_job) {
 	vector < bool > cevents;
+	vector < cprobs > cstates0, cstates1;
 	hmm_scaffold HMM0(2*id_job+0, V, G, H, M);
 	hmm_scaffold HMM1(2*id_job+1, V, G, H, M);
 	HMM0.forward();
 	HMM1.forward();
 	G.mapUnphasedOntoScaffold(id_job, cevents);
-	HMM0.backward(cevents, P.Phap_states[2*id_job+0], P.Phap_indexes[2*id_job+0], options["compress-threshold"].as < double > ());
-	HMM1.backward(cevents, P.Phap_states[2*id_job+1], P.Phap_indexes[2*id_job+1], options["compress-threshold"].as < double > ());
+	unsigned int nstates0 = HMM0.backward(cevents, cstates0, options["compress-threshold"].as < double > ());
+	unsigned int nstates1 = HMM1.backward(cevents, cstates1, options["compress-threshold"].as < double > ());
 
-	pthread_mutex_lock(&mutex_workers);
-	Kstored.push(P.Phap_states[2*id_job+0].size());
-	Kstored.push(P.Phap_states[2*id_job+1].size());
-	pthread_mutex_unlock(&mutex_workers);
+	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
+	Kstored.push(nstates0);
+	Kstored.push(nstates1);
+	for (int e0 = 0 ; e0 < cstates0.size() ; e0 ++) P.Pstates.push_back(cstates0[e0]);
+	for (int e1 = 0 ; e1 < cstates1.size() ; e1 ++) P.Pstates.push_back(cstates1[e1]);
+	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
 }
 
 
 void phaser::phase() {
 	tac.clock();
-	int n_threads = options["thread"].as < int > ();
 	i_jobs = 0;
 
 	//STEP1: haplotype selection
@@ -64,16 +66,20 @@ void phaser::phase() {
 
 	//STEP2: HMM computations
 	vrb.title("HMM computations");
-	if (n_threads > 1) {
-		for (int t = 0 ; t < n_threads ; t++) pthread_create( &id_workers[t] , NULL, hmmcompute_callback, static_cast<void *>(this));
-		for (int t = 0 ; t < n_threads ; t++) pthread_join( id_workers[t] , NULL);
+	if (nthreads > 1) {
+		for (int t = 0 ; t < nthreads ; t++) pthread_create( &id_workers[t] , NULL, hmmcompute_callback, static_cast<void *>(this));
+		for (int t = 0 ; t < nthreads ; t++) pthread_join( id_workers[t] , NULL);
 	} else for (int i = 0 ; i < G.n_samples ; i ++) {
 		hmmcompute(i);
 		vrb.progress("  * Processing", (i+1)*1.0/G.n_samples);
 	}
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("#storage_per_sample=" + stb.str(Kstored.mean(), 2));
+	vrb.bullet("#storage_per_sample = " + stb.str(Kstored.mean(), 2) + " +/- " + stb.str(Kstored.sd(), 2));
 
-	//STEP3: MCMC computations
+	//STEP3: Big transpose
+	vrb.bullet("Size of compressed probabilities = " + stb.str(P.sizeBytes() * 1.0f / 1e9, 4) + " Gb");
+	P.transpose();
+
+	//STEP4: MCMC computations
 	//... TO DO ...
 }

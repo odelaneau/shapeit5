@@ -24,31 +24,58 @@
 
 #include <utils/otools.h>
 
-struct cprob {
+struct prob {
 	unsigned int kst : 16;
 	unsigned int lpb : 8;
 	unsigned int rpb : 8;
 
-	cprob(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
+	prob(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
 		kst = _kst;
 		lpb = _lpb;
 		rpb = _rpb;
 	}
 };
 
+class cprobs {
+public:
+	int idx0;
+	int idx1;
+	vector < prob > probs;
+
+	cprobs(int _idx0, int _idx1) {
+		idx0 = _idx0;
+		idx1 = _idx1;
+	}
+
+	~cprobs() {
+		idx0 = -1; idx1 = -1;
+		probs.clear();
+	}
+
+	void push(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
+		probs.emplace_back(_kst, _lpb, _rpb);
+	}
+
+	unsigned int size() {
+		return probs.size();
+	}
+
+	bool operator < (const cprobs & cp) const {
+		return ((idx0<cp.idx0) || ((idx0==cp.idx0)&&(idx1<cp.idx1)));
+	}
+};
+
 class compressed_set {
 public:
-
-	unsigned int n_haplotypes;					//#samples
-
-	vector < vector < cprob > > Phap_states;
-	vector < vector < unsigned int > > Phap_indexes;
+	vector < cprobs > Pstates;
 
 	//
 	compressed_set();
 	~compressed_set();
 	void clear();
-	void allocate(unsigned int );
+	void transpose();
+
+	unsigned long int sizeBytes();
 };
 
 #endif
