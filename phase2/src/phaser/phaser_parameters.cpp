@@ -41,8 +41,8 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
-			("mcmc-iterations", bpo::value< int >()->default_value(40), "Number of MCMC iterations")
-			("mcmc-burnin", bpo::value< int >()->default_value(20), "Number of MCMC burn-in iterations");
+			("mcmc-iterations", bpo::value< int >()->default_value(10), "Number of MCMC iterations")
+			("mcmc-burnin", bpo::value< int >()->default_value(5), "Number of MCMC burn-in iterations");
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()

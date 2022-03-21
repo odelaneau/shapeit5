@@ -26,6 +26,9 @@
 void phaser::write_files_and_finalise() {
 	vrb.title("Finalization:");
 
+	//step0: multi-threading
+	if (options["thread"].as < int > () > 1) pthread_mutex_destroy(&mutex_workers);
+
 	//step1: writing best guess haplotypes in VCF/BCF file
 	haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < string > ());
 

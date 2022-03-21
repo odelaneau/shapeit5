@@ -33,47 +33,104 @@ void genotype_set::clear() {
 	n_rare_variants = 0.0;
 	n_common_variants = 0.0;
 	n_samples = 0.0;
-	GCalleles.clear();
-	GCmissing.clear();
-	GRindexes.clear();
-	GRhets.clear();
-	GRmissing.clear();
+	names.clear();
+	GRvar_genotypes.clear();
+	GRind_genotypes.clear();
 }
 
-void genotype_set::allocate(unsigned int _n_samples, unsigned int _n_rare_variants, unsigned int _n_common_variants) {
+//Mapping on scaffold
+vector < int > MAPC_vs_left;
+vector < int > MAPC_vs_right;
+vector < int > MAPR_vs_left;
+vector < int > MAPR_vs_right;
+
+
+void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants) {
 	tac.clock();
 
+	n_scaffold_variants = _n_scaffold_variants;
 	n_rare_variants = _n_rare_variants;
 	n_common_variants = _n_common_variants;
 	n_samples = _n_samples;
 
 	if (n_common_variants > 0) {
-		GCalleles = vector < vector < bool > > (n_common_variants, vector < bool > (2 * n_samples, false));
-		GCmissing = vector < vector < bool > > (n_common_variants, vector < bool > (n_samples, false));
+		GCvar_alleles.allocate(n_common_variants, 2 * n_samples);
+		GCind_alleles.allocate(2 * n_samples, n_common_variants);
+		GCvar_missing.allocate(n_common_variants, n_samples);
+		GCind_missing.allocate(n_samples, n_common_variants);
+		MAPC_vs_left = vector < int > (n_common_variants, -1);
+		MAPC_vs_right = vector < int > (n_common_variants, -1);
 	}
 
 	if (n_rare_variants > 0) {
-		GRindexes = vector < vector < unsigned int > > (n_rare_variants);
-		GRhets = vector < vector < bool > > (n_rare_variants);
-		GRmissing = vector < vector < bool > > (n_rare_variants);
-		GRalleles = vector < vector < bool > > (n_rare_variants);
+		GRvar_genotypes = vector < vector < rare_genotype > > (n_rare_variants);
+		GRind_genotypes = vector < vector < rare_genotype > > (n_samples);
+		MAPR_vs_left = vector < int > (n_rare_variants, -1);
+		MAPR_vs_right = vector < int > (n_rare_variants, -1);
 	}
 
-	vrb.bullet("GEN allocation [#common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	//Mapping
+	for (int vt = 0 ; vt < V.vec_scaffold[0]->idx_full ; vt ++) {
+		if (V.vec_full[vt]->type == VARTYPE_RARE) { MAPR_vs_left[V.vec_full[vt]->idx_rare] = -1; MAPR_vs_right[V.vec_full[vt]->idx_rare] = 0; }
+		if (V.vec_full[vt]->type == VARTYPE_COMM) { MAPC_vs_left[V.vec_full[vt]->idx_common] = -1; MAPC_vs_right[V.vec_full[vt]->idx_common] = 0; }
+	}
+	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
+		for (int vt = V.vec_scaffold[vs-1]->idx_full+1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
+			if (V.vec_full[vt]->type == VARTYPE_RARE) { MAPR_vs_left[V.vec_full[vt]->idx_rare] = vs-1; MAPR_vs_right[V.vec_full[vt]->idx_rare] = vs; }
+			if (V.vec_full[vt]->type == VARTYPE_COMM) { MAPC_vs_left[V.vec_full[vt]->idx_common] = vs-1; MAPC_vs_right[V.vec_full[vt]->idx_common] = vs; }
+		}
+	}
+	for (int vt = V.vec_scaffold.back()->idx_full ; vt < V.sizeFull() ; vt ++) {
+		if (V.vec_full[vt]->type == VARTYPE_RARE) { MAPR_vs_left[V.vec_full[vt]->idx_rare] = -1; MAPR_vs_right[V.vec_full[vt]->idx_rare] = 0; }
+		if (V.vec_full[vt]->type == VARTYPE_COMM) { MAPC_vs_left[V.vec_full[vt]->idx_common] = -1; MAPC_vs_right[V.vec_full[vt]->idx_common] = 0; }
+	}
+
+	vrb.bullet("Genotype set allocation [#common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void genotype_set::getUnphasedIndexes(vector < unsigned int > & VC, vector < unsigned int > & VR, vector < unsigned int > & IDX) {
-	IDX.clear();
-	for (int vc = 0 ; vc < VC.size() ; vc ++) {
-		for (int i = 0 ; i < n_samples ; i++) {
-			if (GCmissing[VC[vc]][i] || GCalleles[VC[vc]][2*i+0] != GCalleles[VC[vc]][2*i+1]) IDX.push_back(i);
+void genotype_set::transpose() {
+	tac.clock();
+	if (n_common_variants > 0) {
+		GCvar_alleles.transpose(GCind_alleles, 2 * n_samples, n_common_variants);
+		GCvar_missing.transpose(GCind_alleles, n_samples, n_common_variants);
+	}
+
+	if (n_rare_variants > 0) {
+		for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
+			for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
+				unsigned int sample_idx = GRvar_genotypes[vr][r].idx;
+				GRind_genotypes[sample_idx].push_back(GRvar_genotypes[vr][r]);
+				GRind_genotypes[sample_idx].back().idx = vr;
+			}
 		}
 	}
-	for (int vr = 0 ; vr < VR.size() ; vr ++) {
-		for (int i = 0 ; i < GRindexes[VR[vr]].size() ; i++) {
-			if (GRhets[VR[vr]][i] || GRmissing[VR[vr]][i]) IDX.push_back(GRindexes[VR[vr]][i]);
+	vrb.bullet("Genotype set transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
+
+void genotype_set::mapUnphasedOntoScaffold(int ind, vector < bool > & map) {
+	map.clear();
+	map = vector < bool > (n_scaffold_variants+1, false);
+
+	//Common
+	for (int vc = 0 ; vc < n_common_variants ; vc ++) {
+		if (GCind_missing.get(ind, vc) || GCind_alleles.get(2*ind+0, vc) != GCind_alleles.get(2*ind+1, vc)) {
+			int lidx = MAPC_vs_left[vc];
+			int ridx = MAPC_vs_right[vc];
+			if (lidx < 0 && ridx >= 0) map[0] = true;
+			else if (lidx >=0 && ridx < 0) map.back() = true;
+			else if (lidx >=0 && ridx >= 0) map[ridx] = true;
+			else vrb.error("Issue in mapping variants onto scaffold!");
 		}
 	}
-	sort(IDX.begin(), IDX.end());
-	IDX.erase(unique(IDX.begin(), IDX.end()), IDX.end());
+	//Rare
+	for (int vr = 0 ; vr < GRind_genotypes[ind].size() ; vr ++) {
+		if (GRind_genotypes[ind][vr].mis || GRind_genotypes[ind][vr].het) {
+			int lidx = MAPC_vs_left[GRind_genotypes[ind][vr].idx];
+			int ridx = MAPC_vs_right[GRind_genotypes[ind][vr].idx];
+			if (lidx < 0 && ridx >= 0) map[0] = true;
+			else if (lidx >=0 && ridx < 0) map.back() = true;
+			else if (lidx >=0 && ridx >= 0) map[ridx] = true;
+			else vrb.error("Issue in mapping variants onto scaffold!");
+		}
+	}
 }

@@ -28,6 +28,7 @@
 #include <objects/hmm_parameters.h>
 
 #include <containers/genotype_set.h>
+#include <containers/compressed_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/variant_map.h>
 
@@ -42,16 +43,23 @@ public:
 	genotype_set G;
 	hmm_parameters M;
 	variant_map V;
+	compressed_set P;
 
-	//PARAMETERS
-	double pbwt_modulo;
+	//MULTI-THREADING
+	int i_jobs;
+	vector < pthread_t > id_workers;
+	pthread_mutex_t mutex_workers;
+
+	basic_stats Kstored;
 
 	//CONSTRUCTOR
 	phaser();
 	~phaser();
 
 	//METHODS
+	void hmmcompute(int);
 	void phase();
+
 
 	//PARAMETERS
 	void declare_options();

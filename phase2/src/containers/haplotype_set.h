@@ -34,11 +34,15 @@ public:
 
 	//Scaffold data
 	bitmatrix Hvar;							//Bit matrix of haplotypes (variant first).
+	bitmatrix Hhap;							//Bit matrix of haplotypes (variant first).
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	haplotype_set();
 	~haplotype_set();
 	void clear();
 	void allocate(unsigned int, unsigned int);
+	void transposeHaplotypes_H2V();
+	void transposeHaplotypes_V2H();
+
 };
 #endif

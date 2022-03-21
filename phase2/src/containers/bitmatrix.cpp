@@ -36,18 +36,8 @@ bitmatrix::~bitmatrix() {
 }
 
 void bitmatrix::subset(bitmatrix & BM, vector < unsigned int > & rows) {
-	unsigned long offset_addr = 0, row_start, row_end;
-	for (int r = 0 ; r < rows.size() ; r ++) {
-		row_start = ((unsigned long)rows[r]) * (n_cols/8);
-		row_end = ((unsigned long)rows[r]) * (n_cols/8) + (n_cols/8);
-		memcpy(&bytes[offset_addr], &BM.bytes[row_start], n_cols/8);
-		offset_addr += n_cols/8;
-	}
-}
-/*
-void bitmatrix::subset(bitmatrix & BM, vector < unsigned int > & rows) {
-	n_cols = BM.n_cols;
 	n_rows = rows.size() + ((rows.size()%8)?(8-(rows.size()%8)):0);
+	n_cols = BM.n_cols;
 	n_bytes = (n_cols/8) * (unsigned long)n_rows;
 	bytes = (unsigned char*)malloc(n_bytes*sizeof(unsigned char));
 	unsigned long offset_addr = 0, row_start, row_end;
@@ -58,7 +48,6 @@ void bitmatrix::subset(bitmatrix & BM, vector < unsigned int > & rows) {
 		offset_addr += n_cols/8;
 	}
 }
-*/
 
 void bitmatrix::getMatchHetCount(unsigned int i0, unsigned int i1, int & c1, int & m1) {
 	c1=m1=0;

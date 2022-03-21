@@ -21,8 +21,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <phaser/phaser_header.h>
 
-#include <io/haplotype_writer.h>
-
 void * phaseWindow_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
 	int id_worker, id_job;

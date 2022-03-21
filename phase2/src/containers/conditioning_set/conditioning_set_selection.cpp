@@ -76,8 +76,10 @@ void conditioning_set::select() {
 
 	//Summary
 	basic_stats statK;
-	for (int h = 0 ; h < n_haplotypes ; h ++)
+	for (int h = 0 ; h < n_haplotypes ; h ++) {
+		assert(indexes_pbwt_neighbour[h].size());
 		statK.push(indexes_pbwt_neighbour[h].size());
+	}
 
 
 	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
