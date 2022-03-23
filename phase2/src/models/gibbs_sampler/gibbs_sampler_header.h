@@ -50,7 +50,7 @@ public:
 	void loadRare(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vr, float weight);
 	void loadCommon(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vc, float weight);
 
-	void iterate();
+	void iterate(int &, int &);
 
 	void pushRare(genotype_set & G, unsigned int vr);
 	void pushCommon(genotype_set &, unsigned int vc);

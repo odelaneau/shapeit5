@@ -22,7 +22,7 @@
 
 #include <models/gibbs_sampler/gibbs_sampler_header.h>
 
-void gibbs_sampler::iterate() {
+void gibbs_sampler::iterate(int & error, int & total) {
 	float sum;
 	vector < float > hprob = vector < float > (4, 0.0f);
 	vector < float > gprob = vector < float > (4, 0.0f);
@@ -90,7 +90,6 @@ void gibbs_sampler::iterate() {
 			}
 		}
 	}
-	unsigned err = 0, tot = 0;
 	for (int ui = 0 ; ui < unphased.size() ; ui ++) {
 		int ind = unphased[ui];
 		unsigned int bestg = distance(pprobs.begin() + 4*ind, max_element(pprobs.begin() + 4*ind, pprobs.begin() + 4*(ind+1))) % 4;
@@ -100,17 +99,11 @@ void gibbs_sampler::iterate() {
 		case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
 		case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
 		}
-		err +=  (alleles[2*ind+0] != truth[2*ind+0]);
-		assert(alleles[2*ind+0] != alleles[2*ind+1]);
-		if (truth[2*ind+0] == truth[2*ind+1]) {
-			cout << "Error " << rare << "\t\t" << err << "\t\t" << tot << endl;
-
-			exit(1);
+		if (unphased.size() > 1) {
+			error +=  (alleles[2*ind+0] != truth[2*ind+0]);
+			assert(alleles[2*ind+0] != alleles[2*ind+1]);
+			assert(truth[2*ind+0] != truth[2*ind+1]);
+			total++;
 		}
-		tot++;
 	}
-	if (unphased.size() > 1) cout << rare << "\t\t" << err << "\t\t" << tot << endl;
-
-
-
 }
