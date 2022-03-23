@@ -86,22 +86,25 @@ void phaser::phase() {
 
 	//STEP4: MCMC computations
 	vrb.title("Gibbs sampler computations");
-	gibbs_sampler GS (G.n_samples, 10, 5);
+	int errorRare = 0, errorCommon = 0, totalRare = 0, totalCommon = 0;
+	gibbs_sampler GS (G.n_samples, 20, 10);
 	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
 		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
 			float weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
 				GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
-				GS.iterate();
+				GS.iterate(errorRare, totalRare);
 				GS.pushRare(G, V.vec_full[vt]->idx_rare);
 			} else {
 				assert(V.vec_full[vt]->type == VARTYPE_COMM);
 				GS.loadCommon(G, H, P, V.vec_full[vt]->idx_common, weight);
-				GS.iterate();
+				GS.iterate(errorCommon, totalCommon);
 				GS.pushCommon(G, V.vec_full[vt]->idx_common);
 			}
 		}
-		//vrb.progress("  * Processing", (vs+1)*1.0/V.sizeScaffold());
+		vrb.progress("  * Processing", (vs+1)*1.0/V.sizeScaffold());
 	}
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Error rate at rare = " + stb.str(errorRare*100.0/totalRare, 4));
+	vrb.bullet("Error rate at common = " + stb.str(errorCommon*100.0/totalCommon, 4));
 }
