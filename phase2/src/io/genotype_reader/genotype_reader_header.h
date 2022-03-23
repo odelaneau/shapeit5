@@ -48,7 +48,9 @@ public:
 	//PARAMETERS
 	string funphased;
 	string fphased;
-	string region;
+	string scaffold_region;
+	int input_start;
+	int input_stop;
 	int nthreads;
 	float minmaf;
 
@@ -59,7 +61,7 @@ public:
 	//PARAMS
 	void setFilenames(string, string);
 	void setThreads(int);
-	void setRegion(string);
+	void setRegions(string, int, int);
 	void setMAF(float);
 
 	//IO

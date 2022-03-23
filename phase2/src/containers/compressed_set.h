@@ -24,44 +24,39 @@
 
 #include <utils/otools.h>
 
+#define FORCE_CAST(var, type) *(type*)&var
+
 struct prob {
 	unsigned int kst : 16;
 	unsigned int lpb : 8;
 	unsigned int rpb : 8;
-
-	prob(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
-		kst = _kst;
-		lpb = _lpb;
-		rpb = _rpb;
-	}
 };
 
 class cprobs {
 public:
-	int idx0;
-	int idx1;
-	vector < prob > probs;
+	vector < unsigned int > values;
 
-	cprobs(int _idx0, int _idx1) {
-		idx0 = _idx0;
-		idx1 = _idx1;
+	cprobs(unsigned int _size, int _idx0, int _idx1) {
+		values.reserve(_size+2);
+		values.push_back(_idx0);
+		values.push_back(_idx1);
 	}
 
 	~cprobs() {
-		idx0 = -1; idx1 = -1;
-		probs.clear();
+		values.clear();
 	}
 
 	void push(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
-		probs.emplace_back(_kst, _lpb, _rpb);
+		prob p; p.kst = _kst; p.lpb = _lpb; p.rpb = _rpb;
+		values.push_back(FORCE_CAST(p, unsigned int));
 	}
 
 	unsigned int size() {
-		return probs.size();
+		return values.size() - 2;
 	}
 
 	bool operator < (const cprobs & cp) const {
-		return ((idx0<cp.idx0) || ((idx0==cp.idx0)&&(idx1<cp.idx1)));
+		return ((values[0]<cp.values[0]) || ((values[0]==cp.values[0])&&(values[1]<cp.values[1])));
 	}
 };
 

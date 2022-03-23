@@ -51,6 +51,15 @@ public:
 	pthread_mutex_t mutex_workers;
 	basic_stats Kstored;
 
+	//GENOMIC REGION
+	string chrid;
+	int input_start;
+	int input_stop;
+	int scaffold_start;
+	int scaffold_stop;
+	string input_gregion;
+	string scaffold_gregion;
+
 	//CONSTRUCTOR
 	phaser();
 	~phaser();
@@ -61,6 +70,7 @@ public:
 
 
 	//PARAMETERS
+	void buildCoordinates();
 	void declare_options();
 	void parse_command_line(vector < string > &);
 	void check_options();

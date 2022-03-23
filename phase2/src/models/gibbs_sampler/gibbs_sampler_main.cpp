@@ -108,13 +108,15 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, compresse
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
 			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].idx1 < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].idx1 == (2*unphased[u]+h));
+			while (ci < P.Pstates.size() && P.Pstates[ci].values[1] < (2*unphased[u]+h)) ci ++;
+			assert(P.Pstates[ci].values[1] == (2*unphased[u]+h));
 			//Load the state probs
-			for (int k = 0 ; k < P.Pstates[ci].probs.size() ; k++) {
-				float pl = (P.Pstates[ci].probs[k].lpb * 1.0f) / 255;
-				float pr = (P.Pstates[ci].probs[k].rpb * 1.0f) / 255;
-				unsigned int ks = P.Pstates[ci].probs[k].kst;
+			for (int k = 2 ; k < P.Pstates[ci].values.size() ; k++) {
+				unsigned int value = P.Pstates[ci].values[k];
+				prob p = FORCE_CAST(value, prob);
+				float pl = (p.lpb * 1.0f) / 255;
+				float pr = (p.rpb * 1.0f) / 255;
+				unsigned int ks = p.kst;
 				float kprob = pl * weight + pr * (1.0f - weight);
 				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][ks];
 				cstates[2*unphased[u]+h].push_back(kidx);
@@ -169,13 +171,15 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, compressed_
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
 			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].idx1 < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].idx1 == (2*unphased[u]+h));
+			while (ci < P.Pstates.size() && P.Pstates[ci].values[1] < (2*unphased[u]+h)) ci ++;
+			assert(P.Pstates[ci].values[1] == (2*unphased[u]+h));
 			//Load the state probs
-			for (int k = 0 ; k < P.Pstates[ci].probs.size() ; k++) {
-				float pl = (P.Pstates[ci].probs[k].lpb * 1.0f + 1.0f) / 255;
-				float pr = (P.Pstates[ci].probs[k].rpb * 1.0f + 1.0f) / 255;
-				unsigned int ks = P.Pstates[ci].probs[k].kst;
+			for (int k = 2 ; k < P.Pstates[ci].values.size() ; k++) {
+				unsigned int value = P.Pstates[ci].values[k];
+				prob p = FORCE_CAST(value, prob);
+				float pl = (p.lpb * 1.0f) / 255;
+				float pr = (p.rpb * 1.0f) / 255;
+				unsigned int ks = p.kst;
 				float kprob = pl * weight + pr * (1.0f - weight);
 				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][ks];
 				cstates[2*unphased[u]+h].push_back(kidx);

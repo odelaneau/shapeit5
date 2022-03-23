@@ -35,20 +35,23 @@ void phaser::read_files_and_initialise() {
 		pthread_mutex_init(&mutex_workers, NULL);
 	}
 
-	//step1: Set up the genotype reader
+    //step1: Parsing region string
+	buildCoordinates();
+
+	//step2: Set up the genotype reader
 	vrb.title("Reading genotype data:");
 	genotype_reader readerG(H, G, V);
 	readerG.setThreads(options["thread"].as < int > ());
-	readerG.setRegion(options["region"].as < string > ());
+	readerG.setRegions(options["scaffold-region"].as < string > (), input_start, input_stop);
 	readerG.setFilenames(options["input"].as < string > (), options["scaffold"].as < string > ());
-	readerG.setMAF(options["maf"].as < double > ());
+	readerG.setMAF(options["input-maf"].as < double > ());
 
-	//step2: Read the genotype data
+	//step3: Read the genotype data
 	readerG.scanGenotypes();
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
 
-	//step3: Read and initialise genetic map
+	//step4: Read and initialise genetic map
 	vrb.title("Setting up genetic map:");
 	if (options.count("map")) {
 		gmap_reader readerGM;
@@ -59,8 +62,7 @@ void phaser::read_files_and_initialise() {
 	H.transposeHaplotypes_V2H();
 	G.transpose();
 
-
-	//step4: Initialize conditioning set
+	//step5: Initialize conditioning set
 	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
 					options["pbwt-mdr"].as < double > (),

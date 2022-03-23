@@ -35,7 +35,7 @@ void compressed_set::clear() {
 
 void compressed_set::transpose() {
 	tac.clock();
-	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) swap(Pstates[e].idx0, Pstates[e].idx1);
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) swap(Pstates[e].values[0], Pstates[e].values[1]);
 	sort(Pstates.begin(), Pstates.end());
 	vrb.bullet("Transpose compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
@@ -43,8 +43,8 @@ void compressed_set::transpose() {
 unsigned long int compressed_set::sizeBytes() {
 	unsigned long int nbytes = 0;
 	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
-		nbytes += 20;		//2 x unsigned int
-		nbytes += Pstates[e].probs.size() * 4;
+		nbytes += 8;		//2 x unsigned int
+		nbytes += Pstates[e].values.size() * 4;
 	}
 	return nbytes;
 }
@@ -53,7 +53,7 @@ void compressed_set::mapping(unsigned int n_scaffold_variants) {
 	tac.clock();
 	Pmapping = vector < long int > (n_scaffold_variants+1, -1);
 	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
-		if (Pmapping[Pstates[e].idx0] < 0) Pmapping[Pstates[e].idx0] = e;
+		if (Pmapping[Pstates[e].values[0]] < 0) Pmapping[Pstates[e].values[0]] = e;
 	}
 /*
 	for (unsigned long int e = 0 ; e < Pstates.size() && e < 200; e ++) {
