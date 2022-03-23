@@ -64,13 +64,13 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			gprob[2] *= (hprob[1] * hprob[2]);
 			gprob[3] *= (hprob[1] * hprob[3]);
 			sum = accumulate(gprob.begin(), gprob.end(), 0.0f);
-			for (int g = 0 ; g < 4 ; g++) gprob[g] /= sum;
+			//for (int g = 0 ; g < 4 ; g++) gprob[g] /= sum;
 
 			//cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
 			assert(sum > 0);
 
 			//
-			int sampleg = rng.sample(gprob, 1.0f);
+			int sampleg = rng.sample(gprob, sum);
 			switch (sampleg) {
 			case 0:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 0; break;
 			case 1:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 1; break;
@@ -79,7 +79,10 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			}
 
 			//
-			assert(!missing[ind] && alleles[2*ind+0] != alleles[2*ind+1]);
+			if (alleles[2*ind+0] == alleles[2*ind+1]) {
+				cout << iter << " " << ui << " " << sampleg << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
+				exit(1);
+			}
 
 			//
 			if (iter >= nburnin) {
