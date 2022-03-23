@@ -19,46 +19,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
-#include <containers/compressed_set.h>
+#include <containers/state_set.h>
 
-compressed_set::compressed_set() {
+state_set::state_set() {
 	clear();
 }
 
-compressed_set::~compressed_set() {
+state_set::~state_set() {
 	clear();
 }
 
-void compressed_set::clear() {
+void state_set::clear() {
 	Pstates.clear();
+	Pmapping.clear();
 }
 
-void compressed_set::transpose() {
+void state_set::transpose() {
 	tac.clock();
-	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) swap(Pstates[e].values[0], Pstates[e].values[1]);
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) Pstates[e].swap();
 	sort(Pstates.begin(), Pstates.end());
 	vrb.bullet("Transpose compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-unsigned long int compressed_set::sizeBytes() {
-	unsigned long int nbytes = 0;
-	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
-		nbytes += 8;		//2 x unsigned int
-		nbytes += Pstates[e].values.size() * 4;
-	}
-	return nbytes;
-}
-
-void compressed_set::mapping(unsigned int n_scaffold_variants) {
+void state_set::mapping(unsigned int n_scaffold_variants) {
 	tac.clock();
 	Pmapping = vector < long int > (n_scaffold_variants+1, -1);
 	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
-		if (Pmapping[Pstates[e].values[0]] < 0) Pmapping[Pstates[e].values[0]] = e;
+		if (Pmapping[Pstates[e].id0] < 0) Pmapping[Pstates[e].id0] = e;
 	}
-/*
-	for (unsigned long int e = 0 ; e < Pstates.size() && e < 200; e ++) {
-		cout << e << " " << Pstates[e].idx0 << " " << Pstates[e].idx1 << endl;
-	}
-*/
-	vrb.bullet("Remap compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Map compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

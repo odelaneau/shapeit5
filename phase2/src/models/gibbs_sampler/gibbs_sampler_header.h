@@ -24,7 +24,7 @@
 
 #include <utils/otools.h>
 #include <containers/genotype_set.h>
-#include <containers/compressed_set.h>
+#include <containers/state_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 
 
@@ -47,8 +47,8 @@ public:
 	gibbs_sampler(unsigned int, unsigned int, unsigned int);
 	~gibbs_sampler();
 
-	void loadRare(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vr, float weight);
-	void loadCommon(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vc, float weight);
+	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight);
+	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight);
 
 	void iterate(int &, int &);
 

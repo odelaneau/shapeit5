@@ -28,7 +28,7 @@
 #include <objects/hmm_parameters.h>
 
 #include <containers/genotype_set.h>
-#include <containers/compressed_set.h>
+#include <containers/state_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/variant_map.h>
 
@@ -43,13 +43,12 @@ public:
 	genotype_set G;
 	hmm_parameters M;
 	variant_map V;
-	compressed_set P;
+	state_set P;
 
 	//MULTI-THREADING
 	int i_jobs, nthreads;
 	vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
-	basic_stats Kstored;
 
 	//GENOMIC REGION
 	string chrid;

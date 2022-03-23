@@ -61,7 +61,7 @@ void hmm_scaffold::forward() {
 	}
 }
 
-unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs > & cstates) {
+unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstates) {
 	unsigned int n_total_states = 0;
 	float sum = 0.0f, scale = 0.0f, threshold = 1.0f / nstates;
 	vector < float > alphaXbeta_curr = vector < float >(nstates, 0.0f);
@@ -103,11 +103,10 @@ unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs >
 			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
 			unsigned int n_reserved_states = 0;
 			for (int k = 0 ; k < nstates ; k ++) if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold) n_reserved_states ++;
-			cstates.emplace_back(n_reserved_states, hap, vs+2);
 			for (int k = 0 ; k < nstates ; k ++)
 				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold)
-					cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
-			n_total_states += cstates.back().size();
+					cstates.emplace_back(hap, vs+2, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
+			n_total_states += cstates.size();
 		}
 
 		//Saving products
@@ -117,11 +116,10 @@ unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs >
 	if (cevents[0]) {
 		unsigned int n_reserved_states = 0;
 		for (int k = 0 ; k < nstates ; k ++) if (alphaXbeta_curr[k] >= threshold) n_reserved_states ++;
-		cstates.emplace_back(n_reserved_states, hap, 1);
 		for (int k = 0 ; k < nstates ; k ++)
 			if (alphaXbeta_curr[k] >= threshold)
-				cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
-		n_total_states += cstates.back().size();
+				cstates.emplace_back(hap, 1, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
+		n_total_states += cstates.size();
 	}
 
 	return n_total_states;

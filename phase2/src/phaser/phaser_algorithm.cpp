@@ -39,7 +39,7 @@ void * hmmcompute_callback(void * ptr) {
 
 void phaser::hmmcompute(int id_job) {
 	vector < bool > cevents;
-	vector < cprobs > cstates0, cstates1;
+	vector < state > cstates0, cstates1;
 	hmm_scaffold HMM0(2*id_job+0, V, G, H, M);
 	hmm_scaffold HMM1(2*id_job+1, V, G, H, M);
 	HMM0.forward();
@@ -47,9 +47,8 @@ void phaser::hmmcompute(int id_job) {
 	G.mapUnphasedOntoScaffold(id_job, cevents);
 	unsigned int nstates0 = HMM0.backward(cevents, cstates0);
 	unsigned int nstates1 = HMM1.backward(cevents, cstates1);
+
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-	Kstored.push(nstates0);
-	Kstored.push(nstates1);
 	for (int e0 = 0 ; e0 < cstates0.size() ; e0 ++) P.Pstates.push_back(cstates0[e0]);
 	for (int e1 = 0 ; e1 < cstates1.size() ; e1 ++) P.Pstates.push_back(cstates1[e1]);
 	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
@@ -59,6 +58,7 @@ void phaser::hmmcompute(int id_job) {
 void phaser::phase() {
 	tac.clock();
 	i_jobs = 0;
+
 
 	//STEP1: haplotype selection
 	H.select();
@@ -73,11 +73,9 @@ void phaser::phase() {
 		vrb.progress("  * Processing", (i+1)*1.0/G.n_samples);
 	}
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("#storage_total = " + stb.str(P.Pstates.size()) + " / #reserved = " + stb.str(P.Pstates.capacity()));
-	vrb.bullet("#storage_per_sample = " + stb.str(Kstored.mean(), 2) + " +/- " + stb.str(Kstored.sd(), 2));
+	vrb.bullet("#states = " + stb.str(P.Pstates.size()) + " / #reserved = " + stb.str(P.Pstates.capacity()) + " / Memory = " + stb.str(P.Pstates.capacity() * 12.0/1e9, 2) + "Gg");
 
 	//STEP3: Big transpose
-	vrb.bullet("Size of compressed probabilities = " + stb.str(P.sizeBytes() * 1.0f / 1e9, 4) + " Gb");
 	P.transpose();
 	P.mapping(H.n_scaffold_variants);
 
