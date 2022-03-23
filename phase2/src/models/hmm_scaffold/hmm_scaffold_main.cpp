@@ -61,9 +61,9 @@ void hmm_scaffold::forward() {
 	}
 }
 
-unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs > & cstates, float threshold) {
+unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs > & cstates) {
 	unsigned int n_total_states = 0;
-	float sum = 0.0f, scale = 0.0f;
+	float sum = 0.0f, scale = 0.0f, threshold = 1.0f / nstates;
 	vector < float > alphaXbeta_curr = vector < float >(nstates, 0.0f);
 	vector < float > alphaXbeta_prev = vector < float >(nstates, 0.0f);
 
@@ -100,11 +100,11 @@ unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs >
 
 		//Storage
 		if (cevents[vs+1]) {
-			cstates.emplace_back(hap, vs + 1);
+			cstates.emplace_back(hap, vs+2);
 			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
 			for (int k = 0 ; k < nstates ; k ++) {
 				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold)
-					cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_prev[k] * 256));
+					cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
 			}
 			n_total_states += cstates.back().size();
 		}
@@ -114,10 +114,10 @@ unsigned int hmm_scaffold::backward(vector < bool > & cevents, vector < cprobs >
 	}
 
 	if (cevents[0]) {
-		cstates.emplace_back(hap, 0);
+		cstates.emplace_back(hap, 1);
 		for (int k = 0 ; k < nstates ; k ++)
 			if (alphaXbeta_curr[k] >= threshold)
-				cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 256), (unsigned char)(alphaXbeta_curr[k] * 256));
+				cstates.back().push(k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
 		n_total_states += cstates.back().size();
 	}
 

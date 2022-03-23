@@ -49,6 +49,14 @@ olivier: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 olivier: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 olivier: $(BFILE)
 
+laptop: HTSSRC=$(HOME)/Tools
+laptop: HTSLIB_INC=$(HTSSRC)/htslib-1.10
+laptop: HTSLIB_LIB=$(HTSSRC)/htslib-1.10/libhts.a
+laptop: BOOST_INC=/usr/include
+laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+laptop: $(BFILE)
+
 debug: CXXFLAG=-g
 debug: LDFLAG=-g
 debug: HTSSRC=$(HOME)/Tools
