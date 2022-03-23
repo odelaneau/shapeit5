@@ -19,60 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#ifndef _COMPRESSED_SET_H
-#define _COMPRESSED_SET_H
+#ifndef _STATE_SET_H
+#define _STATE_SET_H
 
 #include <utils/otools.h>
 
-#define FORCE_CAST(var, type) *(type*)&var
-
-struct prob {
+class state {
+public:
+	unsigned int id0;
+	unsigned int id1;
 	unsigned int kst : 16;
 	unsigned int lpb : 8;
 	unsigned int rpb : 8;
+
+
+	state(unsigned int _id0, unsigned int _id1, unsigned int _kst, unsigned char _lpb, unsigned char _rpb) {
+		id0 = _id0;
+		id1 = _id1;
+		kst = _kst;
+		lpb = _lpb;
+		rpb = _rpb;
+	}
+
+	~state(){
+	}
+
+	bool operator < (const state & s) const {
+		return ((id0<s.id0) || ((id0==s.id0)&&(id1<s.id1)));
+	}
+
+	void swap() {
+		unsigned int tmp = id1;
+		id1 = id0;
+		id0 = tmp;
+	}
+
+
 };
 
-class cprobs {
+class state_set {
 public:
-	vector < unsigned int > values;
-
-	cprobs(unsigned int _size, int _idx0, int _idx1) {
-		values.reserve(_size+2);
-		values.push_back(_idx0);
-		values.push_back(_idx1);
-	}
-
-	~cprobs() {
-		values.clear();
-	}
-
-	void push(unsigned short _kst, unsigned short _lpb, unsigned short _rpb) {
-		prob p; p.kst = _kst; p.lpb = _lpb; p.rpb = _rpb;
-		values.push_back(FORCE_CAST(p, unsigned int));
-	}
-
-	unsigned int size() {
-		return values.size() - 2;
-	}
-
-	bool operator < (const cprobs & cp) const {
-		return ((values[0]<cp.values[0]) || ((values[0]==cp.values[0])&&(values[1]<cp.values[1])));
-	}
-};
-
-class compressed_set {
-public:
-	vector < cprobs > Pstates;
+	vector < state > Pstates;
 	vector < long int > Pmapping;
 
 	//
-	compressed_set();
-	~compressed_set();
+	state_set();
+	~state_set();
 	void clear();
 	void transpose();
 	void mapping(unsigned int);
-
-	unsigned long int sizeBytes();
 };
 
 #endif

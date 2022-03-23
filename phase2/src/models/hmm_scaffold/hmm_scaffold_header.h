@@ -26,7 +26,7 @@
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/genotype_set.h>
 #include <objects/hmm_parameters.h>
-#include <containers/compressed_set.h>
+#include <containers/state_set.h>
 
 class hmm_scaffold {
 public:
@@ -58,7 +58,7 @@ public:
 	~hmm_scaffold();
 
 	void forward();
-	unsigned int backward(vector < bool > & cevents, vector < cprobs > & cstates);
+	unsigned int backward(vector < bool > & cevents, vector < state > & cstates);
 };
 
 #endif

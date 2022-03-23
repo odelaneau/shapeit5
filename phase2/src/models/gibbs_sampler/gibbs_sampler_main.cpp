@@ -73,7 +73,7 @@ void gibbs_sampler::pushCommon(genotype_set & G, unsigned int vc) {
 }
 
 
-void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vc, float weight) {
+void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight) {
 	rare = false;
 	unsigned int vs = G.MAPC_vs_right[vc];
 
@@ -108,17 +108,14 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, compresse
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
 			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].values[1] < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].values[1] == (2*unphased[u]+h));
+			while (ci < P.Pstates.size() && P.Pstates[ci].id1 < (2*unphased[u]+h)) ci ++;
+			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
 			//Load the state probs
-			for (int k = 2 ; k < P.Pstates[ci].values.size() ; k++) {
-				unsigned int value = P.Pstates[ci].values[k];
-				prob p = FORCE_CAST(value, prob);
-				float pl = (p.lpb * 1.0f) / 255;
-				float pr = (p.rpb * 1.0f) / 255;
-				unsigned int ks = p.kst;
+			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
+				float pl = (P.Pstates[ci+k].lpb * 1.0f) / 255;
+				float pr = (P.Pstates[ci+k].rpb * 1.0f) / 255;
 				float kprob = pl * weight + pr * (1.0f - weight);
-				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][ks];
+				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
 				cstates[2*unphased[u]+h].push_back(kidx);
 				cprobs[2*unphased[u]+h].push_back(kprob);
 			}
@@ -126,7 +123,7 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, compresse
 	}
 }
 
-void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, compressed_set & P, unsigned int vr, float weight) {
+void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight) {
 	rare = true;
 	unsigned int vs = G.MAPR_vs_right[vr];
 
@@ -171,17 +168,14 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, compressed_
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
 			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].values[1] < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].values[1] == (2*unphased[u]+h));
+			while (ci < P.Pstates.size() && P.Pstates[ci].id1 < (2*unphased[u]+h)) ci ++;
+			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
 			//Load the state probs
-			for (int k = 2 ; k < P.Pstates[ci].values.size() ; k++) {
-				unsigned int value = P.Pstates[ci].values[k];
-				prob p = FORCE_CAST(value, prob);
-				float pl = (p.lpb * 1.0f) / 255;
-				float pr = (p.rpb * 1.0f) / 255;
-				unsigned int ks = p.kst;
+			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
+				float pl = (P.Pstates[ci+k].lpb * 1.0f) / 255;
+				float pr = (P.Pstates[ci+k].rpb * 1.0f) / 255;
 				float kprob = pl * weight + pr * (1.0f - weight);
-				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][ks];
+				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
 				cstates[2*unphased[u]+h].push_back(kidx);
 				cprobs[2*unphased[u]+h].push_back(kprob);
 			}

@@ -35,6 +35,8 @@ void phaser::read_files_and_initialise() {
 		pthread_mutex_init(&mutex_workers, NULL);
 	}
 
+	cout << "SIZE = " << sizeof(state) << endl;
+
     //step1: Parsing region string
 	buildCoordinates();
 
@@ -61,6 +63,8 @@ void phaser::read_files_and_initialise() {
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
 	H.transposeHaplotypes_V2H();
 	G.transpose();
+
+
 
 	//step5: Initialize conditioning set
 	vrb.title("PBWT pass");
