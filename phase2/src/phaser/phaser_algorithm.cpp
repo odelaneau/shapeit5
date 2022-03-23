@@ -87,7 +87,7 @@ void phaser::phase() {
 	//STEP4: MCMC computations
 	vrb.title("Gibbs sampler computations");
 	int errorRare = 0, errorCommon = 0, totalRare = 0, totalCommon = 0;
-	gibbs_sampler GS (G.n_samples, 20, 10);
+	gibbs_sampler GS (G.n_samples, 8, 4);
 	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
 		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
 			float weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);
