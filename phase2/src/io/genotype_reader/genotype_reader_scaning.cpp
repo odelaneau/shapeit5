@@ -77,7 +77,6 @@ void genotype_reader::scanGenotypes() {
 			n_common_variants += (maf>=minmaf);
 		}
 		n_total_variants ++;
-		vrb.progress("  * VCF/BCF scanning", (n_total_variants) * 1.0 / n_total_variants);
 	}
 
 	bcf_sr_destroy(sr);

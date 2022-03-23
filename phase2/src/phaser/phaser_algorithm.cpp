@@ -22,6 +22,7 @@
 #include <phaser/phaser_header.h>
 
 #include <models/hmm_scaffold/hmm_scaffold_header.h>
+#include <models/gibbs_sampler/gibbs_sampler_header.h>
 
 
 void * hmmcompute_callback(void * ptr) {
@@ -45,8 +46,10 @@ void phaser::hmmcompute(int id_job) {
 	HMM0.forward();
 	HMM1.forward();
 	G.mapUnphasedOntoScaffold(id_job, cevents);
-	unsigned int nstates0 = HMM0.backward(cevents, cstates0, options["compress-threshold"].as < double > ());
-	unsigned int nstates1 = HMM1.backward(cevents, cstates1, options["compress-threshold"].as < double > ());
+	//unsigned int nstates0 = HMM0.backward(cevents, cstates0, options["compress-threshold"].as < double > ());
+	//unsigned int nstates1 = HMM1.backward(cevents, cstates1, options["compress-threshold"].as < double > ());
+	unsigned int nstates0 = HMM0.backward(cevents, cstates0);
+	unsigned int nstates1 = HMM1.backward(cevents, cstates1);
 
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
 	Kstored.push(nstates0);
@@ -79,7 +82,26 @@ void phaser::phase() {
 	//STEP3: Big transpose
 	vrb.bullet("Size of compressed probabilities = " + stb.str(P.sizeBytes() * 1.0f / 1e9, 4) + " Gb");
 	P.transpose();
+	P.mapping(H.n_scaffold_variants);
 
 	//STEP4: MCMC computations
-	//... TO DO ...
+	vrb.title("Gibbs sampler computations");
+	gibbs_sampler GS (G.n_samples, 10, 5);
+	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
+		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
+			float weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);
+			if (V.vec_full[vt]->type == VARTYPE_RARE) {
+				GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
+				GS.iterate();
+				GS.pushRare(G, V.vec_full[vt]->idx_rare);
+			} else {
+				assert(V.vec_full[vt]->type == VARTYPE_COMM);
+				GS.loadCommon(G, H, P, V.vec_full[vt]->idx_common, weight);
+				GS.iterate();
+				GS.pushCommon(G, V.vec_full[vt]->idx_common);
+			}
+		}
+		//vrb.progress("  * Processing", (vs+1)*1.0/V.sizeScaffold());
+	}
+	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

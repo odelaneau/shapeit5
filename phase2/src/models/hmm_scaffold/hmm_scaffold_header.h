@@ -28,7 +28,6 @@
 #include <objects/hmm_parameters.h>
 #include <containers/compressed_set.h>
 
-
 class hmm_scaffold {
 public:
 	//DATA
@@ -59,7 +58,7 @@ public:
 	~hmm_scaffold();
 
 	void forward();
-	unsigned int backward(vector < bool > & cevents, vector < cprobs > & cstates, float threshold);
+	unsigned int backward(vector < bool > & cevents, vector < cprobs > & cstates);
 };
 
 #endif

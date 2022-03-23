@@ -68,12 +68,14 @@ public:
 class compressed_set {
 public:
 	vector < cprobs > Pstates;
+	vector < long int > Pmapping;
 
 	//
 	compressed_set();
 	~compressed_set();
 	void clear();
 	void transpose();
+	void mapping(unsigned int);
 
 	unsigned long int sizeBytes();
 };

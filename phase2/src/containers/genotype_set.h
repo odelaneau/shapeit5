@@ -76,8 +76,14 @@ public:
 	bitmatrix GCind_missing;
 
 	//Genotypes at rare unphased variants
+	vector < bool > major_alleles;
 	vector < vector < rare_genotype > > GRvar_genotypes;
 	vector < vector < rare_genotype > > GRind_genotypes;
+
+	//
+	bitmatrix GCvar_truth;
+	vector < vector < bool > > GRvar_truth;
+
 
 	//
 	genotype_set();
