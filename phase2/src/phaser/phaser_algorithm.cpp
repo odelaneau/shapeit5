@@ -24,7 +24,6 @@
 #include <models/hmm_scaffold/hmm_scaffold_header.h>
 #include <models/gibbs_sampler/gibbs_sampler_header.h>
 
-
 void * hmmcompute_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
 	int id_job;
@@ -46,11 +45,8 @@ void phaser::hmmcompute(int id_job) {
 	HMM0.forward();
 	HMM1.forward();
 	G.mapUnphasedOntoScaffold(id_job, cevents);
-	//unsigned int nstates0 = HMM0.backward(cevents, cstates0, options["compress-threshold"].as < double > ());
-	//unsigned int nstates1 = HMM1.backward(cevents, cstates1, options["compress-threshold"].as < double > ());
 	unsigned int nstates0 = HMM0.backward(cevents, cstates0);
 	unsigned int nstates1 = HMM1.backward(cevents, cstates1);
-
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
 	Kstored.push(nstates0);
 	Kstored.push(nstates1);
@@ -77,6 +73,7 @@ void phaser::phase() {
 		vrb.progress("  * Processing", (i+1)*1.0/G.n_samples);
 	}
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("#storage_total = " + stb.str(P.Pstates.size()) + " / #reserved = " + stb.str(P.Pstates.capacity()));
 	vrb.bullet("#storage_per_sample = " + stb.str(Kstored.mean(), 2) + " +/- " + stb.str(Kstored.sd(), 2));
 
 	//STEP3: Big transpose
@@ -86,8 +83,8 @@ void phaser::phase() {
 
 	//STEP4: MCMC computations
 	vrb.title("Gibbs sampler computations");
-	int errorRare = 0, errorCommon = 0, totalRare = 0, totalCommon = 0;
-	gibbs_sampler GS (G.n_samples, 8, 4);
+	int errorRare = 0, errorCommon = 0, totalRare = 0, totalCommon = 0, ndone = 0;
+	gibbs_sampler GS (G.n_samples, options["mcmc-iterations"].as < int > (), options["mcmc-burnin"].as < int > ());
 	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
 		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
 			float weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);
@@ -95,14 +92,16 @@ void phaser::phase() {
 				GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
 				GS.iterate(errorRare, totalRare);
 				GS.pushRare(G, V.vec_full[vt]->idx_rare);
+				ndone++;
 			} else {
 				assert(V.vec_full[vt]->type == VARTYPE_COMM);
 				GS.loadCommon(G, H, P, V.vec_full[vt]->idx_common, weight);
 				GS.iterate(errorCommon, totalCommon);
 				GS.pushCommon(G, V.vec_full[vt]->idx_common);
+				ndone++;
 			}
 		}
-		vrb.progress("  * Processing", (vs+1)*1.0/V.sizeScaffold());
+		vrb.progress("  * Processing", ndone*1.0/(V.sizeRare()+V.sizeCommon()));
 	}
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("Error rate at rare = " + stb.str(errorRare*100.0/totalRare, 4));

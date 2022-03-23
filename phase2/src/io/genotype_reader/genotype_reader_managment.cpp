@@ -29,7 +29,9 @@ genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_
 	n_samples = 0;
 	funphased = "";
 	fphased = "";
-	region = "";
+	scaffold_region = "";
+	input_start = 0;
+	input_start = 1000000000;
 	n_scaffold_genotypes = vector < unsigned long > (4, 0);
 	n_common_genotypes = vector < unsigned long > (4, 0);
 	n_rare_genotypes = vector < unsigned long > (4, 0);
@@ -43,7 +45,9 @@ genotype_reader::~genotype_reader() {
 	n_samples = 0;
 	funphased = "";
 	fphased = "";
-	region = "";
+	scaffold_region = "";
+	input_start = 0;
+	input_start = 1000000000;
 	n_scaffold_genotypes = vector < unsigned long > (4, 0);
 	n_common_genotypes = vector < unsigned long > (4, 0);
 	n_rare_genotypes = vector < unsigned long > (4, 0);
@@ -58,6 +62,10 @@ void genotype_reader::setFilenames (string _funphased, string _fphased) { fphase
 
 void genotype_reader::setThreads(int _nthreads) { nthreads = _nthreads; }
 
-void genotype_reader::setRegion(string _region) { region = _region; }
+void genotype_reader::setRegions(string _scaffold_region, int _input_start, int _input_stop) {
+	input_start = _input_start;
+	input_stop = _input_stop;
+	scaffold_region = _scaffold_region;
+}
 
 void genotype_reader::setMAF(float _minmaf) { minmaf = _minmaf; }

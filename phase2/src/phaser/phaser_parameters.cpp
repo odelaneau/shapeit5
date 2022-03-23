@@ -34,10 +34,11 @@ void phaser::declare_options() {
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
 			("input", bpo::value< string >(), "Genotypes to be phased in VCF/BCF format")
-			("region", bpo::value< string >(), "Region ")
+			("input-region", bpo::value< string >(), "Region to be considered in --input")
+			("input-maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation")
 			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
-			("map", bpo::value< string >(), "Genetic map")
-			("maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation");
+			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
+			("map", bpo::value< string >(), "Genetic map");
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
@@ -84,13 +85,16 @@ void phaser::parse_command_line(vector < string > & args) {
 
 void phaser::check_options() {
 	if (!options.count("input"))
-		vrb.error("You must specify one input file using --input");
+		vrb.error("--input missing");
+
+	if (!options.count("input-region"))
+		vrb.error("--input-region missing");
 
 	if (!options.count("scaffold"))
-		vrb.error("You must specify one scaffold file using --scaffold");
+		vrb.error("--scaffold missing");
 
-	if (!options.count("region"))
-		vrb.error("You must specify a region or chromosome to phase using --region");
+	if (!options.count("scaffold-region"))
+		vrb.error("--scaffold-region missing");
 
 	if (!options.count("output"))
 		vrb.error("You must specify a phased output file with --output");

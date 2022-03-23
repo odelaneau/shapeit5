@@ -30,7 +30,7 @@ void genotype_reader::scanGenotypes() {
 	if (nthreads > 1) bcf_sr_set_threads(sr, nthreads);
 	sr->collapse = COLLAPSE_NONE;
 	sr->require_index = 1;
-	if (bcf_sr_set_regions(sr, region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + region + "]");
+	if (bcf_sr_set_regions(sr, scaffold_region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + scaffold_region + "]");
 
 	//Opening file(s)
 	if (!(bcf_sr_add_reader (sr, funphased.c_str()))) vrb.error("Problem opening index file for [" + funphased + "]");
@@ -61,22 +61,25 @@ void genotype_reader::scanGenotypes() {
 			string alt = string(line_phased->d.allele[1]);
 			V.push(new variant (chr, pos, id, ref, alt, true, VARTYPE_SCAF));
 			n_scaffold_variants++;
+			n_total_variants ++;
 		} else {
 			bcf_unpack(line_unphased, BCF_UN_STR);
-			string chr = bcf_hdr_id2name(sr->readers[0].header, line_unphased->rid);
 			int pos = line_unphased->pos + 1;
-			string id = string(line_unphased->d.id);
-			string ref = string(line_unphased->d.allele[0]);
-			string alt = string(line_unphased->d.allele[1]);
-			rAN = bcf_get_info_int32(sr->readers[0].header, line_unphased, "AN", &vAN, &nAN);
-			rAC = bcf_get_info_int32(sr->readers[0].header, line_unphased, "AC", &vAC, &nAC);
-			assert(nAC==1 && nAN ==1);
-			float maf = min(vAC[0] * 1.0f / vAN[0], (vAN[0] - vAC[0]) * 1.0f / vAN[0]);
-			V.push(new variant (chr, pos, id, ref, alt, vAC[0] < (vAN[0]-vAC[0]), (maf<minmaf)?VARTYPE_RARE:VARTYPE_COMM));
-			n_rare_variants += (maf<minmaf);
-			n_common_variants += (maf>=minmaf);
+			if (pos >= input_start && pos < input_stop) {
+				string chr = bcf_hdr_id2name(sr->readers[0].header, line_unphased->rid);
+				string id = string(line_unphased->d.id);
+				string ref = string(line_unphased->d.allele[0]);
+				string alt = string(line_unphased->d.allele[1]);
+				rAN = bcf_get_info_int32(sr->readers[0].header, line_unphased, "AN", &vAN, &nAN);
+				rAC = bcf_get_info_int32(sr->readers[0].header, line_unphased, "AC", &vAC, &nAC);
+				assert(nAC==1 && nAN ==1);
+				float maf = min(vAC[0] * 1.0f / vAN[0], (vAN[0] - vAC[0]) * 1.0f / vAN[0]);
+				V.push(new variant (chr, pos, id, ref, alt, vAC[0] < (vAN[0]-vAC[0]), (maf<minmaf)?VARTYPE_RARE:VARTYPE_COMM));
+				n_rare_variants += (maf<minmaf);
+				n_common_variants += (maf>=minmaf);
+				n_total_variants ++;
+			}
 		}
-		n_total_variants ++;
 	}
 
 	bcf_sr_destroy(sr);
