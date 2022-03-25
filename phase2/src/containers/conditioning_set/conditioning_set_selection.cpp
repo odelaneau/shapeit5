@@ -22,16 +22,14 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
-void conditioning_set::select() {
+void conditioning_set::select(variant_map & V, genotype_set & G) {
 	tac.clock();
 
 	vector < int > A = vector < int > (n_haplotypes, 0);
 	vector < int > B = vector < int > (n_haplotypes, 0);
-	vector < int > C = vector < int > (n_haplotypes, 0);
-	vector < int > D = vector < int > (n_haplotypes, 0);
-	vector < int > M = vector < int > (depth * n_haplotypes, -1);
+	vector < int > R = vector < int > (n_haplotypes, 0);
+	vector < int > M = vector < int > (2 * depth * n_haplotypes, -1);
 	iota(A.begin(), A.end(), 0);
-	fill(C.begin(), C.end(), 0);
 
 	//Select new sites at which to trigger storage
 	vector < vector < int > > candidates = vector < vector < int > > (sites_pbwt_grouping.back() + 1);
@@ -44,39 +42,32 @@ void conditioning_set::select() {
 	}
 
 	//PBWT sweep
-	for (int l = 0 ; l < n_scaffold_variants ; l ++) {
-		bool eval = sites_pbwt_evaluation[l];
-		bool selc = sites_pbwt_selection[l];
+	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
+		int vc = V.vec_full[vt]->idx_common;
+		int vr = V.vec_full[vt]->idx_rare;
+		int vs = V.vec_full[vt]->idx_scaffold;
 
-		if (eval) {
-			int u = 0, v = 0, p = l, q = l;
-			for (int h = 0 ; h < n_haplotypes ; h ++) {
-				int alookup = A[h], dlookup = C[h];
-				if (dlookup > p) p = dlookup;
-				if (dlookup > q) q = dlookup;
-				if (!Hvar.get(l, alookup)) {
-					A[u] = alookup;
-					C[u] = p;
-					p = 0;
-					u++;
-				} else {
-					B[v] = alookup;
-					D[v] = q;
-					q = 0;
-					v++;
+		if (vs >= 0) {
+			bool eval = sites_pbwt_evaluation[vs];
+			bool selc = sites_pbwt_selection[vs];
+			if (eval) {
+				int u = 0, v = 0;
+				for (int h = 0 ; h < n_haplotypes ; h ++) {
+					if (!Hvar.get(vs, A[h])) A[u++] = A[h];
+					else B[v++] = A[h];
 				}
+				std::copy(B.begin(), B.begin()+v, A.begin()+u);
+				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				if (selc) storeCommon(A, M);
 			}
-			std::copy(B.begin(), B.begin()+v, A.begin()+u);
-			std::copy(D.begin(), D.begin()+v, C.begin()+u);
-			if (selc) store(l, A, C, M);
-		}
-
-		vrb.progress("  * PBWT selection", l * 1.0 / n_scaffold_variants);
+		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(A, R, G.GRvar_genotypes[vr]);
+		vrb.progress("  * PBWT selection", vt * 1.0 / V.sizeFull());
 	}
 
 	//Summary
 	basic_stats statK;
 	for (int h = 0 ; h < n_haplotypes ; h ++) {
+		sort(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end());
 		assert(indexes_pbwt_neighbour[h].size());
 		statK.push(indexes_pbwt_neighbour[h].size());
 	}
@@ -85,44 +76,66 @@ void conditioning_set::select() {
 	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void conditioning_set::store(int l, vector < int > & A, vector < int > & C, vector < int > & M) {
+void conditioning_set::storeRare(vector < int > & A, vector < int > & R, vector < rare_genotype > & G) {
+
+	vector < pair < int, int > > N;
+	for (int g = 0 ; g < G.size() ; g ++) {
+		if (!G[g].mis) {
+			unsigned int hap0 = 2*G[g].idx+0;
+			unsigned int hap1 = 2*G[g].idx+1;
+			N.push_back( pair < int, int > (R[hap0], hap0));
+			N.push_back( pair < int, int > (R[hap1], hap1));
+		}
+	}
+
+	sort(N.begin(), N.end());
+
+	for (int h = 0 ; h < N.size() ; h ++) {
+		int target_hap = N[h].second;
+		if (G[h/2].het) {
+			int from = ((h-depth)<0)?0:(h-depth);
+			int to = ((h+depth)<N.size())?(h+depth):(N.size()-1);
+			for (int c = from ; c <= to ; c ++) {
+				int cond_hap = N[c].second;
+				if (target_hap/2 != cond_hap/2) indexes_pbwt_neighbour[target_hap].push_back(cond_hap);
+			}
+		}
+	}
+}
+
+void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 	for (int h = 0 ; h < n_haplotypes ; h ++) {
-		int chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1, div_guess0 = -1, div_guess1 = -1;
+		int chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1;
 		for (int n_added = 0 ; n_added < depth ; ) {
 			if ((h-offset0)>=0) {
 				hap_guess0 = A[h-offset0];
-				div_guess0 = max(C[h-offset0+1], div_guess0);
-				add_guess0 = 1;
-			} else { add_guess0 = 0; div_guess0 = l+1; }
+				add_guess0 = (hap_guess0/2 != chap/2);
+			} else add_guess0 = 0;
 			if ((h+offset1)<n_haplotypes) {
 				hap_guess1 = A[h+offset1];
-				div_guess1 = max(C[h+offset1], div_guess1);
-				add_guess1 = 1;
-			} else { add_guess1 = 0; div_guess1 = l+1; }
+				add_guess1 = (hap_guess1/2 != chap/2);
+			} else add_guess1 = 0;
 			if (add_guess0 && add_guess1) {
-				if (div_guess0 < div_guess1) {
-					if (hap_guess0 != M[chap * depth + n_added]) {
-						indexes_pbwt_neighbour[chap].push_back(hap_guess0);
-						M[chap * depth + n_added] = hap_guess0;
-					}
-					offset0++; n_added++;
-				} else {
-					if (hap_guess1 != M[chap * depth + n_added]) {
-						indexes_pbwt_neighbour[chap].push_back(hap_guess1);
-						M[chap * depth + n_added] = hap_guess1;
-					}
-					offset1++; n_added++;
-				}
-			} else if (add_guess0) {
-				if (hap_guess0 != M[chap * depth + n_added]) {
+				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
 					indexes_pbwt_neighbour[chap].push_back(hap_guess0);
-					M[chap * depth + n_added] = hap_guess0;
+					M[chap * 2 * depth + n_added] = hap_guess0;
+				}
+				offset0++; n_added++;
+				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
+					indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+					M[chap * 2 * depth + n_added] = hap_guess1;
+				}
+				offset1++; n_added++;
+			} else if (add_guess0) {
+				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
+					indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+					M[chap * 2 * depth + n_added] = hap_guess0;
 				}
 				offset0++; n_added++;
 			} else if (add_guess1) {
-				if (hap_guess1 != M[chap * depth + n_added]) {
+				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
 					indexes_pbwt_neighbour[chap].push_back(hap_guess1);
-					M[chap * depth + n_added] = hap_guess1;
+					M[chap * 2 * depth + n_added] = hap_guess1;
 				}
 				offset1++; n_added++;
 			} else {

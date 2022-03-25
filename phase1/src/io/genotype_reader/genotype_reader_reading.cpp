@@ -33,7 +33,14 @@ void genotype_reader::readGenotypes() {
 	if (bcf_sr_set_regions(sr, region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + region + "]");
 
 	//Opening file(s)
-	for (int f = 0 ; f < 3 ; f ++) if (panels[f] && !(bcf_sr_add_reader (sr, filenames[f].c_str()))) vrb.error("Problem opening index file for [" + filenames[f] + "]");
+	for (int f = 0 ; f < 3 ; f ++) if (panels[f] && !(bcf_sr_add_reader (sr, filenames[f].c_str()))) {
+    	switch (sr->errnum) {
+		case not_bgzf:			vrb.error("Opening [" + filenames[f] + "]: not compressed with bgzip"); break;
+		case idx_load_failed: 	vrb.error("Opening [" + filenames[f] + "]: impossible to load index file"); break;
+		case file_type_error: 	vrb.error("Opening [" + filenames[f] + "]: file format not supported by HTSlib"); break;
+		default : 				vrb.error("Opening [" + filenames[f] + "]: unknown error"); break;
+		}
+	}
 
 	//Main sample IDs processing
 	map < string, int > map_names;

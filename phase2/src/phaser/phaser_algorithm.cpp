@@ -61,7 +61,7 @@ void phaser::phase() {
 
 
 	//STEP1: haplotype selection
-	H.select();
+	H.select(V, G);
 
 	//STEP2: HMM computations
 	vrb.title("HMM computations");
