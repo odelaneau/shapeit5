@@ -35,8 +35,6 @@ void phaser::read_files_and_initialise() {
 		pthread_mutex_init(&mutex_workers, NULL);
 	}
 
-	cout << "SIZE = " << sizeof(state) << endl;
-
     //step1: Parsing region string
 	buildCoordinates();
 

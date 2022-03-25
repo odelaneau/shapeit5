@@ -33,8 +33,22 @@ void genotype_reader::scanGenotypes() {
 	if (bcf_sr_set_regions(sr, scaffold_region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + scaffold_region + "]");
 
 	//Opening file(s)
-	if (!(bcf_sr_add_reader (sr, funphased.c_str()))) vrb.error("Problem opening index file for [" + funphased + "]");
-	if (!(bcf_sr_add_reader (sr, fphased.c_str()))) vrb.error("Problem opening index file for [" + fphased + "]");
+	if (!(bcf_sr_add_reader (sr, funphased.c_str()))) {
+    	switch (sr->errnum) {
+		case not_bgzf:			vrb.error("Opening [" + funphased + "]: not compressed with bgzip"); break;
+		case idx_load_failed: 	vrb.error("Opening [" + funphased + "]: impossible to load index file"); break;
+		case file_type_error: 	vrb.error("Opening [" + funphased + "]: file format not supported by HTSlib"); break;
+		default : 				vrb.error("Opening [" + funphased + "]: unknown error"); break;
+		}
+	}
+	if (!(bcf_sr_add_reader (sr, fphased.c_str()))) {
+    	switch (sr->errnum) {
+		case not_bgzf:			vrb.error("Opening [" + fphased + "]: not compressed with bgzip"); break;
+		case idx_load_failed: 	vrb.error("Opening [" + fphased + "]: impossible to load index file"); break;
+		case file_type_error: 	vrb.error("Opening [" + fphased + "]: file format not supported by HTSlib"); break;
+		default : 				vrb.error("Opening [" + fphased + "]: unknown error"); break;
+		}
+	}
 
 	//Sample processing // Needs to be improved to handle cases where sample lists do not properly overlap (in number and ordering)
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);

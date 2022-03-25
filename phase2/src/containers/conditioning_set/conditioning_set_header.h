@@ -26,6 +26,7 @@
 
 #include <containers/variant_map.h>
 #include <containers/haplotype_set.h>
+#include <containers/genotype_set.h>
 
 
 class conditioning_set : public haplotype_set {
@@ -48,8 +49,9 @@ public:
 	void initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth, int _mac);
 
 	//STATES PROCESSING
-	void store(int l, vector < int > & A, vector < int > & C, vector < int > & M);
-	void select();
+	void storeCommon(vector < int > & A, vector < int > & M);
+	void storeRare(vector < int > & A, vector < int > & R, vector < rare_genotype > & G);
+	void select(variant_map &, genotype_set & G);
 };
 
 #endif
