@@ -112,8 +112,8 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set
 			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
 			//Load the state probs
 			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
-				float pl = (P.Pstates[ci+k].lpb * 1.0f) / 255;
-				float pr = (P.Pstates[ci+k].rpb * 1.0f) / 255;
+				float pl = ((P.Pstates[ci+k].lpb+1) * 1.0f) / 255;
+				float pr = ((P.Pstates[ci+k].rpb+1) * 1.0f) / 255;
 				float kprob = pl * weight + pr * (1.0f - weight);
 				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
 				cstates[2*unphased[u]+h].push_back(kidx);
@@ -172,8 +172,8 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
 			//Load the state probs
 			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
-				float pl = (P.Pstates[ci+k].lpb * 1.0f) / 255;
-				float pr = (P.Pstates[ci+k].rpb * 1.0f) / 255;
+				float pl = ((P.Pstates[ci+k].lpb+1) * 1.0f) / 255;
+				float pr = ((P.Pstates[ci+k].rpb+1) * 1.0f) / 255;
 				float kprob = pl * weight + pr * (1.0f - weight);
 				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
 				cstates[2*unphased[u]+h].push_back(kidx);

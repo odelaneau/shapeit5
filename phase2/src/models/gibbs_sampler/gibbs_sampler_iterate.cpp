@@ -66,7 +66,7 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			sum = accumulate(gprob.begin(), gprob.end(), 0.0f);
 			//for (int g = 0 ; g < 4 ; g++) gprob[g] /= sum;
 
-			//cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
+			if (!(sum > 0)) cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
 			assert(sum > 0);
 
 			//
