@@ -47,7 +47,6 @@ public:
 
 	//ARRAYS
 	vector < vector < float > > alpha;
-	vector < float > alphaSum;
 	vector < float > beta;
 	vector < bool > storageEvents;
 
@@ -58,7 +57,7 @@ public:
 	~hmm_scaffold();
 
 	void forward();
-	unsigned int backward(vector < bool > & cevents, vector < state > & cstates);
+	void backward(vector < bool > & cevents, vector < state > & cstates);
 };
 
 #endif

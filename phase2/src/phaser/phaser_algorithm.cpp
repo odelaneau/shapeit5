@@ -45,8 +45,8 @@ void phaser::hmmcompute(int id_job) {
 	HMM0.forward();
 	HMM1.forward();
 	G.mapUnphasedOntoScaffold(id_job, cevents);
-	unsigned int nstates0 = HMM0.backward(cevents, cstates0);
-	unsigned int nstates1 = HMM1.backward(cevents, cstates1);
+	HMM0.backward(cevents, cstates0);
+	HMM1.backward(cevents, cstates1);
 
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
 	for (int e0 = 0 ; e0 < cstates0.size() ; e0 ++) P.Pstates.push_back(cstates0[e0]);
