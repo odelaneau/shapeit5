@@ -36,11 +36,14 @@ public:
 	vector < bool > sites_pbwt_selection;
 	vector < int > sites_pbwt_grouping;
 	unsigned int sites_pbwt_ngroups;
+	unsigned long int ncollisions;
+	unsigned long int npushes;
 
 	//PARAMETERS FOR PBWT
 	int depth;
 
 	//STATE DATA
+	vector < pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
 	vector < vector < unsigned int > > indexes_pbwt_neighbour;
 
 	//CONSTRUCTOR/DESTRUCTOR
@@ -50,7 +53,7 @@ public:
 
 	//STATES PROCESSING
 	void storeCommon(vector < int > & A, vector < int > & M);
-	void storeRare(vector < int > & A, vector < int > & R, vector < rare_genotype > & G);
+	void storeRare(vector < int > & R, vector < rare_genotype > & G);
 	void select(variant_map &, genotype_set & G);
 };
 
