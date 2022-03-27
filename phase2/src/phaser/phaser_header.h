@@ -49,6 +49,10 @@ public:
 	int i_jobs, nthreads;
 	vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
+	vector < vector < pair < int, float > > > thread_data;
+
+	int errorRare, errorCommon, totalRare, totalCommon, totalSite, doneSite;
+
 
 	//GENOMIC REGION
 	string chrid;
@@ -65,6 +69,8 @@ public:
 
 	//METHODS
 	void hmmcompute(int);
+	void gibbscompute(int);
+
 	void phase();
 
 

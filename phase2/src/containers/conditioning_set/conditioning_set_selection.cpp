@@ -25,6 +25,9 @@
 void conditioning_set::select(variant_map & V, genotype_set & G) {
 	tac.clock();
 
+	npushes = 0;
+	ncollisions = 0;
+
 	vector < int > A = vector < int > (n_haplotypes, 0);
 	vector < int > B = vector < int > (n_haplotypes, 0);
 	vector < int > R = vector < int > (n_haplotypes, 0);
@@ -60,24 +63,39 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 				if (selc) storeCommon(A, M);
 			}
-		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(A, R, G.GRvar_genotypes[vr]);
+		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
 		vrb.progress("  * PBWT selection", vt * 1.0 / V.sizeFull());
 	}
 
 	//Summary
+	sort(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end());
+	indexes_pbwt_neighbour_serialized.erase(unique(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end()), indexes_pbwt_neighbour_serialized.end());
+
 	basic_stats statK;
-	for (int h = 0 ; h < n_haplotypes ; h ++) {
-		sort(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end());
+	for (long int h = 0, e = 0 ; h < n_haplotypes ; h ++) {
+		vector < unsigned int > buffer;
+		while (indexes_pbwt_neighbour_serialized[e].first == h) {
+			buffer.push_back(indexes_pbwt_neighbour_serialized[e].second);
+			e++;
+		}
+		//cout << endl << h << " " << buffer.size() << endl;
+		indexes_pbwt_neighbour[h].reserve(buffer.size());
+		indexes_pbwt_neighbour[h] = buffer;
+		//sort(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end());
+		//indexes_pbwt_neighbour[h].erase(unique(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end()), indexes_pbwt_neighbour[h].end());
+		//indexes_pbwt_neighbour[h].shrink_to_fit();
 		assert(indexes_pbwt_neighbour[h].size());
 		statK.push(indexes_pbwt_neighbour[h].size());
 	}
 
+	indexes_pbwt_neighbour_serialized.clear();
+	indexes_pbwt_neighbour_serialized.shrink_to_fit();
 
 	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("  + #collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
-void conditioning_set::storeRare(vector < int > & A, vector < int > & R, vector < rare_genotype > & G) {
-
+void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & G) {
 	vector < pair < int, int > > N;
 	for (int g = 0 ; g < G.size() ; g ++) {
 		if (!G[g].mis) {
@@ -87,17 +105,16 @@ void conditioning_set::storeRare(vector < int > & A, vector < int > & R, vector 
 			N.push_back( pair < int, int > (R[hap1], hap1));
 		}
 	}
-
 	sort(N.begin(), N.end());
-
 	for (int h = 0 ; h < N.size() ; h ++) {
 		int target_hap = N[h].second;
-		if (G[h/2].het) {
-			int from = ((h-depth)<0)?0:(h-depth);
-			int to = ((h+depth)<N.size())?(h+depth):(N.size()-1);
-			for (int c = from ; c <= to ; c ++) {
-				int cond_hap = N[c].second;
-				if (target_hap/2 != cond_hap/2) indexes_pbwt_neighbour[target_hap].push_back(cond_hap);
+		int from = ((h-depth)<0)?0:(h-depth);
+		int to = ((h+depth)<N.size())?(h+depth):(N.size()-1);
+		for (int c = from ; c <= to ; c ++) {
+			int cond_hap = N[c].second;
+			if (target_hap/2 != cond_hap/2) {
+				//indexes_pbwt_neighbour[target_hap].push_back(cond_hap);
+				indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, cond_hap));
 			}
 		}
 	}
@@ -117,26 +134,34 @@ void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 			} else add_guess1 = 0;
 			if (add_guess0 && add_guess1) {
 				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
-					indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+					//indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
 					M[chap * 2 * depth + n_added] = hap_guess0;
-				}
+					npushes++;
+				} else ncollisions++;
 				offset0++; n_added++;
 				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
-					indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+					//indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
 					M[chap * 2 * depth + n_added] = hap_guess1;
-				}
+					npushes++;
+				} else ncollisions++;
 				offset1++; n_added++;
 			} else if (add_guess0) {
 				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
-					indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+					//indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
 					M[chap * 2 * depth + n_added] = hap_guess0;
-				}
+					npushes++;
+				} else ncollisions++;
 				offset0++; n_added++;
 			} else if (add_guess1) {
 				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
-					indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+					//indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
 					M[chap * 2 * depth + n_added] = hap_guess1;
-				}
+					npushes++;
+				} else ncollisions++;
 				offset1++; n_added++;
 			} else {
 				offset0++;
