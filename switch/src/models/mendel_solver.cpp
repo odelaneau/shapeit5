@@ -125,7 +125,7 @@ void mendel_solver::writePerSample(string fout) {
 		fdo << H.vecSamples[i];
 		if (fidx != -1 && midx != -1) fdo << " " << H.vecSamples[fidx] << " " << H.vecSamples[midx];
 		if (fidx != -1 && midx == -1) fdo << " " << H.vecSamples[fidx] << " -1";
-		if (fidx == -1 && midx != -1) fdo << " -1 " << H.vecSamples[fidx];
+		if (fidx == -1 && midx != -1) fdo << " -1 " << H.vecSamples[midx];
 		if (fidx == -1 && midx == -1) fdo << " -1 -1";
 
 		for (int l = 0 ; l < H.n_variants ; l ++) {

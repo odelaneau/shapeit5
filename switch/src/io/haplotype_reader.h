@@ -39,6 +39,7 @@ public:
 
 	//IO
 	void readHaplotypes(string ftruth, string festi, string ffreq);
+	void readHaplotypes(string ftruth, string festi);
 };
 
 #endif

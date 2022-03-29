@@ -69,7 +69,6 @@ void switcher::parse_command_line(vector < string > & args) {
 void switcher::check_options() {
 	if (!options.count("validation")) vrb.error("You must specify --validation");
 	if (!options.count("estimation")) vrb.error("You must specify --estimation");
-	if (!options.count("frequency")) vrb.error("You must specify --frequency");
 	if (!options.count("region")) vrb.error("You must specify a region or chromosome to process using --region");
 	if (!options.count("output")) vrb.error("You must specify a prefix for output files with --output");
 
@@ -81,7 +80,7 @@ void switcher::verbose_files() {
 	vrb.title("Files:");
 	vrb.bullet("Validation VCF: [" + options["validation"].as < string > () + "]");
 	vrb.bullet("Phased VCF    : [" + options["estimation"].as < string > () + "]");
-	vrb.bullet("Frequency VCF : [" + options["frequency"].as < string > () + "]");
+	if (options.count("frequency")) vrb.bullet("Frequency VCF : [" + options["frequency"].as < string > () + "]");
 	vrb.bullet("Output prefix : [" + options["output"].as < string > () + "]");
 	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
