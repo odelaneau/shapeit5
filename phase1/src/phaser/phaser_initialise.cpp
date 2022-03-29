@@ -1,29 +1,30 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Olivier Delaneau, University of Lausanne
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-////////////////////////////////////////////////////////////////////////////////
+/*******************************************************************************
+ * Copyright (C) 2018-2022 Olivier Delaneau, University of Lausanne
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
 #include <phaser/phaser_header.h>
 
 #include <io/genotype_reader/genotype_reader_header.h>
 #include <io/haplotype_writer.h>
 #include <io/gmap_reader.h>
+#include <io/pedigree_reader.h>
 #include <modules/genotype_builder.h>
 
 
@@ -78,7 +79,14 @@ void phaser::read_files_and_initialise() {
 	//step5: Initialize genotype structures
 	genotype_builder(G, options["thread"].as < int > ()).build();
 
-	//step6: Allocate data structures for computations
+	//step6: Read pedigrees
+	if (options.count("pedigree")) {
+		pedigree_reader readerP;
+		readerP.readPedigreeFile(options["pedigree"].as < string > ());
+		G.scaffoldUsingPedigrees(readerP);
+	}
+
+	//step7: Allocate data structures for computations
 	unsigned int max_number_transitions = G.largestNumberOfTransitions();
 	unsigned int max_number_missing = G.largestNumberOfMissings();
 	threadData = vector < compute_job >(options["thread"].as < int > (), compute_job(V, G, H, max_number_transitions, max_number_missing));

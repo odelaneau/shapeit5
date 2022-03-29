@@ -1,26 +1,24 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Olivier Delaneau, University of Lausanne
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-////////////////////////////////////////////////////////////////////////////////
-
-
+/*******************************************************************************
+ * Copyright (C) 2018-2022 Olivier Delaneau, University of Lausanne
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
 #include "../../versions/versions.h"
 
 #include <phaser/phaser_header.h>
@@ -38,6 +36,7 @@ void phaser::declare_options() {
 			("reference,H", bpo::value < string >(), "Reference panel of haplotypes in VCF/BCF format")
 			("scaffold,S", bpo::value < string >(), "Scaffold of haplotypes in VCF/BCF format")
 			("map,M", bpo::value < string >(), "Genetic map")
+			("pedigree", bpo::value < string >(), "Pedigree information (kid father mother)")
 			("region,R", bpo::value < string >(), "Target region");
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
@@ -127,6 +126,7 @@ void phaser::verbose_files() {
 	vrb.bullet("Input VCF     : [" + options["input"].as < string > () + "]");
 	if (options.count("reference")) vrb.bullet("Reference VCF : [" + options["reference"].as < string > () + "]");
 	if (options.count("scaffold")) vrb.bullet("Scaffold VCF  : [" + options["scaffold"].as < string > () + "]");
+	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
 	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
 	if (options.count("bingraph")) vrb.bullet("Output BIN    : [" + options["bingraph"].as < string > () + "]");
@@ -137,15 +137,10 @@ void phaser::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
-
 	vrb.bullet("MCMC    : " + get_iteration_scheme());
-
 	vrb.bullet("PBWT    : [window = " + stb.str(options["pbwt-window"].as < double > ()) + "cM / depth = " + stb.str(options["pbwt-depth"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / missing = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
-
 	if (options.count("map"))  vrb.bullet("HMM     : [window = " + stb.str(options["hmm-window"].as < double > ()) + "cM / Ne = " + stb.str(options["hmm-ne"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [window = " + stb.str(options["hmm-window"].as < double > ()) + "cM / Ne = " + stb.str(options["hmm-ne"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
-
 	if (options.count("filter-snp") || (!options["filter-maf"].defaulted()))
 		vrb.bullet("FILTERS : [snp only = " + stb.str(options.count("filter-snp")) + " / MAF = " + stb.str(options["filter-maf"].as < double > ()) + "]");
-
 }

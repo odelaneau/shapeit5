@@ -1,24 +1,24 @@
-////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Olivier Delaneau, University of Lausanne
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-////////////////////////////////////////////////////////////////////////////////
+/*******************************************************************************
+ * Copyright (C) 2018-2022 Olivier Delaneau, University of Lausanne
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
 #include <containers/genotype_set.h>
 
 genotype_set::genotype_set() {
@@ -93,3 +93,42 @@ void genotype_set::solve() {
 	for (int i = 0 ; i < vecG.size() ; i ++) vecG[i]->solve();
 	vrb.bullet("HAP solving (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
+
+void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
+	tac.clock();
+
+	// Build map
+	map < string, genotype * > mapG;
+	for (int i = 0 ; i < n_ind ; i ++) mapG.insert(pair < string, genotype * > (vecG[i]->name, vecG[i]));
+
+	//Mapping samples
+	unsigned int ntrios = 0, nduos = 0, nmendels = 0;
+	map < string, genotype * > :: iterator itK, itM, itF;
+	vector < bool > scaffolded = vector < bool > (n_ind, false);
+	for (int i = 0 ; i < pr.kids.size() ; i ++) {
+		itK = mapG.find(pr.kids[i]);
+		itF = mapG.find(pr.fathers[i]);
+		itM = mapG.find(pr.mothers[i]);
+		genotype * gkid = (itK != mapG.end())?itK->second : NULL;
+		genotype * gfather = (itF != mapG.end())?itF->second : NULL;
+		genotype * gmother = (itM != mapG.end())?itM->second : NULL;
+		if (gkid) {
+			if (gfather && gmother) {
+				nmendels += gkid->scaffoldTrio(gfather, gmother);
+				ntrios++;
+			} else if (gfather) {
+				nmendels += gkid->scaffoldDuoFather(gfather);
+				nduos++;
+			} else if (gmother) {
+				nmendels += gkid->scaffoldDuoMother(gmother);
+				nduos++;
+			}
+		}
+	}
+
+	//Verbose
+	vrb.bullet("PED mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duos = " + stb.str(nduos));
+	vrb.bullet2("#mendel_errors = " + stb.str(nmendels) + " (" + stb.str(nmendels * 100.0 / ((ntrios+nduos)*n_site), 2) + "%)");
+}
+
