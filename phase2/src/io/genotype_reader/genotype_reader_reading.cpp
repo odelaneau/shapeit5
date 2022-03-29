@@ -151,7 +151,7 @@ void genotype_reader::readGenotypes() {
 
 	// Report
 	vrb.bullet("VCF/BCF parsing ("+stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("  + Scaffold : R/R=" + stb.str(n_scaffold_genotypes[0]) + " R/A=" + stb.str(n_scaffold_genotypes[1]) + " A/A=" + stb.str(n_scaffold_genotypes[2]) + " ./.=" + stb.str(n_scaffold_genotypes[3]));
-	vrb.bullet("  + Common   : R/R=" + stb.str(n_common_genotypes[0]) + " R/A=" + stb.str(n_common_genotypes[1]) + " A/A=" + stb.str(n_common_genotypes[2]) + " ./.=" + stb.str(n_common_genotypes[3]));
-	vrb.bullet("  + Rare     : R/R=" + stb.str(n_rare_genotypes[0]) + " R/A=" + stb.str(n_rare_genotypes[1]) + " A/A=" + stb.str(n_rare_genotypes[2]) + " ./.=" + stb.str(n_rare_genotypes[3]));
+	vrb.bullet2("Scaffold : R/R=" + stb.str(n_scaffold_genotypes[0]) + " R/A=" + stb.str(n_scaffold_genotypes[1]) + " A/A=" + stb.str(n_scaffold_genotypes[2]) + " ./.=" + stb.str(n_scaffold_genotypes[3]));
+	vrb.bullet2("Common   : R/R=" + stb.str(n_common_genotypes[0]) + " R/A=" + stb.str(n_common_genotypes[1]) + " A/A=" + stb.str(n_common_genotypes[2]) + " ./.=" + stb.str(n_common_genotypes[3]));
+	vrb.bullet2("Rare     : R/R=" + stb.str(n_rare_genotypes[0]) + " R/A=" + stb.str(n_rare_genotypes[1]) + " A/A=" + stb.str(n_rare_genotypes[2]) + " ./.=" + stb.str(n_rare_genotypes[3]));
 }

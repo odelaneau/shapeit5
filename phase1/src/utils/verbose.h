@@ -96,6 +96,11 @@ public:
 		if (verbose_on_log) log << "  * " << s << endl;
 	}
 
+	void bullet2(string s) {
+		if (verbose_on_screen) cout << "      + " << s << endl;
+		if (verbose_on_log) log << "      + " << s << endl;
+	}
+
 	void warning(string s) {
 		if (verbose_on_screen) cout << endl << "\x1B[33m" << "WARNING: " <<  "\033[0m" << s << endl;
 		if (verbose_on_log) log << endl << "WARNING: " << s << endl;

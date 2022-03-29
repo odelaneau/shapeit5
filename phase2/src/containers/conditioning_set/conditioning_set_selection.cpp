@@ -92,7 +92,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	indexes_pbwt_neighbour_serialized.shrink_to_fit();
 
 	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("  + #collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
+	vrb.bullet2("#collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
 void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & G) {
