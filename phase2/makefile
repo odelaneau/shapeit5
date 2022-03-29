@@ -1,5 +1,5 @@
-#COMPILER MODE C++11
-CXX=g++ -std=c++11
+#COMPILER MODE C++17
+CXX=g++ -std=c++17
 
 
 #create folders
@@ -7,7 +7,7 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3
+CXXFLAG=-O3 -mavx2 -mfma
 LDFLAG=-O3
 
 #DYNAMIC LIBRARIES

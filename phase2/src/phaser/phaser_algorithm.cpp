@@ -71,9 +71,9 @@ void * gibbscompute_callback(void * ptr) {
 
 
 void phaser::gibbscompute(int id_job) {
-	int errorRare_tmp = 0, errorCommon_tmp = 0, totalRare_tmp = 0, totalCommon_tmp = 0;
 	gibbs_sampler GS (G.n_samples, options["mcmc-iterations"].as < int > (), options["mcmc-burnin"].as < int > ());
 	for (int v = 0 ; v < thread_data[id_job].size() ; v ++) {
+		int errorRare_tmp = 0, errorCommon_tmp = 0, totalRare_tmp = 0, totalCommon_tmp = 0;
 		int vt = thread_data[id_job][v].first;
 		float weight = thread_data[id_job][v].second;
 		if (V.vec_full[vt]->type == VARTYPE_RARE) {
@@ -142,5 +142,5 @@ void phaser::phase() {
 	} else gibbscompute(0);
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("Error rate at rare = " + stb.str(errorRare*100.0/totalRare, 4));
-	vrb.bullet("Error rate at common = " + stb.str(errorCommon*100.0/totalCommon, 4) + " / " + stb.str(errorCommon, 4) + " " + stb.str(totalCommon, 4));
+	vrb.bullet("Error rate at common = " + stb.str(errorCommon*100.0/totalCommon, 4));
 }
