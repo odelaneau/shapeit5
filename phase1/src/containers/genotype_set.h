@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright (C) 2018 Olivier Delaneau, University of Lausanne
- * 
+ * Copyright (C) 2018-2022 Olivier Delaneau, University of Lausanne
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,12 +26,16 @@
 
 #include <objects/genotype/genotype_header.h>
 #include <containers/variant_map.h>
+#include <io/pedigree_reader.h>
+
 
 class genotype_set {
 public:
 	//DATA
-	int n_site, n_ind;					//Number of variants, number of individuals
-	vector < genotype * > vecG;			//Vector of genotype graphs
+	int n_site, n_ind;							//Number of variants, number of individuals
+	vector < genotype * > vecG;					//Vector of genotype graphs
+	vector < genotype * > vecFathers;			//Points to fathers, NULL otherwise
+	vector < genotype * > vecMothers;			//Points to mothers, NULL otherwise
 
 	//CONSTRUCTOR/DESTRUCTOR
 	genotype_set();
@@ -41,9 +45,11 @@ public:
 	//METHODS
 	void imputeMonomorphic(variant_map &);		//Impute to REF monomorphic variants
 	unsigned int largestNumberOfTransitions();	//Get the number of transitions in the larger genotype graph. Used to initialize memory space for multi-threading.
-	unsigned int largestNumberOfMissings();	//Get the number of transitions in the larger genotype graph. Used to initialize memory space for multi-threading.
+	unsigned int largestNumberOfMissings();		//Get the number of transitions in the larger genotype graph. Used to initialize memory space for multi-threading.
 	unsigned long numberOfSegments();			//Total number of segments across all genotype graphs (used for verbose).
 	void solve();								//
+	void scaffoldUsingPedigrees(pedigree_reader &);
+
 };
 
 #endif
