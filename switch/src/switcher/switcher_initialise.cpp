@@ -25,7 +25,11 @@
 
 void switcher::read_files_and_initialise() {
 	//step1: Read input files
-	haplotype_reader(H, options["region"].as < string > (), options["thread"].as < int > ()).readHaplotypes(options["validation"].as < string > (), options["estimation"].as < string > (), options["frequency"].as < string > ());
+
+	if (!options.count("frequency"))
+		haplotype_reader(H, options["region"].as < string > (), options["thread"].as < int > ()).readHaplotypes(options["validation"].as < string > (), options["estimation"].as < string > (), options["frequency"].as < string > ());
+	else
+		haplotype_reader(H, options["region"].as < string > (), options["thread"].as < int > ()).readHaplotypes(options["validation"].as < string > (), options["estimation"].as < string > ());
 
 	//step2: read pedigrees if necessary
 	if (options.count("pedigree")) H.readPedigrees(options["pedigree"].as < string > ());
