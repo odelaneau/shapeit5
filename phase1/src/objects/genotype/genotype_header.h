@@ -92,9 +92,9 @@ public:
 	void mapMerges(vector < double > &, double , vector < bool > &);
 	void performMerges(vector < double > &, vector < bool > &);
 	void store(vector < double > &, vector < float > &);
-	unsigned int scaffoldTrio(genotype *, genotype *);
-	unsigned int scaffoldDuoFather(genotype *);
-	unsigned int scaffoldDuoMother(genotype *);
+	void scaffoldTrio(genotype *, genotype *, vector < unsigned int > &);
+	void scaffoldDuoFather(genotype *, vector < unsigned int > &);
+	void scaffoldDuoMother(genotype *, vector < unsigned int > &);
 
 	//INLINES
 	unsigned int countDiplotypes(unsigned long);

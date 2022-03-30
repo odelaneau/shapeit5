@@ -76,15 +76,15 @@ void phaser::read_files_and_initialise() {
 
 	if (!options.count("pbwt-disable-init")) H.solve(&G);
 
-	//step5: Initialize genotype structures
-	genotype_builder(G, options["thread"].as < int > ()).build();
-
-	//step6: Read pedigrees
+	//step5: Read pedigrees
 	if (options.count("pedigree")) {
 		pedigree_reader readerP;
 		readerP.readPedigreeFile(options["pedigree"].as < string > ());
 		G.scaffoldUsingPedigrees(readerP);
 	}
+
+	//step6: Initialize genotype structures
+	genotype_builder(G, options["thread"].as < int > ()).build();
 
 	//step7: Allocate data structures for computations
 	unsigned int max_number_transitions = G.largestNumberOfTransitions();

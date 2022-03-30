@@ -94,8 +94,13 @@ void genotype_set::solve() {
 	vrb.bullet("HAP solving (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
+//counts[0] : # observed mendel errors
+//counts[1] : # possible mendel errors
+//counts[2] : # hets being scaffolded
+//counts[2] : # hets not being scaffolded
 void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	tac.clock();
+	vector < unsigned int > counts = vector < unsigned int >(4, 0);
 
 	// Build map
 	map < string, genotype * > mapG;
@@ -114,13 +119,13 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 		genotype * gmother = (itM != mapG.end())?itM->second : NULL;
 		if (gkid) {
 			if (gfather && gmother) {
-				nmendels += gkid->scaffoldTrio(gfather, gmother);
+				gkid->scaffoldTrio(gfather, gmother, counts);
 				ntrios++;
 			} else if (gfather) {
-				nmendels += gkid->scaffoldDuoFather(gfather);
+				gkid->scaffoldDuoFather(gfather, counts);
 				nduos++;
 			} else if (gmother) {
-				nmendels += gkid->scaffoldDuoMother(gmother);
+				gkid->scaffoldDuoMother(gmother, counts);
 				nduos++;
 			}
 		}
@@ -129,6 +134,7 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	//Verbose
 	vrb.bullet("PED mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duos = " + stb.str(nduos));
-	vrb.bullet2("#mendel_errors = " + stb.str(nmendels) + " (" + stb.str(nmendels * 100.0 / ((ntrios+nduos)*n_site), 2) + "%)");
+	vrb.bullet2("%mendel_errors = " + stb.str(counts[0] *100.0 / counts[1], 2) + " (n=" + stb.str(counts[0]) + ")");
+	vrb.bullet2("%hets_phased = " + stb.str(counts[2]*100.0 / (counts[2]+counts[3]), 2) + " (n=" + stb.str(counts[2]) + ")");
 }
 
