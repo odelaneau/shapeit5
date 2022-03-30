@@ -44,7 +44,7 @@ void phaser::read_files_and_initialise() {
 	readerG.setRegion(options["region"].as < string > ());
 	readerG.setMainFilename(options["input"].as < string > ());
 	if (options.count("reference")) readerG.addReferenceFilename(options["reference"].as < string > ());
-	if (options.count("scaffold")) readerG.addReferenceFilename(options["scaffold"].as < string > ());
+	if (options.count("scaffold")) readerG.addScaffoldFilename(options["scaffold"].as < string > ());
 	if (options.count("filter-snp")) readerG.setFilterSNP();
 	if (!options["filter-maf"].defaulted()) readerG.setFilterMAF(options["filter-maf"].as < double > ());
 

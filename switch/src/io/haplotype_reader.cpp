@@ -115,7 +115,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq)
 			}
 		}
 		n_variant_tot ++;
-		if (n_variant_tot % 1000 == 0) vrb.bullet (stb.str(n_variant_tot) + " lines processed");
+		if (n_variant_tot % 10000 == 0) vrb.bullet (stb.str(n_variant_tot) + " lines processed");
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));
@@ -208,7 +208,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi) {
 			}
 		}
 		n_variant_tot ++;
-		if (n_variant_tot % 1000 == 0) vrb.bullet (stb.str(n_variant_tot) + " lines processed");
+		if (n_variant_tot % 10000 == 0) vrb.bullet (stb.str(n_variant_tot) + " lines processed");
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));

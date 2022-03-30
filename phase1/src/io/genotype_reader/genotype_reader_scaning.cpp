@@ -57,17 +57,11 @@ void genotype_reader::scanGenotypes() {
 		//Not in the intersect of ref and main panels
 		if (panels[1] && nset == 1) { n_variants_noverlap++; continue; }
 
-		//cout << "TEST1" << endl;
-
 		//Not a bi-alleleic variant
 		if (line_main->n_allele != 2) { n_variants_multi++; continue; }
 
-		//cout << "TEST2" << endl;
-
 		//Unpack information if filtering
 		if (filter_snp_only || (filter_min_maf > 0)) bcf_unpack(line_main, BCF_UN_STR);
-
-		//cout << "TEST3" << endl;
 
 		//Keep SNPs only
 		if (filter_snp_only) {
@@ -79,9 +73,7 @@ void genotype_reader::scanGenotypes() {
 			if (!bref || !balt) continue;
 		}
 
-		//cout << "TEST4" << endl;
-
-		//Keep common SNPs only
+		//Keep common only
 		if (filter_min_maf > 0) {
 			rAN_main = bcf_get_info_int32(sr->readers[0].header, line_main, "AN", &vAN_main, &nAN_main);
 			rAC_main = bcf_get_info_int32(sr->readers[0].header, line_main, "AC", &vAC_main, &nAC_main);
@@ -91,7 +83,6 @@ void genotype_reader::scanGenotypes() {
 			n_variants_rare += (maf < filter_min_maf);
 			if (maf < filter_min_maf) continue;
 		}
-		//cout << "TEST5" << endl;
 
 		//Push variant information
 		bcf_unpack(line_main, BCF_UN_STR);
@@ -108,12 +99,12 @@ void genotype_reader::scanGenotypes() {
 		n_variants++;
 	}
 	bcf_sr_destroy(sr);
-	if (n_variants == 0) vrb.error("No variants to be phased!");
 	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + " / #sites=" + stb.str(n_variants) + " / region=" + region);
-	if (n_variants_noverlap) vrb.bullet(stb.str(n_variants_noverlap) + " sites not in the overlap with reference panel");
-	if (n_variants_multi) vrb.bullet(stb.str(n_variants_noverlap) + " multi-allelic sites removed");
-	if (n_variants_notsnp) vrb.bullet(stb.str(n_variants_notsnp) + " sites not bi-allelic SNPs removed");
-	if (n_variants_noverlap) vrb.bullet(stb.str(n_variants_rare) + " sites below MAF threshold removed");
+	if (n_variants_noverlap) vrb.bullet(stb.str(n_variants_noverlap) + " sites removed [not in reference panel]");
+	if (n_variants_multi) vrb.bullet(stb.str(n_variants_noverlap) + " sites removed [multi-allelic]");
+	if (n_variants_notsnp) vrb.bullet(stb.str(n_variants_notsnp) + " sites removed [not SNPs]");
+	if (n_variants_rare) vrb.bullet(stb.str(n_variants_rare) + " sites removed [below MAF threshold]");
+	if (n_variants == 0) vrb.error("No variants to be phased!");
 }
 

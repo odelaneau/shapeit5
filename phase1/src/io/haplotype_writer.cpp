@@ -67,7 +67,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 		bcf_update_id(hdr, rec, V.vec_pos[l]->id.c_str());
 		string alleles = V.vec_pos[l]->ref + "," + V.vec_pos[l]->alt;
 		bcf_update_alleles_str(hdr, rec, alleles.c_str());
-		int count_alt = 0;
+		int count_alt = 0, count_tot = H.n_hap;
 		for (int i = 0 ; i < G.n_ind ; i++) {
 			bool a0 = H.H_opt_var.get(l, 2*i+0);
 			bool a1 = H.H_opt_var.get(l, 2*i+1);
@@ -76,8 +76,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 			genotypes[2*i+1] = bcf_gt_phased(a1);
 		}
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
-		float freq_alt = count_alt * 1.0 / (2 * G.n_ind);
-		bcf_update_info_float(hdr, rec, "AF", &freq_alt, 1);
+		bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
 		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 		vrb.progress("  * VCF writing", (l+1)*1.0/V.size());
