@@ -54,10 +54,10 @@ void genotype_reader::readGenotypes() {
 	vector < int > mappingS2M;
 	if (panels[2]) {
 		int n_with_scaffold = 0;
-		n_scaf_samples = bcf_hdr_nsamples(sr->readers[2].header);
+		n_scaf_samples = bcf_hdr_nsamples(sr->readers[panels[1]+panels[2]].header);
 		mappingS2M = vector < int > (n_scaf_samples, -1);
 		for (int i = 0 ; i < n_scaf_samples ; i ++) {
-			string scaf_name = string(sr->readers[2].header->samples[i]);
+			string scaf_name = string(sr->readers[panels[1]+panels[2]].header->samples[i]);
 			map < string, int > :: iterator it = map_names.find(scaf_name);
 			if (it != map_names.end()) {
 				mappingS2M[i] = it->second;
@@ -88,8 +88,11 @@ void genotype_reader::readGenotypes() {
 
 			//Retrieve data in scaffold file if necessary and available
 			if (panels[2]) {
-				line_scaf = bcf_sr_get_line(sr, 2);
-				if (line_scaf) ngt_scaf = bcf_get_genotypes(sr->readers[2].header, line_scaf, &gt_arr_scaf, &ngt_arr_scaf); assert(ngt_scaf == 2 * n_scaf_samples);
+				line_scaf = bcf_sr_get_line(sr, panels[1]+panels[2]);
+				if (line_scaf) {
+					ngt_scaf = bcf_get_genotypes(sr->readers[panels[1]+panels[2]].header, line_scaf, &gt_arr_scaf, &ngt_arr_scaf);
+					assert(ngt_scaf == 2 * n_scaf_samples);
+				}
 			}
 
 			//Process main data
@@ -130,15 +133,16 @@ void genotype_reader::readGenotypes() {
 			//Process scaffold data
 			if (panels[2] && line_scaf) {
 				for(int i = 0 ; i < 2 * n_scaf_samples ; i += 2) {
-					if (mappingS2M[DIV2(i)] >= 0) {
+					int ind = mappingS2M[DIV2(i)];
+					if (ind >= 0) {
 						bool sa0 = (bcf_gt_allele(gt_arr_scaf[i+0])==1);
 						bool sa1 = (bcf_gt_allele(gt_arr_scaf[i+1])==1);
 						bool sph = (bcf_gt_is_phased(gt_arr_scaf[i+0]) || bcf_gt_is_phased(gt_arr_scaf[i+1]));
 						bool smi = (gt_arr_scaf[i+0] == bcf_gt_missing || gt_arr_scaf[i+1] == bcf_gt_missing);
-						if ((sa0 != sa1) && !smi && sph && VAR_GET_HET(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)])) {
-							VAR_SET_SCA(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)]);
-							sa0?VAR_SET_HAP0(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)]):VAR_CLR_HAP0(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)]);
-							sa1?VAR_SET_HAP1(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)]):VAR_CLR_HAP1(MOD2(i_variant_kept), G.vecG[mappingS2M[DIV2(i)]]->Variants[DIV2(i_variant_kept)]);
+						if ((sa0 != sa1) && !smi && sph && VAR_GET_HET(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)])) {
+							VAR_SET_SCA(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)]);
+							sa0?VAR_SET_HAP0(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)]):VAR_CLR_HAP0(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)]);
+							sa1?VAR_SET_HAP1(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)]):VAR_CLR_HAP1(MOD2(i_variant_kept), G.vecG[ind]->Variants[DIV2(i_variant_kept)]);
 							n_genotypes[4] ++;
 						}
 					}
