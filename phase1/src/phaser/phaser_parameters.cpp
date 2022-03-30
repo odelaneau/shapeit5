@@ -47,7 +47,7 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
-			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.02 cM by default)")
+			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.1cM by default)")
 			("pbwt-depth", bpo::value < int >()->default_value(4), "Depth of PBWT indexes to condition on")
 			("pbwt-mac", bpo::value < int >()->default_value(5), "Minimal Minor Allele Count at which PBWT is evaluated")
 			("pbwt-mdr", bpo::value < double >()->default_value(0.10), "Maximal Missing Data Rate at which PBWT is evaluated")
