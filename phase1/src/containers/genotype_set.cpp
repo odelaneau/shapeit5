@@ -61,7 +61,7 @@ void genotype_set::imputeMonomorphic(variant_map & V) {
 			V.vec_pos[v]->cmis = 0;
 		}
 	}
-	vrb.bullet("Impute monomorphic [n=" + stb.str(n_imputed_genotypes) + "(" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Impute monomorphic [n=" + stb.str(n_imputed_genotypes) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 unsigned int genotype_set::largestNumberOfTransitions() {

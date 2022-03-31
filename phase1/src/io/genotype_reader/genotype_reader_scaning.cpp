@@ -102,7 +102,7 @@ void genotype_reader::scanGenotypes() {
 	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + " / #sites=" + stb.str(n_variants) + " / region=" + region);
 	if (n_variants_noverlap) vrb.bullet(stb.str(n_variants_noverlap) + " sites removed [not in reference panel]");
-	if (n_variants_multi) vrb.bullet(stb.str(n_variants_noverlap) + " sites removed [multi-allelic]");
+	if (n_variants_multi) vrb.bullet(stb.str(n_variants_multi) + " sites removed [multi-allelic]");
 	if (n_variants_notsnp) vrb.bullet(stb.str(n_variants_notsnp) + " sites removed [not SNPs]");
 	if (n_variants_rare) vrb.bullet(stb.str(n_variants_rare) + " sites removed [below MAF threshold]");
 	if (n_variants == 0) vrb.error("No variants to be phased!");

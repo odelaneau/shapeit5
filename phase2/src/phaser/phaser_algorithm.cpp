@@ -89,10 +89,10 @@ void phaser::gibbscompute(int id_job) {
 
 		if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
 		doneSite++;
-		errorRare += errorRare_tmp;
-		errorCommon += errorCommon_tmp;
-		totalRare += totalRare_tmp;
-		totalCommon += totalCommon_tmp;
+		//errorRare += errorRare_tmp;
+		//errorCommon += errorCommon_tmp;
+		//totalRare += totalRare_tmp;
+		//totalCommon += totalCommon_tmp;
 		vrb.progress("  * Processing", doneSite*1.0/totalSite);
 		if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
 	}
@@ -141,6 +141,6 @@ void phaser::phase() {
 		for (int t = 0 ; t < nthreads ; t++) pthread_join( id_workers[t] , NULL);
 	} else gibbscompute(0);
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("Error rate at rare = " + stb.str(errorRare*100.0/totalRare, 4));
-	vrb.bullet("Error rate at common = " + stb.str(errorCommon*100.0/totalCommon, 4));
+	//vrb.bullet("Error rate at rare = " + stb.str(errorRare*100.0/totalRare, 4));
+	//vrb.bullet("Error rate at common = " + stb.str(errorCommon*100.0/totalCommon, 4));
 }

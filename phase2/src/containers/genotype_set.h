@@ -81,8 +81,8 @@ public:
 	vector < vector < rare_genotype > > GRind_genotypes;
 
 	//
-	bitmatrix GCvar_truth;
-	vector < vector < bool > > GRvar_truth;
+//	bitmatrix GCvar_truth;
+//	vector < vector < bool > > GRvar_truth;
 
 
 	//

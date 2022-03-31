@@ -49,8 +49,8 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf_hdr_append(hdr, string("##fileDate="+tac.date()).c_str());
 	bcf_hdr_append(hdr, string("##source=shapeit5 phase 1 v" + string(PHASE1_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_pos[0]->chr + ">").c_str());
-	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
-	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
+	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
+	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
 
 	//Add samples
