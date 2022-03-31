@@ -36,7 +36,6 @@ haplotype_segment::haplotype_segment(genotype * _G, bitmatrix & H, vector < unsi
 	n_missing = missing_last - missing_first + 1;
 
 	probSumT = 0.0f;
-#ifdef __AVX2__
 	prob = aligned_vector32 < float > (HAP_NUMBER * n_cond_haps, 0.0f);
 	probSumH = aligned_vector32 < float > (HAP_NUMBER, 0.0f);
 	probSumK = aligned_vector32 < float > (n_cond_haps, 0.0f);
@@ -48,19 +47,6 @@ haplotype_segment::haplotype_segment(genotype * _G, bitmatrix & H, vector < unsi
 		AlphaMissing = vector < aligned_vector32 < float > > (n_missing, aligned_vector32 < float > (HAP_NUMBER * n_cond_haps, 0.0f));
 		AlphaSumMissing = vector < aligned_vector32 < float > > (n_missing, aligned_vector32 < float > (HAP_NUMBER, 0.0f));
 	}
-#else
-	prob = vector < float > (HAP_NUMBER * n_cond_haps, 0.0f);
-	probSumH = vector < float > (HAP_NUMBER, 0.0f);
-	probSumK = vector < float > (n_cond_haps, 0.0f);
-	Alpha = vector < vector < float > > (segment_last - segment_first + 1, vector < float > (HAP_NUMBER * n_cond_haps, 0.0f));
-	AlphaSum = vector < vector < float > > (segment_last - segment_first + 1, vector < float > (HAP_NUMBER, 0.0f));
-	AlphaLocus = vector < int > (segment_last - segment_first + 1, 0);
-	AlphaSumSum = vector < float > (segment_last - segment_first + 1, 0.0);
-	if (n_missing > 0) {
-		AlphaMissing = vector < vector < float > > (n_missing, vector < float > (HAP_NUMBER * n_cond_haps, 0.0f));
-		AlphaSumMissing = vector < vector < float > > (n_missing, vector < float > (HAP_NUMBER, 0.0f));
-	}
-#endif
 	//Cache efficient data transfer for conditioning haplotypes
 	curr_rel_locus_offset = Hhap.subset(H, idxH, locus_first, locus_last);
 	Hvar.allocateFast(Hhap.n_cols, Hhap.n_rows);

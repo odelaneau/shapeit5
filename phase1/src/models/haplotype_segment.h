@@ -26,15 +26,11 @@
 #include <objects/compute_job.h>
 #include <objects/hmm_parameters.h>
 
-#ifdef __AVX2__
-
 #include <immintrin.h>
 #include <boost/align/aligned_allocator.hpp>
 
 template <typename T>
 using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T, 32 > >;
-
-#endif
 
 class haplotype_segment {
 private:
@@ -72,7 +68,6 @@ private:
 
 	//DYNAMIC ARRAYS
 	float probSumT;
-#ifdef __AVX2__
 	aligned_vector32 < float > prob;
 	aligned_vector32 < float > probSumK;
 	aligned_vector32 < float > probSumH;
@@ -84,19 +79,6 @@ private:
 	vector < aligned_vector32 < float > > AlphaSumMissing;
 	float HProbs [HAP_NUMBER * HAP_NUMBER] __attribute__ ((aligned(32)));
 	double DProbs [HAP_NUMBER * HAP_NUMBER * HAP_NUMBER * HAP_NUMBER] __attribute__ ((aligned(32)));
-#else
-	vector < float > prob;
-	vector < float > probSumK;
-	vector < float > probSumH;
-	vector < vector < float > > Alpha;
-	vector < vector < float > > AlphaSum;
-	vector < int > AlphaLocus;
-	vector < float > AlphaSumSum;
-	vector < vector < float > > AlphaMissing;
-	vector < vector < float > > AlphaSumMissing;
-	float HProbs [HAP_NUMBER * HAP_NUMBER];
-	double DProbs [HAP_NUMBER * HAP_NUMBER * HAP_NUMBER * HAP_NUMBER];
-#endif
 
 	//STATIC ARRAYS
 	float sumHProbs;
@@ -136,7 +118,6 @@ public:
 /*****************			HOMOZYGOUS GENOTYPE			************************/
 /*******************************************************************************/
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::INIT_HOM() {
 	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
@@ -150,31 +131,15 @@ void haplotype_segment::INIT_HOM() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::INIT_HOM() {
-	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		fill(prob.begin()+i, prob.begin()+i+HAP_NUMBER, (ag==ah)?1.0f:M.ed/M.ee);
-		for (int h = 0 ; h < HAP_NUMBER ; h ++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
-#ifdef __AVX2__
 inline
 bool haplotype_segment::RUN_HOM(char rare_allele) {
 	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
 	if (rare_allele < 0 || ag == rare_allele) {
 		__m256 _sum = _mm256_set1_ps(0.0f);
-		//__m256 _factor = _mm256_set1_ps(M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
 		__m256 _factor = _mm256_set1_ps(yt / (n_cond_haps * probSumT));
 		__m256 _tFreq = _mm256_load_ps(&probSumH[0]);
 		_tFreq = _mm256_mul_ps(_tFreq, _factor);
-		//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
 		__m256 _nt = _mm256_set1_ps(nt / probSumT);
 		__m256 _mismatch = _mm256_set1_ps(M.ed/M.ee);
 		for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
@@ -191,39 +156,12 @@ bool haplotype_segment::RUN_HOM(char rare_allele) {
 	}
 	return false;
 }
-#else
-inline
-bool haplotype_segment::RUN_HOM(char rare_allele) {
-	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
-	if (rare_allele < 0 || ag == rare_allele) {
-		//vector < float > _tFreq = vector < float >(HAP_NUMBER, M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
-		vector < float > _tFreq = vector < float >(HAP_NUMBER, yt / (n_cond_haps * probSumT));
-		for (int h = 0 ; h < HAP_NUMBER ; h++) _tFreq[h] *= probSumH[h];
-		//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-		float _nt = nt / probSumT;
-		float _mismatch = M.ed/M.ee;
-		fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-		for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-			bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-			for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] = (prob[i+h]*_nt)+_tFreq[h];
-			if (ag!=ah) for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] *= _mismatch;
-			for (int h = 0 ; h < HAP_NUMBER ; h ++) probSumH[h] += prob[i+h];
-		}
-		probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-		return true;
-	}
-	return false;
-}
-#endif
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::COLLAPSE_HOM() {
 	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
 	__m256 _sum = _mm256_set1_ps(0.0f);
-	//__m256 _tFreq = _mm256_set1_ps(M.t[curr_abs_locus-forward] / n_cond_haps);
-	__m256 _tFreq = _mm256_set1_ps(yt / n_cond_haps);					////Check divide by probSumT here!
-	//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
+	__m256 _tFreq = _mm256_set1_ps(yt / n_cond_haps);					//Check divide by probSumT here!
 	__m256 _nt = _mm256_set1_ps(nt / probSumT);
 	__m256 _mismatch = _mm256_set1_ps(M.ed/M.ee);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
@@ -237,30 +175,11 @@ void haplotype_segment::COLLAPSE_HOM() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::COLLAPSE_HOM() {
-	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	//float _tFreq = M.t[curr_abs_locus-forward] / n_cond_haps;
-	float _tFreq = yt / n_cond_haps;					////Check divide by probSumT here!
-	//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-	float _nt = nt / probSumT;
-	float _mismatch = M.ed/M.ee;
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		fill(prob.begin()+i, prob.begin()+i+HAP_NUMBER, (ag==ah)?((probSumK[k]*_nt)+_tFreq):(((probSumK[k]*_nt)+_tFreq)*_mismatch));
-		for (int h = 0 ; h < HAP_NUMBER ; h ++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
 /*******************************************************************************/
 /*****************			HETEROZYGOUS GENOTYPE			********************/
 /*******************************************************************************/
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::INIT_AMB() {
 	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
@@ -280,26 +199,7 @@ void haplotype_segment::INIT_AMB() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::INIT_AMB() {
-	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
-	for (int h = 0 ; h < HAP_NUMBER ; h ++) {
-		g0[h] = HAP_GET(amb_code,h)?M.ed/M.ee:1.0f;
-		g1[h] = HAP_GET(amb_code,h)?1.0f:M.ed/M.ee;
-	}
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		if (ah) memcpy(&prob[i], &g1[0], HAP_NUMBER*sizeof(float));
-		else memcpy(&prob[i], &g0[0], HAP_NUMBER*sizeof(float));
-		for (int h = 0 ; h < HAP_NUMBER ; h ++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::RUN_AMB() {
 	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
@@ -308,11 +208,9 @@ void haplotype_segment::RUN_AMB() {
 		g1[h] = HAP_GET(amb_code,h)?1.0f:M.ed/M.ee;
 	}
 	__m256 _sum = _mm256_set1_ps(0.0f);
-	//__m256 _factor = _mm256_set1_ps(M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
 	__m256 _factor = _mm256_set1_ps(yt / (n_cond_haps * probSumT));
 	__m256 _tFreq = _mm256_load_ps(&probSumH[0]);
 	_tFreq = _mm256_mul_ps(_tFreq, _factor);
-	//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
 	__m256 _nt = _mm256_set1_ps(nt / probSumT);
 	__m256 _emit[2]; _emit[0] = _mm256_loadu_ps(&g0[0]); _emit[1] = _mm256_loadu_ps(&g1[0]);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
@@ -326,31 +224,7 @@ void haplotype_segment::RUN_AMB() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::RUN_AMB() {
-	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
-	for (int h = 0 ; h < HAP_NUMBER ; h ++) {
-		g0[h] = HAP_GET(amb_code,h)?M.ed/M.ee:1.0f;
-		g1[h] = HAP_GET(amb_code,h)?1.0f:M.ed/M.ee;
-	}
-	//vector < float > _tFreq = vector < float >(HAP_NUMBER, M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
-	vector < float > _tFreq = vector < float >(HAP_NUMBER, yt / (n_cond_haps * probSumT));
-	for (int h = 0 ; h < HAP_NUMBER ; h++) _tFreq[h] *= probSumH[h];
-	//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-	float _nt = nt / probSumT;
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] = (prob[i+h]*_nt)+_tFreq[h];
-		for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] *= ah?g1[h]:g0[h];
-		for (int h = 0 ; h < HAP_NUMBER ; h++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::COLLAPSE_AMB() {
 	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
@@ -359,9 +233,7 @@ void haplotype_segment::COLLAPSE_AMB() {
 		g1[h] = HAP_GET(amb_code,h)?1.0f:M.ed/M.ee;
 	}
 	__m256 _sum = _mm256_set1_ps(0.0f);
-	//__m256 _tFreq = _mm256_set1_ps(M.t[curr_abs_locus-forward] / n_cond_haps);
 	__m256 _tFreq = _mm256_set1_ps(yt / n_cond_haps);
-	//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
 	__m256 _nt = _mm256_set1_ps(nt / probSumT);
 	__m256 _emit[2]; _emit[0] = _mm256_loadu_ps(&g0[0]); _emit[1] = _mm256_loadu_ps(&g1[0]);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
@@ -375,28 +247,6 @@ void haplotype_segment::COLLAPSE_AMB() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::COLLAPSE_AMB() {
-	unsigned char amb_code = G->Ambiguous[curr_abs_ambiguous];
-	for (int h = 0 ; h < HAP_NUMBER ; h ++) {
-		g0[h] = HAP_GET(amb_code,h)?M.ed/M.ee:1.0f;
-		g1[h] = HAP_GET(amb_code,h)?1.0f:M.ed/M.ee;
-	}
-	//float _tFreq = M.t[curr_abs_locus-forward] / n_cond_haps;
-	float _tFreq = yt / n_cond_haps;
-	//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-	float _nt = nt / probSumT;
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		fill(prob.begin()+i, prob.begin()+i+HAP_NUMBER, (probSumK[k]*_nt)+_tFreq);
-		for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] *= ah?g1[h]:g0[h];
-		for (int h = 0 ; h < HAP_NUMBER ; h++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
 /*******************************************************************************/
 /*****************			MISSING GENOTYPE			************************/
@@ -409,15 +259,12 @@ void haplotype_segment::INIT_MIS() {
 	probSumT = 1.0f;
 }
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::RUN_MIS() {
 	__m256 _sum = _mm256_set1_ps(0.0f);
-	//__m256 _factor = _mm256_set1_ps(M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
 	__m256 _factor = _mm256_set1_ps(yt / (n_cond_haps * probSumT));
 	__m256 _tFreq = _mm256_load_ps(&probSumH[0]);
 	_tFreq = _mm256_mul_ps(_tFreq, _factor);
-	//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
 	__m256 _nt = _mm256_set1_ps(nt / probSumT);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
 		__m256 _prob = _mm256_load_ps(&prob[i]);
@@ -428,30 +275,11 @@ void haplotype_segment::RUN_MIS() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::RUN_MIS() {
-	//vector < float > _tFreq = vector < float >(HAP_NUMBER, M.t[curr_abs_locus-forward] / (n_cond_haps * probSumT));
-	vector < float > _tFreq = vector < float >(HAP_NUMBER, yt / (n_cond_haps * probSumT));
-	for (int h = 0 ; h < HAP_NUMBER ; h++) _tFreq[h] *= probSumH[h];
-	//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-	float _nt = nt / probSumT;
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		for (int h = 0 ; h < HAP_NUMBER ; h++) prob[i+h] = (prob[i+h]*_nt)+_tFreq[h];
-		for (int h = 0 ; h < HAP_NUMBER ; h++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::COLLAPSE_MIS() {
 	__m256 _sum = _mm256_set1_ps(0.0f);
-	//__m256 _tFreq = _mm256_set1_ps(M.t[curr_abs_locus-forward] / n_cond_haps);
 	__m256 _tFreq = _mm256_set1_ps(yt / n_cond_haps);
-	//__m256 _nt = _mm256_set1_ps(M.nt[curr_abs_locus-forward] / probSumT);
 	__m256 _nt = _mm256_set1_ps(nt / probSumT);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
 		__m256 _prob = _mm256_set1_ps(probSumK[k]);
@@ -462,21 +290,6 @@ void haplotype_segment::COLLAPSE_MIS() {
 	_mm256_store_ps(&probSumH[0], _sum);
 	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
 }
-#else
-inline
-void haplotype_segment::COLLAPSE_MIS() {
-	//float _tFreq = M.t[curr_abs_locus-forward] / n_cond_haps;
-	float _tFreq = yt / n_cond_haps;
-	//float _nt = M.nt[curr_abs_locus-forward] / probSumT;
-	float _nt = nt / probSumT;
-	fill(probSumH.begin(), probSumH.begin()+HAP_NUMBER, 0.0f);
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		fill(prob.begin()+i, prob.begin()+i+HAP_NUMBER, (probSumK[k]*_nt)+_tFreq);
-		for (int h = 0 ; h < HAP_NUMBER ; h++) probSumH[h] += prob[i+h];
-	}
-	probSumT = probSumH[0] + probSumH[1] + probSumH[2] + probSumH[3] + probSumH[4] + probSumH[5] + probSumH[6] + probSumH[7];
-}
-#endif
 
 /*******************************************************************************/
 /*****************					SUM Ks				************************/
@@ -493,18 +306,15 @@ void haplotype_segment::SUMK() {
 /*****************		TRANSITION COMPUTATIONS			************************/
 /*******************************************************************************/
 
-#ifdef __AVX2__
 inline
 bool haplotype_segment::TRANS_HAP() {
 	sumHProbs = 0.0f;
 	unsigned int  curr_rel_segment_index = curr_segment_index-segment_first;
 	yt = M.getForwardTransProb(AlphaLocus[curr_rel_segment_index - 1], prev_abs_locus);
 	nt = 1.0f - yt;
-	//float fact1 = M.nt[curr_abs_locus-1] / AlphaSumSum[curr_rel_segment_index - 1];
 	float fact1 = nt / AlphaSumSum[curr_rel_segment_index - 1];
 	for (int h1 = 0 ; h1 < HAP_NUMBER ; h1++) {
 		__m256 _sum = _mm256_set1_ps(0.0f);
-		//float fact2 = (AlphaSum[curr_rel_segment_index-1][h1]/AlphaSumSum[curr_rel_segment_index-1]) * M.t[curr_abs_locus - 1] / n_cond_haps;
 		float fact2 = (AlphaSum[curr_rel_segment_index-1][h1]/AlphaSumSum[curr_rel_segment_index-1]) * yt / n_cond_haps;
 		for (int k = 0 ; k < n_cond_haps ; k ++) {
 			__m256 _alpha = _mm256_set1_ps(Alpha[curr_rel_segment_index-1][k*HAP_NUMBER + h1] * fact1 + fact2);
@@ -516,27 +326,6 @@ bool haplotype_segment::TRANS_HAP() {
 	}
 	return (isnan(sumHProbs) || isinf(sumHProbs) || sumHProbs < numeric_limits<float>::min());
 }
-#else
-inline
-bool haplotype_segment::TRANS_HAP() {
-	sumHProbs = 0.0f;
-	unsigned int  curr_rel_segment_index = curr_segment_index-segment_first;
-	yt = M.getForwardTransProb(AlphaLocus[curr_rel_segment_index - 1], curr_abs_locus);
-	nt = 1.0f - yt;
-	//float fact1 = M.nt[curr_abs_locus-1] / AlphaSumSum[curr_rel_segment_index - 1];
-	float fact1 = nt / AlphaSumSum[curr_rel_segment_index - 1];
-	fill_n(HProbs, HAP_NUMBER*HAP_NUMBER, 0.0f);
-	for (int h1 = 0 ; h1 < HAP_NUMBER ; h1++) {
-		//float fact2 = (AlphaSum[curr_rel_segment_index-1][h1]/AlphaSumSum[curr_rel_segment_index-1]) * M.t[curr_abs_locus - 1] / n_cond_haps;
-		float fact2 = (AlphaSum[curr_rel_segment_index-1][h1]/AlphaSumSum[curr_rel_segment_index-1]) * yt / n_cond_haps;
-		for (int k = 0 ; k < n_cond_haps ; k ++) {
-			for (int h2 = 0 ; h2 < HAP_NUMBER ; h2++) HProbs[h1*HAP_NUMBER+h2]+=((Alpha[curr_rel_segment_index-1][k*HAP_NUMBER + h1]*fact1 + fact2)*prob[k*HAP_NUMBER+h2]);
-		}
-		sumHProbs += HProbs[h1*HAP_NUMBER+0]+HProbs[h1*HAP_NUMBER+1]+HProbs[h1*HAP_NUMBER+2]+HProbs[h1*HAP_NUMBER+3]+HProbs[h1*HAP_NUMBER+4]+HProbs[h1*HAP_NUMBER+5]+HProbs[h1*HAP_NUMBER+6]+HProbs[h1*HAP_NUMBER+7];
-	}
-	return (isnan(sumHProbs) || isinf(sumHProbs) || sumHProbs < numeric_limits<float>::min());
-}
-#endif
 
 inline
 bool haplotype_segment::TRANS_DIP_MULT() {
@@ -574,7 +363,6 @@ bool haplotype_segment::TRANS_DIP_ADD() {
 	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < numeric_limits<double>::min());
 }
 
-#ifdef __AVX2__
 inline
 void haplotype_segment::IMPUTE(vector < float > & missing_probabilities) {
 	__m256 _sum = _mm256_set1_ps(0.0f);
@@ -595,18 +383,5 @@ void haplotype_segment::IMPUTE(vector < float > & missing_probabilities) {
 		missing_probabilities[curr_abs_missing * HAP_NUMBER + h] = prob1[h] / (prob0[h]+prob1[h]);
 	}
 }
-#else
-inline
-void haplotype_segment::IMPUTE(vector < float > & missing_probabilities) {
-	vector < vector < float > > _sumA = vector < vector < float > > (2, vector < float > (HAP_NUMBER, 0.0f));
-	vector < float > _scale = AlphaSumMissing[curr_rel_missing];
-	for (int h = 0 ; h < HAP_NUMBER ; h++) _scale[h] = 1.0f / _scale[h];
-	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
-		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
-		for (int h = 0 ; h < HAP_NUMBER ; h++) _sumA[ah][h] += (AlphaMissing[curr_rel_missing][i+h]*_scale[h])*prob[i+h];
-	}
-	for (int h = 0 ; h < HAP_NUMBER ; h ++) missing_probabilities[curr_abs_missing * HAP_NUMBER + h] = _sumA[1][h] / (_sumA[0][h]+_sumA[1][h]);
-}
-#endif
 
 #endif
