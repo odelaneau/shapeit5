@@ -45,7 +45,7 @@ void hmm_parameters::initialise(variant_map & V, int _Neff, int _Nhap) {
 	}
 	int count_rare = 0;
 	rare_allele = vector < char > (V.size(), -1);
-	for (int l = 0 ; l < V.size() ; l ++) if (V.vec_pos[l]->getMAF() <= RARE_VARIANT_FREQ) {
+	for (int l = 0 ; l < V.size() ; l ++) if (V.vec_pos[l]->getMAF() < RARE_VARIANT_FREQ) {
 		rare_allele[l] = (V.vec_pos[l]->getAF() > 0.5f);
 		count_rare ++;
 	}

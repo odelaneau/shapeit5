@@ -102,11 +102,13 @@ void gibbs_sampler::iterate(int & error, int & total) {
 		case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
 		case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
 		}
+		/*
 		if (unphased.size() > 1) {
 			error +=  (alleles[2*ind+0] != truth[2*ind+0]);
 			assert(alleles[2*ind+0] != alleles[2*ind+1]);
 			assert(truth[2*ind+0] != truth[2*ind+1]);
 			total++;
 		}
+		*/
 	}
 }

@@ -61,7 +61,7 @@ void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned i
 		MAPC_vs_left = vector < unsigned int > (n_common_variants, -1);
 		MAPC_vs_right = vector < unsigned int > (n_common_variants, -1);
 
-		GCvar_truth.allocate(n_common_variants, 2 * n_samples);
+		//GCvar_truth.allocate(n_common_variants, 2 * n_samples);
 	}
 
 	if (n_rare_variants > 0) {
@@ -72,7 +72,7 @@ void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned i
 		major_alleles = vector < bool > (n_rare_variants, false);
 		for (int r = 0 ; r < V.sizeRare() ; r ++) major_alleles[r] = !V.vec_rare[r]->minor;
 
-		GRvar_truth = vector < vector < bool > > (n_rare_variants);
+	//	GRvar_truth = vector < vector < bool > > (n_rare_variants);
 
 	}
 

@@ -37,7 +37,7 @@ public:
 
 	vector < bool > alleles;
 	vector < bool > missing;
-	vector < bool > truth;
+	//vector < bool > truth;
 
 	vector < unsigned int > unphased;
 	vector < vector < unsigned int > > cstates;

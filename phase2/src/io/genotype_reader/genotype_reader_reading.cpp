@@ -93,8 +93,8 @@ void genotype_reader::readGenotypes() {
 						bool mi = (gt_arr_unphased[i+0] == bcf_gt_missing || gt_arr_unphased[i+1] == bcf_gt_missing);
 
 						//
-						G.GCvar_truth.set(vc, i+0, a0);
-						G.GCvar_truth.set(vc, i+1, a1);
+						//G.GCvar_truth.set(vc, i+0, a0);
+						//G.GCvar_truth.set(vc, i+1, a1);
 						//
 
 						if (mi) {
@@ -124,18 +124,18 @@ void genotype_reader::readGenotypes() {
 
 						if (mi) {
 							G.pushRareMissing(vr, i/2, !minor);
-							G.GRvar_truth[vr].push_back(a0);
-							G.GRvar_truth[vr].push_back(a1);
+							//G.GRvar_truth[vr].push_back(a0);
+							//G.GRvar_truth[vr].push_back(a1);
 							n_rare_genotypes[3] ++;
 						} else if ((a0+a1) == 1) {
 							G.pushRareHet(vr, i/2);
-							G.GRvar_truth[vr].push_back(a0);
-							G.GRvar_truth[vr].push_back(a1);
+							//G.GRvar_truth[vr].push_back(a0);
+							//G.GRvar_truth[vr].push_back(a1);
 							n_rare_genotypes[1] ++;
 						} else if (a0 == minor) {
 							G.pushRareHom(vr, i/2, !minor);
-							G.GRvar_truth[vr].push_back(a0);
-							G.GRvar_truth[vr].push_back(a1);
+							//G.GRvar_truth[vr].push_back(a0);
+							//G.GRvar_truth[vr].push_back(a1);
 							n_rare_genotypes[a0*2] ++;
 						} else n_rare_genotypes[a0*2] ++;
 					}

@@ -26,7 +26,7 @@ gibbs_sampler::gibbs_sampler(unsigned int _nsamples, unsigned int _niterations, 
 	niterations = _niterations;
 	nburnin = _nburnin;
 	alleles = vector < bool > (2*nsamples, false);
-	truth = vector < bool > (2*nsamples, false);
+	//truth = vector < bool > (2*nsamples, false);
 	missing = vector < bool > (nsamples, false);
 	cstates = vector < vector < unsigned int > > (2*nsamples);
 	cprobs = vector < vector < float > > (2*nsamples);
@@ -90,8 +90,8 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set
 		missing[i] = G.GCvar_missing.get(vc, i);
 		alleles[2*i+0] = G.GCvar_alleles.get(vc, 2*i+0);
 		alleles[2*i+1] = G.GCvar_alleles.get(vc, 2*i+1);
-		truth[2*i+0] = G.GCvar_truth.get(vc, 2*i+0);
-		truth[2*i+1] = G.GCvar_truth.get(vc, 2*i+1);
+		//truth[2*i+0] = G.GCvar_truth.get(vc, 2*i+0);
+		//truth[2*i+1] = G.GCvar_truth.get(vc, 2*i+1);
 		if (missing[i]) {
 			alleles[2*i+0] = rng.flipCoin()?true:false;
 			alleles[2*i+1] = rng.flipCoin()?true:false;
@@ -137,7 +137,7 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 
 	//Genotype data
 	fill(alleles.begin(), alleles.end(), G.major_alleles[vr]);
-	fill(truth.begin(), truth.end(), G.major_alleles[vr]);
+	//fill(truth.begin(), truth.end(), G.major_alleles[vr]);
 	fill(missing.begin(), missing.end(), false);
 	for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
 		unsigned int ind = G.GRvar_genotypes[vr][r].idx;
@@ -147,15 +147,15 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 			alleles[2*ind+1] = fc?false:true;
 			unphased.push_back(ind);
 
-			truth[2*ind+0] = G.GRvar_truth[vr][2*r+0];
-			truth[2*ind+1] = G.GRvar_truth[vr][2*r+1];
-			assert(truth[2*ind+0] != truth[2*ind+1]);
+			//truth[2*ind+0] = G.GRvar_truth[vr][2*r+0];
+			//truth[2*ind+1] = G.GRvar_truth[vr][2*r+1];
+			//assert(truth[2*ind+0] != truth[2*ind+1]);
 
 		} else if (G.GRvar_genotypes[vr][r].mis) {
 			missing[ind] = true;
 			unphased.push_back(ind);
-			truth[2*ind+0] = G.GRvar_truth[vr][2*r+0];
-			truth[2*ind+1] = G.GRvar_truth[vr][2*r+1];
+			//truth[2*ind+0] = G.GRvar_truth[vr][2*r+0];
+			//truth[2*ind+1] = G.GRvar_truth[vr][2*r+1];
 
 		} else {
 			alleles[2*ind+0] = !G.major_alleles[vr];
