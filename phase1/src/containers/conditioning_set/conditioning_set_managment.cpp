@@ -95,7 +95,7 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 	sites_pbwt_ngroups = sites_pbwt_grouping.back() + 1;
 
 	//MAPPING MT+STOR
-	vector < int > outputMT;
+	vector < int > outputMT; outputMT.push_back(0); outputMT.push_back(V.size() - 1);
 	split(V, _modulo_multithreading, 0, V.size() - 1, outputMT);
 	for (int c = 0, ts = 0 ; c < outputMT.size() ; c += 2) {
 		for (int l = outputMT[c] ; l <= outputMT[c+1] ; l++) sites_pbwt_mthreading[l] = c/2;

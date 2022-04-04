@@ -238,4 +238,10 @@ void genotype::performMerges(vector < double > & currProbs, vector < bool > & fl
 	Lengths = Lengths2;
 	n_segments = n_segments2;
 	n_transitions = countTransitions();
+
+	/*
+	for (int s = 0 ; s < n_segments ; s++) {
+		cout << name << " " << s << " " << isOrdered(Diplotypes[s]) << endl;
+	}
+	 */
 }
