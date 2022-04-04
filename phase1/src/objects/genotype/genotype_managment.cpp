@@ -30,6 +30,7 @@ genotype::genotype(unsigned int _index) {
 	n_storage_events = 0;
 	std::fill(curr_dipcodes, curr_dipcodes + 64, 0);
 	this->name = "";
+	double_precision = false;
 }
 
 genotype::~genotype() {

@@ -48,15 +48,33 @@ void phaser::phaseWindow(int id_worker, int id_job) {
 		if (options["thread"].as < int > () > 1) pthread_mutex_unlock(&mutex_workers);
 
 		int outcome = 0;
-		haplotype_segment HS(G.vecG[id_job], H.H_opt_hap, threadData[id_worker].Kstates[w], threadData[id_worker].Windows.W[w], M);
-		HS.forward();
-		outcome = HS.backward(threadData[id_worker].T, threadData[id_worker].M);
+		if (G.vecG[id_job]->double_precision) {
+			//Run using double precision as underflow happened previously
+			haplotype_segment_double HS(G.vecG[id_job], H.H_opt_hap, threadData[id_worker].Kstates[w], threadData[id_worker].Windows.W[w], M);
+			HS.forward();
+			outcome = HS.backward(threadData[id_worker].T, threadData[id_worker].M);
+		} else {
+			//Try single precision as this is faster
+			haplotype_segment_single HS(G.vecG[id_job], H.H_opt_hap, threadData[id_worker].Kstates[w], threadData[id_worker].Windows.W[w], M);
+			HS.forward();
+			outcome = HS.backward(threadData[id_worker].T, threadData[id_worker].M);
 
+			//Underflow happening with single precision, rerun using double precision
+			if (outcome != 0) {
+				haplotype_segment_double HS(G.vecG[id_job], H.H_opt_hap, threadData[id_worker].Kstates[w], threadData[id_worker].Windows.W[w], M);
+				HS.forward();
+				outcome = HS.backward(threadData[id_worker].T, threadData[id_worker].M);
+				G.vecG[id_job]->double_precision = true;
+				n_underflow_recovered_precision++;
+			}
+		}
+
+		//
 		switch (outcome) {
 		case -2: vrb.error("Diploid underflow impossible to recover for [" + G.vecG[id_job]->name + "]");
 		case -1: vrb.error("Haploid underflow impossible to recover for [" + G.vecG[id_job]->name + "]");
 		}
-		n_underflow_recovered += outcome;
+		n_underflow_recovered_summing += outcome;
 	}
 
 	//Copy over new IBD2 constraints into H
@@ -82,7 +100,8 @@ void phaser::phaseWindow(int id_worker, int id_job) {
 void phaser::phaseWindow() {
 	tac.clock();
 	int n_thread = options["thread"].as < int > ();
-	n_underflow_recovered = 0;
+	n_underflow_recovered_summing = 0;
+	n_underflow_recovered_precision = 0;
 	i_workers = 0; i_jobs = 0;
 	statH.clear(); statS.clear();
 	storedKsizes.clear();
@@ -93,8 +112,7 @@ void phaser::phaseWindow() {
 		phaseWindow(0, i);
 		vrb.progress("  * HMM computations", (i+1)*1.0/G.n_ind);
 	}
-	if (n_underflow_recovered) vrb.bullet("HMM computations [K=" + stb.str(statH.mean(), 1) + "+/-" + stb.str(statH.sd(), 1) + " / W=" + stb.str(statS.mean(), 2) + "Mb / U=" + stb.str(n_underflow_recovered) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	else vrb.bullet("HMM computations [K=" + stb.str(statH.mean(), 3) + "+/-" + stb.str(statH.sd(), 3) + " / W=" + stb.str(statS.mean(), 2) + "Mb] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("HMM computations [K=" + stb.str(statH.mean(), 1) + "+/-" + stb.str(statH.sd(), 1) + " / W=" + stb.str(statS.mean(), 2) + "Mb / US=" + stb.str(n_underflow_recovered_summing) + " / UP=" + stb.str(n_underflow_recovered_precision) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void phaser::phase() {

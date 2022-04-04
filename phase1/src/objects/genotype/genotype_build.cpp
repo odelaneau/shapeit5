@@ -144,6 +144,7 @@ void genotype::build() {
 			n_unf += f_het;
 		}
 		for (unsigned int vrel = 0 ; vrel < Lengths[s] ; vrel ++) a+=VAR_GET_AMB(MOD2(vabs+vrel),Variants[DIV2(vabs+vrel)]);
+
 		vabs += Lengths[s];
 	}
 

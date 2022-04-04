@@ -24,12 +24,12 @@
 
 #include <utils/otools.h>
 #include <objects/hmm_parameters.h>
-#include <models/haplotype_segment.h>
+#include <models/haplotype_segment_single.h>
+#include <models/haplotype_segment_double.h>
 
 #include <containers/genotype_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/variant_map.h>
-
 
 #define STAGE_BURN	0
 #define STAGE_PRUN	1
@@ -57,14 +57,10 @@ public:
 	vector < unsigned int > iteration_types;
 	vector < unsigned int > iteration_counts;
 	unsigned int iteration_stage;
-	int n_underflow_recovered;
+	int n_underflow_recovered_summing;
+	int n_underflow_recovered_precision;
 
-	//PARAMETERS
-	double pbwt_modulo;
-	//double ibd2_maf;
-	//int ibd2_count;
-
-	//
+	//STATS
 	basic_stats statH,statS;
 	vector < double > storedKsizes;
 

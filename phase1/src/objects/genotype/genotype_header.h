@@ -53,6 +53,15 @@
 #define VAR_SET_HAP1(e,v)	((v)|=(8<<((e)<<2)))
 #define VAR_CLR_HAP1(e,v)	((e)?((v)&=127):((v)&=247))
 
+
+
+#define MASK_INIT	0xFFFFFFFFFFFFFFFFUL
+#define MASK_SCAF	0x00AA00AA00AA00AAUL
+#define MASK_UNF0	0x55AA55AA55AA55AAUL
+#define MASK_UNF1	0x3333CCCC3333CCCCUL
+#define MASK_UNF2	0x0F0F0F0FF0F0F0F0UL
+
+
 class genotype {
 public:
 	// INTERNAL DATA
@@ -66,6 +75,9 @@ public:
 	unsigned int n_stored_transitionProbs;	// Number of transition probabilities stored in memory
 	unsigned int n_storage_events;			// Number of storage having been done
 	unsigned char curr_dipcodes [64];		// List of diplotypes in a given segment (buffer style variable)
+	unsigned char curr_hapcodes [16];		// List of diplotypes in a given segment (buffer style variable)
+	bool double_precision;
+
 
 	// VARIANT / HAPLOTYPE / DIPLOTYPE DATA
 	vector < unsigned char > Variants;		// 0.5 byte per variant
@@ -100,7 +112,27 @@ public:
 	unsigned int countDiplotypes(unsigned long);
 	void makeDiplotypes(unsigned long);
 	unsigned int countTransitions();
+	bool isOrdered(unsigned long _dip);
 };
+
+inline
+bool genotype::isOrdered(unsigned long _dip) {
+    fill(begin(curr_hapcodes), begin(curr_hapcodes)+16, 0);
+	for (unsigned int d = 0, i = 0 ; d < 64 ; ++d) {
+		if (DIP_GET(_dip, d)) {
+			unsigned char hap0 = DIP_HAP0(d);
+			unsigned char hap1 = DIP_HAP1(d);
+			curr_hapcodes[hap0] = 1;
+			curr_hapcodes[HAP_NUMBER + hap1] = 1;
+		}
+	}
+	for (int h = 0 ; h < HAP_NUMBER ; h++) {
+		if (curr_hapcodes[h] && curr_hapcodes[HAP_NUMBER+h]) {
+			return false;
+		}
+	}
+	return true;
+}
 
 inline
 unsigned int genotype::countDiplotypes(unsigned long _dip) {
