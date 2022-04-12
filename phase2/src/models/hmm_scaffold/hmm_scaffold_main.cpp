@@ -41,6 +41,10 @@ hmm_scaffold::~hmm_scaffold() {
 void hmm_scaffold::setup(unsigned int _hap) {
 	hap = _hap;
 	nstates = C.indexes_pbwt_neighbour[hap].size();
+
+	Hvar.reallocateFast(C.n_scaffold_variants, nstates);
+	Hhap.reallocateFast(nstates, C.n_scaffold_variants);
+
 	Hhap.subset(C.Hhap, C.indexes_pbwt_neighbour[hap]);
 	Hhap.transpose(Hvar);
 }

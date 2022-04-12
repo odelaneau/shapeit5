@@ -149,6 +149,7 @@ void phaser::phase() {
 	vrb.title("HMM computations");
 	thread_hmms = vector < hmm_scaffold * > (nthreads);
 	for(int t = 0; t < nthreads ; t ++) thread_hmms[t] = new hmm_scaffold(V, G, H, M);
+
 	if (nthreads > 1) {
 		i_jobs = i_threads = 0;
 		for (int t = 0 ; t < nthreads ; t++) pthread_create( &id_workers[t] , NULL, hmmcompute_callback, static_cast<void *>(this));

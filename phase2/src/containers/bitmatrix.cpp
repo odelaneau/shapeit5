@@ -78,13 +78,28 @@ void bitmatrix::allocateFast(unsigned int nrow, unsigned int ncol) {
 	bytes = (unsigned char*)malloc(n_bytes*sizeof(unsigned char));
 }
 
-void bitmatrix::reallocateFast(unsigned int nrow, unsigned int ncol) {
+void bitmatrix::reallocate(unsigned int nrow, unsigned int ncol) {
 	n_rows = nrow + ((nrow%8)?(8-(nrow%8)):0);
 	n_cols = ncol + ((ncol%8)?(8-(ncol%8)):0);
 	unsigned long int new_n_bytes = (n_cols/8) * (unsigned long)n_rows;
 	if (new_n_bytes > n_bytes) bytes = (unsigned char*)realloc(bytes, new_n_bytes*sizeof(unsigned char));
 	n_bytes = new_n_bytes;
 }
+
+void bitmatrix::reallocateFull(unsigned int nrow, unsigned int ncol) {
+	n_rows = nrow + ((nrow%8)?(8-(nrow%8)):0);
+	n_cols = ncol + ((ncol%8)?(8-(ncol%8)):0);
+	unsigned long int new_n_bytes = (n_cols/8) * (unsigned long)n_rows;
+	if (new_n_bytes > n_bytes) bytes = (unsigned char*)realloc(bytes, new_n_bytes*sizeof(unsigned char));
+	n_bytes = new_n_bytes;
+	memset(bytes, 0, n_bytes);
+}
+
+void bitmatrix::reallocateFast(unsigned int nrow, unsigned int ncol) {
+	n_rows = nrow + ((nrow%8)?(8-(nrow%8)):0);
+	n_cols = ncol + ((ncol%8)?(8-(ncol%8)):0);
+}
+
 
 
 /*
