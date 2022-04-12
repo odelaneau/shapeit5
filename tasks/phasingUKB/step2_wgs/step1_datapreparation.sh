@@ -12,5 +12,3 @@ SUB=/mnt/project/Phasing/PhasingWGS/step1_preparedata/INDlist.filtered.noparents
 OUT=benchmark_ukb23352_c20_qc_v1.bcf
 dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/step1_preparedata/" -icmd="bcftools view -Ob -o $OUT -S $SUB --force-samples $BCF && bcftools index $OUT" --tag subsetB --tag benchWGS --instance-type mem2_ssd1_v2_x2 --name benchWGS_subsetB --priority normal -y
 
-
-

@@ -57,7 +57,7 @@ laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 laptop: $(BFILE)
 
-debug: CXXFLAG=-g
+debug: CXXFLAG=-g  -mavx2 -mfma
 debug: LDFLAG=-g
 debug: HTSSRC=$(HOME)/Tools
 debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15

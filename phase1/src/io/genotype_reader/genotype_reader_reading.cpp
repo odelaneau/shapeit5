@@ -56,8 +56,11 @@ void genotype_reader::readGenotypes() {
 		int n_with_scaffold = 0;
 		n_scaf_samples = bcf_hdr_nsamples(sr->readers[panels[1]+panels[2]].header);
 		mappingS2M = vector < int > (n_scaf_samples, -1);
+		vector < string > tokens_tmp;
 		for (int i = 0 ; i < n_scaf_samples ; i ++) {
-			string scaf_name = string(sr->readers[panels[1]+panels[2]].header->samples[i]);
+			string buffer_tmp = string(sr->readers[panels[1]+panels[2]].header->samples[i]);
+			stb.split(buffer_tmp, tokens_tmp, "_");
+			string scaf_name = tokens_tmp[0];
 			map < string, int > :: iterator it = map_names.find(scaf_name);
 			if (it != map_names.end()) {
 				mappingS2M[i] = it->second;
@@ -159,7 +162,7 @@ void genotype_reader::readGenotypes() {
 	bcf_sr_destroy(sr);
 
 	// Report
-	unsigned long n_genotypes_total = accumulate(n_genotypes.begin(), n_genotypes.begin() + 4, 0);
+	unsigned long n_genotypes_total = accumulate(n_genotypes.begin(), n_genotypes.begin() + 4, 0UL);
 	string str0 = "0/0=" + stb.str(n_genotypes[0]*100.0/n_genotypes_total, 3) + "%";
 	string str1 = "0/1=" + stb.str(n_genotypes[1]*100.0/n_genotypes_total, 3) + "%";
 	string str2 = "1/1=" + stb.str(n_genotypes[2]*100.0/n_genotypes_total, 3) + "%";

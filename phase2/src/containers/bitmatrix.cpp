@@ -39,7 +39,7 @@ void bitmatrix::subset(bitmatrix & BM, vector < unsigned int > & rows) {
 	n_rows = rows.size() + ((rows.size()%8)?(8-(rows.size()%8)):0);
 	n_cols = BM.n_cols;
 	n_bytes = (n_cols/8) * (unsigned long)n_rows;
-	bytes = (unsigned char*)malloc(n_bytes*sizeof(unsigned char));
+	//bytes = (unsigned char*)malloc(n_bytes*sizeof(unsigned char));
 	unsigned long offset_addr = 0, row_start, row_end;
 	for (int r = 0 ; r < rows.size() ; r ++) {
 		row_start = ((unsigned long)rows[r]) * (n_cols/8);

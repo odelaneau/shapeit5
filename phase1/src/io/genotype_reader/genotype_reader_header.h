@@ -49,7 +49,6 @@ public:
 	float filter_min_maf;
 	bool filter_snp_only;
 	vector < bool > variant_mask;
-	vector < bool > sample_mask;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	genotype_reader(haplotype_set &, genotype_set &, variant_map &);

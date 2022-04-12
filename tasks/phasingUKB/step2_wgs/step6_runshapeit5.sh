@@ -3,14 +3,18 @@
 #GET VALIDATION DATA
 while read LINE; do
 
-	REG=$(echo $LINE | awk '{ print $3; }')
-	BCF=/mnt/project/Phasing/PhasingWGS/step2_splitchunks/benchmark_ukb23352_c20_qc_v1.$REG\.bcf
-	SCA=/mnt/project/Phasing/PhasingSNParray/step5_benchmark/benchmark_c20_b0_v2.b38.sorted.N480853.phased.bcf
+	SREG=$(echo $LINE | awk '{ print $3; }')
+	IREG=$(echo $LINE | awk '{ print $4; }')
+	BCF=/mnt/project/Phasing/PhasingWGS/step2_splitchunks/benchmark_ukb23352_c20_qc_v1.$IREG\.bcf
+	SCA=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$IREG\.shapeit5.default.depth8.bcf
 	MAP=/mnt/project/data/shapeit_maps/chr20.b38.gmap.gz
-
+	
 	OUT=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.bcf
 	LOG=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.log
 	TIM=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.time
+	
+	
+	
 
 	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase1_static --input $BCF --map $MAP --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --filter-snp --region $REG && bcftools index -f $OUT --threads 8" --tag benchWGS --tag shapeit5 --tag chr20 --instance-type mem3_ssd1_v2_x32 --priority low --name benchWGS_shapeit5_$REG -y
 
@@ -20,7 +24,7 @@ while read LINE; do
 
 #	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase1_static --input $BCF --scaffold $SCA --map $MAP --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --filter-snp --region $REG && bcftools index -f $OUT --threads 8" --tag benchWGS --tag shapeit5 --tag chr20 --instance-type mem3_ssd1_v2_x32 --priority low --name benchWGS_shapeit5_$REG -y
 	
-	OUT=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.depth8.bcf
+	OUT=
 	LOG=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.depth8.log
 	TIM=benchmark_ukb23352_c20_qc_v1.$REG\.shapeit5.default.depth8.time
 

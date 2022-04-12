@@ -78,9 +78,10 @@ public:
 
 public:
 	//CONSTRUCTOR/DESTRUCTOR
-	hmm_scaffold(unsigned int _hap, variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M);
+	hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M);
 	~hmm_scaffold();
 
+	void setup(unsigned int _hap);
 	void forward();
 	void backward(vector < bool > & cevents, vector < state > & cstates);
 };

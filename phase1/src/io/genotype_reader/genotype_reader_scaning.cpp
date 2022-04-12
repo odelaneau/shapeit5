@@ -33,7 +33,7 @@ void genotype_reader::scanGenotypes() {
 	if (bcf_sr_set_regions(sr, region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + region + "]");
 
 	//Opening file(s)
-	for (int f = 0 ; f < 2 ; f ++) if (panels[f] && !(bcf_sr_add_reader (sr, filenames[f].c_str()))) {
+	for (int f = 0 ; f < 3 ; f ++) if (panels[f] && !(bcf_sr_add_reader (sr, filenames[f].c_str()))) {
     	switch (sr->errnum) {
 		case not_bgzf:			vrb.error("Opening [" + filenames[f] + "]: not compressed with bgzip"); break;
 		case idx_load_failed: 	vrb.error("Opening [" + filenames[f] + "]: impossible to load index file"); break;
@@ -45,19 +45,33 @@ void genotype_reader::scanGenotypes() {
 	//Sample processing
 	n_main_samples = bcf_hdr_nsamples(sr->readers[0].header);
 	n_ref_samples = panels[1] ? bcf_hdr_nsamples(sr->readers[1].header) : 0;
-	sample_mask = vector < bool > (n_main_samples + n_ref_samples, true);	//SET THIS UP!
 
-	bcf1_t * line_main;
-	int nset, n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0;
+	bcf1_t * line_main, * line_ref, * line_scaf;
+	int nset, n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
 	int rAC_main=0, nAC_main=0, *vAC_main=NULL, rAN_main=0, nAN_main=0, *vAN_main=NULL;
 	while (nset = bcf_sr_next_line (sr)) {
-		line_main =  bcf_sr_get_line(sr, 0);
+
+		//By defaults, we do not want the variants
 		variant_mask.push_back(false);
 
-		//Not in the intersect of ref and main panels
-		if (panels[1] && nset == 1) { n_variants_noverlap++; continue; }
+		//See which file has a record
+		bool has_main = bcf_sr_has_line(sr, 0);
+		bool has_ref = (panels[1] && bcf_sr_has_line(sr, 1));
+		bool has_scaf = (panels[2] && bcf_sr_has_line(sr, panels[1] + 1));
 
-		//Not a bi-alleleic variant
+		//Not in reference panel
+		if (panels[1] && has_main && !has_ref) { n_variants_noverlap++; continue; }
+
+		//In reference, but not in main panel
+		if (panels[1] && !has_main && has_ref) { n_variants_nref++; continue; }
+
+		//In scaffold, but not in main panel
+		if (panels[2] && !has_main && has_scaf) { n_variants_nscaf++; continue; }
+
+		//Retrieve the VCF record in main VCF
+		line_main =  bcf_sr_get_line(sr, 0);
+
+		//Not a bi-allelic variant
 		if (line_main->n_allele != 2) { n_variants_multi++; continue; }
 
 		//Unpack information if filtering
@@ -93,7 +107,6 @@ void genotype_reader::scanGenotypes() {
 		string alt = string(line_main->d.allele[1]);
 		V.push(new variant (chr, pos, id, ref, alt, V.size()));
 
-
 		//Flag it!
 		variant_mask.back() = true;
 		n_variants++;
@@ -101,10 +114,12 @@ void genotype_reader::scanGenotypes() {
 	bcf_sr_destroy(sr);
 	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet("#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + " / #sites=" + stb.str(n_variants) + " / region=" + region);
-	if (n_variants_noverlap) vrb.bullet2(stb.str(n_variants_noverlap) + " sites removed [not in reference panel]");
-	if (n_variants_multi) vrb.bullet2(stb.str(n_variants_multi) + " sites removed [multi-allelic]");
-	if (n_variants_notsnp) vrb.bullet2(stb.str(n_variants_notsnp) + " sites removed [not SNPs]");
-	if (n_variants_rare) vrb.bullet2(stb.str(n_variants_rare) + " sites removed [below MAF threshold]");
+	if (n_variants_noverlap) vrb.bullet2(stb.str(n_variants_noverlap) + " sites removed in main panel [not in reference panel]");
+	if (n_variants_multi) vrb.bullet2(stb.str(n_variants_multi) + " sites removed in main panel [multi-allelic]");
+	if (n_variants_notsnp) vrb.bullet2(stb.str(n_variants_notsnp) + " sites removed in main panel [not SNPs]");
+	if (n_variants_rare) vrb.bullet2(stb.str(n_variants_rare) + " sites removed in main panel [below MAF threshold]");
+	if (n_variants_nref) vrb.bullet2(stb.str(n_variants_nref) + " sites removed in reference panel [not in main panel]");
+	if (n_variants_nscaf) vrb.bullet2(stb.str(n_variants_nscaf) + " sites removed in scaffold panel [not in main panel]");
 	if (n_variants == 0) vrb.error("No variants to be phased!");
 }
 

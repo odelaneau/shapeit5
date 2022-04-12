@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CHR=20
+
 VCF=/mnt/project/Phasing/PhasingSNParray/step4_liftover/full_c20_b0_v2.b38.sorted.vcf.gz
 
 #GET VALIDATION
@@ -17,11 +19,10 @@ done
 #PHASING
 for N in 5000 10000 20000 50000 100000 200000 300000 400000 480853; do
 	MAP=/mnt/project/data/shapeit_maps/chr20.b38.gmap.gz
-	INP=/mnt/project/Phasing/PhasingSNParray/step5_benchmark/benchmark_c20_b0_v2.b38.sorted.N$N\.bcf
-		
+	INP=/mnt/project/Phasing/PhasingSNParray/step5_benchmark/benchmark_c20_b0_v2.b38.sorted.N$N\.vcf.gz
 	LOG=benchmark_c20_b0_v2.b38.sorted.N$N\.phased.log
 	OUT=benchmark_c20_b0_v2.b38.sorted.N$N\.phased.bcf
-
-	dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/step5_benchmark/" -iimage_file="/docker/shapeit5_0.0.1.tar.gz" -icmd="SHAPEIT5_phase1_static --input $INP --map $MAP --output $OUT --region chr$CHR --log $LOG --thread 16 && bcftools index $OUT --threads 16" --tag phasing --tag benchmark --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_phasing -y
+	TIM=benchmark_c20_b0_v2.b38.sorted.N$N\.phased.time
+	dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/step5_benchmark/" -iimage_file="/docker/shapeit5_0.0.1.tar.gz" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase1_static --input $INP --map $MAP --output $OUT --region chr20 --log $LOG --thread 16 && bcftools index $OUT --threads 16" --tag phasing --tag benchmark --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_phasing -y
 done
 

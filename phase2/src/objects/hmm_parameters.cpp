@@ -41,6 +41,7 @@ void hmm_parameters::initialise(variant_map & V, unsigned int _Neff, unsigned in
 	nt = vector < float > (V.sizeScaffold() - 1, 0.0);
 	for (int l = 1 ; l < cm.size() ; l ++) {
 		float dist_cm = cm[l] - cm[l-1];
+		if (dist_cm < 0.000001f) dist_cm = 0.000001f;
 		t[l-1] = getTransProb(dist_cm);
 		nt[l-1] = 1-t[l-1];
 	}

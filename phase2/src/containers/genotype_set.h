@@ -27,23 +27,25 @@
 #include <containers/bitmatrix.h>
 #include <containers/variant_map.h>
 
-
 class rare_genotype {
 public:
-	unsigned int idx : 28;
+	unsigned int idx : 26;
 	unsigned int het : 1;
 	unsigned int mis : 1;
 	unsigned int al0 : 1;
 	unsigned int al1 : 1;
+	unsigned int pir : 1;
+	unsigned int ph0 : 1;
 
-	rare_genotype() { idx = het = mis = al0 = al1 = 0; }
+	rare_genotype() { idx = het = mis = al0 = al1 = pir = ph0 = 0; }
 
 	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
 		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
+		pir = ph0 = 0;
 	}
 
 	~rare_genotype() {
-		idx = het = mis = al0 = al1 = 0;
+		idx = het = mis = al0 = al1 = pir = ph0 = 0;
 	}
 
 	bool operator < (const rare_genotype & rg) const {
@@ -55,7 +57,7 @@ class genotype_set {
 public:
 
 	//Counts
-	unsigned int n_scaffold_variants;				//#variants rare to be phased
+	unsigned int n_scaffold_variants;			//#variants rare to be phased
 	unsigned int n_rare_variants;				//#variants rare to be phased
 	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
 	unsigned int n_samples;						//#samples
@@ -80,10 +82,13 @@ public:
 	vector < vector < rare_genotype > > GRvar_genotypes;
 	vector < vector < rare_genotype > > GRind_genotypes;
 
-	//
-//	bitmatrix GCvar_truth;
-//	vector < vector < bool > > GRvar_truth;
+	//PIR information at rare unphased variants
+	vector < vector < bool > > GRvar_pirs;
+	vector < vector < bool > > GRind_pirs;
 
+	//
+	//bitmatrix GCvar_truth;
+	//vector < vector < bool > > GRvar_truth;
 
 	//
 	genotype_set();

@@ -55,6 +55,7 @@ public :
 
 	bool isSingleton();
 	bool isMonomorphic();
+	bool isSNP();
 	unsigned int getMAC();
 	double getMDR();
 	double getMAF();

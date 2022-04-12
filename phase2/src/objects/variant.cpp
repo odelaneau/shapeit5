@@ -68,4 +68,10 @@ bool variant::isMonomorphic() {
 	return (calt == 0 || cref == 0);
 }
 
+bool variant::isSNP() {
+	bool bref = (ref == "A") || (ref == "T") || (ref == "G") || (ref == "C");
+	bool balt = (alt == "A") || (alt == "T") || (alt == "G") || (alt == "C");
+	return (bref && balt);
+}
+
 

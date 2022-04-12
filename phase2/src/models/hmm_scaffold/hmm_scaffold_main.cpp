@@ -21,26 +21,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <models/hmm_scaffold/hmm_scaffold_header.h>
 
-hmm_scaffold::hmm_scaffold(unsigned int _hap, variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M) : V(_V), G(_G), C(_C), M(_M){
-	hap = _hap;
+hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M) : V(_V), G(_G), C(_C), M(_M){
 	match_prob[0] = 1.0f; match_prob[1] = M.ed/M.ee;
 
 	unsigned max_nstates = 0;
 	for (int h = 0 ; h < C.n_haplotypes ; h ++) if (C.indexes_pbwt_neighbour[h].size() > max_nstates) max_nstates = C.indexes_pbwt_neighbour[h].size();
-
 	alpha = vector < aligned_vector32 < float > > (C.n_scaffold_variants, aligned_vector32 < float > (max_nstates, 0.0f));
 	beta = aligned_vector32 < float > (max_nstates, 1.0f);
-
-	nstates = C.indexes_pbwt_neighbour[hap].size();
-	Hhap.subset(C.Hhap, C.indexes_pbwt_neighbour[hap]);
-	Hvar.allocate(C.n_scaffold_variants, nstates);
-	Hhap.transpose(Hvar);
+	Hvar.allocate(C.n_scaffold_variants, max_nstates);
+	Hhap.allocate(max_nstates, C.n_scaffold_variants);
 }
 
 hmm_scaffold::~hmm_scaffold() {
 	alpha.clear();
 	beta.clear();
 	storageEvents.clear();
+}
+
+void hmm_scaffold::setup(unsigned int _hap) {
+	hap = _hap;
+	nstates = C.indexes_pbwt_neighbour[hap].size();
+	Hhap.subset(C.Hhap, C.indexes_pbwt_neighbour[hap]);
+	Hhap.transpose(Hvar);
 }
 
 void hmm_scaffold::forward() {

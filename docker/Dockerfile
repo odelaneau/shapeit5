@@ -19,7 +19,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # run update and install necessary tools from package manager
 WORKDIR /tmp
 RUN apt-get update && apt-get -y upgrade && apt-get install -y \
-	apt-utils curl gnupg gcc g++ make autoconf && \
+	apt-utils time curl gnupg gcc g++ make autoconf && \
 	apt-get clean && apt-get purge && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
