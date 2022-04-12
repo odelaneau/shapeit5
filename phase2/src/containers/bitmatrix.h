@@ -38,7 +38,10 @@ public:
 
 	void allocate(unsigned int nrow, unsigned int ncol);
 	void allocateFast(unsigned int nrow, unsigned int ncol);
+
+	void reallocateFull(unsigned int nrow, unsigned int ncol);
 	void reallocateFast(unsigned int nrow, unsigned int ncol);
+	void reallocate(unsigned int nrow, unsigned int ncol);
 
 
 	void subset(bitmatrix & BM, vector < unsigned int > & rows);
