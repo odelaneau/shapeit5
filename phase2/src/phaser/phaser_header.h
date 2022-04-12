@@ -32,6 +32,9 @@
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/variant_map.h>
 
+#include <models/hmm_scaffold/hmm_scaffold_header.h>
+
+
 class phaser {
 public:
 	//COMMAND LINE OPTIONS
@@ -46,10 +49,11 @@ public:
 	state_set P;
 
 	//MULTI-THREADING
-	int i_jobs, nthreads;
+	int i_jobs, i_threads, nthreads;
 	vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
 	vector < vector < pair < int, float > > > thread_data;
+	vector < hmm_scaffold * > thread_hmms;
 
 	int errorRare, errorCommon, totalRare, totalCommon, totalSite, doneSite;
 
@@ -68,7 +72,7 @@ public:
 	~phaser();
 
 	//METHODS
-	void hmmcompute(int);
+	void hmmcompute(int, int);
 	void gibbscompute(int);
 
 	void phase();

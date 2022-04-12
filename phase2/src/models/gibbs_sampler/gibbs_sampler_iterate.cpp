@@ -52,6 +52,8 @@ void gibbs_sampler::iterate(int & error, int & total) {
 				hprob[2*h+1] /= sum;
 			}
 
+			assert(sum > 0);
+
 			for (int h = 0 ; h < 4 ; h++) if (hprob[h] < 1e-7) hprob[h] = 1e-7;
 
 			//
@@ -66,7 +68,8 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			sum = accumulate(gprob.begin(), gprob.end(), 0.0f);
 			//for (int g = 0 ; g < 4 ; g++) gprob[g] /= sum;
 
-			if (!(sum > 0)) cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
+			//if (!(sum > 0))
+			//	cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
 			assert(sum > 0);
 
 			//
@@ -76,12 +79,6 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			case 1:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 1; break;
 			case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
 			case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
-			}
-
-			//
-			if (alleles[2*ind+0] == alleles[2*ind+1]) {
-				cout << iter << " " << ui << " " << sampleg << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
-				exit(1);
 			}
 
 			//
@@ -102,13 +99,5 @@ void gibbs_sampler::iterate(int & error, int & total) {
 		case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
 		case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
 		}
-		/*
-		if (unphased.size() > 1) {
-			error +=  (alleles[2*ind+0] != truth[2*ind+0]);
-			assert(alleles[2*ind+0] != alleles[2*ind+1]);
-			assert(truth[2*ind+0] != truth[2*ind+1]);
-			total++;
-		}
-		*/
 	}
 }

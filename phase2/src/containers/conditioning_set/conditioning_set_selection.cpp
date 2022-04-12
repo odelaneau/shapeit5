@@ -44,7 +44,8 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 		}
 	}
 
-	//PBWT sweep
+	//PBWT forward sweep
+	tac.clock();
 	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
 		int vc = V.vec_full[vt]->idx_common;
 		int vr = V.vec_full[vt]->idx_rare;
@@ -64,12 +65,38 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 				if (selc) storeCommon(A, M);
 			}
 		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
-		vrb.progress("  * PBWT selection", vt * 1.0 / V.sizeFull());
+		vrb.progress("  * PBWT forward selection", vt * 1.0 / V.sizeFull());
 	}
-
-	//Summary
 	sort(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end());
 	indexes_pbwt_neighbour_serialized.erase(unique(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end()), indexes_pbwt_neighbour_serialized.end());
+	vrb.bullet("PBWT forward selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	//PBWT backward sweep
+	tac.clock();
+	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
+		int vc = V.vec_full[vt]->idx_common;
+		int vr = V.vec_full[vt]->idx_rare;
+		int vs = V.vec_full[vt]->idx_scaffold;
+
+		if (vs >= 0) {
+			bool eval = sites_pbwt_evaluation[vs];
+			bool selc = sites_pbwt_selection[vs];
+			if (eval) {
+				int u = 0, v = 0;
+				for (int h = 0 ; h < n_haplotypes ; h ++) {
+					if (!Hvar.get(vs, A[h])) A[u++] = A[h];
+					else B[v++] = A[h];
+				}
+				std::copy(B.begin(), B.begin()+v, A.begin()+u);
+				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				if (selc) storeCommon(A, M);
+			}
+		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
+		vrb.progress("  * PBWT backward selection", (V.sizeFull()-vt) * 1.0 / V.sizeFull());
+	}
+	sort(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end());
+	indexes_pbwt_neighbour_serialized.erase(unique(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end()), indexes_pbwt_neighbour_serialized.end());
+	vrb.bullet("PBWT backward selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 
 	basic_stats statK;
 	for (long int h = 0, e = 0 ; h < n_haplotypes ; h ++) {
@@ -78,20 +105,15 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 			buffer.push_back(indexes_pbwt_neighbour_serialized[e].second);
 			e++;
 		}
-		//cout << endl << h << " " << buffer.size() << endl;
 		indexes_pbwt_neighbour[h].reserve(buffer.size());
 		indexes_pbwt_neighbour[h] = buffer;
-		//sort(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end());
-		//indexes_pbwt_neighbour[h].erase(unique(indexes_pbwt_neighbour[h].begin(), indexes_pbwt_neighbour[h].end()), indexes_pbwt_neighbour[h].end());
-		//indexes_pbwt_neighbour[h].shrink_to_fit();
 		assert(indexes_pbwt_neighbour[h].size());
 		statK.push(indexes_pbwt_neighbour[h].size());
 	}
 
 	indexes_pbwt_neighbour_serialized.clear();
 	indexes_pbwt_neighbour_serialized.shrink_to_fit();
-
-	vrb.bullet("PBWT selection [#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet2("#states="+ stb.str(statK.mean(), 2) + "+/-" + stb.str(statK.sd(), 2));
 	vrb.bullet2("#collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
