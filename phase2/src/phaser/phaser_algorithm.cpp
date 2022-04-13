@@ -24,6 +24,8 @@
 #include <models/gibbs_sampler/gibbs_sampler_header.h>
 #include <models/pileup_caller/pileup_caller_header.h>
 
+#define ALLOC_CHUNK 40000000
+
 void * hmmcompute_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
 	int id_job, id_thread;
@@ -44,27 +46,41 @@ void * hmmcompute_callback(void * ptr) {
 
 void phaser::hmmcompute(int id_job, int id_thread) {
 	vector < bool > cevents;
-	vector < state > cstates;
+	vector < state > cstates0, cstates1;
+
+	//Mapping storage events
 	G.mapUnphasedOntoScaffold(id_job, cevents);
 
+	//HMM compute
 	thread_hmms[id_thread]->setup(2*id_job+0);
 	thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents, cstates);
-
-	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-	unsigned long int necessary_size = P.Pstates.size() + cstates.size();
-	if (necessary_size >= P.Pstates.capacity()) P.Pstates.reserve(P.Pstates.capacity() + 1000 * cstates.size());
-	for (int e = 0 ; e < cstates.size() ; e ++) P.Pstates.push_back(cstates[e]);
-	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
-
+	thread_hmms[id_thread]->backward(cevents, cstates0);
 	thread_hmms[id_thread]->setup(2*id_job+1);
 	thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents, cstates);
+	thread_hmms[id_thread]->backward(cevents, cstates1);
 
+	//Storage of compressed probabilities [Mutex protected]
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-	necessary_size = P.Pstates.size() + cstates.size();
-	if (necessary_size >= P.Pstates.capacity()) P.Pstates.reserve(P.Pstates.capacity() + 1000 * cstates.size());
-	for (int e = 0 ; e < cstates.size() ; e ++) P.Pstates.push_back(cstates[e]);
+
+	unsigned long int allocated_size = P.Pstates.capacity();
+	unsigned long int necessary_size = P.Pstates.size() + cstates0.size() + cstates1.size();
+	unsigned long int requested_size = 0;
+
+	if (necessary_size > allocated_size) {
+		if (id_job < (G.n_samples/5)) {
+			requested_size = allocated_size + ALLOC_CHUNK;
+			//cout << endl << "ALLOC_FIX " << allocated_size << " " << requested_size << endl;
+		} else {
+			requested_size = allocated_size + (G.n_samples - id_job + 1) * statCS.mean() * 1.1f;
+			//cout << endl << "ALLOC_DYN " << allocated_size << " " << requested_size << endl;
+		}
+		P.Pstates.reserve(requested_size);
+	}
+
+	for (int e = 0 ; e < cstates0.size() ; e ++) P.Pstates.push_back(cstates0[e]);
+	for (int e = 0 ; e < cstates1.size() ; e ++) P.Pstates.push_back(cstates1[e]);
+	statCS.push(cstates0.size()+cstates1.size());
+
 	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
 }
 
@@ -168,7 +184,7 @@ void phaser::phase() {
 
 	//STEP4: MCMC computations
 	vector < pair < int, float > > thread_data_serialized;
-	errorRare = 0; errorCommon = 0; totalRare = 0; totalCommon = 0; totalSite = 0; doneSite = 0;
+	totalSite = 0; doneSite = 0;
 	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
 		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
 			float weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);

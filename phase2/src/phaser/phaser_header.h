@@ -55,8 +55,9 @@ public:
 	vector < vector < pair < int, float > > > thread_data;
 	vector < hmm_scaffold * > thread_hmms;
 
-	int errorRare, errorCommon, totalRare, totalCommon, totalSite, doneSite;
-
+	//STATS
+	int totalSite, doneSite;
+	basic_stats statCS;
 
 	//GENOMIC REGION
 	string chrid;

@@ -129,6 +129,7 @@ void phaser::verbose_files() {
 }
 
 void phaser::verbose_options() {
+	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
 
