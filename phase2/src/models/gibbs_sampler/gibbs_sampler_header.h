@@ -37,12 +37,12 @@ public:
 
 	vector < bool > alleles;
 	vector < bool > missing;
-	//vector < bool > truth;
 
 	vector < unsigned int > unphased;
 	vector < vector < unsigned int > > cstates;
 	vector < vector < float > > cprobs;
 	vector < float > pprobs;
+	vector < float > rprobs;
 
 	gibbs_sampler(unsigned int, unsigned int, unsigned int);
 	~gibbs_sampler();

@@ -30,6 +30,7 @@ gibbs_sampler::gibbs_sampler(unsigned int _nsamples, unsigned int _niterations, 
 	cstates = vector < vector < unsigned int > > (2*nsamples);
 	cprobs = vector < vector < float > > (2*nsamples);
 	pprobs = vector < float > (4*nsamples);
+	rprobs = vector < float > (nsamples);
 }
 
 gibbs_sampler::~gibbs_sampler() {
@@ -83,6 +84,7 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set
 		cprobs[h].clear();
 	}
 	fill (pprobs.begin(), pprobs.end() , 0.0f);
+	fill (rprobs.begin(), rprobs.end() , 0.5f);
 
 	//Genotype data
 	for (int i = 0 ; i < G.n_samples ; i ++) {
@@ -131,6 +133,7 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 		cprobs[h].clear();
 	}
 	fill (pprobs.begin(), pprobs.end() , 0.0f);
+	fill (rprobs.begin(), rprobs.end() , 0.5f);
 
 	//Genotype data
 	fill(alleles.begin(), alleles.end(), G.major_alleles[vr]);
@@ -141,6 +144,7 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 			bool fc = rng.flipCoin();
 			alleles[2*ind+0] = fc?true:false;
 			alleles[2*ind+1] = fc?false:true;
+			if (G.GRvar_genotypes[vr][r].pir) rprobs[ind] = G.GRvar_genotypes[vr][r].ph0?0.999:0.001;
 			unphased.push_back(ind);
 		} else if (G.GRvar_genotypes[vr][r].mis) {
 			missing[ind] = true;

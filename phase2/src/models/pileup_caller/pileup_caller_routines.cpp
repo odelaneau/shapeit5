@@ -24,13 +24,30 @@
 pileup_caller::pileup_caller(haplotype_set & _H, genotype_set & _G, variant_map & _V, int _min_mapQ, int _min_baseQ) : H(_H), G(_G), V(_V) {
 	min_mapQ = _min_mapQ;
 	min_baseQ = _min_baseQ;
+	fai_fname = "";
+	n_rhets_total = 0;
+	n_rhets_pired = 0;
+	n_bases_mismatch = 0;
+	n_bases_total = 0;
+	n_bases_lowqual = 0;
+	n_bases_indel = 0;
+	n_bases_match = 0;
+	n_pirs_mismatch = 0;
+	n_pirs_total = 0;
 }
 
 pileup_caller::~pileup_caller() {
 	R.clear();
+	if (fai) fai_destroy(fai);
 }
 
-
+void pileup_caller::loadFASTA(string ffasta) {
+	setenv("REF_CACHE", "", 0);
+	setenv("REF_PATH", "fake_value_so_no_download", 0);
+	fai_fname = ffasta;
+	fai = fai_load(fai_fname.c_str());
+	if (fai == NULL) vrb.error("Error while loading fasta index file");
+}
 
 het pileup_caller::getScafHetsLeft(int ind, int vr) {
 	//Backward ...
@@ -99,11 +116,14 @@ bool pileup_caller::phaseWithPIRs(int ind, int vr, het &lhet, het &thet, het &rh
 	float prob_01 = (support[0][0] + support[1][1]) * 1.0f / sum;
 	float prob_10 = (support[0][1] + support[1][0]) * 1.0f / sum;
 
-	if (prob_01 > 0.90) {
+	n_pirs_mismatch += min(support[0][0] + support[1][1], support[0][1] + support[1][0]);
+	n_pirs_total += support[0][0] + support[1][1] + support[0][1] + support[1][0];
+
+	if (prob_01 > 0.99) {
 		thet.a0 = 0;
 		thet.a1 = 1;
 		return true;
-	} else if (prob_10 > 0.90) {
+	} else if (prob_10 > 0.99) {
 		thet.a0 = 1;
 		thet.a1 = 0;
 		return true;

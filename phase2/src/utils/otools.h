@@ -49,6 +49,8 @@
 #include <htslib/hts.h>
 #include <htslib/kseq.h>
 #include <htslib/sam.h>
+#include <htslib/faidx.h>
+#include <htslib/regidx.h>
 extern "C" {
 	#include <htslib/vcf_sweep.h>
 	#include <htslib/synced_bcf_reader.h>

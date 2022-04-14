@@ -29,14 +29,11 @@ void gibbs_sampler::iterate(int & error, int & total) {
 
 	for (int iter = 0 ; iter < niterations ; iter ++) {
 
-		//cout << " ========================================== " << endl;
-
 		for (int ui = 0 ; ui < unphased.size() ; ui ++) {
 
 			//Init
 			int ind = unphased[ui];
 			fill(hprob.begin(), hprob.end(), 0.0f);
-			fill(gprob.begin(), gprob.end(), 1.0f);
 			assert(missing [ind] || (alleles[2*ind+0] != alleles[2*ind+1]));
 
 			//
@@ -56,23 +53,23 @@ void gibbs_sampler::iterate(int & error, int & total) {
 
 			for (int h = 0 ; h < 4 ; h++) if (hprob[h] < 1e-7) hprob[h] = 1e-7;
 
-			//
+			//Prior for hets, using eventually PIRs
 			if (!missing [ind]) {
 				gprob[0] = 0.0f;
+				gprob[1] = 1.0f - rprobs[ind];
+				gprob[2] = rprobs[ind];
 				gprob[3] = 0.0f;
-			}
+			} else fill(gprob.begin(), gprob.end(), 1.0f);
+
+			//Compute posteriors using copying probs
 			gprob[0] *= (hprob[0] * hprob[2]);
 			gprob[1] *= (hprob[0] * hprob[3]);
 			gprob[2] *= (hprob[1] * hprob[2]);
 			gprob[3] *= (hprob[1] * hprob[3]);
 			sum = accumulate(gprob.begin(), gprob.end(), 0.0f);
-			//for (int g = 0 ; g < 4 ; g++) gprob[g] /= sum;
-
-			//if (!(sum > 0))
-			//	cout << iter << " " << ui << " " << stb.str(sum, 3) << " / " << stb.str(gprob, 3) << " / " << stb.str(hprob, 3) << endl;
 			assert(sum > 0);
 
-			//
+			//Sample a new genotype
 			int sampleg = rng.sample(gprob, sum);
 			switch (sampleg) {
 			case 0:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 0; break;
@@ -81,7 +78,7 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
 			}
 
-			//
+			//Store posteriors if not a burn-in iteration
 			if (iter >= nburnin) {
 				pprobs[4*ind+0] += gprob[0];
 				pprobs[4*ind+1] += gprob[1];
