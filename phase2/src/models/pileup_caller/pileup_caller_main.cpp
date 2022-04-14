@@ -21,6 +21,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <models/pileup_caller/pileup_caller_header.h>
 
+#define HET_LEFT	0
+#define HET_TARG	1
+#define HET_RIGT	2
+
 static int read_bam(void *data, bam1_t *b) {
 	data_caller * aux = (data_caller*) data;
 	int ret;
@@ -39,13 +43,53 @@ static int read_bam(void *data, bam1_t *b) {
     return ret;
 }
 
-void pileup_caller::queryBAM(int ind, string fbam, unsigned long int & rare_het_total, unsigned long int & rare_het_pired) {
+void pileup_caller::parseReads(const bam_pileup1_t * v_plp, int n_plp, het & h, int side) {
+	n_bases_total+=n_plp;
+	for (int read = 0 ; read < n_plp ; read ++) {
+		const bam_pileup1_t * p = v_plp + read;
+		if (p->is_del || p->is_refskip || p->indel == 1) {
+			n_bases_indel ++;
+			continue;
+		} else {
+			char base = getBase(bam_seqi(bam_get_seq(p->b), p->qpos));
+			char qual = (char)bam_get_qual(p->b)[p->qpos];
+
+			if (qual < min_baseQ) {
+				n_bases_lowqual ++;
+				continue;
+			}
+
+			if (base != h.ref && base != h.alt) {
+				n_bases_mismatch ++;
+				continue;
+			}
+
+			string qname = string(bam_get_qname(p->b));
+			map < string, pir > :: iterator itR = R.insert(pair < string, pir > (qname, pir())).first;
+			switch (side) {
+			case HET_LEFT:	itR->second.l_phr = qual;
+							itR->second.l_obs = 1;
+							itR->second.l_all = (base == h.alt);
+							break;
+			case HET_TARG:	itR->second.t_phr = qual;
+							itR->second.t_obs = 1;
+							itR->second.t_all = (base == h.alt);
+							break;
+			case HET_RIGT:	itR->second.r_phr = qual;
+							itR->second.r_obs = 1;
+							itR->second.r_all = (base == h.alt);
+							break;
+			}
+			n_bases_match++;
+		}
+	}
+}
+
+void pileup_caller::queryBAM(int ind, string fbam) {
+	tac.clock();
 	pir d;
 	data_caller DC(min_mapQ);
 	map < string, pir > :: iterator itR;
-
-	//Opening BAM file
-	DC.open(fbam);
 
 	//Loop over rare variants
 	for (int r = 0 ; r < G.GRind_genotypes[ind].size() ; r ++) {
@@ -60,19 +104,25 @@ void pileup_caller::queryBAM(int ind, string fbam, unsigned long int & rare_het_
 
 			//Get target infos
 			het t_gen;
+			t_gen.idx = G.GRind_genotypes[ind][r].idx;
 			t_gen.pos = V.vec_rare[G.GRind_genotypes[ind][r].idx]->bp - 1;
 			t_gen.ref = V.vec_rare[G.GRind_genotypes[ind][r].idx]->ref[0];
 			t_gen.alt = V.vec_rare[G.GRind_genotypes[ind][r].idx]->alt[0];
+
+			//cout << l_gen.pos << " " << t_gen.pos << " " << r_gen.pos << endl;
 
 			//Get distance
 			int l_dist = t_gen.distance(l_gen);
 			int r_dist = t_gen.distance(r_gen);
 
+			//If isolated het, let's break
+			if (l_dist > 1500 && r_dist > 1500) break;
+
+			//Open BAM/CRAM file descriptor
+			if (!DC.isOpened()) DC.open(fbam, fai_fname);
+
 			//Jump to region
-			if (l_dist < 1500 && r_dist < 1500) DC.jump(chr, l_gen.pos - 1, r_gen.pos + 1);
-			else if (l_dist < 1500) DC.jump(chr, l_gen.pos - 1, t_gen.pos + 1);
-			else if (r_dist < 2000) DC.jump(chr, t_gen.pos - 1, r_gen.pos + 1);
-			else break;
+			DC.jump(chr, ((l_dist<1500)?l_gen.pos:t_gen.pos)-1, ((r_dist<1500)?r_gen.pos:t_gen.pos)+1);
 
 			//Parse reads
 			R.clear();
@@ -83,58 +133,11 @@ void pileup_caller::queryBAM(int ind, string fbam, unsigned long int & rare_het_
 				if (curr_pos < DC.begin() || curr_pos >= DC.end()) continue;
 
 				//Left
-				if (curr_tid == curr_chr && curr_pos == l_gen.pos) {
-					for (int read = 0 ; read < n_plp ; read ++) {
-						const bam_pileup1_t * p = v_plp + read;
-						if (p->is_del || p->is_refskip || p->indel == 1) continue;
-						else if (bam_get_qual(p->b)[p->qpos] < min_baseQ) continue;
-						else {
-							char base = getBase(bam_seqi(bam_get_seq(p->b), p->qpos));
-							if (base != l_gen.ref && base != l_gen.alt) continue;
-							string qname = string(bam_get_qname(p->b)); d.clear();
-							itR = R.insert(pair < string, pir > (qname, d)).first;
-							itR->second.l_phr = (unsigned char)bam_get_qual(p->b)[p->qpos];
-							itR->second.l_obs = 1;
-							itR->second.l_all = (base == l_gen.alt);
-						}
-					}
-				}
-
+				if (curr_tid == curr_chr && curr_pos == l_gen.pos) parseReads(v_plp, n_plp, l_gen, HET_LEFT);
 				//right
-				if (curr_tid == curr_chr && curr_pos == r_gen.pos) {
-					for (int read = 0 ; read < n_plp ; read ++) {
-						const bam_pileup1_t * p = v_plp + read;
-						if (p->is_del || p->is_refskip || p->indel == 1) continue;
-						else if (bam_get_qual(p->b)[p->qpos] < min_baseQ) continue;
-						else {
-							char base = getBase(bam_seqi(bam_get_seq(p->b), p->qpos));
-							if (base != r_gen.ref && base != r_gen.alt) continue;
-							string qname = string(bam_get_qname(p->b)); d.clear();
-							itR = R.insert(pair < string, pir > (qname, d)).first;
-							itR->second.r_phr = (unsigned char)bam_get_qual(p->b)[p->qpos];
-							itR->second.r_obs = 1;
-							itR->second.r_all = (base == r_gen.alt);
-						}
-					}
-				}
-
+				if (curr_tid == curr_chr && curr_pos == r_gen.pos) parseReads(v_plp, n_plp, r_gen, HET_RIGT);
 				//target
-				if (curr_tid == curr_chr && curr_pos == t_gen.pos) {
-					for (int read = 0 ; read < n_plp ; read ++) {
-						const bam_pileup1_t * p = v_plp + read;
-						if (p->is_del || p->is_refskip || p->indel == 1) continue;
-						else if (bam_get_qual(p->b)[p->qpos] < min_baseQ) continue;
-						else {
-							char base = getBase(bam_seqi(bam_get_seq(p->b), p->qpos));
-							if (base != t_gen.ref && base != t_gen.alt) continue;
-							string qname = string(bam_get_qname(p->b)); d.clear();
-							itR = R.insert(pair < string, pir > (qname, d)).first;
-							itR->second.t_phr = (unsigned char)bam_get_qual(p->b)[p->qpos];
-							itR->second.t_obs = 1;
-							itR->second.t_all = (base == t_gen.alt);
-						}
-					}
-				}
+				if (curr_tid == curr_chr && curr_pos == t_gen.pos) parseReads(v_plp, n_plp, t_gen, HET_TARG);
 			}
 			bam_plp_reset(s_plp);
 			bam_plp_destroy(s_plp);
@@ -143,13 +146,13 @@ void pileup_caller::queryBAM(int ind, string fbam, unsigned long int & rare_het_
 			if (phaseWithPIRs(ind, r, l_gen, t_gen, r_gen)) {
 				G.GRind_genotypes[ind][r].pir = 1;
 				G.GRind_genotypes[ind][r].ph0 = t_gen.a0;
-				rare_het_pired++;
+				n_rhets_pired++;
 			}
-			rare_het_total++;
+			n_rhets_total++;
 		}
 	}
 
 	//Closing BAM file
-	DC.close();
-
+	if (DC.isOpened()) DC.close();
+	vrb.bullet("Processing [" + fbam + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

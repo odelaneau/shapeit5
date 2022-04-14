@@ -76,21 +76,27 @@ public:
 	hts_idx_t * idx;			// Index handler
 	hts_itr_t * iter;			// NULL if a region not specified
 	int min_mapQ;				// mapQ filter
+	bool opened;
 
 	data_caller (int _min_mapQ) {
 		min_mapQ = _min_mapQ;
 		fp = NULL; hdr = NULL; idx = NULL; iter = NULL;
+		opened = false;
 	}
 
 	~data_caller() {
 		close();
 	}
 
-	void open (string fbam) {
+	void open (string fbam, string fasta) {
 		if (!(fp=sam_open(fbam.c_str(), "r"))) vrb.error("Cannot open file!");
 		if (!(hdr=sam_hdr_read(fp))) vrb.error("Cannot parse header!");
 	    if (!(idx=sam_index_load(fp, fbam.c_str()))) vrb.error("Cannot load index!");
+	    if ((fasta != "") && hts_set_fai_filename(fp, fasta.c_str())) vrb.error("Cannot open fasta");
+	    opened = true;
 	}
+
+	bool isOpened() { return opened; }
 
 	void close() {
 		if (hdr) bam_hdr_destroy(hdr);
@@ -98,6 +104,7 @@ public:
 		if (fp) sam_close(fp);
 		if (iter) hts_itr_destroy(iter);
 		fp = NULL; hdr = NULL; idx = NULL; iter = NULL;
+		opened = false;
 	}
 
 	void jump(string & chr, int start, int end) {
@@ -152,7 +159,22 @@ public :
 	genotype_set & G;
 	variant_map & V;
 
-	//
+	//FASTA
+	string fai_fname;
+	faidx_t* fai;
+
+	//Sequencing stats
+	unsigned long int n_rhets_total;
+	unsigned long int n_rhets_pired;
+	unsigned long int n_bases_mismatch;
+	unsigned long int n_bases_match;
+	unsigned long int n_bases_lowqual;
+	unsigned long int n_bases_indel;
+	unsigned long int n_bases_total;
+	unsigned long int n_pirs_total;
+	unsigned long int n_pirs_mismatch;
+
+	//PIRs
 	map < string, pir > R;
 
 	//PARAMETERS
@@ -164,12 +186,14 @@ public :
 	~pileup_caller();
 
 	//MAIN
-	void queryBAM(int ind, string ,  unsigned long int & rare_het_total, unsigned long int & rare_het_pired);
+	void loadFASTA(string);
+	void queryBAM(int ind, string);
 
 	//ROUTINES
 	het getScafHetsLeft(int ind, int vr);
 	het getScafHetsRight(int ind, int vr);
 	bool phaseWithPIRs(int ind, int vr, het &lhet, het &thet, het &rhet);
+	void parseReads(const bam_pileup1_t * v_plp, int n_plp, het & h, int side);
 };
 
 #endif

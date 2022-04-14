@@ -1,6 +1,6 @@
 
 REG=read.table("/home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt", head=FALSE)
-TYP=c("fqa","fqc")
+TYP=c("fqa","fqc", "fqr")
 nTYP=length(TYP)
 PAR=c("default", "scaffold", "default.depth8", "scaffold.depth8", "default.modulo5", "scaffold.modulo5")
 nPAR=length(PAR)
@@ -41,57 +41,72 @@ for (r in 1:nrow(REG)) {
 
 	
 #BEAGLE
-t=2
-A = c()
-B = c()
-C = c()
+vBIN=c(0,1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000)
+nBIN=length(vBIN)
+
+t=3
+A0 = c()
+B0 = c()
+C0 = c()
 for (r in 1:nrow(REG)) {
 	tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".beagle5.3.", TYP[t], ".frequency.switch.txt.gz", sep="");
 	cat (tmp, "\n")
 	BGL = read.table(tmp, head=FALSE)
-	if (length(A) ==0) {
-		A = BGL$V2
-		B = BGL$V3
-		C = BGL$V1
+	if (length(A0) ==0) {
+		A0 = BGL$V2
+		B0 = BGL$V3
+		C0 = BGL$V1
 	} else {
-		A = A + BGL$V2
-		B = B + BGL$V3
+		A0 = A0 + BGL$V2
+		B0 = B0 + BGL$V3
 	}		
 }
-BIN=cut(C, breaks=c(0,1000,2000,5000,10000,20000,50000,100000), labels=1:7)
-DF = cbind(A, B, BIN)
+BIN=cut(C0, breaks=vBIN, labels=1:(nBIN-1))
+DF = cbind(A0, B0, BIN)
 vE = as.vector(by (DF[, 1], DF[, 3], sum))
 vT = as.vector(by (DF[, 2], DF[, 3], sum))
 x = vE*100/vT
-
 	
 #SHAPEIT
-t=2
-A = c()
-B = c()
-C = c()
+t=3
+A1 = c()
+B1 = c()
+C1 = c()
 for (r in 1:nrow(REG)) {
-	tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".shapeit5.", PAR[3], ".", TYP[t], ".frequency.switch.txt.gz", sep="");
+	tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".shapeit5.phase2.bcf.", TYP[t], ".frequency.switch.txt.gz", sep="");
 	cat (tmp, "\n")
 	BGL = read.table(tmp, head=FALSE)
-	if (length(A) ==0) {
-		A = BGL$V2
-		B = BGL$V3
-		C = BGL$V1
+	if (length(A1) ==0) {
+		A1 = BGL$V2
+		B1 = BGL$V3
+		C1 = BGL$V1
 	} else {
-		A = A + BGL$V2
-		B = B + BGL$V3
+		A1 = A1 + BGL$V2
+		B1 = B1 + BGL$V3
 	}		
 }
-BIN=cut(C, breaks=c(0,1000,2000,5000,10000,20000,50000,100000), labels=1:7)
-DF = cbind(A, B, BIN)
+BIN=cut(C1, breaks=vBIN, labels=1:(nBIN-1))
+DF = cbind(A1, B1, BIN)
 vE = as.vector(by (DF[, 1], DF[, 3], sum))
 vT = as.vector(by (DF[, 2], DF[, 3], sum))
 y = vE*100/vT
 
 
-plot(log10(c(1000,2000,5000,10000,20000,50000,100000)), x, type="b", col="red")
-points(log10(c(1000,2000,5000,10000,20000,50000,100000)), y, type="b", col="blue")
+plot(log10(vBIN[2:nBIN]), x, type="b", col="red", xlab="log10(MAC)", ylab="Switch error (%)")
+points(log10(vBIN[2:nBIN]), y, type="b", col="blue")
+
+plot(log10(vBIN[2:nBIN]), (y-x) * 100 / x, type="b", xlab="log10(MAC)", ylab="Switch error reduction (%)", ylim=c(-50, +10))
+abline(h=0, col="red")
+
+
+
+
+plot(log10(C0), (A0/B0-A1/B1) / (A0/B0), type="b", xlab="log10(MAC)", ylab="Switch error reduction (%)", ylim=c(-1, +1))
+abline(h=0, col="red")
+
+
+
+
 
 
 library(RColorBrewer)

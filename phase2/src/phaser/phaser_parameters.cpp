@@ -43,6 +43,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_sequence ("Sequencing data files");
 	opt_input.add_options()
 			("bam-list", bpo::value< string >(), "List of BAM files to be used for read based phasing")
+			("bam-fasta", bpo::value< string >(), "Fasta file for CRAM decompression")
 			("bam-mapq", bpo::value< int >()->default_value(10), "Minimal mapping quality to consider a read")
 			("bam-baseq", bpo::value< int >()->default_value(20), "Minimal calling quality to consider a base in a read");
 

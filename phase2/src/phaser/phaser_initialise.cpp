@@ -61,11 +61,4 @@ void phaser::read_files_and_initialise() {
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
 	H.transposeHaplotypes_V2H();
 	G.transpose();
-
-	//step5: Initialize conditioning set
-	vrb.title("PBWT pass");
-	H.initialize(V,	options["pbwt-modulo"].as < double > (),
-					options["pbwt-mdr"].as < double > (),
-					options["pbwt-depth"].as < int > (),
-					options["pbwt-mac"].as < int > ());
 }

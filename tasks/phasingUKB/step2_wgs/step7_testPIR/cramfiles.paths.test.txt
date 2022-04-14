@@ -1,0 +1,6 @@
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/2939971_23193_0_0.cram	2939971
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/4805027_23193_0_0.cram	4805027
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/3172520_23193_0_0.cram	3172520
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/2873467_23193_0_0.cram	2873467
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/1420056_23193_0_0.cram	1420056
+/home/olivier/Fuse/PhasingUKB/Phasing/PhasingWGS/step7_testPIR/3194013_23193_0_0.cram	3194013
