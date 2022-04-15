@@ -39,14 +39,14 @@ void phaser::declare_options() {
 			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
 			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
 			("map", bpo::value< string >(), "Genetic map");
-
+/*
 	bpo::options_description opt_sequence ("Sequencing data files");
 	opt_input.add_options()
 			("bam-list", bpo::value< string >(), "List of BAM files to be used for read based phasing")
 			("bam-fasta", bpo::value< string >(), "Fasta file for CRAM decompression")
 			("bam-mapq", bpo::value< int >()->default_value(10), "Minimal mapping quality to consider a read")
 			("bam-baseq", bpo::value< int >()->default_value(20), "Minimal calling quality to consider a base in a read");
-
+*/
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
 			("mcmc-iterations", bpo::value< int >()->default_value(10), "Number of MCMC iterations")
@@ -55,7 +55,8 @@ void phaser::declare_options() {
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
 			("pbwt-modulo", bpo::value< double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM")
-			("pbwt-depth", bpo::value< int >()->default_value(4), "Depth of PBWT indexes to condition on")
+			("pbwt-depth-common", bpo::value< int >()->default_value(4), "Depth of PBWT indexes at common sites to condition on")
+			("pbwt-depth-rare", bpo::value< int >()->default_value(4), "Depth of PBWT indexes at rare hets to condition on")
 			("pbwt-mac", bpo::value< int >()->default_value(2), "Minimal Minor Allele Count at which PBWT is evaluated")
 			("pbwt-mdr", bpo::value < double >()->default_value(0.10), "Maximal Missing Data Rate at which PBWT is evaluated");
 	
@@ -69,7 +70,8 @@ void phaser::declare_options() {
 			("output,O", bpo::value< string >(), "Phased haplotypes in VCF/BCF format")
 			("log", bpo::value< string >(), "Log file");
 
-	descriptions.add(opt_base).add(opt_input).add(opt_sequence).add(opt_mcmc).add(opt_pbwt).add(opt_hmm).add(opt_output);
+	//descriptions.add(opt_base).add(opt_input).add(opt_sequence).add(opt_mcmc).add(opt_pbwt).add(opt_hmm).add(opt_output);
+	descriptions.add(opt_base).add(opt_input).add(opt_mcmc).add(opt_pbwt).add(opt_hmm).add(opt_output);
 }
 
 void phaser::parse_command_line(vector < string > & args) {
@@ -124,7 +126,7 @@ void phaser::verbose_files() {
 	vrb.bullet("Input VCF     : [" + options["input"].as < string > () + "]");
 	vrb.bullet("Scaffold VCF  : [" + options["scaffold"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
-	if (options.count("bam-list")) vrb.bullet("BAM list      : [" + options["bam-list"].as < string > () + "]");
+	//if (options.count("bam-list")) vrb.bullet("BAM list      : [" + options["bam-list"].as < string > () + "]");
 	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
@@ -133,13 +135,9 @@ void phaser::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
-
 	vrb.bullet("MCMC    : #iterations=" + stb.str(options["mcmc-iterations"].as < int > ()) + " / #burn-in=" + stb.str(options["mcmc-burnin"].as < int > ()));
-
-	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
-
+	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth-common"].as < int > ()) + "," + stb.str(options["pbwt-depth-rare"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
 	if (options.count("map")) vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
-
-	if (options.count("bam-list")) vrb.bullet("ABM     : [MappingQ = " + stb.str(options["bam-mapq"].as < int > ()) + " / BaseQ = " + stb.str(options["bam-baseq"].as < int > ()) + "]");
+	//if (options.count("bam-list")) vrb.bullet("BAM     : [MappingQ = " + stb.str(options["bam-mapq"].as < int > ()) + " / BaseQ = " + stb.str(options["bam-baseq"].as < int > ()) + "]");
 }

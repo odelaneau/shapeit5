@@ -23,22 +23,25 @@
 #include <containers/conditioning_set/conditioning_set_header.h>
 
 conditioning_set::conditioning_set() {
-	depth = 0;
+	depth_common = 0;
+	depth_rare = 0;
 }
 
 conditioning_set::~conditioning_set() {
-	depth = 0;
+	depth_common = 0;
+	depth_rare = 0;
 	sites_pbwt_evaluation.clear();
 	sites_pbwt_selection.clear();
 	sites_pbwt_grouping.clear();
 	indexes_pbwt_neighbour.clear();
 }
 
-void conditioning_set::initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth, int _mac) {
+void conditioning_set::initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth_common, int _depth_rare, int _mac) {
 	tac.clock();
 
 	//SETTING PARAMETERS
-	depth = _depth;
+	depth_common = _depth_common;
+	depth_rare = _depth_rare;
 
 	//MAPPING EVAL+GRP
 	int n_evaluated = 0;

@@ -123,6 +123,7 @@ void phaser::phase() {
 	tac.clock();
 
 	//STEP0: Phase informative reads
+	/*
 	if (options.count("bam-list")) {
 		tac.clock();
 		string buffer;
@@ -133,7 +134,8 @@ void phaser::phase() {
 		vrb.title("Extracting PIRs from BAM listed in [" + options["bam-list"].as < string > () + "]");
 		input_file fd (options["bam-list"].as < string > ());
 		while (getline(fd, buffer)) {
-			if (stb.split(buffer, tokens, "	") != 2) vrb.error ("BAM list file expects 2 columns");
+			int ntok = stb.split(buffer, tokens, '\t');
+			if (ntok != 2) vrb.error ("BAM list file expects 2 columns [f=" + stb.str(ntok) + "]");
 			mapBamfiles.insert(pair < string, string > (tokens[1], tokens[0]));
 		}
 		fd.close();
@@ -163,12 +165,14 @@ void phaser::phase() {
 		vrb.bullet("#indel_bases = " + stb.str(PLC.n_bases_indel) + " / " + stb.str(PLC.n_bases_total) + " (" + stb.str(PLC.n_bases_indel * 100.0 / PLC.n_bases_total, 3) + "%)");
 		//vrb.bullet("Total time to parse all BAMs/CRAMs (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	}
+	*/
 
 	//STEP1: haplotype selection
 	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
 					options["pbwt-mdr"].as < double > (),
-					options["pbwt-depth"].as < int > (),
+					options["pbwt-depth-common"].as < int > (),
+					options["pbwt-depth-rare"].as < int > (),
 					options["pbwt-mac"].as < int > ());
 
 	H.select(V, G);
