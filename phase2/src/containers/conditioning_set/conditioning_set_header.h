@@ -40,7 +40,8 @@ public:
 	unsigned long int npushes;
 
 	//PARAMETERS FOR PBWT
-	int depth;
+	int depth_common;
+	int depth_rare;
 
 	//STATE DATA
 	vector < pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
@@ -49,7 +50,7 @@ public:
 	//CONSTRUCTOR/DESTRUCTOR
 	conditioning_set();
 	~conditioning_set();
-	void initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth, int _mac);
+	void initialize(variant_map &, float, float, int, int, int);
 
 	//STATES PROCESSING
 	void storeCommon(vector < int > & A, vector < int > & M);

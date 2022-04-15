@@ -54,12 +54,13 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			for (int h = 0 ; h < 4 ; h++) if (hprob[h] < 1e-7) hprob[h] = 1e-7;
 
 			//Prior for hets, using eventually PIRs
+			fill(gprob.begin(), gprob.end(), 1.0f);
 			if (!missing [ind]) {
 				gprob[0] = 0.0f;
-				gprob[1] = 1.0f - rprobs[ind];
-				gprob[2] = rprobs[ind];
+				//gprob[1] = 1.0f - rprobs[ind];
+				//gprob[2] = rprobs[ind];
 				gprob[3] = 0.0f;
-			} else fill(gprob.begin(), gprob.end(), 1.0f);
+			}
 
 			//Compute posteriors using copying probs
 			gprob[0] *= (hprob[0] * hprob[2]);

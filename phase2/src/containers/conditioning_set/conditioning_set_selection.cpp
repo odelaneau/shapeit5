@@ -31,7 +31,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vector < int > A = vector < int > (n_haplotypes, 0);
 	vector < int > B = vector < int > (n_haplotypes, 0);
 	vector < int > R = vector < int > (n_haplotypes, 0);
-	vector < int > M = vector < int > (2 * depth * n_haplotypes, -1);
+	vector < int > M = vector < int > (2 * depth_common * n_haplotypes, -1);
 	iota(A.begin(), A.end(), 0);
 
 	//Select new sites at which to trigger storage
@@ -130,12 +130,11 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 	sort(N.begin(), N.end());
 	for (int h = 0 ; h < N.size() ; h ++) {
 		int target_hap = N[h].second;
-		int from = ((h-depth)<0)?0:(h-depth);
-		int to = ((h+depth)<N.size())?(h+depth):(N.size()-1);
+		int from = ((h-depth_rare)<0)?0:(h-depth_rare);
+		int to = ((h+depth_rare)<N.size())?(h+depth_rare):(N.size()-1);
 		for (int c = from ; c <= to ; c ++) {
 			int cond_hap = N[c].second;
 			if (target_hap/2 != cond_hap/2) {
-				//indexes_pbwt_neighbour[target_hap].push_back(cond_hap);
 				indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, cond_hap));
 			}
 		}
@@ -145,7 +144,7 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 	for (int h = 0 ; h < n_haplotypes ; h ++) {
 		int chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1;
-		for (int n_added = 0 ; n_added < depth ; ) {
+		for (int n_added = 0 ; n_added < depth_common ; ) {
 			if ((h-offset0)>=0) {
 				hap_guess0 = A[h-offset0];
 				add_guess0 = (hap_guess0/2 != chap/2);
@@ -155,33 +154,29 @@ void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 				add_guess1 = (hap_guess1/2 != chap/2);
 			} else add_guess1 = 0;
 			if (add_guess0 && add_guess1) {
-				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
-					//indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+				if (hap_guess0 != M[chap * 2 * depth_common + n_added]) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
-					M[chap * 2 * depth + n_added] = hap_guess0;
+					M[chap * 2 * depth_common + n_added] = hap_guess0;
 					npushes++;
 				} else ncollisions++;
 				offset0++; n_added++;
-				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
-					//indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+				if (hap_guess1 != M[chap * 2 * depth_common + n_added]) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
-					M[chap * 2 * depth + n_added] = hap_guess1;
+					M[chap * 2 * depth_common + n_added] = hap_guess1;
 					npushes++;
 				} else ncollisions++;
 				offset1++; n_added++;
 			} else if (add_guess0) {
-				if (hap_guess0 != M[chap * 2 * depth + n_added]) {
-					//indexes_pbwt_neighbour[chap].push_back(hap_guess0);
+				if (hap_guess0 != M[chap * 2 * depth_common + n_added]) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
-					M[chap * 2 * depth + n_added] = hap_guess0;
+					M[chap * 2 * depth_common + n_added] = hap_guess0;
 					npushes++;
 				} else ncollisions++;
 				offset0++; n_added++;
 			} else if (add_guess1) {
-				if (hap_guess1 != M[chap * 2 * depth + n_added]) {
-					//indexes_pbwt_neighbour[chap].push_back(hap_guess1);
+				if (hap_guess1 != M[chap * 2 * depth_common + n_added]) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
-					M[chap * 2 * depth + n_added] = hap_guess1;
+					M[chap * 2 * depth_common + n_added] = hap_guess1;
 					npushes++;
 				} else ncollisions++;
 				offset1++; n_added++;
