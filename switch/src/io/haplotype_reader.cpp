@@ -83,6 +83,8 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq)
 				bcf_unpack(line_f, BCF_UN_ALL);
 				H.Positions.push_back(line_f->pos + 1);
 				H.RSIDs.push_back(string(line_f->d.id));
+				H.REFs.push_back(string(line_f->d.allele[0]));
+				H.ALTs.push_back(string(line_f->d.allele[1]));
 
 				rAN = bcf_get_info_int32(sr->readers[2].header, line_f, "AN", &vAN, &nAN);
 				rAC = bcf_get_info_int32(sr->readers[2].header, line_f, "AC", &vAC, &nAC);

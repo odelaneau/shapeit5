@@ -38,12 +38,23 @@ public:
 
 	//Routines
 	void check();
+	bool isSNP(string &, string &);
 
 	//Summarize
 	void writePerSample(string);
 	void writePerVariant(string);
 	void writePerFrequency(string);
+	void writePerType(string);
 	void writeBlock(string);
+	void writeFlipSwitchErrorPerSample(string);
+
 };
+
+inline
+bool haplotype_checker::isSNP(string & ref, string &alt) {
+	bool bref = (ref == "A") || (ref == "T") || (ref == "G") || (ref == "C");
+	bool balt = (alt == "A") || (alt == "T") || (alt == "G") || (alt == "C");
+	return bref && balt;
+}
 
 #endif

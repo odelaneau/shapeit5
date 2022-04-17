@@ -75,7 +75,6 @@ void gibbs_sampler::pushCommon(genotype_set & G, unsigned int vc) {
 
 
 void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight) {
-	rare = false;
 	unsigned int vs = G.MAPC_vs_right[vc];
 
 	//Clean-up
@@ -124,7 +123,6 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set
 }
 
 void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight) {
-	rare = true;
 	unsigned int vs = G.MAPR_vs_right[vr];
 
 	//Clean-up

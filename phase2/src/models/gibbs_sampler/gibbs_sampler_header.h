@@ -27,13 +27,11 @@
 #include <containers/state_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 
-
 class gibbs_sampler {
 public:
 	unsigned int nsamples;
 	unsigned int niterations;
 	unsigned int nburnin;
-	bool rare;
 
 	vector < bool > alleles;
 	vector < bool > missing;
