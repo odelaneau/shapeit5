@@ -24,6 +24,9 @@
 
 #include <utils/otools.h>
 
+#define TYPE_SNP	0
+#define TYPE_INDEL	1
+
 class haplotype_set {
 public:
 
@@ -43,6 +46,7 @@ public:
 	vector < int > MAC;
 	vector < int > Positions;
 	vector < string > RSIDs;
+	vector < string > REFs, ALTs;
 
 	//Family Data [Rows]
 	vector < string > vecSamples;

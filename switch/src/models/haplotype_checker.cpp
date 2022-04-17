@@ -62,6 +62,28 @@ void haplotype_checker::writePerSample(string fout) {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
+void haplotype_checker::writeFlipSwitchErrorPerSample(string fout) {
+	tac.clock();
+	vrb.title("Writing phasing flip and switch errors per sample in [" + fout + "]");
+	output_file fdo (fout);
+	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
+		vector < int > HET;
+		for (int l = 0 ; l < H.n_variants ; l ++) if (Checked[i][l]) HET.push_back(l);
+
+		int n_flips = 0, n_switches = 0, n_correct = 0;
+		for (int h = 2 ; h < HET.size() ; h ++) {
+			int n_errors = Errors[i][HET[h-1]] + Errors[i][HET[h]];
+			n_correct += (n_errors == 0);
+			n_switches += (n_errors == 1);
+			n_flips += (n_errors == 2);
+		}
+		int total = n_switches + n_flips + n_correct;
+		fdo << H.vecSamples[H.IDXesti[i]] << " " << n_switches << " " << n_flips << " " << n_correct << " " << stb.str(n_switches * 100.0f / total, 2) << " " << stb.str(n_flips * 100.0f / total, 2) << " " << stb.str(n_correct * 100.0f / total, 2) << endl;
+	}
+	fdo.close();
+	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
+}
+
 void haplotype_checker::writePerVariant(string fout) {
 	tac.clock();
 	vrb.title("Writing phasing switch errors per variant in [" + fout + "]");
@@ -78,7 +100,30 @@ void haplotype_checker::writePerVariant(string fout) {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
-void haplotype_checker::writePerFrequency(string fout){
+void haplotype_checker::writePerType(string fout) {
+	tac.clock();
+	vrb.title("Writing phasing switch errors per variant type in [" + fout + "]");
+	output_file fdo (fout);
+	vector < int > b_errors = vector < int > (2, 0);
+	vector < int > b_checked = vector < int > (2, 0);
+	for (int l = 0 ; l < H.n_variants ; l ++) {
+		for (int i = 0 ; i < H.IDXesti.size() ; i++) {
+			b_errors[isSNP(H.REFs[l], H.ALTs[l])] += Errors[i][l];
+			b_checked[isSNP(H.REFs[l], H.ALTs[l])] += Checked[i][l];
+		}
+	}
+	for (int b = 0 ; b < b_errors.size() ; b ++) {
+		if (b_checked[b] > 0)
+			fdo << b << " " << b_errors[b] << " " << b_checked[b] << " " << stb.str(b_errors[b] * 100.0f / b_checked[b], 2) << endl;
+		else
+			fdo << b << " 0 0 0.0" << endl;
+	}
+
+	fdo.close();
+	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
+}
+
+void haplotype_checker::writePerFrequency(string fout) {
 	tac.clock();
 	vrb.title("Writing phasing switch errors per frequency bin in [" + fout + "]");
 	int max_mac = *max_element(std::begin(H.MAC), std::end(H.MAC));

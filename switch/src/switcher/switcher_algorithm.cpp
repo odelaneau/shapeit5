@@ -46,8 +46,8 @@ void switcher::process() {
 	HC.check();
 	HC.writePerSample(options["output"].as < string > () + ".sample.switch.txt.gz");
 	HC.writePerVariant(options["output"].as < string > () + ".variant.switch.txt.gz");
-
 	HC.writePerFrequency(options["output"].as < string > () + ".frequency.switch.txt.gz");
-
+	HC.writePerType(options["output"].as < string > () + ".type.switch.txt.gz");
+	HC.writeFlipSwitchErrorPerSample(options["output"].as < string > () + ".flipsAndSwitches.txt.gz");
 	HC.writeBlock(options["output"].as < string > () + ".block.switch.txt.gz");
 }

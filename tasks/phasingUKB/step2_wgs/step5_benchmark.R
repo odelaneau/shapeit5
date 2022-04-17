@@ -1,18 +1,99 @@
+library(RColorBrewer)
+COLpair = brewer.pal(12,"Paired")
+COLdiff = brewer.pal(8,"Set1")
 
+N=150000
 REG=read.table("/home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt", head=FALSE)
-TYP=c("fqa","fqc", "fqr")
+
+
+
+
+
+
+#######################################################################################
+#
+#				PLOT SER BY FREQUENCY
+#
+#######################################################################################
+
+vBIN=c(0,1,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000, 150000)
+nBIN=length(vBIN)
+
+#Computes SER by frequency bin
+freqSER <- function (prefix, suffix) {
+	A = rep(0, N)
+	B = rep(0, N)
+	C = 1:N
+	for (r in 1:nrow(REG)) {
+		tmp=paste(prefix, REG$V3[r], suffix, sep=".");
+		DATA = read.table(tmp, head=FALSE)
+		cat (tmp, " ", nrow(DATA), " ", max(DATA$V1), "\n")		
+		for (l in 1:nrow(DATA)) {
+			A[DATA$V1[l]] = A[DATA$V1[l]] + DATA$V2[l]
+			B[DATA$V1[l]] = B[DATA$V1[l]] + DATA$V3[l]
+		}
+	}
+	bins=cut(C, breaks=vBIN, labels=1:(nBIN-1))
+	merged = cbind(A, B, bins)
+	aggrE = as.vector(by(merged[, 1], merged[, 3], sum))
+	aggrT = as.vector(by(merged[, 2], merged[, 3], sum))
+	ser = aggrE*100/aggrT
+	return (ser);
+}
+
+#
+bgl_default_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1", "beagle5.3.fqr.frequency.switch.txt.gz");
+
+shp_nf_dc2dr2_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr2.fqr.frequency.switch.txt.gz");
+#shp_nf_dc2dr4_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr4.fqr.frequency.switch.txt.gz");
+#shp_nf_dc4dr4_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc4.dr4.fqr.frequency.switch.txt.gz");
+#shp_nf_dc2dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr8.fqr.frequency.switch.txt.gz");
+#shp_nf_dc4dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc4.dr8.fqr.frequency.switch.txt.gz");
+#shp_nf_dc8dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc8.dr8.fqr.frequency.switch.txt.gz");
+
+pdf("figure1.pdf", 12,6)
+par(mfrow=c(1,2))
+ser_bin=c(0.1, 0.2,0.5,1.0,2.0,5.0,10.0,20.0,50.0)
+
+plot(log10(vBIN[2:nBIN]), log10(bgl_default_freq), type="n", pch=20, xlab="MAC", ylab="Switch Error Rate (%)", col="black", lwd=2, xaxt='n', yaxt='n')
+abline(h=log10(ser_bin), col="lightgrey", lty=2)
+abline(v=log10(vBIN[2:nBIN]), col="lightgrey", lty=2)
+axis(1, at=log10(vBIN[2:nBIN]), label=vBIN[2:nBIN], las=2)
+axis(2, at=log10(ser_bin), label=ser_bin)
+
+points(log10(vBIN[2:nBIN]), log10(bgl_default_freq), type="o", pch=20, col="black", lwd=2, xaxt='n', yaxt='n')
+
+points(log10(vBIN[2:nBIN]), log10(shp_nf_dc2dr2_freq), type="o", pch=20, xlab="MAC", col=COLdiff[1], lwd=2)
+legend("topright", fill=c("black", COLdiff[1]), legend=c("beagle5.3","shapeit5"), bg="white")
+
+plot(log10(vBIN[2:nBIN]), (shp_nf_dc2dr2_freq - bgl_default_freq) * 100.0 / bgl_default_freq, type="n", pch=20, xlab="MAC", ylab = "Switch Error Rate Reduction (%)", col="black", lwd=2, xaxt='n', ylim=c(-50, 0))
+abline(h=seq(-50,0,5), col="lightgrey", lty=2)
+abline(v=log10(vBIN[2:nBIN]), col="lightgrey", lty=2)
+abline(v=log10(300), col="blue", lty=2)
+axis(1, at=log10(vBIN[2:nBIN]), label=vBIN[2:nBIN], las=2)
+points(log10(vBIN[2:nBIN]), (shp_nf_dc2dr2_freq - bgl_default_freq) * 100.0 / bgl_default_freq, type="o", pch=20, col="black", lwd=2)
+abline(h=0, col="red")
+dev.off()
+
+
+#######################################################################################
+#
+#				PLOT SER SCAFFOLD
+#
+#######################################################################################
+
+
+TYP=c("fqa","fqc")
 nTYP=length(TYP)
-PAR=c("default", "scaffold", "default.depth8", "scaffold.depth8", "default.modulo5", "scaffold.modulo5")
+PAR=c("default.depth8", "scaffold.depth8")
 nPAR=length(PAR)
-
-
 
 #BEAGLE
 BGLerror = rep(0, nTYP)
 BGLtotal = rep(0, nTYP)
 for (r in 1:nrow(REG)) {
 	for (t in 1:nTYP) {
-		tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".beagle5.3.", TYP[t], ".sample.switch.txt.gz", sep="");
+		tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.", REG$V3[r], ".beagle5.3.", TYP[t], ".sample.switch.txt.gz", sep="");
 		cat (tmp, "\n")
 		BGL = read.table(tmp, head=FALSE)
 		BGL = BGL[!is.nan(BGL$V4), ]
@@ -27,7 +108,7 @@ SHPtotal = matrix(0, nrow=nPAR, ncol=nTYP)
 for (r in 1:nrow(REG)) {
 	for (t in 1:nTYP) {
 		for (p in 1:nPAR) {
-			tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".shapeit5." , PAR[p], ".", TYP[t], ".sample.switch.txt.gz", sep="");
+			tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[r], ".shapeit5." , PAR[p], ".", TYP[t], ".sample.switch.txt.gz", sep="");
 			cat (tmp, "\n")
 			SHP = read.table(tmp, head=FALSE)
 			SHP = SHP[!is.nan(SHP$V4), ]
@@ -36,94 +117,35 @@ for (r in 1:nrow(REG)) {
 		}
 	}
 }
-	
-	
 
-	
-#BEAGLE
-vBIN=c(0,1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000)
-nBIN=length(vBIN)
+pdf("figure1.pdf", 6,6)
 
-t=3
-A0 = c()
-B0 = c()
-C0 = c()
-for (r in 1:nrow(REG)) {
-	tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".beagle5.3.", TYP[t], ".frequency.switch.txt.gz", sep="");
-	cat (tmp, "\n")
-	BGL = read.table(tmp, head=FALSE)
-	if (length(A0) ==0) {
-		A0 = BGL$V2
-		B0 = BGL$V3
-		C0 = BGL$V1
-	} else {
-		A0 = A0 + BGL$V2
-		B0 = B0 + BGL$V3
-	}		
-}
-BIN=cut(C0, breaks=vBIN, labels=1:(nBIN-1))
-DF = cbind(A0, B0, BIN)
-vE = as.vector(by (DF[, 1], DF[, 3], sum))
-vT = as.vector(by (DF[, 2], DF[, 3], sum))
-x = vE*100/vT
-	
-#SHAPEIT
-t=3
-A1 = c()
-B1 = c()
-C1 = c()
-for (r in 1:nrow(REG)) {
-	tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[1], ".shapeit5.phase2.bcf.", TYP[t], ".frequency.switch.txt.gz", sep="");
-	cat (tmp, "\n")
-	BGL = read.table(tmp, head=FALSE)
-	if (length(A1) ==0) {
-		A1 = BGL$V2
-		B1 = BGL$V3
-		C1 = BGL$V1
-	} else {
-		A1 = A1 + BGL$V2
-		B1 = B1 + BGL$V3
-	}		
-}
-BIN=cut(C1, breaks=vBIN, labels=1:(nBIN-1))
-DF = cbind(A1, B1, BIN)
-vE = as.vector(by (DF[, 1], DF[, 3], sum))
-vT = as.vector(by (DF[, 2], DF[, 3], sum))
-y = vE*100/vT
+barplot(cbind(BGLerror * 100.0 / BGLtotal, t(SHPerror * 100.0 / SHPtotal)), ylab="Switch Error Rate (%)", beside=TRUE, names.arg=c("Beagle\ndefault", "Shapeit\ndefault", "Shapeit\nscaffold"), col=COLdiff[1:2])
+legend("topright", legend=c("Assay sites", "All sites"), fill=COLdiff)
+dev.off()
 
-
-plot(log10(vBIN[2:nBIN]), x, type="b", col="red", xlab="log10(MAC)", ylab="Switch error (%)")
-points(log10(vBIN[2:nBIN]), y, type="b", col="blue")
-
-plot(log10(vBIN[2:nBIN]), (y-x) * 100 / x, type="b", xlab="log10(MAC)", ylab="Switch error reduction (%)", ylim=c(-50, +10))
-abline(h=0, col="red")
-
-
-
-
-plot(log10(C0), (A0/B0-A1/B1) / (A0/B0), type="b", xlab="log10(MAC)", ylab="Switch error reduction (%)", ylim=c(-1, +1))
-abline(h=0, col="red")
-
-
-
-
-
+#######################################################################################
+#
+#				PLOT SWITCHES ARRAY
+#
+#######################################################################################
 
 library(RColorBrewer)
 COL = brewer.pal(12,"Paired")
 
 
-pdf ("plot1.pdf", 40,15)
+pdf ("figure2.pdf", 30,30)
 
-par(mfrow=c(1,2))
+par(mfrow=c(1,3), mar=c(4.1,0,4.1,0))
 
-D = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.default.depth8.fqc.block.switch.txt.gz", head=FALSE)
-S = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.default.depth8.fqc.sample.switch.txt.gz", head=FALSE)
+
+D = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.beagle5.3.fqc.block.switch.txt.gz", head=FALSE)
+S = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.beagle5.3.fqa.sample.switch.txt.gz", head=FALSE)
 S = S[!is.nan(S$V4), ]
 
 SMPL = unique(S$V1)
 nSMPL = length(SMPL)
-plot(0,0,type="n", xlim=c(min(D$V2), max(D$V2)), ylim=c(0, nSMPL), main="SHAPEIT")
+plot(0,0,type="n", xlim=c(min(D$V2), max(D$V2)), ylim=c(0, nSMPL), main="Beagle\ndefault", yaxt='n')
 
 for (i in 1:nSMPL) {
 	Ds = D[which(D$V1 == SMPL[i]), ]
@@ -133,15 +155,14 @@ for (i in 1:nSMPL) {
 }
 
 
-	
 
-D = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.beagle5.3.fqc.block.switch.txt.gz", head=FALSE)
-S = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.beagle5.3.fqc.sample.switch.txt.gz", head=FALSE)
+D = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.default.depth8.fqc.block.switch.txt.gz", head=FALSE)
+S = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.default.depth8.fqc.sample.switch.txt.gz", head=FALSE)
 S = S[!is.nan(S$V4), ]
 
 SMPL = unique(S$V1)
 nSMPL = length(SMPL)
-plot(0,0,type="n", xlim=c(min(D$V2), max(D$V2)), ylim=c(0, nSMPL), main="BEAGLE")
+plot(0,0,type="n", xlim=c(min(D$V2), max(D$V2)), ylim=c(0, nSMPL), main="Shapeit\ndefault", yaxt='n')
 
 for (i in 1:nSMPL) {
 	Ds = D[which(D$V1 == SMPL[i]), ]
@@ -151,6 +172,20 @@ for (i in 1:nSMPL) {
 }
 
 
-	
+D = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.scaffold.depth8.fqc.block.switch.txt.gz", head=FALSE)
+S = read.table("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.chr20:7702567-12266861.shapeit5.scaffold.depth8.fqc.sample.switch.txt.gz", head=FALSE)
+S = S[!is.nan(S$V4), ]
+
+SMPL = unique(S$V1)
+nSMPL = length(SMPL)
+plot(0,0,type="n", xlim=c(min(D$V2), max(D$V2)), ylim=c(0, nSMPL), main="Shapeit\nscaffold", yaxt='n')
+
+for (i in 1:nSMPL) {
+	Ds = D[which(D$V1 == SMPL[i]), ]
+	for (l in 2:nrow(Ds)) {
+		rect(Ds$V2[l-1], i, Ds$V2[l], i+1, col = ifelse (l %% 2 == 0, COL[5], COL[6]), border = NULL, lwd=0.5)
+	}
+}
+
 dev.off()
 
