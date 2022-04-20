@@ -47,6 +47,10 @@ void ligater::remove_info(bcf_hdr_t *hdr, bcf1_t *line)
     for (int i=0; i<line->n_info; i++)
     {
         bcf_info_t *inf = &line->d.info[i];
+        const char *key = bcf_hdr_int2id(hdr,BCF_DT_ID,inf->key);
+        if ( key[0]=='A' && key[1]=='N' && !key[2] ) continue;
+        if ( key[0]=='A' && key[1]=='C' && !key[2] ) continue;
+
         if ( inf->vptr_free )
         {
             free(inf->vptr - inf->vptr_off);
@@ -79,13 +83,13 @@ void ligater::remove_format(bcf_hdr_t *hdr, bcf1_t *line)
     }
 }
 
-void ligater::phase_update(bcf_hdr_t *hdr, bcf1_t *line)
+void ligater::phase_update(bcf_hdr_t *hdr, bcf1_t *line, const bool uphalf)
 {
     int i, nGTs = bcf_get_genotypes(hdr, line, &GTa, &mGTa);
     if ( nGTs <= 0 ) return;    // GT field is not present
     for (i=0; i<bcf_hdr_nsamples(hdr); i++)
     {
-		if ( !swap_phase[i] ) continue;
+		if ( !swap_phase[uphalf][i] ) continue;
 		int *gt = &GTa[i*2];
 		if ( bcf_gt_is_missing(gt[0]) || gt[1]==bcf_int32_vector_end ) continue;
         if (!bcf_gt_is_phased(gt[0]) || !bcf_gt_is_phased(gt[1])) continue;
@@ -107,19 +111,19 @@ void ligater::update_distances()
 	    if ( bcf_gt_allele(gta[0])==bcf_gt_allele(gta[1]) || bcf_gt_allele(gtb[0])==bcf_gt_allele(gtb[1]) ) continue;
 	    if ( bcf_gt_allele(gta[0])==bcf_gt_allele(gtb[0]) && bcf_gt_allele(gta[1])==bcf_gt_allele(gtb[1]) )
 	    {
-	        if ( swap_phase[i] ) nmism[i]++; else nmatch[i]++;
+	        if ( swap_phase[0][i] ) nmism[i]++; else nmatch[i]++;
 	    }
 	    if ( bcf_gt_allele(gta[0])==bcf_gt_allele(gtb[1]) && bcf_gt_allele(gta[1])==bcf_gt_allele(gtb[0]) )
 	    {
-	        if ( swap_phase[i] ) nmatch[i]++; else nmism[i]++;
+	        if ( swap_phase[0][i] ) nmatch[i]++; else nmism[i]++;
 	    }
 	}
 }
 
-void ligater::write_record(htsFile *fd, bcf_hdr_t * out_hdr, bcf_hdr_t * hdr_in, bcf1_t *line)
+void ligater::write_record(htsFile *fd, bcf_hdr_t * out_hdr, bcf_hdr_t * hdr_in, bcf1_t *line, const bool uphalf)
 {
 	bcf_translate(out_hdr, hdr_in, line);
-	if ( nswap ) phase_update(hdr_in, line);
+	if ( nswap[uphalf] ) phase_update(hdr_in, line, uphalf);
 	remove_info(out_hdr,line);
 	remove_format(out_hdr,line);
 	if (bcf_write(fd, out_hdr, line) ) vrb.error("Failed to write the record output to file");
@@ -129,6 +133,8 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 {
 	bcf_srs_t * sr =  bcf_sr_init();
 	sr->require_index = 1;
+	sr->collapse = COLLAPSE_NONE;
+	sr->max_unpack = BCF_UN_STR;
 
 	int n_threads = options["thread"].as < int > ();
 	if (n_threads > 1) bcf_sr_set_threads(sr, n_threads);
@@ -138,18 +144,23 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 
 	int nset = 0;
 	int n_sites_buff = 0;
+	int n_sites_tot = 0;
 	int last_pos=seek_pos;
 
 	bcf1_t * line0 = NULL, * line1 = NULL;
 	bcf_sr_seek(sr, seek_chr, seek_pos);
-
 	while ((nset = bcf_sr_next_line (sr)))
 	{
-		if (nset==1) break;
+		if (nset==1)
+		{
+			if ( !bcf_sr_has_line(sr,0) && bcf_sr_region_done(sr,0)) break;  // no input from the first reader
+			++n_sites_tot;
+			continue;
+		}
 		line0 =  bcf_sr_get_line(sr, 0);
-		line1 =  bcf_sr_get_line(sr, 1);
-
 		if (line0->n_allele != 2) continue;
+
+		line1 =  bcf_sr_get_line(sr, 1);
 		int nGTsa = bcf_get_genotypes(sr->readers[0].header, line0, &GTa, &mGTa);
 		int nGTsb = bcf_get_genotypes(sr->readers[1].header, line1, &GTb, &mGTb);
 		if ( nGTsa != 2*nsamples || nGTsb != 2*nsamples ) vrb.error("Non-diploid samples found in overlap");
@@ -157,15 +168,19 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 		update_distances();
 		last_pos = line0->pos;
 		++n_sites_buff;
+		++n_sites_tot;
 	}
 	bcf_sr_destroy(sr);
 
-	int nswitches=0;
 	stats1D stats_all;
 	stats1D phaseq;
+
+	nswap[1]=0;
 	for (int i = 0 ; i < nsamples; i++)
 	{
-		nswitches += (nmatch[i] < nmism[i]);
+		swap_phase[1][i] = nmatch[i] < nmism[i];
+		nswap[1] += swap_phase[1][i];
+
 		stats_all.push(nmatch[i] + nmism[i]);
 
 		float f = 99;
@@ -176,11 +191,14 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
            f = (99*(0.7 + f0*logf(f0) + (1-f0)*logf(1-f0))/0.7);
         }
         phaseq.push(f);
+
+		nmatch[i] = 0;
+		nmism[i]  = 0;
 	}
 
 	if (n_sites_buff <=0) vrb.error("Overlap is empty");
 	nsites_buff_d2.push_back(n_sites_buff/2);
-	vrb.print("Buf " + stb.str(nsites_buff_d2.size() -1) + " ["+string(seek_chr)+":"+stb.str(seek_pos+1)+"-"+stb.str(last_pos+1)+"] [L=" + stb.str(n_sites_buff) + "] [Avg #hets=" + stb.str(stats_all.mean()) + "] [Switch rate=" + stb.str(nswitches*1.0 / nsamples) + "] [Avg phaseQ=" + stb.str(phaseq.mean()) + "]");
+	vrb.print("Buf " + stb.str(nsites_buff_d2.size() -1) + " ["+string(seek_chr)+":"+stb.str(seek_pos+1)+"-"+stb.str(last_pos+1)+"] [L_isec=" + stb.str(n_sites_buff) + " / L_tot=" + stb.str(n_sites_tot) + "] [Avg #hets=" + stb.str(stats_all.mean()) + "] [Switch rate=" + stb.str(nswap[1]*1.0 / nsamples) + "] [Avg phaseQ=" + stb.str(phaseq.mean()) + "]");
 }
 
 void ligater::ligate() {
@@ -223,22 +241,6 @@ void ligater::ligate() {
         }
         bcf_hdr_destroy(hdr);
         if ( hts_close(fp)!=0 ) vrb.error("Close failed: " + filenames[f] + ".");
-/*
-		if(!(bcf_sr_add_reader (sr, filenames[f].c_str())))
-		{
-			if (sr->errnum != idx_load_failed) vrb.error("Failed to open file in sync reader: " + filenames[f] + "");
-			bcf_sr_remove_reader (sr, f);
-			int ret = bcf_index_build3(filenames[f].c_str(), NULL, 14, options["thread"].as < int > ());
-			if (ret != 0)
-			{
-				if (ret == -2) vrb.error("index: failed to open " + filenames[f]);
-				else if (ret == -3) vrb.error("index: " + filenames[f] + " is in a format that cannot be usefully indexed");
-				else vrb.error("index: failed to create index for + " + filenames[f]);
-			}
-			if(!(bcf_sr_add_reader (sr, filenames[f].c_str()))) vrb.error("Problem opening/creating index file for [" + filenames[f] + "]");
-			else vrb.bullet("Index file for [" + filenames[f] + "] has been successfully created.\n");
-		}
-*/
 	}
 
     for (int i=1; i<nfiles; i++) if ( start_pos[i-1]!=-1 && start_pos[i]!=-1 && start_pos[i]<start_pos[i-1] ) vrb.error("The files not in ascending order");
@@ -247,7 +249,7 @@ void ligater::ligate() {
     while ( i<out_hdr->nhrec )
     {
     	bcf_hrec_t *hrec = out_hdr->hrec[i];
-		// remove everything in INFO and FORMAT except FORMAT/GT
+		// remove everything in INFO and FORMAT except INFO/AC, INFO/AN and FORMAT/GT
     	const string strk(hrec->key);
     	if (strk != "INFO" && strk!="FORMAT") { i++; continue; }
 
@@ -255,6 +257,8 @@ void ligater::ligate() {
 		if ( id>=0 )
 		{
 			if (strk=="FORMAT" && string(hrec->vals[id])=="GT" ) { i++; continue; }
+			if (strk=="INFO" && (string(hrec->vals[id])=="AC" || string(hrec->vals[id])=="AN") ) { i++; continue; }
+
 			vdict_t *d = (vdict_t*)out_hdr->dict[BCF_DT_ID];
 			khint_t k = kh_get(vdict, d, out_hdr->hrec[i]->vals[id]);
 			kh_val(d, k).hrec[2] = NULL;
@@ -269,10 +273,12 @@ void ligater::ligate() {
     if ( nrm ) if (bcf_hdr_sync(out_hdr) < 0) vrb.error("Failed to update header");
 
 	nsamples = bcf_hdr_nsamples(out_hdr);
-	swap_phase = vector < bool > (nsamples, false);
+
+	nswap = {0,0};
+	swap_phase = {std::vector<bool>(nsamples, false), std::vector<bool>(nsamples, false)};
 	nmatch = vector < int > (nsamples, 0);
 	nmism = vector < int > (nsamples, 0);
-	nswap=0;
+
 	GTa = GTb = NULL;
 	mGTa = 0, mGTb=0;
 
@@ -289,9 +295,8 @@ void ligater::ligate() {
 	int n_sites_buff = 0;
 
 	int prev_readers_size = 0;
-	//int i=0;
     string prev_chr = "";
-    int prev_pos = 0;
+    std::array<int,2> prev_pos = {0,0};
     int first_pos = 0;
     int ifname = 0;
 
@@ -327,16 +332,7 @@ void ligater::ligate() {
         int nret;
         while ( (nret = bcf_sr_next_line(sr)) )
         {
-            if ( !bcf_sr_has_line(sr,0) )  // no input from the first reader
-            {
-                if ( ! bcf_sr_region_done(sr,0) )
-                {
-                	vrb.warning("Dropping site: " + string(bcf_seqname(bcf_sr_get_header(sr,1),bcf_sr_get_line(sr,1))) + ":" + to_string( bcf_sr_get_line(sr,1)->pos+1) + ". " +
-                			+ "The tool is not designed for regions in non-perfect overlap. Please check the input files.");
-                    continue;
-                }
-                bcf_sr_remove_reader(sr, 0);
-            }
+            if ( !bcf_sr_has_line(sr,0) ) if ( bcf_sr_region_done(sr,0) )  bcf_sr_remove_reader(sr, 0);
 
             // Get a line to learn about current position
             for (i=0; i<sr->nreaders; i++) if ( bcf_sr_has_line(sr,i) ) break;
@@ -351,7 +347,8 @@ void ligater::ligate() {
             while ( ifname < nfiles && start_pos[ifname]!=-1 && line->pos >= start_pos[ifname] )
             {
                 must_seek = 1;
-                if ( !bcf_sr_add_reader(sr,filenames[ifname].c_str()) )vrb.error("Failed to open " + filenames[ifname] + ".");
+                if ( !bcf_sr_add_reader(sr, filenames[ifname].c_str())) vrb.error("Failed to open " + filenames[ifname] + ".");
+                if  (sr->nreaders>2) vrb.error("Three files overlapping at position: " + to_string(line->pos+1));
                 ifname++;
             }
             if ( must_seek )
@@ -361,8 +358,17 @@ void ligater::ligate() {
                 seek_chr = bcf_hdr_name2id(out_hdr, bcf_seqname(sr->readers[i].header,line));
                 continue;
             }
-            // We are assuming that there is a perfect overlap, sites which are not present in both files are dropped
-            if ( sr->nreaders>1 && !bcf_sr_has_line(sr,1) && !bcf_sr_region_done(sr,1) ) continue;
+
+            if ( sr->nreaders>1 && ((!bcf_sr_has_line(sr,0) && !bcf_sr_region_done(sr,0)) || (!bcf_sr_has_line(sr,1) && !bcf_sr_region_done(sr,1))) )
+            {
+            	const bool uphalf = !bcf_sr_has_line(sr,0);
+            	line = bcf_sr_get_line(sr,uphalf);
+				write_record(out_fp, out_hdr, sr->readers[0].header, line,uphalf);
+                prev_pos[uphalf]=line->pos;
+                prev_readers_size = sr->nreaders;
+				n_variants++;
+            	continue;
+            }
 
             if (sr->nreaders<2)
             {
@@ -370,132 +376,62 @@ void ligater::ligate() {
             	{
             		n_variants_at_start_cnk = n_variants;
             		prev_chr = string(bcf_seqname(sr->readers[i].header,line));
-            		first_pos = (int)bcf_sr_get_line(sr,0)->pos + 1;
-            		vrb.wait("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "]");
+            		first_pos = (int)bcf_sr_get_line(sr,i)->pos + 1;
+            		vrb.wait("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "-]");
             	}
-    			if (prev_readers_size == 2)
+            	else if (prev_readers_size == 2)
     			{
             		n_variants_at_start_cnk = n_variants;
-    				n_sites_buff = 0;
             		prev_chr = string(bcf_seqname(sr->readers[i].header,line));
-            		first_pos = (int)bcf_sr_get_line(sr,0)->pos + 1;
-    				vrb.wait("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "]");
+            		first_pos = (int)bcf_sr_get_line(sr,i)->pos + 1;
+    				vrb.wait("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "-]");
+            		//after a buffer we go back to one reader. Chunk 1 is now chunk 0.
+    				n_sites_buff = 0;
+            		nswap[0]=nswap[1];
+            		swap_phase[0] = swap_phase[1];
     			}
-				line = bcf_sr_get_line(sr,0);
-    			write_record(out_fp, out_hdr, sr->readers[0].header, line);
+				line = bcf_sr_get_line(sr,i);
+    			write_record(out_fp, out_hdr, sr->readers[0].header, line,i);
+            	prev_pos[i]=line->pos;
             }
             else
             {
             	if (n_sites_buff==0)
             	{
             		prev_chr = string(bcf_seqname(sr->readers[i].header,line));
-    				vrb.print("Cnk " + stb.str(ifname-2) + " [" + prev_chr + ":" + stb.str(first_pos) + "-" + stb.str(prev_pos + 1) + "] [L=" + stb.str(n_variants-n_variants_at_start_cnk) + "]" );
+    				vrb.print("Cnk " + stb.str(ifname-2) + " [" + prev_chr + ":" + stb.str(first_pos) + "-" + stb.str(prev_pos[0] + 1) + "] [L=" + stb.str(n_variants-n_variants_at_start_cnk) + "]" );
             		scan_overlap(ifname, bcf_seqname(sr->readers[i].header,line), line->pos);
             	}
 
 				const bool uphalf = n_sites_buff >= nsites_buff_d2.back();
-				if  (uphalf && n_sites_buff == nsites_buff_d2.back()) //reset
-				{
-					nswap=0;
-					for (int j=0; j<nsamples; j++)
-					{
-						if ( nmatch[j] >= nmism[j] ) swap_phase[j] = 0;
-						else
-						{
-							swap_phase[j] = 1;
-							nswap++;
-						}
-						nmatch[j] = 0;
-						nmism[j]  = 0;
-					}
-				}
 				line = bcf_sr_get_line(sr,uphalf);
-				write_record(out_fp, out_hdr, sr->readers[uphalf].header, line);
+				write_record(out_fp, out_hdr, sr->readers[uphalf].header, line, uphalf);
 				++n_sites_buff;
+	            prev_pos[0]=prev_pos[1]=line->pos;
             }
-            prev_pos=line->pos;
-
             prev_readers_size = sr->nreaders;
     		n_variants++;
         }
         if ( sr->nreaders ) while ( sr->nreaders ) bcf_sr_remove_reader(sr, 0);
     }
-	vrb.print("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "-" + stb.str(prev_pos + 1) + "] [L=" + stb.str(n_variants-n_variants_at_start_cnk) + "]" );
-/*
-	while ((nset = bcf_sr_next_line (sr)))
-	{
-		active_readers.clear();
-		std::fill(file_has_record.begin(), file_has_record.end(), false);
-		for (int f = 0 ; f < nfiles ; f ++)
-		{
-			file_has_record[f] = bcf_sr_has_line(sr, f);
-			if (file_has_record[f]) active_readers.push_back(f);
-		}
+	vrb.print("Cnk " + stb.str(ifname-1) + " [" + prev_chr + ":" + stb.str(first_pos) + "-" + stb.str(prev_pos[0] + 1) + "] [L=" + stb.str(n_variants-n_variants_at_start_cnk) + "]" );
 
-		//line =  bcf_sr_get_line(sr, active_readers[0]);
-
-		//if (active_readers.size() >= 3) vrb.error("Too many files overlap at position [" + stb.str((int)line->pos + 1) + "]");
-		//if (active_readers.size() == 0) vrb.error("Not enough files overlap at position [" + stb.str((int)line->pos + 1) + "]");
-
-		//if (line->n_allele != 2) continue;
-
-		if (active_readers.size() == 1)
-		{
-			if (prev_readers.size() == 0) vrb.print("Chunk " + stb.str(chunk_counter) + " from position [" + stb.str((int)line->pos + 1) + "]");
-			else if (prev_readers.size() == 2)
-			{
-				n_sites_buff = 0;
-				++chunk_counter;
-				vrb.print("Chunk " + stb.str(chunk_counter) + " from position [" + stb.str((int)line->pos + 1) + "]");
-			}
-			write_record(out_fp, out_hdr, sr->readers[active_readers[0]].header, line);
-		}
-		if (active_readers.size() == 2)
-		{
-			if (n_sites_buff==0)
-				scan_overlap(active_readers, bcf_seqname(sr->readers[active_readers[0]].header,line), line->pos);
-
-			bool uphalf = n_sites_buff >= nsites_buff.back()/2;
-			if  (uphalf && n_sites_buff == nsites_buff.back()/2) //reset
-			{
-				nswap=0;
-			    for (int j=0; j<nsamples; j++)
-			    {
-			        if ( nmatch[j] >= nmism[j] ) swap_phase[j] = 0;
-			        else
-			        {
-			        	swap_phase[j] = 1;
-			            nswap++;
-			        }
-			        nmatch[j] = 0;
-			        nmism[j]  = 0;
-			    }
-			}
-			write_record(out_fp, out_hdr, sr->readers[active_readers[uphalf]].header, bcf_sr_get_line(sr, active_readers[uphalf]));
-			++n_sites_buff;
-		}
-		prev_readers = active_readers;
-		n_variants++;
-	}
-*/
 	if (hts_close(out_fp)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
 	bcf_hdr_destroy(out_hdr);
-
 	bcf_sr_destroy(sr);
-
-
 	if (line) bcf_destroy(line);
-    //if (lines[0]) bcf_destroy(lines[0]);
-    //if (lines[1]) bcf_destroy(lines[1]);
 	free(GTa);
     free(GTb);
 
 	if (n_variants == 0) vrb.error("No variants to be phased in files");
-
 	vrb.title("Writing completed [L=" + stb.str(n_variants) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.title("Creating index");
-	//create index using htslib (csi, using default bcftools option 14)
-	if (!bcf_index_build3(string(options["output"].as < string > ()).c_str(), NULL, 14, options["thread"].as < int > ())) vrb.print("Index successfully created");
-	else vrb.warning("Problem building the index for the output file. Try to build it using tabix/bcftools.");
+
+	if (options.count("index"))
+	{
+		vrb.title("Creating index");
+		//create index using htslib (csi, using default bcftools option 14)
+		if (!bcf_index_build3(string(options["output"].as < string > ()).c_str(), NULL, 14, options["thread"].as < int > ())) vrb.print("Index successfully created");
+		else vrb.warning("Problem building the index for the output file. This can indicate a problem during ligation. Try to build the index using tabix/bcftools.");
+	}
 }
 
