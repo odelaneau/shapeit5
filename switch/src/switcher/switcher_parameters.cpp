@@ -58,10 +58,10 @@ void switcher::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Validating phasing using trios/duos or known haplotypes");
+	vrb.title("[SHAPEIT5] Switch (validation of haplotypes using trios/duos or true sets)");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : " + string(SWITCH_VERSION));
+	vrb.bullet("Version       : 5." + string(SWITCH_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
 
 }

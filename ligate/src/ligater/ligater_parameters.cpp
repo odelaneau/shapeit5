@@ -49,10 +49,10 @@ void ligater::parse_command_line(vector < string > & args) {
 		bpo::notify(options);
 	} catch ( const boost::program_options::error& e ) { cerr << "Error parsing command line arguments: " << string(e.what()) << endl; exit(0); }
 
-	vrb.title("[SHAPEIT5] Ligate multiple output files into chromosome-wide files");
+	vrb.title("[SHAPEIT5] Ligate (ligate multiple output files into chromosome-wide files)");
 	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : " + string(LIGATE_VERSION));
+	vrb.bullet("Version       : 5." + string(LIGATE_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
 
 	if (options.count("help")) { cout << descriptions << endl; exit(0); }

@@ -103,7 +103,8 @@ void hmm_scaffold::forward() {
 }
 
 void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstates) {
-	float sum = 0.0f, scale = 0.0f, threshold = 1.0f / (nstates+1);
+	float sum = 0.0f, scale = 0.0f;
+	float threshold = min(1.0f / (nstates+1), 0.005f);
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
 	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
