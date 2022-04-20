@@ -46,6 +46,7 @@ public:
 	genotype_set G;
 	hmm_parameters M;
 	variant_map V;
+	double pbwt_modulo;
 
 	//MULTI-THREADING
 	int i_workers, i_jobs;

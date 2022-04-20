@@ -47,10 +47,10 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
-			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.1cM by default)")
+			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.025cM by default)")
 			("pbwt-depth", bpo::value < int >()->default_value(4), "Depth of PBWT indexes to condition on")
 			("pbwt-mac", bpo::value < int >()->default_value(5), "Minimal Minor Allele Count at which PBWT is evaluated")
-			("pbwt-mdr", bpo::value < double >()->default_value(0.10), "Maximal Missing Data Rate at which PBWT is evaluated")
+			("pbwt-mdr", bpo::value < double >()->default_value(0.1), "Maximal Missing Data Rate at which PBWT is evaluated")
 			("pbwt-window", bpo::value < double >()->default_value(4), "Run PBWT selection in windows of this size");
 	
 	bpo::options_description opt_hmm ("HMM parameters");
@@ -83,10 +83,10 @@ void phaser::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Phasing jointly multiple markers");
+	vrb.title("[SHAPEIT5] Phase1 (jointly phase multiple markers)");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : " + string(PHASE1_VERSION));
+	vrb.bullet("Version       : 5." + string(PHASE1_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
 }
 

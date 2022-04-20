@@ -49,7 +49,7 @@ void phaser::declare_options() {
 */
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
-			("mcmc-iterations", bpo::value< int >()->default_value(10), "Number of MCMC iterations")
+			("mcmc-iterations", bpo::value< int >()->default_value(20), "Number of MCMC iterations")
 			("mcmc-burnin", bpo::value< int >()->default_value(5), "Number of MCMC burn-in iterations");
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
@@ -85,10 +85,10 @@ void phaser::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Phase rare variants and indels onto a dense haplotype scaffold");
+	vrb.title("[SHAPEIT5] Phase2 (phase one variant at a time onto a scaffold)");
 	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : " + string(PHASE2_VERSION));
+	vrb.bullet("Version       : 5." + string(PHASE2_VERSION));
 	vrb.bullet("Run date      : " + tac.date());
 }
 

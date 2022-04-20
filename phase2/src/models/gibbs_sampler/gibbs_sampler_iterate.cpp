@@ -29,6 +29,8 @@ void gibbs_sampler::iterate(int & error, int & total) {
 
 	for (int iter = 0 ; iter < niterations ; iter ++) {
 
+		random_shuffle(unphased.begin(), unphased.end());
+
 		for (int ui = 0 ; ui < unphased.size() ; ui ++) {
 
 			//Init
@@ -88,6 +90,7 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			}
 		}
 	}
+	sort(unphased.begin(), unphased.end());
 	for (int ui = 0 ; ui < unphased.size() ; ui ++) {
 		int ind = unphased[ui];
 		unsigned int bestg = distance(pprobs.begin() + 4*ind, max_element(pprobs.begin() + 4*ind, pprobs.begin() + 4*(ind+1))) % 4;

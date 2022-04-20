@@ -5,6 +5,12 @@ COLdiff = brewer.pal(8,"Set1")
 N=150000
 REG=read.table("/home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt", head=FALSE)
 
+#######################################################################################
+#
+#				PLOT SER BY TYPE
+#
+#######################################################################################
+
 
 
 
@@ -85,7 +91,7 @@ dev.off()
 
 TYP=c("fqa","fqc")
 nTYP=length(TYP)
-PAR=c("default.depth8", "scaffold.depth8")
+PAR=c("default", "scaffold", "default.depth8", "scaffold.depth8", "default.modulo5", "scaffold.modulo5", "default.modulo25", "scaffold.modulo25")
 nPAR=length(PAR)
 
 #BEAGLE
