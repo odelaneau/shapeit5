@@ -93,8 +93,10 @@ void ligater::phase_update(bcf_hdr_t *hdr, bcf1_t *line, const bool uphalf)
 		int *gt = &GTa[i*2];
 		if ( bcf_gt_is_missing(gt[0]) || gt[1]==bcf_int32_vector_end ) continue;
         if (!bcf_gt_is_phased(gt[0]) || !bcf_gt_is_phased(gt[1])) continue;
-        gt[0] = bcf_gt_phased(bcf_gt_allele(gt[1])==1);
-        gt[1] = bcf_gt_phased(bcf_gt_allele(gt[0])==1);
+        const int gt0 = bcf_gt_phased(bcf_gt_allele(gt[1])==1);
+        const int gt1 = bcf_gt_phased(bcf_gt_allele(gt[0])==1);
+        gt[0] = gt0;
+        gt[1] = gt1;
     }
     bcf_update_genotypes(hdr,line,GTa,nGTs);
 }
