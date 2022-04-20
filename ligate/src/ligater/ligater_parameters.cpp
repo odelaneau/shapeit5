@@ -33,11 +33,12 @@ void ligater::declare_options() {
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
-			("input", bpo::value < string >(), "Text file containing all VCF/BCF to ligate together");
+			("input", bpo::value < string >(), "Text file containing all VCF/BCF to ligate");
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output,O", bpo::value< string >(), "Output ligated file in VCF/BCF format")
+			("index", "Whether to index the ligated output (csi format)");
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_output);
@@ -76,15 +77,17 @@ void ligater::check_options() {
 }
 
 void ligater::verbose_files() {
+	std::array<std::string,2> no_yes = {"NO","YES"};
+
 	vrb.title("Files:");
-	vrb.bullet("Input LIST    : [" + options["input"].as < string > () + "]");
-	vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
+	vrb.bullet("Input LIST     : [" + options["input"].as < string > () + "]");
+	vrb.bullet("Output VCF     : [" + options["output"].as < string > () + "]");
+	vrb.bullet("Index output   : [" + no_yes[options.count("index")] + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 
 void ligater::verbose_options() {
 	vrb.title("Parameters:");
-	vrb.bullet("Seed       : " + stb.str(options["seed"].as < int > ()));
-	vrb.bullet("#Threads   : " + stb.str(options["thread"].as < int > ()));
-
+	vrb.bullet("Seed           : [" + stb.str(options["seed"].as < int > ()) + "]");
+	vrb.bullet("#Threads       : [" + stb.str(options["thread"].as < int > ()) + "]");
 }

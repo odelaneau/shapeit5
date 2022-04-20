@@ -41,10 +41,12 @@ public:
 	//SAMPLE DATA
 
 	int nsamples;
-	int nswap;
-	vector < bool > swap_phase;
+
+	std::array<int,2> nswap;
+	std::array<std::vector<bool>,2> swap_phase;
 	vector < int > nmatch;
 	vector < int > nmism;
+
 	vector < int > nsites_buff_d2;
 
 	int32_t *GTa, *GTb, mGTa, mGTb;
@@ -74,10 +76,10 @@ public:
 	void updateHS(int *);
 	int update_switching();
 	void update_distances();
-	void phase_update(bcf_hdr_t *hdr, bcf1_t *line);
+	void phase_update(bcf_hdr_t *hdr, bcf1_t *line, const bool uphalf);
 	void remove_info(bcf_hdr_t *hdr, bcf1_t *line);
 	void remove_format(bcf_hdr_t *hdr, bcf1_t *line);
-	void write_record(htsFile *, bcf_hdr_t * ,  bcf_hdr_t * ,bcf1_t *);
+	void write_record(htsFile *, bcf_hdr_t * ,  bcf_hdr_t * ,bcf1_t *, const bool uphalf);
 
 };
 
