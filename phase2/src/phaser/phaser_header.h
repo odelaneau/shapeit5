@@ -55,8 +55,16 @@ public:
 	vector < vector < pair < int, float > > > thread_data;
 	vector < hmm_scaffold * > thread_hmms;
 
+	//MCMC
+	int current_run;
+	int total_run;
+
 	//STATS
 	int totalSite, doneSite;
+	unsigned long int n_common_yphased;
+	unsigned long int n_common_nphased;
+	unsigned long int n_rare_yphased;
+	unsigned long int n_rare_nphased;
 	basic_stats statCS;
 
 	//GENOMIC REGION
@@ -75,7 +83,6 @@ public:
 	//METHODS
 	void hmmcompute(int, int);
 	void gibbscompute(int);
-
 	void phase();
 
 

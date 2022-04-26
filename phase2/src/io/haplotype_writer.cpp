@@ -86,14 +86,6 @@ void haplotype_writer::writeHaplotypes(string fname) {
 				count_alt -= 2 * major_allele;
 				count_alt += a0+a1;
 			}
-		} else if (V.vec_full[vt]->type == VARTYPE_COMM) {
-			for (int i = 0 ; i < G.n_samples ; i++) {
-				bool a0 = G.GCvar_alleles.get(vc, 2*i+0);
-				bool a1 = G.GCvar_alleles.get(vc, 2*i+1);
-				genotypes[2*i+0] = bcf_gt_phased(a0);
-				genotypes[2*i+1] = bcf_gt_phased(a1);
-				count_alt += a0+a1;
-			}
 		} else {
 			for (int i = 0 ; i < H.n_samples ; i++) {
 				bool a0 = H.Hvar.get(vs, 2*i+0);

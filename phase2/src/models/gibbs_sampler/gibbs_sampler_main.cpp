@@ -27,10 +27,10 @@ gibbs_sampler::gibbs_sampler(unsigned int _nsamples, unsigned int _niterations, 
 	nburnin = _nburnin;
 	alleles = vector < bool > (2*nsamples, false);
 	missing = vector < bool > (nsamples, false);
+	phased = vector < bool > (nsamples, false);
 	cstates = vector < vector < unsigned int > > (2*nsamples);
 	cprobs = vector < vector < float > > (2*nsamples);
 	pprobs = vector < float > (4*nsamples);
-	//rprobs = vector < float > (nsamples);
 }
 
 gibbs_sampler::~gibbs_sampler() {
@@ -40,42 +40,99 @@ gibbs_sampler::~gibbs_sampler() {
 	cstates.clear();
 	cprobs.clear();
 	pprobs.clear();
-	//rprobs.clear();
 }
 
-void gibbs_sampler::pushRare(genotype_set & G, unsigned int vr) {
-	vector < float > gprobs = vector < float > (4, 0.0f);
-	for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
-		if (G.GRvar_genotypes[vr][r].het || G.GRvar_genotypes[vr][r].mis) {
-			copy(pprobs.begin() + 4 * G.GRvar_genotypes[vr][r].idx, pprobs.begin() + 4 * (G.GRvar_genotypes[vr][r].idx+1), gprobs.begin());
-			switch (alg.imax(gprobs)) {
-			case 0: G.GRvar_genotypes[vr][r].al0 = 0; G.GRvar_genotypes[vr][r].al1 = 0; break;
-			case 1: G.GRvar_genotypes[vr][r].al0 = 0; G.GRvar_genotypes[vr][r].al1 = 1; break;
-			case 2: G.GRvar_genotypes[vr][r].al0 = 1; G.GRvar_genotypes[vr][r].al1 = 0; break;
-			case 3: G.GRvar_genotypes[vr][r].al0 = 1; G.GRvar_genotypes[vr][r].al1 = 1; break;
+void gibbs_sampler::setHQ(){
+	ee = 0.9999f;
+	ed = 0.0001f;
+}
+
+void gibbs_sampler::setLQ(){
+	ee = 0.9999f;
+	ed = 0.0001f;
+}
+
+void gibbs_sampler::randomize_phase() {
+	for(int h = 0 ; h < alleles.size() ; h +=2) {
+		if (alleles[h+0] != alleles[h+1]) {
+			if (rng.flipCoin()) {
+				alleles[h+0] = !alleles[h+0];
+				alleles[h+1] = !alleles[h+1];
 			}
 		}
 	}
 }
 
-void gibbs_sampler::pushCommon(genotype_set & G, unsigned int vc) {
+unsigned int fimax(vector < float > & vec) {
+	float maxValue = vec[0];
+	int maxIndex = 0;
+	for (unsigned int i = 1; i < vec.size() ; i ++) if (vec[i] > maxValue) {
+		maxValue = vec[i];
+		maxIndex = i;
+	}
+
+	float epsilon = 1e-5;
+	vector < int > max_indexes;
+	for (unsigned int i = 0; i < vec.size() ; i ++) {
+		if (abs(vec[i] - maxValue) < epsilon) {
+			max_indexes.push_back(i);
+		}
+	}
+
+	return max_indexes[rng.getInt(max_indexes.size())];
+}
+
+void gibbs_sampler::pushRare(genotype_set & G, unsigned int vr, unsigned int & n_yphased, unsigned int & n_nphased, float threshold) {
+	vector < float > gprobs = vector < float > (4, 0.0f);
+	for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
+		if (G.GRvar_genotypes[vr][r].mis + G.GRvar_genotypes[vr][r].het) {
+			if (!G.GRvar_genotypes[vr][r].pha) {
+				copy(pprobs.begin() + 4 * G.GRvar_genotypes[vr][r].idx, pprobs.begin() + 4 * (G.GRvar_genotypes[vr][r].idx+1), gprobs.begin());
+				int imax = fimax(gprobs);
+				if (gprobs[imax] >= threshold) {
+					switch (imax) {
+					case 0: G.GRvar_genotypes[vr][r].al0 = 0; G.GRvar_genotypes[vr][r].al1 = 0; break;
+					case 1: G.GRvar_genotypes[vr][r].al0 = 0; G.GRvar_genotypes[vr][r].al1 = 1; break;
+					case 2: G.GRvar_genotypes[vr][r].al0 = 1; G.GRvar_genotypes[vr][r].al1 = 0; break;
+					case 3: G.GRvar_genotypes[vr][r].al0 = 1; G.GRvar_genotypes[vr][r].al1 = 1; break;
+					}
+					G.GRvar_genotypes[vr][r].pha = 1;
+					n_yphased ++;
+				} else {
+					n_nphased++;
+				}
+			} else n_yphased ++;
+		}
+	}
+}
+
+void gibbs_sampler::pushCommon(genotype_set & G, unsigned int vc, unsigned int & n_yphased, unsigned int & n_nphased, float threshold) {
 	vector < float > gprobs = vector < float > (4, 0.0f);
 	for (int i = 0 ; i < G.n_samples ; i ++) {
 		if (missing[i] || (alleles[2*i+0] != alleles[2*i+1])) {
-			copy(pprobs.begin() + 4 * i, pprobs.begin() + 4 * (i+1), gprobs.begin());
-			switch (alg.imax(gprobs)) {
-			case 0: G.GCvar_alleles.set(vc, 2*i+0, false); G.GCvar_alleles.set(vc, 2*i+1, false); break;
-			case 1: G.GCvar_alleles.set(vc, 2*i+0, false); G.GCvar_alleles.set(vc, 2*i+1, true); break;
-			case 2: G.GCvar_alleles.set(vc, 2*i+0, true); G.GCvar_alleles.set(vc, 2*i+1, false); break;
-			case 3: G.GCvar_alleles.set(vc, 2*i+0, true); G.GCvar_alleles.set(vc, 2*i+1, true); break;
-			}
+			if (!phased[i]) {
+				copy(pprobs.begin() + 4 * i, pprobs.begin() + 4 * (i+1), gprobs.begin());
+				int imax = fimax(gprobs);
+				if (gprobs[imax] >= threshold) {
+					switch (imax) {
+					case 0: G.GCvar_alleles.set(vc, 2*i+0, false); G.GCvar_alleles.set(vc, 2*i+1, false); break;
+					case 1: G.GCvar_alleles.set(vc, 2*i+0, false); G.GCvar_alleles.set(vc, 2*i+1, true); break;
+					case 2: G.GCvar_alleles.set(vc, 2*i+0, true); G.GCvar_alleles.set(vc, 2*i+1, false); break;
+					case 3: G.GCvar_alleles.set(vc, 2*i+0, true); G.GCvar_alleles.set(vc, 2*i+1, true); break;
+					}
+					G.GCvar_phased.set(vc, i, true);
+					n_yphased ++;
+				} else {
+					n_nphased++;
+				}
+			} else n_yphased ++;
 		}
 	}
 }
 
-
-void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight) {
-	unsigned int vs = G.MAPC_vs_right[vc];
+void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight, bool use_compressed) {
+	unsigned int vs = G.MAPC[vc];
+	common = true;
 
 	//Clean-up
 	unphased.clear();
@@ -84,46 +141,63 @@ void gibbs_sampler::loadCommon(genotype_set & G, conditioning_set & C, state_set
 		cprobs[h].clear();
 	}
 	fill (pprobs.begin(), pprobs.end() , 0.0f);
-	//fill (rprobs.begin(), rprobs.end() , 0.5f);
 
 	//Genotype data
 	for (int i = 0 ; i < G.n_samples ; i ++) {
 		missing[i] = G.GCvar_missing.get(vc, i);
+		phased[i] = G.GCvar_phased.get(vc, i);
 		alleles[2*i+0] = G.GCvar_alleles.get(vc, 2*i+0);
 		alleles[2*i+1] = G.GCvar_alleles.get(vc, 2*i+1);
-		if (missing[i]) {
-			alleles[2*i+0] = rng.flipCoin()?true:false;
-			alleles[2*i+1] = rng.flipCoin()?true:false;
-		} else if (alleles[2*i+0] != alleles[2*i+1]) {
-			bool fc = rng.flipCoin();
-			alleles[2*i+0] = fc?true:false;
-			alleles[2*i+1] = fc?false:true;
+		if (!phased[i]) {
+			if (missing[i]) {
+				alleles[2*i+0] = rng.flipCoin()?true:false;
+				alleles[2*i+1] = rng.flipCoin()?true:false;
+				unphased.push_back(i);
+			} else if (alleles[2*i+0] != alleles[2*i+1]) {
+				bool fc = rng.flipCoin();
+				alleles[2*i+0] = fc?true:false;
+				alleles[2*i+1] = fc?false:true;
+				unphased.push_back(i);
+			}
 		}
-		if (missing[i] || (alleles[2*i+0]!=alleles[2*i+1])) unphased.push_back(i);
 	}
 
 	//State probability data
-	unsigned long int ci = P.Pmapping[vs];
+	long int ci = P.Pmapping[vs];
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
 			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].id1 < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
-			//Load the state probs
-			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
-				float pl = ((P.Pstates[ci+k].lpb+1) * 1.0f) / 255;
-				float pr = ((P.Pstates[ci+k].rpb+1) * 1.0f) / 255;
-				float kprob = pl * weight + pr * (1.0f - weight);
-				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
-				cstates[2*unphased[u]+h].push_back(kidx);
-				cprobs[2*unphased[u]+h].push_back(kprob);
+
+			if (use_compressed) {
+				while (ci < P.Pstates1.size() && P.Pstates1[ci].id1 < (2*unphased[u]+h)) ci ++;
+				assert(P.Pstates1[ci].id1 == (2*unphased[u]+h));
+				for (int k = 0 ; ((ci+k) < P.Pstates1.size()) && (P.Pstates1[ci+k].id1 == (2*unphased[u]+h)) ; k++) {
+					float pl = ((P.Pstates1[ci+k].lpb+1) * 1.0f) / 255;
+					float pr = ((P.Pstates1[ci+k].rpb+1) * 1.0f) / 255;
+					float kprob = pl * (1.0f - weight) + pr * weight;
+					unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates1[ci+k].kst];
+					cstates[2*unphased[u]+h].push_back(kidx);
+					cprobs[2*unphased[u]+h].push_back(kprob);
+				}
+			} else {
+				while (ci < P.Pstates2.size() && P.Pstates2[ci].id1 < (2*unphased[u]+h)) ci ++;
+				assert(P.Pstates2[ci].id1 == (2*unphased[u]+h));
+				for (int k = 0 ; k < C.indexes_pbwt_neighbour[2*unphased[u]+h].size() ; k ++) {
+					float pl = P.Pstates2[ci+k].lpb;
+					float pr = P.Pstates2[ci+k].rpb;
+					float kprob = pl * (1.0f - weight) + pr * weight;
+					unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][k];
+					cstates[2*unphased[u]+h].push_back(kidx);
+					cprobs[2*unphased[u]+h].push_back(kprob);
+				}
 			}
 		}
 	}
 }
 
-void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight) {
-	unsigned int vs = G.MAPR_vs_right[vr];
+void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight, bool use_compressed) {
+	unsigned int vs = G.MAPR[vr];
+	common = false;
 
 	//Clean-up
 	unphased.clear();
@@ -132,43 +206,60 @@ void gibbs_sampler::loadRare(genotype_set & G, conditioning_set & C, state_set &
 		cprobs[h].clear();
 	}
 	fill (pprobs.begin(), pprobs.end() , 0.0f);
-	//fill (rprobs.begin(), rprobs.end() , 0.5f);
 
 	//Genotype data
 	fill(alleles.begin(), alleles.end(), G.major_alleles[vr]);
 	fill(missing.begin(), missing.end(), false);
+	fill(phased.begin(), phased.end(), false);
 	for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
 		unsigned int ind = G.GRvar_genotypes[vr][r].idx;
-		if (G.GRvar_genotypes[vr][r].het) {
-			bool fc = rng.flipCoin();
-			alleles[2*ind+0] = fc?true:false;
-			alleles[2*ind+1] = fc?false:true;
-			//if (G.GRvar_genotypes[vr][r].pir) rprobs[ind] = G.GRvar_genotypes[vr][r].ph0?0.999:0.001;
-			unphased.push_back(ind);
-		} else if (G.GRvar_genotypes[vr][r].mis) {
-			missing[ind] = true;
-			unphased.push_back(ind);
+		phased[ind] = G.GRvar_genotypes[vr][r].pha;
+
+		if (phased[ind]) {
+			alleles[2*ind+0] = G.GRvar_genotypes[vr][r].al0;
+			alleles[2*ind+1] = G.GRvar_genotypes[vr][r].al1;
 		} else {
-			alleles[2*ind+0] = !G.major_alleles[vr];
-			alleles[2*ind+1] = !G.major_alleles[vr];
+			if (G.GRvar_genotypes[vr][r].mis) {
+				missing[ind] = true;
+				unphased.push_back(ind);
+			} else if (G.GRvar_genotypes[vr][r].het) {
+				bool fc = rng.flipCoin();
+				alleles[2*ind+0] = fc?true:false;
+				alleles[2*ind+1] = fc?false:true;
+				unphased.push_back(ind);
+			} else {
+				alleles[2*ind+0] = !G.major_alleles[vr];
+				alleles[2*ind+1] = !G.major_alleles[vr];
+			}
 		}
 	}
 
 	//State probability data
-	unsigned long int ci = P.Pmapping[vs];
+	long int ci = P.Pmapping[vs];
 	for (int u = 0 ; u < unphased.size() ; u ++) {
 		for (int h = 0 ; h < 2 ; h ++) {
-			//Iterate until hap is found
-			while (ci < P.Pstates.size() && P.Pstates[ci].id1 < (2*unphased[u]+h)) ci ++;
-			assert(P.Pstates[ci].id1 == (2*unphased[u]+h));
-			//Load the state probs
-			for (int k = 0 ; (ci+k) < P.Pstates.size() && P.Pstates[ci+k].id1 == (2*unphased[u]+h) ; k++) {
-				float pl = ((P.Pstates[ci+k].lpb+1) * 1.0f) / 255;
-				float pr = ((P.Pstates[ci+k].rpb+1) * 1.0f) / 255;
-				float kprob = pl * weight + pr * (1.0f - weight);
-				unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates[ci+k].kst];
-				cstates[2*unphased[u]+h].push_back(kidx);
-				cprobs[2*unphased[u]+h].push_back(kprob);
+			if (use_compressed) {
+				while (ci < P.Pstates1.size() && P.Pstates1[ci].id1 < (2*unphased[u]+h)) ci ++;
+				assert(P.Pstates1[ci].id1 == (2*unphased[u]+h));
+				for (int k = 0 ; (ci+k) < P.Pstates1.size() && P.Pstates1[ci+k].id1 == (2*unphased[u]+h) ; k++) {
+					float pl = ((P.Pstates1[ci+k].lpb+1) * 1.0f) / 255;
+					float pr = ((P.Pstates1[ci+k].rpb+1) * 1.0f) / 255;
+					float kprob = pl * (1.0f - weight) + pr * weight;
+					unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][P.Pstates1[ci+k].kst];
+					cstates[2*unphased[u]+h].push_back(kidx);
+					cprobs[2*unphased[u]+h].push_back(kprob);
+				}
+			} else {
+				while (ci < P.Pstates2.size() && P.Pstates2[ci].id1 < (2*unphased[u]+h)) ci ++;
+				assert(P.Pstates2[ci].id1 == (2*unphased[u]+h));
+				for (int k = 0 ; k < C.indexes_pbwt_neighbour[2*unphased[u]+h].size() ; k ++) {
+					float pl = P.Pstates2[ci+k].lpb;
+					float pr = P.Pstates2[ci+k].rpb;
+					float kprob = pl * (1.0f - weight) + pr * weight;
+					unsigned int kidx = C.indexes_pbwt_neighbour[2*unphased[u]+h][k];
+					cstates[2*unphased[u]+h].push_back(kidx);
+					cprobs[2*unphased[u]+h].push_back(kprob);
+				}
 			}
 		}
 	}

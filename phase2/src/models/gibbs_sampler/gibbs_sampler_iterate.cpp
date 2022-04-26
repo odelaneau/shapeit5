@@ -22,15 +22,12 @@
 
 #include <models/gibbs_sampler/gibbs_sampler_header.h>
 
-void gibbs_sampler::iterate(int & error, int & total) {
+void gibbs_sampler::iterate() {
 	float sum;
 	vector < float > hprob = vector < float > (4, 0.0f);
 	vector < float > gprob = vector < float > (4, 0.0f);
 
 	for (int iter = 0 ; iter < niterations ; iter ++) {
-
-		random_shuffle(unphased.begin(), unphased.end());
-
 		for (int ui = 0 ; ui < unphased.size() ; ui ++) {
 
 			//Init
@@ -42,63 +39,45 @@ void gibbs_sampler::iterate(int & error, int & total) {
 			for (int h = 0 ; h < 2 ; h++) {
 				assert(cstates[2*ind+h].size());
 				for (int k = 0 ; k < cstates[2*ind+h].size() ; k ++) {
-					bool a = alleles[cstates[2*ind+h][k]];
-					float p = cprobs[2*ind+h][k];
-					hprob[2*h+a] += p;
+					hprob[2*h+alleles[cstates[2*ind+h][k]]] += cprobs[2*ind+h][k];
 				}
 				sum = hprob[2*h+0] + hprob[2*h+1];
+				assert(sum > 0);
 				hprob[2*h+0] /= sum;
 				hprob[2*h+1] /= sum;
 			}
-
-			assert(sum > 0);
-
-			for (int h = 0 ; h < 4 ; h++) if (hprob[h] < 1e-7) hprob[h] = 1e-7;
 
 			//Prior for hets, using eventually PIRs
 			fill(gprob.begin(), gprob.end(), 1.0f);
 			if (!missing [ind]) {
 				gprob[0] = 0.0f;
-				//gprob[1] = 1.0f - rprobs[ind];
-				//gprob[2] = rprobs[ind];
 				gprob[3] = 0.0f;
 			}
 
 			//Compute posteriors using copying probs
-			gprob[0] *= (hprob[0] * hprob[2]);
-			gprob[1] *= (hprob[0] * hprob[3]);
-			gprob[2] *= (hprob[1] * hprob[2]);
-			gprob[3] *= (hprob[1] * hprob[3]);
+			gprob[0] *= (hprob[0]*ee + hprob[1]*ed) * (hprob[2]*ee + hprob[3]*ed);
+			gprob[1] *= (hprob[0]*ee + hprob[1]*ed) * (hprob[2]*ed + hprob[3]*ee);
+			gprob[2] *= (hprob[0]*ed + hprob[1]*ee) * (hprob[2]*ee + hprob[3]*ed);
+			gprob[3] *= (hprob[0]*ed + hprob[1]*ee) * (hprob[2]*ed + hprob[3]*ee);
 			sum = accumulate(gprob.begin(), gprob.end(), 0.0f);
 			assert(sum > 0);
 
 			//Sample a new genotype
 			int sampleg = rng.sample(gprob, sum);
 			switch (sampleg) {
-			case 0:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 0; break;
-			case 1:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 1; break;
-			case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
-			case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
+			case 0:	alleles[2*ind+0] = false; alleles[2*ind+1] = false; break;
+			case 1:	alleles[2*ind+0] = false; alleles[2*ind+1] = true; break;
+			case 2:	alleles[2*ind+0] = true; alleles[2*ind+1] = false; break;
+			case 3:	alleles[2*ind+0] = true; alleles[2*ind+1] = true; break;
 			}
 
 			//Store posteriors if not a burn-in iteration
 			if (iter >= nburnin) {
-				pprobs[4*ind+0] += gprob[0];
-				pprobs[4*ind+1] += gprob[1];
-				pprobs[4*ind+2] += gprob[2];
-				pprobs[4*ind+3] += gprob[3];
+				pprobs[4*ind+0] += gprob[0] / (sum * (niterations - nburnin));
+				pprobs[4*ind+1] += gprob[1] / (sum * (niterations - nburnin));
+				pprobs[4*ind+2] += gprob[2] / (sum * (niterations - nburnin));
+				pprobs[4*ind+3] += gprob[3] / (sum * (niterations - nburnin));
 			}
-		}
-	}
-	sort(unphased.begin(), unphased.end());
-	for (int ui = 0 ; ui < unphased.size() ; ui ++) {
-		int ind = unphased[ui];
-		unsigned int bestg = distance(pprobs.begin() + 4*ind, max_element(pprobs.begin() + 4*ind, pprobs.begin() + 4*(ind+1))) % 4;
-		switch (bestg) {
-		case 0:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 0; break;
-		case 1:	alleles[2*ind+0] = 0; alleles[2*ind+1] = 1; break;
-		case 2:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 0; break;
-		case 3:	alleles[2*ind+0] = 1; alleles[2*ind+1] = 1; break;
 		}
 	}
 }
