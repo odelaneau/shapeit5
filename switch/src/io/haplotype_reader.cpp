@@ -177,6 +177,8 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi) {
 				bcf_unpack(line_t, BCF_UN_ALL);
 				H.Positions.push_back(line_t->pos + 1);
 				H.RSIDs.push_back(string(line_t->d.id));
+				H.REFs.push_back(string(line_t->d.allele[0]));
+				H.ALTs.push_back(string(line_t->d.allele[1]));
 
 				//2. Validation
 				int vAC = 0, vAN = 0;

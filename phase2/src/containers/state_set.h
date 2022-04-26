@@ -24,7 +24,7 @@
 
 #include <utils/otools.h>
 
-class state {
+class cstate {
 public:
 	unsigned int id0;
 	unsigned int id1;
@@ -32,42 +32,59 @@ public:
 	unsigned int lpb : 8;
 	unsigned int rpb : 8;
 
-
-	state(unsigned int _id0, unsigned int _id1, unsigned int _kst, unsigned char _lpb, unsigned char _rpb) {
-		id0 = _id0;
-		id1 = _id1;
-		kst = _kst;
-		lpb = _lpb;
-		rpb = _rpb;
+	cstate(unsigned int _id0, unsigned int _id1, unsigned int _kst, unsigned char _lpb, unsigned char _rpb) {
+		id0 = _id0; id1 = _id1; kst = _kst; lpb = _lpb; rpb = _rpb;
 	}
 
-	~state(){
+	~cstate(){
 	}
 
-	bool operator < (const state & s) const {
+	bool operator < (const cstate & s) const {
 		return ((id0<s.id0) || ((id0==s.id0)&&(id1<s.id1)));
 	}
 
 	void swap() {
-		unsigned int tmp = id1;
-		id1 = id0;
-		id0 = tmp;
+		unsigned int tmp = id1; id1 = id0; id0 = tmp;
+	}
+};
+
+class fstate {
+public:
+	unsigned int id0;
+	unsigned int id1;
+	float lpb;
+	float rpb;
+
+	fstate(unsigned int _id0, unsigned int _id1, float _lpb, float _rpb) {
+		id0 = _id0; id1 = _id1; lpb = _lpb; rpb = _rpb;
 	}
 
+	~fstate(){
+	}
 
+	bool operator < (const fstate & s) const {
+		return ((id0<s.id0) || ((id0==s.id0)&&(id1<s.id1)));
+	}
+
+	void swap() {
+		unsigned int tmp = id1; id1 = id0; id0 = tmp;
+	}
 };
 
 class state_set {
 public:
-	vector < state > Pstates;
+	vector < cstate > Pstates1;
+	vector < fstate > Pstates2;
 	vector < long int > Pmapping;
 
 	//
 	state_set();
 	~state_set();
 	void clear();
-	void transpose();
-	void mapping(unsigned int);
+	void transpose1();
+	void mapping1(unsigned int);
+	void transpose2();
+	void mapping2(unsigned int);
 };
 
 #endif

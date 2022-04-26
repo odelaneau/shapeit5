@@ -107,9 +107,10 @@ void haplotype_checker::writePerType(string fout) {
 	vector < int > b_errors = vector < int > (2, 0);
 	vector < int > b_checked = vector < int > (2, 0);
 	for (int l = 0 ; l < H.n_variants ; l ++) {
+		bool snp = isSNP(H.REFs[l], H.ALTs[l]);
 		for (int i = 0 ; i < H.IDXesti.size() ; i++) {
-			b_errors[isSNP(H.REFs[l], H.ALTs[l])] += Errors[i][l];
-			b_checked[isSNP(H.REFs[l], H.ALTs[l])] += Checked[i][l];
+			b_errors[snp] += Errors[i][l];
+			b_checked[snp] += Checked[i][l];
 		}
 	}
 	for (int b = 0 ; b < b_errors.size() ; b ++) {

@@ -7,17 +7,6 @@ REG=read.table("/home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2
 
 #######################################################################################
 #
-#				PLOT SER BY TYPE
-#
-#######################################################################################
-
-
-
-
-
-
-#######################################################################################
-#
 #				PLOT SER BY FREQUENCY
 #
 #######################################################################################
@@ -48,14 +37,11 @@ freqSER <- function (prefix, suffix) {
 }
 
 #
-bgl_default_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1", "beagle5.3.fqr.frequency.switch.txt.gz");
+bgl_default_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/benchmark_ukb23352_c20_qc_v1", "beagle5.3.fqf.frequency.switch.txt.gz");
 
-shp_nf_dc2dr2_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr2.fqr.frequency.switch.txt.gz");
-#shp_nf_dc2dr4_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr4.fqr.frequency.switch.txt.gz");
-#shp_nf_dc4dr4_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc4.dr4.fqr.frequency.switch.txt.gz");
-#shp_nf_dc2dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr8.fqr.frequency.switch.txt.gz");
-#shp_nf_dc4dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc4.dr8.fqr.frequency.switch.txt.gz");
-#shp_nf_dc8dr8_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc8.dr8.fqr.frequency.switch.txt.gz");
+shp_nf_dc2dr2_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc2.dr2.fqf.frequency.switch.txt.gz");
+shp_nf_dc4dr2_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc4.dr2.fqf.frequency.switch.txt.gz");
+shp_nf_dc8dr2_freq = freqSER("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1", "shapeit5.dc8.dr2.fqf.frequency.switch.txt.gz");
 
 pdf("figure1.pdf", 12,6)
 par(mfrow=c(1,2))
@@ -72,8 +58,8 @@ points(log10(vBIN[2:nBIN]), log10(bgl_default_freq), type="o", pch=20, col="blac
 points(log10(vBIN[2:nBIN]), log10(shp_nf_dc2dr2_freq), type="o", pch=20, xlab="MAC", col=COLdiff[1], lwd=2)
 legend("topright", fill=c("black", COLdiff[1]), legend=c("beagle5.3","shapeit5"), bg="white")
 
-plot(log10(vBIN[2:nBIN]), (shp_nf_dc2dr2_freq - bgl_default_freq) * 100.0 / bgl_default_freq, type="n", pch=20, xlab="MAC", ylab = "Switch Error Rate Reduction (%)", col="black", lwd=2, xaxt='n', ylim=c(-50, 0))
-abline(h=seq(-50,0,5), col="lightgrey", lty=2)
+plot(log10(vBIN[2:nBIN]), (shp_nf_dc2dr2_freq - bgl_default_freq) * 100.0 / bgl_default_freq, type="n", pch=20, xlab="MAC", ylab = "Switch Error Rate Reduction (%)", col="black", lwd=2, xaxt='n', ylim=c(-50, 100))
+abline(h=seq(-50,100,5), col="lightgrey", lty=2)
 abline(v=log10(vBIN[2:nBIN]), col="lightgrey", lty=2)
 abline(v=log10(300), col="blue", lty=2)
 axis(1, at=log10(vBIN[2:nBIN]), label=vBIN[2:nBIN], las=2)
@@ -124,9 +110,27 @@ for (r in 1:nrow(REG)) {
 	}
 }
 
+	
+#SHAPEIT
+SHPerror2 = matrix(0, nrow=nPAR, ncol=nTYP)
+SHPtotal2 = matrix(0, nrow=nPAR, ncol=nTYP)
+for (r in 1:nrow(REG)) {
+	for (t in 1:nTYP) {
+		for (p in 1:nPAR) {
+			tmp=paste("~/Fuse/PhasingUKB/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.", REG$V3[r], ".shapeit5.indel." , PAR[p], ".", TYP[t], ".sample.switch.txt.gz", sep="");
+			cat (tmp, "\n")
+			SHP = read.table(tmp, head=FALSE)
+			SHP = SHP[!is.nan(SHP$V4), ]
+			SHPerror2[p, t] = SHPerror2[p, t] + sum(SHP$V2)
+			SHPtotal2[p, t] = SHPtotal2[p, t] + sum(SHP$V3)
+		}
+	}
+}
+
+
 pdf("figure1.pdf", 6,6)
 
-barplot(cbind(BGLerror * 100.0 / BGLtotal, t(SHPerror * 100.0 / SHPtotal)), ylab="Switch Error Rate (%)", beside=TRUE, names.arg=c("Beagle\ndefault", "Shapeit\ndefault", "Shapeit\nscaffold"), col=COLdiff[1:2])
+barplot(cbind(BGLerror * 100.0 / BGLtotal, t(SHPerror[1:2,] * 100.0 / SHPtotal[1:2,]), t(SHPerror2[1:2,] * 100.0 / SHPtotal2[1:2,])), ylab="Switch Error Rate (%)", beside=TRUE, names.arg=c("Beagle\ndefault", "Shapeit\ndefault", "Shapeit\nscaffold", "Shapeit+Indel\ndefault", "Shapeit+Indel\nscaffold"), col=COLdiff[1:2])
 legend("topright", legend=c("Assay sites", "All sites"), fill=COLdiff)
 dev.off()
 

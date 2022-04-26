@@ -29,23 +29,24 @@
 
 class rare_genotype {
 public:
-	unsigned int idx : 26;
+	unsigned int idx : 27;
 	unsigned int het : 1;
 	unsigned int mis : 1;
 	unsigned int al0 : 1;
 	unsigned int al1 : 1;
-	unsigned int pir : 1;
-	unsigned int ph0 : 1;
+	unsigned int pha : 1;
 
-	rare_genotype() { idx = het = mis = al0 = al1 = pir = ph0 = 0; }
+	rare_genotype() {
+		idx = het = mis = al0 = al1 = pha = 0;
+	}
 
 	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
 		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
-		pir = ph0 = 0;
+		pha = (!mis && (al0==al1));
 	}
 
 	~rare_genotype() {
-		idx = het = mis = al0 = al1 = pir = ph0 = 0;
+		idx = het = mis = al0 = al1 = pha = 0;
 	}
 
 	bool operator < (const rare_genotype & rg) const {
@@ -66,29 +67,22 @@ public:
 	vector < string > names;
 
 	//Mapping on scaffold
-	vector < unsigned int > MAPC_vs_left;
-	vector < unsigned int > MAPC_vs_right;
-	vector < unsigned int > MAPR_vs_left;
-	vector < unsigned int > MAPR_vs_right;
+	vector < unsigned int > MAPC;
+	vector < unsigned int > MAPR;
 
 	//Genotypes at common unphased variants
 	bitmatrix GCvar_alleles;
 	bitmatrix GCind_alleles;
 	bitmatrix GCvar_missing;
 	bitmatrix GCind_missing;
+	bitmatrix GCvar_phased;
+	bitmatrix GCind_phased;
+
 
 	//Genotypes at rare unphased variants
 	vector < bool > major_alleles;
 	vector < vector < rare_genotype > > GRvar_genotypes;
 	vector < vector < rare_genotype > > GRind_genotypes;
-
-	//PIR information at rare unphased variants
-	vector < vector < bool > > GRvar_pirs;
-	vector < vector < bool > > GRind_pirs;
-
-	//
-	//bitmatrix GCvar_truth;
-	//vector < vector < bool > > GRvar_truth;
 
 	//
 	genotype_set();
@@ -104,11 +98,14 @@ public:
 	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
 	void pushRareHet(unsigned int vr, unsigned int i);
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
+//	void imputeMonomorphic();
+//	void phaseSingleton();
 };
 
 inline
 void genotype_set::setCommonMissing(unsigned int vc, unsigned int i) {
 	GCvar_missing.set(vc, i, true);
+	GCvar_phased.set(vc, i, false);
 	GCvar_alleles.set(vc, 2*i+0, false);
 	GCvar_alleles.set(vc, 2*i+1, false);
 }
@@ -119,12 +116,15 @@ void genotype_set::setCommonGenotype(unsigned int vc, unsigned int i, unsigned i
 	if (g == 0) {
 		GCvar_alleles.set(vc, 2*i+0, false);
 		GCvar_alleles.set(vc, 2*i+1, false);
+		GCvar_phased.set(vc, i, true);
 	} else if (g == 2) {
 		GCvar_alleles.set(vc, 2*i+0, true);
 		GCvar_alleles.set(vc, 2*i+1, true);
+		GCvar_phased.set(vc, i, true);
 	} else {
 		GCvar_alleles.set(vc, 2*i+0, false);
 		GCvar_alleles.set(vc, 2*i+1, true);
+		GCvar_phased.set(vc, i, false);
 	}
 }
 

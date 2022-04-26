@@ -196,4 +196,51 @@ public :
 	void parseReads(const bam_pileup1_t * v_plp, int n_plp, het & h, int side);
 };
 
+
+//STEP0: Phase informative reads: To be added in phaser_algorithm.cpp
+/*
+if (options.count("bam-list")) {
+	tac.clock();
+	string buffer;
+	vector < string > tokens;
+	map < string, string > mapBamfiles;
+
+	//Load BAM LIST
+	vrb.title("Extracting PIRs from BAM listed in [" + options["bam-list"].as < string > () + "]");
+	input_file fd (options["bam-list"].as < string > ());
+	while (getline(fd, buffer)) {
+		int ntok = stb.split(buffer, tokens, '\t');
+		if (ntok != 2) vrb.error ("BAM list file expects 2 columns [f=" + stb.str(ntok) + "]");
+		mapBamfiles.insert(pair < string, string > (tokens[1], tokens[0]));
+	}
+	fd.close();
+	vrb.bullet("#BAMfiles = " + stb.str(mapBamfiles.size()));
+
+	//OPEN PILEUP
+	pileup_caller PLC(H, G, V, options["bam-mapq"].as < int > (), options["bam-baseq"].as < int > ());
+	if (options.count("bam-fasta")) PLC.loadFASTA(options["bam-fasta"].as < string > ());
+	unsigned long int n_het_phased = 0, n_het_total = 0, n_sample_phased = 0;
+
+	//PROCESS ALL BAMs
+	for (int i = 0 ; i < G.names.size() ; i ++) {
+		map < string , string > :: iterator itBL = mapBamfiles.find(G.names[i]);
+		if (itBL != mapBamfiles.end()) {
+			PLC.queryBAM(i, itBL->second);
+			n_sample_phased++;
+		}
+		//vrb.progress("  * Processing", (i+1)*1.0/G.n_samples);
+	}
+	vrb.title("Summary for BAM/CRAM parsing");
+	vrb.bullet("#files = " + stb.str(n_sample_phased));
+	vrb.bullet("#hets w/ PIRs = " + stb.str(PLC.n_rhets_pired) + " / " + stb.str(PLC.n_rhets_total) + " (" + stb.str(PLC.n_rhets_pired * 100.0 / PLC.n_rhets_total, 3) + "%)");
+	vrb.bullet("#mismatching_pirs = " + stb.str(PLC.n_pirs_mismatch) + " / " + stb.str(PLC.n_pirs_total) + " (" + stb.str(PLC.n_pirs_mismatch * 100.0 / PLC.n_pirs_total, 3) + "%)");
+	vrb.bullet("#matching_bases = " + stb.str(PLC.n_bases_match) + " / " + stb.str(PLC.n_bases_total) + " (" + stb.str(PLC.n_bases_match * 100.0 / PLC.n_bases_total, 3) + "%)");
+	vrb.bullet("#mismatching_bases = " + stb.str(PLC.n_bases_mismatch) + " / " + stb.str(PLC.n_bases_total) + " (" + stb.str(PLC.n_bases_mismatch * 100.0 / PLC.n_bases_total, 3) + "%)");
+	vrb.bullet("#lowqual_bases = " + stb.str(PLC.n_bases_lowqual) + " / " + stb.str(PLC.n_bases_total) + " (" + stb.str(PLC.n_bases_lowqual * 100.0 / PLC.n_bases_total, 3) + "%)");
+	vrb.bullet("#indel_bases = " + stb.str(PLC.n_bases_indel) + " / " + stb.str(PLC.n_bases_total) + " (" + stb.str(PLC.n_bases_indel * 100.0 / PLC.n_bases_total, 3) + "%)");
+	//vrb.bullet("Total time to parse all BAMs/CRAMs (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
+*/
+
+
 #endif

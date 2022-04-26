@@ -144,8 +144,8 @@ void pileup_caller::queryBAM(int ind, string fbam) {
 
 			//Phasing
 			if (phaseWithPIRs(ind, r, l_gen, t_gen, r_gen)) {
-				G.GRind_genotypes[ind][r].pir = 1;
-				G.GRind_genotypes[ind][r].ph0 = t_gen.a0;
+//				G.GRind_genotypes[ind][r].pir = 1;
+//				G.GRind_genotypes[ind][r].ph0 = t_gen.a0;
 				n_rhets_pired++;
 			}
 			n_rhets_total++;

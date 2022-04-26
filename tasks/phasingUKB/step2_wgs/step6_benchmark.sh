@@ -89,31 +89,20 @@ while read LINE; do
 	iREG=$(echo $LINE | awk '{ print $3; }')
 	oREG=$(echo $LINE | awk '{ print $4; }')
 
-	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.b2.m5.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.dc2.dr2.bcf
 	OUT=$(basename $SHP .bcf)\.fqf
 	LOG=$(basename $SHP .bcf)\.fqf.log
-	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 
-	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.b5.m10.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.dc4.dr2.bcf
 	OUT=$(basename $SHP .bcf)\.fqf
 	LOG=$(basename $SHP .bcf)\.fqf.log
-	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
+	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
 
-	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.b5.m20.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.dc8.dr2.bcf
 	OUT=$(basename $SHP .bcf)\.fqf
 	LOG=$(basename $SHP .bcf)\.fqf.log
-	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
-
-	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.b10.m20.bcf
-	OUT=$(basename $SHP .bcf)\.fqf
-	LOG=$(basename $SHP .bcf)\.fqf.log
-	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
-
-	SHP=/mnt/project/Phasing/PhasingWGS/step6_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.b10.m50.bcf
-	OUT=$(basename $SHP .bcf)\.fqf
-	LOG=$(basename $SHP .bcf)\.fqf.log
-	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP5_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP5_$iREG -y
-
+	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step6_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQF --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
 
 done < /home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt
 
@@ -130,108 +119,108 @@ while read LINE; do
 	########################################################## DEPTH 4 MODULO 0.1cM ############################################################################
 
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
 	
 	
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
 	
 	########################################################## DEPTH 8 MODULO 0.1cM ############################################################################
 	
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.depth8.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.depth8.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.depth8.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.depth8.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
 	
 	
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.depth8.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.depth8.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.depth8.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.depth8.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
 
 	########################################################## DEPTH 4 MODULO 0.05cM ############################################################################
 	
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.modulo5.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.modulo5.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.modulo5.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.modulo5.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
 		
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.modulo5.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.modulo5.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.modulo5.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.modulo5.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
 
 	########################################################## DEPTH 4 MODULO 0.025cM ############################################################################
 	
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.modulo25.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.modulo25.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.default.modulo25.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.default.modulo25.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP2_$iREG -y
 		
 	#SHAPEIT AT SNP ARRAY POSITIONS
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.modulo25.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.modulo25.bcf
 	OUT=$(basename $SHP .bcf)\.fqa
 	LOG=$(basename $SHP .bcf)\.fqa.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQA --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP3_$iREG -y
 	
 	#SHAPEIT AT COMMON SNPs
-	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.scaffold.modulo25.bcf
+	SHP=/mnt/project/Phasing/PhasingWGS/step4_runshapeit/benchmark_ukb23352_c20_qc_v1.$iREG\.shapeit5.indel.scaffold.modulo25.bcf
 	OUT=$(basename $SHP .bcf)\.fqc
 	LOG=$(basename $SHP .bcf)\.fqc.log
-	#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step4_runshapeit/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $SHP --frequency $FQC --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4_$iREG --tag chr20 --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP4_$iREG -y
 
 	
 done < /home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt

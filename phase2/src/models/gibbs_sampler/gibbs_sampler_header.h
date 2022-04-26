@@ -20,7 +20,7 @@
  * SOFTWARE.
  ******************************************************************************/
 #ifndef _GIBBS_SAMPLER_H
-#define _GIBBS_SAMPLER__H
+#define _GIBBS_SAMPLER_H
 
 #include <utils/otools.h>
 #include <containers/genotype_set.h>
@@ -32,9 +32,11 @@ public:
 	unsigned int nsamples;
 	unsigned int niterations;
 	unsigned int nburnin;
+	bool common;
 
 	vector < bool > alleles;
 	vector < bool > missing;
+	vector < bool > phased;
 
 	vector < unsigned int > unphased;
 	vector < vector < unsigned int > > cstates;
@@ -42,17 +44,30 @@ public:
 	vector < float > pprobs;
 	vector < float > rprobs;
 
+	float ee, ed;
+
 	gibbs_sampler(unsigned int, unsigned int, unsigned int);
 	~gibbs_sampler();
 
-	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight);
-	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight);
+	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight, bool);
+	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight, bool);
+	void setHQ();
+	void setLQ();
+	float getMAF();
 
-	void iterate(int &, int &);
+	void iterate();
+	void randomize_phase();
 
-	void pushRare(genotype_set & G, unsigned int vr);
-	void pushCommon(genotype_set &, unsigned int vc);
+	void pushRare(genotype_set & G, unsigned int vr, unsigned int & n_yphased, unsigned int & n_nphased, float);
+	void pushCommon(genotype_set &, unsigned int vc, unsigned int & n_yphased, unsigned int & n_nphased, float);
 
 };
+
+inline
+float gibbs_sampler::getMAF() {
+	unsigned int nalt = 0;
+	for (int e = 0 ; e < alleles.size() ; e ++) nalt += alleles[e];
+	return min(nalt*100.0/alleles.size(), (nalt-alleles.size())*100.0/alleles.size());
+}
 
 #endif

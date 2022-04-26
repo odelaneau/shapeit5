@@ -43,13 +43,6 @@ float horizontal_add (const __m256& a) {
 	__m128 sums = _mm_add_ps(vlow, shuf);
 	shuf = _mm_movehl_ps(shuf, sums); // high half -> low half
 	sums = _mm_add_ss(sums, shuf);    // (no wasted instructions, and all of them are the 4B minimum)
-
-	/*
-	aligned_vector32 < float > tmp  = aligned_vector32 < float > (8);
-	_mm256_store_ps(&tmp[0], a);
-	cout << _mm_cvtss_f32(sums) << " " << tmp[0]+tmp[1]+tmp[2]+tmp[3]+tmp[4]+tmp[5]+tmp[6]+tmp[7] << endl;
-	 */
-
 	return _mm_cvtss_f32(sums);
 }
 
@@ -83,7 +76,9 @@ public:
 
 	void setup(unsigned int _hap);
 	void forward();
-	void backward(vector < bool > & cevents, vector < state > & cstates);
+	void backward1(vector < bool > & cevents, vector < cstate > & cstates);
+	void backward2(vector < bool > & cevents, vector < fstate > & fstates);
+
 };
 
 #endif

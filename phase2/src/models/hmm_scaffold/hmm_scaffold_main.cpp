@@ -102,16 +102,15 @@ void hmm_scaffold::forward() {
 	}
 }
 
-void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstates) {
+void hmm_scaffold::backward1(vector < bool > & cevents, vector < cstate > & cstates) {
 	float sum = 0.0f, scale = 0.0f;
-	float threshold = min(1.0f / (nstates+1), 0.005f);
+	float threshold = min(1.0f / (nstates + 1), 0.001f);
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
 	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
 	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
 
 	cstates.clear();
-	//fill (beta.begin(), beta.end(), 1.0f / nstates);
 
 	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
 
@@ -144,6 +143,7 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstate
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alpha[vs][k]), _mm256_load_ps(&beta[k]));
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			_scale = _mm256_add_ps(_scale, _prob_temp);
+			offset += 8;
 		}
 		scale = (offset > 0)?horizontal_add(_scale):0.0f;
 		for (; offset < nstates ; offset ++) {
@@ -154,7 +154,9 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstate
 		_scale = _mm256_set1_ps(scale);
 		offset = 0;
 		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
-			_mm256_store_ps(&alphaXbeta_curr[k], _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale));
+			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale);
+			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
+			offset += 8;
 		}
 		for (; offset < nstates ; offset ++) alphaXbeta_curr[offset] *= scale;
 
@@ -182,7 +184,7 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstate
 			unsigned int nstored = 0;
 			for (int k = 0 ; k < nstates ; k ++) {
 				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold) {
-					cstates.emplace_back(hap, vs+2, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
+					cstates.emplace_back(hap, vs+1, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
 					nstored ++;
 				}
 			}
@@ -197,10 +199,101 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < state > & cstate
 		unsigned int nstored = 0;
 		for (int k = 0 ; k < nstates ; k ++) {
 			if (alphaXbeta_curr[k] >= threshold) {
-				cstates.emplace_back(hap, 1, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
+				cstates.emplace_back(hap, 0, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
 				nstored ++;
 			}
 		}
 		assert(nstored);
+	}
+}
+
+
+void hmm_scaffold::backward2(vector < bool > & cevents, vector < fstate > & fstates) {
+	float sum = 0.0f, scale = 0.0f;
+	const unsigned int nstatesMD8 = (nstates / 8) * 8;
+	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
+	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
+	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
+
+	fstates.clear();
+
+	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
+
+		//
+		const std::array<float,2> emit = {match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)]};
+		const __m256 _emit0 = _mm256_set1_ps(emit[0]);
+		const __m256 _emit1 = _mm256_set1_ps(emit[1]);
+
+		//Transitions
+		if (vs == C.n_scaffold_variants - 1) fill (beta.begin(), beta.end(), 1.0f / nstates);
+		else {
+			const float f0 = M.t[vs] / nstates;
+			const float f1 = M.nt[vs] / sum;
+			const __m256 _f0 = _mm256_set1_ps(f0);
+			const __m256 _f1 = _mm256_set1_ps(f1);
+			int offset = 0;
+			for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+				const __m256 _prob_prev = _mm256_load_ps(&beta[k]);
+				const __m256 _prob_curr = _mm256_fmadd_ps(_prob_prev, _f1, _f0);
+				_mm256_store_ps(&beta[k], _prob_curr);
+				offset += 8;
+			}
+			for (; offset < nstates ; offset ++) beta[offset] = (beta[offset]*f1+f0);
+		}
+
+		//Products
+		__m256 _scale = _mm256_set1_ps(0.0f);
+		int offset = 0;
+		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alpha[vs][k]), _mm256_load_ps(&beta[k]));
+			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
+			_scale = _mm256_add_ps(_scale, _prob_temp);
+			offset += 8;
+		}
+		scale = (offset > 0)?horizontal_add(_scale):0.0f;
+		for (; offset < nstates ; offset ++) {
+			alphaXbeta_curr[offset] = alpha[vs][offset] * beta[offset];
+			scale += alphaXbeta_curr[offset];
+		}
+		scale = 1.0f / scale;
+		_scale = _mm256_set1_ps(scale);
+		offset = 0;
+		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale);
+			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
+			offset += 8;
+		}
+		for (; offset < nstates ; offset ++) alphaXbeta_curr[offset] *= scale;
+
+		//Emission
+		__m256 _sum = _mm256_set1_ps(0.0f);
+		offset = 0;
+		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+			const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((unsigned int )Hvar.getByte(vs, k)), _vshift_count);
+			const __m256 _emiss = _mm256_blendv_ps (_emit0, _emit1, _mm256_castsi256_ps(_mask));
+			const __m256 _prob_prev = _mm256_load_ps(&beta[k]);
+			const __m256 _prob_curr = _mm256_mul_ps(_prob_prev, _emiss);
+			_sum = _mm256_add_ps(_sum, _prob_curr);
+			_mm256_store_ps(&beta[k], _prob_curr);
+			offset += 8;
+		}
+		sum = (offset > 0)?horizontal_add(_sum):0.0f;
+		for (; offset < nstates ; offset ++) {
+			beta[offset] *= emit[Hvar.get(vs, offset)];
+			sum += beta[offset];
+		}
+
+		//Storage
+		if (cevents[vs+1]) {
+			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
+			for (int k = 0 ; k < nstates ; k ++) fstates.emplace_back(hap, vs+1, alphaXbeta_curr[k], alphaXbeta_prev[k]);
+		}
+
+		//Saving products
+		copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
+	}
+
+	if (cevents[0]) {
+		for (int k = 0 ; k < nstates ; k ++) fstates.emplace_back(hap, 0, alphaXbeta_curr[k], alphaXbeta_curr[k]);
 	}
 }
