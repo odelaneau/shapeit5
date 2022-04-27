@@ -76,8 +76,7 @@ public:
 
 	void setup(unsigned int _hap);
 	void forward();
-	void backward1(vector < bool > & cevents, vector < cstate > & cstates);
-	void backward2(vector < bool > & cevents, vector < fstate > & fstates);
+	void backward(vector < bool > & cevents, vector < cstate > & cstates);
 
 };
 
