@@ -43,8 +43,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
 			("mcmc-iterations", bpo::value< int >()->default_value(20), "Number of MCMC iterations")
-			("mcmc-burnin", bpo::value< int >()->default_value(5), "Number of MCMC burn-in iterations")
-			("mcmc-runs", bpo::value< int >()->default_value(1), "Number of MCMC consecutive runs");
+			("mcmc-burnin", bpo::value< int >()->default_value(5), "Number of MCMC burn-in iterations");
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
@@ -127,7 +126,7 @@ void phaser::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
-	vrb.bullet("MCMC    : #iterations=" + stb.str(options["mcmc-iterations"].as < int > ()) + " / #burn-in=" + stb.str(options["mcmc-burnin"].as < int > ()) + " / #runs = " + stb.str(options["mcmc-runs"].as < int > ()));
+	vrb.bullet("MCMC    : [#iterations=" + stb.str(options["mcmc-iterations"].as < int > ()) + " / #burn-in=" + stb.str(options["mcmc-burnin"].as < int > ()) + "]");
 	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth-common"].as < int > ()) + "," + stb.str(options["pbwt-depth-rare"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
 	if (options.count("map")) vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");

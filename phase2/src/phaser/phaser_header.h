@@ -55,10 +55,6 @@ public:
 	vector < vector < pair < int, float > > > thread_data;
 	vector < hmm_scaffold * > thread_hmms;
 
-	//MCMC
-	int current_run;
-	int total_run;
-
 	//STATS
 	int totalSite, doneSite;
 	unsigned long int n_common_yphased;

@@ -60,8 +60,4 @@ void phaser::read_files_and_initialise() {
 	} else V.setGeneticMap();
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
 	H.transposeHaplotypes_V2H();
-
-	//step5: MCMC runs
-	current_run = 0;
-	total_run = options["mcmc-runs"].as < int > ();
 }

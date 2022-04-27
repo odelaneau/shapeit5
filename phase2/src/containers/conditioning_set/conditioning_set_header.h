@@ -55,12 +55,11 @@ public:
 	//STATES PROCESSING
 	void storeCommon(vector < int > & A, vector < int > & M);
 	void storeRare(vector < int > & R, vector < rare_genotype > & G);
-	void storeAtCommonUnphased(vector < int > & A, genotype_set & G, int);
-	void storeAtRareUnphased(vector < int > & R, vector < rare_genotype > & G);
-	void select1(variant_map &, genotype_set & G);
-	void select2(variant_map &, genotype_set & G);
-	void scrollUntilPhasedIsFound(vector < int > & A, genotype_set & G, int vc, int thap, int tidx, bool a);
+	void select(variant_map &, genotype_set & G);
 
+	void solveRare1(vector < int > &, vector < int > &, genotype_set &, unsigned int);
+	void solveRare2(vector < int > &, vector < int > &, vector < int > &, genotype_set &, unsigned int, unsigned int, vector < float > &);
+	void solve(variant_map &, genotype_set &);
 };
 
 #endif

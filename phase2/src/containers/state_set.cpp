@@ -30,42 +30,24 @@ state_set::~state_set() {
 }
 
 void state_set::clear() {
-	Pstates1.clear();
-	Pstates2.clear();
+	Pstates.clear();
 	Pmapping.clear();
-	Pstates1.shrink_to_fit();
-	Pstates2.shrink_to_fit();
+	Pstates.shrink_to_fit();
 	Pmapping.shrink_to_fit();
 }
 
-void state_set::transpose1() {
+void state_set::transpose() {
 	tac.clock();
-	for (unsigned long int e = 0 ; e < Pstates1.size() ; e ++) Pstates1[e].swap();
-	sort(Pstates1.begin(), Pstates1.end());
-	vrb.bullet("Transpose1 compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) Pstates[e].swap();
+	sort(Pstates.begin(), Pstates.end());
+	vrb.bullet("Transpose compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void state_set::transpose2() {
-	tac.clock();
-	for (unsigned long int e = 0 ; e < Pstates2.size() ; e ++) Pstates2[e].swap();
-	sort(Pstates2.begin(), Pstates2.end());
-	vrb.bullet("Transpose2 compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-}
-
-void state_set::mapping1(unsigned int n_scaffold_variants) {
+void state_set::mapping(unsigned int n_scaffold_variants) {
 	tac.clock();
 	Pmapping = vector < long int > (n_scaffold_variants+1, -1);
-	for (unsigned long int e = 0 ; e < Pstates1.size() ; e ++) {
-		if (Pmapping[Pstates1[e].id0] < 0) Pmapping[Pstates1[e].id0] = e;
+	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
+		if (Pmapping[Pstates[e].id0] < 0) Pmapping[Pstates[e].id0] = e;
 	}
-	vrb.bullet("Map1 compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-}
-
-void state_set::mapping2(unsigned int n_scaffold_variants) {
-	tac.clock();
-	Pmapping = vector < long int > (n_scaffold_variants+1, -1);
-	for (unsigned long int e = 0 ; e < Pstates2.size() ; e ++) {
-		if (Pmapping[Pstates2[e].id0] < 0) Pmapping[Pstates2[e].id0] = e;
-	}
-	vrb.bullet("Map2 compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Map compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

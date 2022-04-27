@@ -49,8 +49,8 @@ public:
 	gibbs_sampler(unsigned int, unsigned int, unsigned int);
 	~gibbs_sampler();
 
-	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight, bool);
-	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight, bool);
+	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight);
+	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight);
 	void setHQ();
 	void setLQ();
 	float getMAF();

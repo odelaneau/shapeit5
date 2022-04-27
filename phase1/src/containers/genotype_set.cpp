@@ -134,7 +134,7 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	//Verbose
 	vrb.bullet("PED mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duos = " + stb.str(nduos));
-	vrb.bullet2("%mendel_errors = " + stb.str(counts[0] *100.0 / counts[1], 2) + " (n=" + stb.str(counts[0]) + ")");
-	vrb.bullet2("%hets_phased = " + stb.str(counts[2]*100.0 / (counts[2]+counts[3]), 2) + " (n=" + stb.str(counts[2]) + ")");
+	vrb.bullet2("%mendel_errors = " + stb.str(counts[0] *100.0 / counts[1], 2) + "% (n=" + stb.str(counts[0]) + ")");
+	vrb.bullet2("%hets_phased = " + stb.str(counts[2]*100.0 / (counts[2]+counts[3]), 2) + "% (n=" + stb.str(counts[2]) + ")");
 }
 

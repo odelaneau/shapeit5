@@ -33,7 +33,12 @@ conditioning_set::~conditioning_set() {
 	sites_pbwt_evaluation.clear();
 	sites_pbwt_selection.clear();
 	sites_pbwt_grouping.clear();
+	for (int h = 0 ; h < indexes_pbwt_neighbour.size() ; h ++) {
+		indexes_pbwt_neighbour[h].clear();
+		indexes_pbwt_neighbour[h].shrink_to_fit();
+	}
 	indexes_pbwt_neighbour.clear();
+	indexes_pbwt_neighbour.shrink_to_fit();
 }
 
 void conditioning_set::initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth_common, int _depth_rare, int _mac) {
