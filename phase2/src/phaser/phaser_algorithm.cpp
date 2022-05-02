@@ -126,6 +126,11 @@ void phaser::gibbscompute(int id_job) {
 }
 
 void phaser::phase() {
+	//STEP0: SINGLETONS AND MONOMORPHIC
+	vrb.title("Pre-processing");
+	G.imputeMonomorphic();
+	//G.phaseSingleton();
+
 	//STEP1: haplotype selection
 	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
@@ -198,7 +203,7 @@ void phaser::phase() {
 	if (G.n_common_variants) vrb.bullet2("#common_phased = " + stb.str(n_common_yphased) + " / " + stb.str(n_common_yphased+n_common_nphased) + " (" + stb.str(n_common_yphased * 100.0 / (n_common_yphased+n_common_nphased), 2) + "%)");
 	vrb.bullet2("#rare_phased = " + stb.str(n_rare_yphased) + " / " + stb.str(n_rare_yphased+n_rare_nphased) + " (" + stb.str(n_rare_yphased * 100.0 / (n_rare_yphased+n_rare_nphased), 2) + "%)");
 
-	//
+	//STEP6: PHASE REMAINING HETS
 	vrb.title("Solving remaining hets using PBWT");
 	H.solve(V, G);
 

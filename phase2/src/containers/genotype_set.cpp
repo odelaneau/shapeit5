@@ -37,8 +37,9 @@ void genotype_set::clear() {
 	GRvar_genotypes.clear();
 	GRind_genotypes.clear();
 }
-/*
+
 void genotype_set::imputeMonomorphic() {
+	unsigned int n_solved = 0;
 	for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
 		bool mono = true;
 		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
@@ -49,12 +50,15 @@ void genotype_set::imputeMonomorphic() {
 				GRvar_genotypes[vr][r].al0 = major_alleles[vr];
 				GRvar_genotypes[vr][r].al1 = major_alleles[vr];
 				GRvar_genotypes[vr][r].pha = 1;
+				n_solved++;
 			}
 		}
 	}
+	vrb.bullet(stb.str(n_solved) + " missing genotypes imputed at monomorphic sites");
 }
 
 void genotype_set::phaseSingleton() {
+	unsigned int n_solved = 0;
 	for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
 		if (GRvar_genotypes[vr].size() == 1 && GRvar_genotypes[vr][0].het) {
 			if (rng.flipCoin()) {
@@ -65,10 +69,12 @@ void genotype_set::phaseSingleton() {
 				GRvar_genotypes[vr][0].al1 = 0;
 			}
 			GRvar_genotypes[vr][0].pha = 1;
+			n_solved++;
 		}
 	}
+	vrb.bullet(stb.str(n_solved) + " singletons randomly phased");
 }
-*/
+
 void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants) {
 	tac.clock();
 

@@ -52,6 +52,33 @@ public:
 	bool operator < (const rare_genotype & rg) const {
 		return idx < rg.idx;
 	}
+
+	void phase(unsigned int g) {
+		pha = 1;
+		switch (g) {
+		case 0:	al0 = 0; al1 = 0; break;
+		case 1:	al0 = 0; al1 = 1; break;
+		case 2:	al0 = 1; al1 = 0; break;
+		case 3:	al0 = 1; al1 = 1; break;
+		}
+	}
+
+	void randomize() {
+		if (het) {
+			bool flip = rng.flipCoin();
+			al0 = flip?true:false;
+			al1 = flip?false:true;
+		}
+
+		if (mis) {
+			switch (rng.getInt(4)) {
+			case 0:	al0 = false; al1 = false; break;
+			case 1:	al0 = false; al1 = true; break;
+			case 2:	al0 = true; al1 = false; break;
+			case 3:	al0 = true; al1 = true; break;
+			}
+		}
+	}
 };
 
 class genotype_set {
@@ -98,8 +125,8 @@ public:
 	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
 	void pushRareHet(unsigned int vr, unsigned int i);
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
-//	void imputeMonomorphic();
-//	void phaseSingleton();
+	void imputeMonomorphic();
+	void phaseSingleton();
 };
 
 inline

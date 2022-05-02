@@ -28,6 +28,32 @@
 #include <containers/haplotype_set.h>
 #include <containers/genotype_set.h>
 
+class cflip {
+public:
+	unsigned int pgenotype;
+	float support;
+
+	cflip() {
+		pgenotype = 0;
+		support = 0.0f;
+	}
+
+	cflip(unsigned int _pgenotype, float _support) {
+		pgenotype = _pgenotype;
+		support = _support;
+	}
+
+	void set(unsigned int _pgenotype, float _support) {
+		pgenotype = _pgenotype;
+		support = _support;
+	}
+
+	bool betterThan(cflip & cf) {
+		if (abs(support) > abs(cf.support)) return true;
+		else return false;
+	}
+};
+
 
 class conditioning_set : public haplotype_set {
 public:
@@ -43,6 +69,9 @@ public:
 	int depth_common;
 	int depth_rare;
 
+	//PHASE DATA
+	vector < cflip > CF;
+
 	//STATE DATA
 	vector < pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
 	vector < vector < unsigned int > > indexes_pbwt_neighbour;
@@ -57,8 +86,13 @@ public:
 	void storeRare(vector < int > & R, vector < rare_genotype > & G);
 	void select(variant_map &, genotype_set & G);
 
+	/*
 	void solveRare1(vector < int > &, vector < int > &, genotype_set &, unsigned int);
 	void solveRare2(vector < int > &, vector < int > &, vector < int > &, genotype_set &, unsigned int, unsigned int, vector < float > &);
+	*/
+	void solveRareForward(vector < int > & A, vector < int > & C, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm);
+	void solveRareBackward(vector < int > & A, vector < int > & C, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm);
+
 	void solve(variant_map &, genotype_set &);
 };
 
