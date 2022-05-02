@@ -24,7 +24,7 @@
 //counts[0] : # observed mendel errors
 //counts[1] : # possible mendel errors
 //counts[2] : # hets being scaffolded
-//counts[2] : # hets not being scaffolded
+//counts[3] : # hets not being scaffolded
 void genotype::scaffoldTrio(genotype * gfather, genotype * gmother, vector < unsigned int > & counts) {
 	for (int v = 0 ; v < n_variants ; v ++) {
 		if (VAR_GET_HET(MOD2(v), Variants[DIV2(v)])) {
@@ -50,6 +50,17 @@ void genotype::scaffoldTrio(genotype * gfather, genotype * gmother, vector < uns
 				moth0?VAR_SET_HAP1(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP1(MOD2(v), Variants[DIV2(v)]);
 			} else counts[3]++;
 			counts[1] ++;
+
+			/*
+			bool c0 = VAR_GET_HAP0(MOD2(v), Variants[DIV2(v)]);
+			bool c1 = VAR_GET_HAP1(MOD2(v), Variants[DIV2(v)]);
+			bool f0 = VAR_GET_HAP0(MOD2(v), gfather->Variants[DIV2(v)]);
+			bool f1 = VAR_GET_HAP1(MOD2(v), gfather->Variants[DIV2(v)]);
+			bool m0 = VAR_GET_HAP0(MOD2(v), gmother->Variants[DIV2(v)]);
+			bool m1 = VAR_GET_HAP1(MOD2(v), gmother->Variants[DIV2(v)]);
+			cout << v << " " << c0 << " " << c1  << " " << f0 << " " << f1 << " " << m0 << " " << m1 << " / " << VAR_GET_SCA(MOD2(v), Variants[DIV2(v)]) << " " << VAR_GET_HET(MOD2(v), Variants[DIV2(v)]) << " " << VAR_GET_HOM(MOD2(v), Variants[DIV2(v)]) << endl;
+			*/
+
 		} else if (VAR_GET_HOM(MOD2(v), Variants[DIV2(v)])) {
 			bool father_is_hom = VAR_GET_HOM(MOD2(v), gfather->Variants[DIV2(v)]);
 			bool mother_is_hom = VAR_GET_HOM(MOD2(v), gmother->Variants[DIV2(v)]);

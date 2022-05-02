@@ -20,8 +20,6 @@ void mendel_solver::set() {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
-
-
 void mendel_solver::solveT(int locus, int cidx, int fidx, int midx) {
 	int phased = 0, mendel = 0;
 	int cg = H.Htrue[2*cidx+0][locus] + H.Htrue[2*cidx+1][locus];

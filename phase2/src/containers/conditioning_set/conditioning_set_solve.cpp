@@ -34,38 +34,12 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 	iota(A.begin(), A.end(), 0);
 	random_shuffle(A.begin(), A.end());
 
-	//
-	vector < float > scoreBit = vector < float > (n_scaffold_variants, 0.0);
-	for (int l = 0 ; l < n_scaffold_variants ; ++l) scoreBit[l] = log (l + 1.0);
-
-
-	//PBWT backward sweep
-	tac.clock();
-	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
-		int vc = V.vec_full[vt]->idx_common;
-		int vr = V.vec_full[vt]->idx_rare;
-		int vs = V.vec_full[vt]->idx_scaffold;
-
-		if (vs >= 0) {
-			bool eval = sites_pbwt_evaluation[vs];
-			bool selc = sites_pbwt_selection[vs];
-			if (eval) {
-				int u = 0, v = 0;
-				for (int h = 0 ; h < n_haplotypes ; h ++) {
-					if (!Hvar.get(vs, A[h])) A[u++] = A[h];
-					else B[v++] = A[h];
-				}
-				std::copy(B.begin(), B.begin()+v, A.begin()+u);
-				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
-			}
-		} else if (vr >= 0) solveRare1(A, R, G, vr);
-		vrb.progress("  * PBWT backward pass", (V.sizeFull()-vt) * 1.0 / V.sizeFull());
-	}
-	vrb.bullet("PBWT backward pass (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	//Get cM positions of the scaffold sites
+	vector < float > vs_cm = vector < float > (n_scaffold_variants, 0.0);
+	for (int l = 0 ; l < n_scaffold_variants ; ++l) vs_cm[l] = V.vec_scaffold[l]->cm;
 
 	//PBWT forward sweep
 	tac.clock();
-	int nzvs = 0;
 	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
 		int vc = V.vec_full[vt]->idx_common;
 		int vr = V.vec_full[vt]->idx_rare;
@@ -95,211 +69,111 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
 				std::copy(D.begin(), D.begin()+v, C.begin()+u);
 				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
-				nzvs = vs;
 			}
-		} else if (vr >= 0) solveRare2(A, C, R, G, vr, nzvs, scoreBit);
+		} else if (vr >= 0) solveRareForward(A, C, R, G, vr, V.vec_rare[vr]->cm, vs_cm);
 		vrb.progress("  * PBWT forward pass", vt * 1.0 / V.sizeFull());
 	}
 	vrb.bullet("PBWT forward pass (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	//PBWT backward sweep
+	tac.clock();
+	fill(C.begin(), C.end(), V.sizeScaffold() - 1);
+	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
+		int vc = V.vec_full[vt]->idx_common;
+		int vr = V.vec_full[vt]->idx_rare;
+		int vs = V.vec_full[vt]->idx_scaffold;
+
+		if (vs >= 0) {
+			bool eval = sites_pbwt_evaluation[vs];
+			bool selc = sites_pbwt_selection[vs];
+			if (eval) {
+				int u = 0, v = 0, p = vs, q = vs;
+				for (int h = 0 ; h < n_haplotypes ; h ++) {
+					int alookup = A[h], dlookup = C[h];
+					if (dlookup < p) p = dlookup;
+					if (dlookup < q) q = dlookup;
+					if (!Hvar.get(vs, alookup)) {
+						A[u] = alookup;
+						C[u] = p;
+						p = V.sizeScaffold() - 1;
+						u++;
+					} else {
+						B[v] = alookup;
+						D[v] = q;
+						q = V.sizeScaffold() - 1;
+						v++;
+					}
+				}
+				std::copy(B.begin(), B.begin()+v, A.begin()+u);
+				std::copy(D.begin(), D.begin()+v, C.begin()+u);
+				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+			}
+		} else if (vr >= 0) solveRareBackward(A, C, R, G, vr, V.vec_rare[vr]->cm, vs_cm);
+		vrb.progress("  * PBWT backward pass", (V.sizeFull() - vt) * 1.0 / V.sizeFull());
+	}
+	vrb.bullet("PBWT backward pass (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	assert(!CF.size());
 }
 
-void conditioning_set::solveRare1(vector < int > & A, vector < int > & R, genotype_set & G, unsigned int vr) {
-	float thresh, v, v0, v1;
-	unsigned int nm = 0, nh = 0;
-
-	vector < int > C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
-	vector < int > S;
+void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm) {
+	vector < int > S, C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
 	for (int g = 0 ; g < G.GRvar_genotypes[vr].size() ; g ++) {
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
 			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
 		} else if (G.GRvar_genotypes[vr][g].mis) {
 			S.push_back(g);
-			nm++;
 		} else if (G.GRvar_genotypes[vr][g].het) {
 			S.push_back(g);
-			nh++;
 		}
 	}
 
 	//PHASING FIRST PASS
-	thresh = 2.5;
-	while (nh && thresh > 1.0) {
-		int nhOld = nh;
-		int nmOld = nm;
-		nh = 0; nm = 0 ;
-
+	float thresh = 2.5, v, v0, v1;
+	while (S.size() && thresh > 1.0) {
+		unsigned int sizeS = S.size();
 		for (vector < int > :: iterator s = S.begin() ; s != S.end() ; ) {
 			int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
 			int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
-			if (G.GRvar_genotypes[vr][*s].het) {
-				v = 0.0;
-				if (R[h0]>0) v += C[A[R[h0]-1]];
-				if (R[h0]<(n_haplotypes-1)) v += C[A[R[h0]+1]];
-				if (R[h1]>0) v -= C[A[R[h1]-1]];
-				if (R[h1]<(n_haplotypes-1)) v -= C[A[R[h1]+1]];
-
-				if (v > thresh) {
-					C[h0] = 1.0;
-					C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
-					s = S.erase(s);
-				} else if (v < -thresh) {
-					C[h0] = -1.0;
-					C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
-					s = S.erase(s);
-				} else {
-					nh++;
-					s++;
-				}
-			} else {
-				if (R[h0]>0) v0 = C[A[R[h0]-1]];
-				if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
-				if (R[h1]>0) v1 = C[A[R[h1]-1]];
-				if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
-
-				if (v0 == -2 && v1 == -2) {
-					C[h0] = -1.0;
-					C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
-					s = S.erase(s);
-				} else if (v0 == -2 && v1 == 2) {
-					C[h0] = -1.0;
-					C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
-					s = S.erase(s);
-				} else if (v0 == 2 && v1 == -2) {
-					C[h0] = 1.0;
-					C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
-					s = S.erase(s);
-				} else if (v0 == 2 && v1 == 2) {
-					C[h0] = 1.0;
-					C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
-					s = S.erase(s);
-				} else {
-					nm++;
-					s++;
-				}
-			}
-		}
-
-		if (nh == nhOld) thresh -= 1.0 ;
-	}
-}
-
-void conditioning_set::solveRare2(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, unsigned int vs, vector < float > & scoreBit) {
-	float thresh, v, v0, v1;
-	unsigned int nm = 0, nh = 0;
-
-	vector < int > C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
-	vector < int > S;
-	for (int g = 0 ; g < G.GRvar_genotypes[vr].size() ; g ++) {
-		if (G.GRvar_genotypes[vr][g].pha) {
-			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
-			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
-		} else if (G.GRvar_genotypes[vr][g].mis) {
-			S.push_back(g);
-			nm++;
-		} else if (G.GRvar_genotypes[vr][g].het) {
-			S.push_back(g);
-			nh++;
-		}
-	}
-
-	//PHASING FIRST PASS
-	thresh = 2.5;
-	while (nh && thresh > 1.0) {
-		int nhOld = nh;
-		int nmOld = nm;
-		nh = 0; nm = 0 ;
-
-		for (vector < int > :: iterator s = S.begin() ; s != S.end() ; ) {
-			int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
-			int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+			if (R[h0]>0) v0 = C[A[R[h0]-1]];
+			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
+			if (R[h1]>0) v1 = C[A[R[h1]-1]];
+			if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
+			v = v0 - v1;
 
 			if (G.GRvar_genotypes[vr][*s].het) {
-				v = 0.0;
-				if (R[h0]>0) v += C[A[R[h0]-1]];
-				if (R[h0]<(n_haplotypes-1)) v += C[A[R[h0]+1]];
-				if (R[h1]>0) v -= C[A[R[h1]-1]];
-				if (R[h1]<(n_haplotypes-1)) v -= C[A[R[h1]+1]];
-
 				if (v > thresh) {
-					C[h0] = 1;
-					C[h1] = -1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
+					C[h0] = 1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(2);
 					s = S.erase(s);
 				} else if (v < -thresh) {
-					C[h0] = -1;
-					C[h1] = 1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
+					C[h0] = -1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(1);
 					s = S.erase(s);
-				} else {
-					nh++;
-					s++;
-				}
+				} else s++;
 			} else {
-				if (R[h0]>0) v0 = C[A[R[h0]-1]];
-				if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
-				if (R[h1]>0) v1 = C[A[R[h1]-1]];
-				if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
-
 				if (v0 == -2 && v1 == -2) {
-					C[h0] = -1;
-					C[h1] = -1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
+					C[h0] = -1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(0);
 					s = S.erase(s);
 				} else if (v0 == -2 && v1 == 2) {
-					C[h0] = -1;
-					C[h1] = 1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 0;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
+					C[h0] = -1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(1);
 					s = S.erase(s);
 				} else if (v0 == 2 && v1 == -2) {
-					C[h0] = 1;
-					C[h1] = -1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 0;
+					C[h0] = 1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(2);
 					s = S.erase(s);
 				} else if (v0 == 2 && v1 == 2) {
-					C[h0] = 1;
-					C[h1] = 1;
-					G.GRvar_genotypes[vr][*s].pha = 1;
-					G.GRvar_genotypes[vr][*s].al0 = 1;
-					G.GRvar_genotypes[vr][*s].al1 = 1;
+					C[h0] = 1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(3);
 					s = S.erase(s);
-				} else {
-					nm++;
-					s++;
-				}
+				} else s++;
 			}
 		}
-
-		if (nh == nhOld) thresh -= 1.0 ;
+		if (S.size() == sizeS) thresh -= 1.0 ;
 	}
 
 	//PHASING SECOND PASS
@@ -307,45 +181,151 @@ void conditioning_set::solveRare2(vector < int > & A, vector < int > & D, vector
 		int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
 		int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
+		v0 = v1 = 0;
+		if (R[h0]>0) v0 += C[A[R[h0]-1]] * abs(vr_cm - vs_cm[D[R[h0]]]);
+		if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]] * abs(vr_cm - vs_cm[D[R[h0]+1]]);
+		if (R[h1]>0) v1 -= C[A[R[h1]-1]] * abs(vr_cm - vs_cm[D[R[h1]]]);
+		if (R[h1]<(n_haplotypes-1)) v1 -= C[A[R[h1]+1]] * abs(vr_cm - vs_cm[D[R[h1]+1]]);
+		v = v0+v1;
+
 		if (G.GRvar_genotypes[vr][*s].het) {
-			v = 0.0;
-			if (R[h0]>0) v += C[A[R[h0]-1]] * scoreBit[vs - D[R[h0]] + 1];
-			if (R[h0]<(n_haplotypes-1)) v += C[A[R[h0]+1]] * scoreBit[vs - D[R[h0]+1]+1];
-			if (R[h1]>0) v -= C[A[R[h1]-1]] * scoreBit[vs - D[R[h1]] + 1];
-			if (R[h1]<(n_haplotypes-1)) v -= C[A[R[h1]+1]] * scoreBit[vs - D[R[h1]+1]+1];
 			if (v > 0) {
-				C[h0] = 1;
-				C[h1] = -1;
-				G.GRvar_genotypes[vr][*s].pha = 1;
-				G.GRvar_genotypes[vr][*s].al0 = 1;
-				G.GRvar_genotypes[vr][*s].al1 = 0;
+				C[h0] = 1; C[h1] = -1;
+				CF.emplace_back(2, v);
 			} else {
-				C[h0] = -1;
-				C[h1] = 1;
-				G.GRvar_genotypes[vr][*s].pha = 1;
-				G.GRvar_genotypes[vr][*s].al0 = 0;
-				G.GRvar_genotypes[vr][*s].al1 = 1;
+				C[h0] = -1; C[h1] = 1;
+				CF.emplace_back(1, v);
 			}
 		} else {
-			if (R[h0]>0) v0 = C[A[R[h0]-1]] * scoreBit[vs - D[R[h0]] + 1];
-			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]] * scoreBit[vs - D[R[h0]+1]+1];
-			if (R[h1]>0) v1 = C[A[R[h1]-1]] * scoreBit[vs - D[R[h1]] + 1];
-			if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]] * scoreBit[vs - D[R[h1]+1]+1];
-			G.GRvar_genotypes[vr][*s].pha = 1;
-			if (v0 > 0) {
-				C[h0] = 1;
-				G.GRvar_genotypes[vr][*s].al0 = 1;
+			if (v0 > 0 && v1 > 0) {
+				C[h0] = 1; C[h1] = 1;
+				CF.emplace_back(3, v0+v1);
+			} else if (v0 > 0 && v1 < 0) {
+				C[h0] = 1; C[h1] = -1;
+				CF.emplace_back(2, v0+v1);
+			} else if (v0 < 0 && v1 > 0) {
+				C[h0] = -1; C[h1] = 1;
+				CF.emplace_back(1, v0+v1);
 			} else {
-				C[h0] = -1;
-				G.GRvar_genotypes[vr][*s].al0 = 0;
-			}
-			if (v1 > 0) {
-				C[h1] = 1;
-				G.GRvar_genotypes[vr][*s].al1 = 1;
-			} else {
-				C[h1] = -1;
-				G.GRvar_genotypes[vr][*s].al1 = 0;
+				C[h0] = -1; C[h1] = -1;
+				CF.emplace_back(0, v0+v1);
 			}
 		}
+	}
+}
+
+
+void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm) {
+	vector < int > S, C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
+	for (int g = G.GRvar_genotypes[vr].size()-1 ; g >= 0 ; g --) {
+		if (G.GRvar_genotypes[vr][g].pha) {
+			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
+			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
+		} else if (G.GRvar_genotypes[vr][g].mis) {
+			S.push_back(g);
+		} else if (G.GRvar_genotypes[vr][g].het) {
+			S.push_back(g);
+		}
+	}
+
+	//PHASING FIRST PASS
+	vector < int > Stmp = S;
+	float thresh = 2.5, v, v0, v1;
+	while (Stmp.size() && thresh > 1.0) {
+		unsigned int sizeS = Stmp.size();
+		for (vector < int > :: iterator s = Stmp.begin() ; s != Stmp.end() ; ) {
+			int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+			int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+
+			if (R[h0]>0) v0 = C[A[R[h0]-1]];
+			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
+			if (R[h1]>0) v1 = C[A[R[h1]-1]];
+			if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
+			v = v0 - v1;
+
+			if (G.GRvar_genotypes[vr][*s].het) {
+				if (v > thresh) {
+					C[h0] = 1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(2);
+					s = Stmp.erase(s);
+				} else if (v < -thresh) {
+					C[h0] = -1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(1);
+					s = Stmp.erase(s);
+				} else s++;
+			} else {
+				if (v0 == -2 && v1 == -2) {
+					C[h0] = -1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(0);
+					s = Stmp.erase(s);
+				} else if (v0 == -2 && v1 == 2) {
+					C[h0] = -1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(1);
+					s = Stmp.erase(s);
+				} else if (v0 == 2 && v1 == -2) {
+					C[h0] = 1.0; C[h1] = -1.0;
+					G.GRvar_genotypes[vr][*s].phase(2);
+					s = Stmp.erase(s);
+				} else if (v0 == 2 && v1 == 2) {
+					C[h0] = 1.0; C[h1] = 1.0;
+					G.GRvar_genotypes[vr][*s].phase(3);
+					s = Stmp.erase(s);
+				} else s++;
+			}
+		}
+		if (Stmp.size() == sizeS) thresh -= 1.0 ;
+	}
+
+	//PHASING SECOND PASS
+	cflip ctmp;
+	for (vector < int > :: iterator s = S.begin() ; s != S.end() ; s++) {
+		int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+		int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+
+		if (find(Stmp.begin(), Stmp.end(), *s)!=Stmp.end()) {
+			v0 = v1 = 0;
+			if (R[h0]>0) v0 += C[A[R[h0]-1]] * abs(vr_cm - vs_cm[D[R[h0]]]);
+			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]] * abs(vr_cm - vs_cm[D[R[h0]+1]]);
+			if (R[h1]>0) v1 -= C[A[R[h1]-1]] * abs(vr_cm - vs_cm[D[R[h1]]]);
+			if (R[h1]<(n_haplotypes-1)) v1 -= C[A[R[h1]+1]] * abs(vr_cm - vs_cm[D[R[h1]+1]]);
+			v = v0+v1;
+
+			if (G.GRvar_genotypes[vr][*s].het) {
+				if (v > 0) {
+					C[h0] = 1; C[h1] = -1;
+					ctmp.set(2, v);
+				} else {
+					C[h0] = -1; C[h1] = 1;
+					ctmp.set(1, v);
+				}
+			} else {
+				if (v0 > 0 && v1 > 0) {
+					C[h0] = 1; C[h1] = 1;
+					ctmp.set(3, v0+v1);
+				} else if (v0 > 0 && v1 < 0) {
+					C[h0] = 1; C[h1] = -1;
+					ctmp.set(2, v0+v1);
+				} else if (v0 < 0 && v1 > 0) {
+					C[h0] = -1; C[h1] = 1;
+					ctmp.set(1, v0+v1);
+				} else {
+					C[h0] = -1; C[h1] = -1;
+					ctmp.set(0, v0+v1);
+				}
+			}
+
+			G.GRvar_genotypes[vr][*s].pha = 1;
+			if (!ctmp.betterThan(CF.back())) ctmp = CF.back();
+
+			if (abs(ctmp.support) > 0.01f) {
+				switch (ctmp.pgenotype) {
+				case 0:	G.GRvar_genotypes[vr][*s].al0 = 0; G.GRvar_genotypes[vr][*s].al1 = 0; break;
+				case 1:	G.GRvar_genotypes[vr][*s].al0 = 0; G.GRvar_genotypes[vr][*s].al1 = 1; break;
+				case 2:	G.GRvar_genotypes[vr][*s].al0 = 1; G.GRvar_genotypes[vr][*s].al1 = 0; break;
+				case 3:	G.GRvar_genotypes[vr][*s].al0 = 1; G.GRvar_genotypes[vr][*s].al1 = 1; break;
+				}
+			} else G.GRvar_genotypes[vr][*s].randomize();
+		}
+		CF.pop_back();
 	}
 }

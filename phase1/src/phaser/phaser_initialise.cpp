@@ -53,7 +53,15 @@ void phaser::read_files_and_initialise() {
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
 
-	//step3: Read and initialise genetic map
+	//step3: Read pedigrees
+	if (options.count("pedigree")) {
+		pedigree_reader readerP;
+		readerP.readPedigreeFile(options["pedigree"].as < string > ());
+		G.scaffoldUsingPedigrees(readerP);
+	}
+
+
+	//step4: Read and initialise genetic map
 	vrb.title("Setting up genetic map:");
 	if (options.count("map")) {
 		gmap_reader readerGM;
@@ -62,7 +70,7 @@ void phaser::read_files_and_initialise() {
 	} else V.setGeneticMap();
 	M.initialise(V, options["hmm-ne"].as < int > (), (readerG.n_main_samples+readerG.n_ref_samples)*2);
 
-	//step4: Initialize haplotype set
+	//step5: Initialize haplotype set
 	vrb.title("Initializing data structures:");
 	G.imputeMonomorphic(V);
 	H.updateHaplotypes(G, true);
@@ -75,13 +83,6 @@ void phaser::read_files_and_initialise() {
 					options["thread"].as < int > ());
 
 	if (!options.count("pbwt-disable-init")) H.solve(&G);
-
-	//step5: Read pedigrees
-	if (options.count("pedigree")) {
-		pedigree_reader readerP;
-		readerP.readPedigreeFile(options["pedigree"].as < string > ());
-		G.scaffoldUsingPedigrees(readerP);
-	}
 
 	//step6: Initialize genotype structures
 	genotype_builder(G, options["thread"].as < int > ()).build();
