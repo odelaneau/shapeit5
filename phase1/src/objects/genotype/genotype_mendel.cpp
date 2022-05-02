@@ -64,8 +64,8 @@ void genotype::scaffoldTrio(genotype * gfather, genotype * gmother, vector < uns
 			bool mother_is_hom = VAR_GET_HOM(MOD2(v), gmother->Variants[DIV2(v)]);
 			bool fath0 = VAR_GET_HAP0(MOD2(v), gfather->Variants[DIV2(v)]);
 			bool moth0 = VAR_GET_HAP0(MOD2(v), gmother->Variants[DIV2(v)]);
-			if (fath0 != moth0) VAR_SET_SCA(MOD2(v), Variants[DIV2(v)]); counts[2]++;
-			else VAR_SET_HOM(MOD2(v), Variants[DIV2(v)]); counts[2]++;
+			if (fath0 != moth0) VAR_SET_SCA(MOD2(v), Variants[DIV2(v)]);
+			else VAR_SET_HOM(MOD2(v), Variants[DIV2(v)]);
 			fath0?VAR_SET_HAP0(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP0(MOD2(v), Variants[DIV2(v)]);
 			moth0?VAR_SET_HAP1(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP1(MOD2(v), Variants[DIV2(v)]);
 		}
