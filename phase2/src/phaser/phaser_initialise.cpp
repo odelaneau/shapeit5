@@ -24,6 +24,8 @@
 #include <io/genotype_reader/genotype_reader_header.h>
 #include <io/haplotype_writer.h>
 #include <io/gmap_reader.h>
+#include <io/pedigree_reader.h>
+
 
 void phaser::read_files_and_initialise() {
 	//step0: Initialize seed
@@ -51,7 +53,14 @@ void phaser::read_files_and_initialise() {
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
 
-	//step4: Read and initialise genetic map
+	//step4: Read pedigrees
+	if (options.count("pedigree")) {
+		pedigree_reader readerP;
+		readerP.readPedigreeFile(options["pedigree"].as < string > ());
+		G.scaffoldUsingPedigrees(readerP);
+	}
+
+	//step5: Read and initialise genetic map
 	vrb.title("Setting up genetic map:");
 	if (options.count("map")) {
 		gmap_reader readerGM;

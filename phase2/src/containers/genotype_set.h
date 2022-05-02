@@ -27,6 +27,9 @@
 #include <containers/bitmatrix.h>
 #include <containers/variant_map.h>
 
+#include <io/pedigree_reader.h>
+
+
 class rare_genotype {
 public:
 	unsigned int idx : 27;
@@ -126,7 +129,12 @@ public:
 	void pushRareHet(unsigned int vr, unsigned int i);
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
 	void imputeMonomorphic();
-	void phaseSingleton();
+	void randomizeSingleton();
+
+	void scaffoldTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts);
+	void scaffoldDuoMother(int ikid, int imother, vector < unsigned int > &counts);
+	void scaffoldDuoFather(int ikid, int ifather, vector < unsigned int > &counts);
+	void scaffoldUsingPedigrees(pedigree_reader & pr);
 };
 
 inline

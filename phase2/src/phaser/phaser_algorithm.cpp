@@ -129,7 +129,7 @@ void phaser::phase() {
 	//STEP0: SINGLETONS AND MONOMORPHIC
 	vrb.title("Pre-processing");
 	G.imputeMonomorphic();
-	//G.phaseSingleton();
+	//G.randomizeSingleton();
 
 	//STEP1: haplotype selection
 	vrb.title("PBWT pass");

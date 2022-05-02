@@ -38,7 +38,8 @@ void phaser::declare_options() {
 			("input-maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation")
 			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
 			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
-			("map", bpo::value< string >(), "Genetic map");
+			("map", bpo::value< string >(), "Genetic map")
+			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother");
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
 	opt_mcmc.add_options()
@@ -118,6 +119,7 @@ void phaser::verbose_files() {
 	vrb.bullet("Input VCF     : [" + options["input"].as < string > () + "]");
 	vrb.bullet("Scaffold VCF  : [" + options["scaffold"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
+	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
 	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
