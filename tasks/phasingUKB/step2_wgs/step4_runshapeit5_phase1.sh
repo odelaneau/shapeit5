@@ -9,7 +9,6 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 		
 		REG=$(echo $LINE | awk '{ print $3; }')
 		BCF=/mnt/project/Phasing/PhasingWGS/step2_splitchunks/benchmark_ukb23352_c20_qc_v1.subset.N$N\.$REG\.bcf
-		OUT=$(basename $VCF .vcf.gz)
 		
 		OUT=benchmark_ukb23352_c20_qc_v1.subset.N$N\.$REG\.shapeit5.default.bcf
 		LOG=benchmark_ukb23352_c20_qc_v1.subset.N$N\.$REG\.shapeit5.default.log
