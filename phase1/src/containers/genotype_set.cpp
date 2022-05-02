@@ -97,7 +97,7 @@ void genotype_set::solve() {
 //counts[0] : # observed mendel errors
 //counts[1] : # possible mendel errors
 //counts[2] : # hets being scaffolded
-//counts[2] : # hets not being scaffolded
+//counts[3] : # hets not being scaffolded
 void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	tac.clock();
 	vector < unsigned int > counts = vector < unsigned int >(4, 0);
@@ -109,7 +109,6 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	//Mapping samples
 	unsigned int ntrios = 0, nduos = 0, nmendels = 0;
 	map < string, genotype * > :: iterator itK, itM, itF;
-	vector < bool > scaffolded = vector < bool > (n_ind, false);
 	for (int i = 0 ; i < pr.kids.size() ; i ++) {
 		itK = mapG.find(pr.kids[i]);
 		itF = mapG.find(pr.fathers[i]);

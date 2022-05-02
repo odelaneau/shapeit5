@@ -50,17 +50,6 @@ void genotype::scaffoldTrio(genotype * gfather, genotype * gmother, vector < uns
 				moth0?VAR_SET_HAP1(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP1(MOD2(v), Variants[DIV2(v)]);
 			} else counts[3]++;
 			counts[1] ++;
-
-			/*
-			bool c0 = VAR_GET_HAP0(MOD2(v), Variants[DIV2(v)]);
-			bool c1 = VAR_GET_HAP1(MOD2(v), Variants[DIV2(v)]);
-			bool f0 = VAR_GET_HAP0(MOD2(v), gfather->Variants[DIV2(v)]);
-			bool f1 = VAR_GET_HAP1(MOD2(v), gfather->Variants[DIV2(v)]);
-			bool m0 = VAR_GET_HAP0(MOD2(v), gmother->Variants[DIV2(v)]);
-			bool m1 = VAR_GET_HAP1(MOD2(v), gmother->Variants[DIV2(v)]);
-			cout << v << " " << c0 << " " << c1  << " " << f0 << " " << f1 << " " << m0 << " " << m1 << " / " << VAR_GET_SCA(MOD2(v), Variants[DIV2(v)]) << " " << VAR_GET_HET(MOD2(v), Variants[DIV2(v)]) << " " << VAR_GET_HOM(MOD2(v), Variants[DIV2(v)]) << endl;
-			*/
-
 		} else if (VAR_GET_HOM(MOD2(v), Variants[DIV2(v)])) {
 			bool father_is_hom = VAR_GET_HOM(MOD2(v), gfather->Variants[DIV2(v)]);
 			bool mother_is_hom = VAR_GET_HOM(MOD2(v), gmother->Variants[DIV2(v)]);
@@ -70,6 +59,15 @@ void genotype::scaffoldTrio(genotype * gfather, genotype * gmother, vector < uns
 			if (father_is_hom && fath0 != child0) counts[0]++;
 			if (mother_is_hom && moth0 != child0) counts[0]++;
 			counts[1] ++;
+		} else if (VAR_GET_MIS(MOD2(v), Variants[DIV2(v)])) {
+			bool father_is_hom = VAR_GET_HOM(MOD2(v), gfather->Variants[DIV2(v)]);
+			bool mother_is_hom = VAR_GET_HOM(MOD2(v), gmother->Variants[DIV2(v)]);
+			bool fath0 = VAR_GET_HAP0(MOD2(v), gfather->Variants[DIV2(v)]);
+			bool moth0 = VAR_GET_HAP0(MOD2(v), gmother->Variants[DIV2(v)]);
+			if (fath0 != moth0) VAR_SET_SCA(MOD2(v), Variants[DIV2(v)]); counts[2]++;
+			else VAR_SET_HOM(MOD2(v), Variants[DIV2(v)]); counts[2]++;
+			fath0?VAR_SET_HAP0(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP0(MOD2(v), Variants[DIV2(v)]);
+			moth0?VAR_SET_HAP1(MOD2(v), Variants[DIV2(v)]):VAR_CLR_HAP1(MOD2(v), Variants[DIV2(v)]);
 		}
 	}
 }
