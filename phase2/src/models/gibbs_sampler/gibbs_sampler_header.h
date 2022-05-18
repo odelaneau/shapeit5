@@ -50,24 +50,10 @@ public:
 	~gibbs_sampler();
 
 	void loadRare(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vr, float weight);
-	void loadCommon(genotype_set & G, conditioning_set & C, state_set & P, unsigned int vc, float weight);
-	void setHQ();
-	void setLQ();
-	float getMAF();
-
 	void iterate();
 	void randomize_phase();
-
 	void pushRare(genotype_set & G, unsigned int vr, unsigned int & n_yphased, unsigned int & n_nphased, float);
-	void pushCommon(genotype_set &, unsigned int vc, unsigned int & n_yphased, unsigned int & n_nphased, float);
 
 };
-
-inline
-float gibbs_sampler::getMAF() {
-	unsigned int nalt = 0;
-	for (int e = 0 ; e < alleles.size() ; e ++) nalt += alleles[e];
-	return min(nalt*100.0/alleles.size(), (nalt-alleles.size())*100.0/alleles.size());
-}
 
 #endif

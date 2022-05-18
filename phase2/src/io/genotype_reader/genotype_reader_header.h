@@ -39,10 +39,8 @@ public:
 	unsigned int n_total_variants;
 	unsigned int n_scaffold_variants;
 	unsigned int n_rare_variants;
-	unsigned int n_common_variants;
 	unsigned int n_samples;
 	vector < unsigned long > n_scaffold_genotypes;
-	vector < unsigned long > n_common_genotypes;
 	vector < unsigned long > n_rare_genotypes;
 
 	//PARAMETERS

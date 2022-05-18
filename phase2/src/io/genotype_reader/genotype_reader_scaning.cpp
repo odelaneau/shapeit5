@@ -88,16 +88,15 @@ void genotype_reader::scanGenotypes() {
 				rAC = bcf_get_info_int32(sr->readers[0].header, line_unphased, "AC", &vAC, &nAC);
 				assert(nAC==1 && nAN ==1);
 				float maf = min(vAC[0] * 1.0f / vAN[0], (vAN[0] - vAC[0]) * 1.0f / vAN[0]);
-				V.push(new variant (chr, pos, id, ref, alt, vAC[0] < (vAN[0]-vAC[0]), (maf<minmaf)?VARTYPE_RARE:VARTYPE_COMM));
-				n_rare_variants += (maf<minmaf);
-				n_common_variants += (maf>=minmaf);
+				V.push(new variant (chr, pos, id, ref, alt, vAC[0] < (vAN[0]-vAC[0]), VARTYPE_RARE));
+				n_rare_variants ++;
 				n_total_variants ++;
 			}
 		}
 	}
 
 	bcf_sr_destroy(sr);
-	if ((n_rare_variants + n_common_variants) == 0) vrb.error("No variants to be phased!");
+	if (n_rare_variants == 0) vrb.error("No variants to be phased!");
 	vrb.bullet("VCF/BCF scanning (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 

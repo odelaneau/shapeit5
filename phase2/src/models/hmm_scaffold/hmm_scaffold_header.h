@@ -66,8 +66,6 @@ public:
 	//ARRAYS
 	vector < aligned_vector32 < float > > alpha;
 	aligned_vector32 < float > beta;
-	vector < bool > storageEvents;
-
 
 public:
 	//CONSTRUCTOR/DESTRUCTOR
@@ -76,7 +74,7 @@ public:
 
 	void setup(unsigned int _hap);
 	void forward();
-	void backward(vector < bool > & cevents, vector < cstate > & cstates);
+	void backward(vector < vector < unsigned int > > & cevents, vector < cstate > & cstates);
 
 };
 

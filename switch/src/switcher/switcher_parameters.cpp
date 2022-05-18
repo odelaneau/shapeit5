@@ -37,7 +37,8 @@ void switcher::declare_options() {
 			("estimation,E", bpo::value< string >(), "Phased dataset in VCF/BCF format")
 			("frequency,F", bpo::value< string >(), "Variant frequency in VCF/BCF format")
 			("pedigree,P", bpo::value< string >(), "Pedigree file in PED format")
-			("region,R", bpo::value< string >(), "Target region");
+			("region,R", bpo::value< string >(), "Target region")
+			("dupid", "Duplicate ID for UKB matching IDs");
 	
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()

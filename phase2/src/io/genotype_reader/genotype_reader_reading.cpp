@@ -57,7 +57,7 @@ void genotype_reader::readGenotypes() {
 		G.names.push_back(string(sr->readers[0].header->samples[i]));
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
-	int nset, vt = 0, vr = 0, vc = 0, vs = 0;
+	int nset, vt = 0, vr = 0, vs = 0;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 	int ngt_unphased, *gt_arr_unphased = NULL, ngt_arr_unphased = 0;
 
@@ -85,26 +85,7 @@ void genotype_reader::readGenotypes() {
 		} else {
 			int pos = line_unphased->pos + 1;
 			if (pos >= input_start && pos < input_stop) {
-				if (V.vec_full[vt]->type == VARTYPE_COMM) {
-					ngt_unphased = bcf_get_genotypes(sr->readers[0].header, line_unphased, &gt_arr_unphased, &ngt_arr_unphased); assert(ngt_unphased == 2 * n_samples);
-					for(int i = 0 ; i < 2 * n_samples ; i += 2) {
-						bool a0 = (bcf_gt_allele(gt_arr_unphased[i+0])==1);
-						bool a1 = (bcf_gt_allele(gt_arr_unphased[i+1])==1);
-						bool mi = (gt_arr_unphased[i+0] == bcf_gt_missing || gt_arr_unphased[i+1] == bcf_gt_missing);
-
-						if (mi) {
-							G.setCommonMissing(vc, i/2);
-							V.vec_full[vt]->cmis ++;
-							n_common_genotypes[3] ++;
-						} else {
-							G.setCommonGenotype(vc, i/2, a0+a1);
-							V.vec_full[vt]->cref += 2-(a0+a1);
-							V.vec_full[vt]->calt += a0+a1;
-							n_common_genotypes[a0+a1] ++;
-						}
-					}
-					vc++; vt ++;
-				} else {
+				if (V.vec_full[vt]->type == VARTYPE_RARE) {
 					bool minor =  V.vec_full[vt]->minor;
 					ngt_unphased = bcf_get_genotypes(sr->readers[0].header, line_unphased, &gt_arr_unphased, &ngt_arr_unphased); assert(ngt_unphased == 2 * n_samples);
 					for(int i = 0 ; i < 2 * n_samples ; i += 2) {
@@ -141,6 +122,5 @@ void genotype_reader::readGenotypes() {
 	// Report
 	vrb.bullet("VCF/BCF parsing ("+stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet2("Scaffold : R/R=" + stb.str(n_scaffold_genotypes[0]) + " R/A=" + stb.str(n_scaffold_genotypes[1]) + " A/A=" + stb.str(n_scaffold_genotypes[2]) + " ./.=" + stb.str(n_scaffold_genotypes[3]));
-	if (vc) vrb.bullet2("Common   : R/R=" + stb.str(n_common_genotypes[0]) + " R/A=" + stb.str(n_common_genotypes[1]) + " A/A=" + stb.str(n_common_genotypes[2]) + " ./.=" + stb.str(n_common_genotypes[3]));
 	vrb.bullet2("Rare     : R/R=" + stb.str(n_rare_genotypes[0]) + " R/A=" + stb.str(n_rare_genotypes[1]) + " A/A=" + stb.str(n_rare_genotypes[2]) + " ./.=" + stb.str(n_rare_genotypes[3]));
 }

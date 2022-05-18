@@ -30,7 +30,7 @@ haplotype_reader::~haplotype_reader() {
 	region = "";
 }
 
-void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq) {
+void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq, bool dupid) {
 	tac.clock();
 	vrb.title("Reading VCF/BCF input files");
 	vrb.bullet("Validation ["  + ftruth + "]");
@@ -50,6 +50,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq)
 	int n_samples_truth = bcf_hdr_nsamples(sr->readers[0].header);
 	for (int i = 0 ; i < n_samples_truth ; i ++) {
 		string sample_id = string(sr->readers[0].header->samples[i]);
+		if (dupid) sample_id = sample_id + "_" + sample_id;
 		H.push(sample_id);
 	}
 	vrb.bullet("#Validation samples = " + stb.str(n_samples_truth));
@@ -127,7 +128,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq)
 }
 
 
-void haplotype_reader::readHaplotypes(string ftruth, string festi) {
+void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 	tac.clock();
 	vrb.title("Reading VCF/BCF input files");
 	vrb.bullet("Validation ["  + ftruth + "]");
@@ -145,6 +146,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi) {
 	int n_samples_truth = bcf_hdr_nsamples(sr->readers[0].header);
 	for (int i = 0 ; i < n_samples_truth ; i ++) {
 		string sample_id = string(sr->readers[0].header->samples[i]);
+		if (dupid) sample_id = sample_id + "_" + sample_id;
 		H.push(sample_id);
 	}
 	vrb.bullet("#Validation samples = " + stb.str(n_samples_truth));

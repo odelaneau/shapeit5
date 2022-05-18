@@ -35,21 +35,27 @@ public:
 	unsigned int idx : 27;
 	unsigned int het : 1;
 	unsigned int mis : 1;
+
+	unsigned int pha : 1;
 	unsigned int al0 : 1;
 	unsigned int al1 : 1;
-	unsigned int pha : 1;
+
+	float ph0, ph1;
 
 	rare_genotype() {
 		idx = het = mis = al0 = al1 = pha = 0;
+		ph0 = ph1 = 0.0f;
 	}
 
 	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
 		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
 		pha = (!mis && (al0==al1));
+		ph0 = ph1 = 0.0f;
 	}
 
 	~rare_genotype() {
 		idx = het = mis = al0 = al1 = pha = 0;
+		ph0 = ph1 = 0.0f;
 	}
 
 	bool operator < (const rare_genotype & rg) const {
@@ -90,24 +96,13 @@ public:
 	//Counts
 	unsigned int n_scaffold_variants;			//#variants rare to be phased
 	unsigned int n_rare_variants;				//#variants rare to be phased
-	unsigned int n_common_variants;				//#variants common to be phased (e.g. indels)
 	unsigned int n_samples;						//#samples
 
 	//Sample IDs
 	vector < string > names;
 
 	//Mapping on scaffold
-	vector < unsigned int > MAPC;
-	vector < unsigned int > MAPR;
-
-	//Genotypes at common unphased variants
-	bitmatrix GCvar_alleles;
-	bitmatrix GCind_alleles;
-	bitmatrix GCvar_missing;
-	bitmatrix GCind_missing;
-	bitmatrix GCvar_phased;
-	bitmatrix GCind_phased;
-
+	vector < unsigned int > MAP_R2S;
 
 	//Genotypes at rare unphased variants
 	vector < bool > major_alleles;
@@ -118,50 +113,24 @@ public:
 	genotype_set();
 	~genotype_set();
 	void clear();
-	void allocate(variant_map &, unsigned int, unsigned int , unsigned int, unsigned int);
+	void allocate(variant_map &, unsigned int, unsigned int , unsigned int);
 	void transpose();
-	void mapUnphasedOntoScaffold(int ind, vector < bool > & map);
+	void mapUnphasedOntoScaffold(int ind, vector < vector < unsigned int > > & map);
+	void impute(unsigned int, unsigned int, vector < float > &, vector < float > &, vector < unsigned int > &);
 
 	//
-	void setCommonMissing(unsigned int vc, unsigned int i);
-	void setCommonGenotype(unsigned int vc, unsigned int i, unsigned int g);
 	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
 	void pushRareHet(unsigned int vr, unsigned int i);
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
 	void imputeMonomorphic();
 	void randomizeSingleton();
+	void phase(unsigned long int & n_phased, unsigned long int & n_total, float threshold);
 
 	void scaffoldTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts);
 	void scaffoldDuoMother(int ikid, int imother, vector < unsigned int > &counts);
 	void scaffoldDuoFather(int ikid, int ifather, vector < unsigned int > &counts);
 	void scaffoldUsingPedigrees(pedigree_reader & pr);
 };
-
-inline
-void genotype_set::setCommonMissing(unsigned int vc, unsigned int i) {
-	GCvar_missing.set(vc, i, true);
-	GCvar_phased.set(vc, i, false);
-	GCvar_alleles.set(vc, 2*i+0, false);
-	GCvar_alleles.set(vc, 2*i+1, false);
-}
-
-inline
-void genotype_set::setCommonGenotype(unsigned int vc, unsigned int i, unsigned int g) {
-	GCvar_missing.set(vc, i, false);
-	if (g == 0) {
-		GCvar_alleles.set(vc, 2*i+0, false);
-		GCvar_alleles.set(vc, 2*i+1, false);
-		GCvar_phased.set(vc, i, true);
-	} else if (g == 2) {
-		GCvar_alleles.set(vc, 2*i+0, true);
-		GCvar_alleles.set(vc, 2*i+1, true);
-		GCvar_phased.set(vc, i, true);
-	} else {
-		GCvar_alleles.set(vc, 2*i+0, false);
-		GCvar_alleles.set(vc, 2*i+1, true);
-		GCvar_phased.set(vc, i, false);
-	}
-}
 
 inline
 void genotype_set::pushRareMissing(unsigned int vr, unsigned int i, bool major) {

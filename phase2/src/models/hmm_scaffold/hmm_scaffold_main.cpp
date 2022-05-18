@@ -35,7 +35,6 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set
 hmm_scaffold::~hmm_scaffold() {
 	alpha.clear();
 	beta.clear();
-	storageEvents.clear();
 }
 
 void hmm_scaffold::setup(unsigned int _hap) {
@@ -102,13 +101,15 @@ void hmm_scaffold::forward() {
 	}
 }
 
-void hmm_scaffold::backward(vector < bool > & cevents, vector < cstate > & cstates) {
+void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector < cstate > & cstates) {
 	float sum = 0.0f, scale = 0.0f;
 	float threshold = min(1.0f / (nstates + 1), 0.001f);
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
-	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
-	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
+	//aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
+	//aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
+	vector < float > alphaXbeta_curr = vector < float >(nstates, 0.0f);
+	vector < float > alphaXbeta_prev = vector < float >(nstates, 0.0f);
 
 	cstates.clear();
 
@@ -139,25 +140,29 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cstate > & cstat
 		//Products
 		__m256 _scale = _mm256_set1_ps(0.0f);
 		int offset = 0;
+		/*
 		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alpha[vs][k]), _mm256_load_ps(&beta[k]));
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			_scale = _mm256_add_ps(_scale, _prob_temp);
 			offset += 8;
 		}
+		*/
 		scale = (offset > 0)?horizontal_add(_scale):0.0f;
 		for (; offset < nstates ; offset ++) {
 			alphaXbeta_curr[offset] = alpha[vs][offset] * beta[offset];
 			scale += alphaXbeta_curr[offset];
 		}
 		scale = 1.0f / scale;
-		_scale = _mm256_set1_ps(scale);
+		//_scale = _mm256_set1_ps(scale);
 		offset = 0;
+		/*
 		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale);
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			offset += 8;
 		}
+		*/
 		for (; offset < nstates ; offset ++) alphaXbeta_curr[offset] *= scale;
 
 		//Emission
@@ -179,8 +184,16 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cstate > & cstat
 		}
 
 		//Storage
-		if (cevents[vs+1]) {
+		if (cevents[vs+1].size()) {
 			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
+
+			//Impute from full conditioning set
+			for (int vr = 0 ; vr < cevents[vs+1].size() ; vr ++) {
+				G.impute(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap]);
+			}
+
+			//Store compressed probabilities
+			/*
 			unsigned int nstored = 0;
 			for (int k = 0 ; k < nstates ; k ++) {
 				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold) {
@@ -189,13 +202,22 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cstate > & cstat
 				}
 			}
 			assert(nstored);
+			*/
 		}
 
 		//Saving products
 		copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
 	}
 
-	if (cevents[0]) {
+	if (cevents[0].size()) {
+
+		//Impute from full conditioning set
+		for (int vr = 0 ; vr < cevents[0].size() ; vr ++) {
+			G.impute(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap]);
+		}
+
+		//Store compressed probabilities
+		/*
 		unsigned int nstored = 0;
 		for (int k = 0 ; k < nstates ; k ++) {
 			if (alphaXbeta_curr[k] >= threshold) {
@@ -204,5 +226,6 @@ void hmm_scaffold::backward(vector < bool > & cevents, vector < cstate > & cstat
 			}
 		}
 		assert(nstored);
+		*/
 	}
 }

@@ -48,7 +48,7 @@ void phaser::hmmcompute(int id_job, int id_thread) {
 	vector < cstate > cstates0, cstates1;
 
 	//Mapping storage events
-	vector < bool > cevents;
+	vector < vector < unsigned int > > cevents;
 	G.mapUnphasedOntoScaffold(id_job, cevents);
 
 	//HMM compute
@@ -60,12 +60,11 @@ void phaser::hmmcompute(int id_job, int id_thread) {
 	thread_hmms[id_thread]->backward(cevents, cstates1);
 
 	//Storage of compressed probabilities [Mutex protected]
+	/*
 	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-
 	unsigned long int allocated_size = P.Pstates.capacity();
 	unsigned long int necessary_size = P.Pstates.size()+cstates0.size()+cstates1.size();
 	unsigned long int requested_size = 0;
-
 	if (necessary_size > allocated_size) {
 		if (id_job < (G.n_samples/5)) {
 			requested_size = allocated_size + ALLOC_CHUNK;
@@ -74,12 +73,11 @@ void phaser::hmmcompute(int id_job, int id_thread) {
 		}
 		P.Pstates.reserve(requested_size);
 	}
-
 	for (int e = 0 ; e < cstates0.size() ; e ++) P.Pstates.push_back(cstates0[e]);
 	for (int e = 0 ; e < cstates1.size() ; e ++) P.Pstates.push_back(cstates1[e]);
 	statCS.push(cstates0.size()+cstates1.size());
-
 	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
+	*/
 }
 
 
@@ -98,26 +96,16 @@ void * gibbscompute_callback(void * ptr) {
 void phaser::gibbscompute(int id_job) {
 	gibbs_sampler GS (G.n_samples, options["mcmc-iterations"].as < int > (), options["mcmc-burnin"].as < int > ());
 	for (int v = 0 ; v < thread_data[id_job].size() ; v ++) {
-		unsigned int _n_common_yphased = 0, _n_common_nphased = 0, _n_rare_yphased = 0, _n_rare_nphased = 0;
+		unsigned int _n_rare_yphased = 0, _n_rare_nphased = 0;
 		int vt = thread_data[id_job][v].first;
 		float weight = thread_data[id_job][v].second;
-		if (V.vec_full[vt]->type == VARTYPE_RARE) {
-			GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
-			V.vec_full[vt]->isSNP()?GS.setHQ():GS.setLQ();
-			GS.iterate();
-			GS.pushRare(G, V.vec_full[vt]->idx_rare, _n_rare_yphased, _n_rare_nphased, 0.8f);
-		} else {
-			assert(V.vec_full[vt]->type == VARTYPE_COMM);
-			GS.loadCommon(G, H, P, V.vec_full[vt]->idx_common, weight);
-			V.vec_full[vt]->isSNP()?GS.setHQ():GS.setLQ();
-			GS.iterate();
-			GS.pushCommon(G, V.vec_full[vt]->idx_common, _n_common_yphased, _n_common_nphased, 0.249f);
-		}
+		assert(V.vec_full[vt]->type == VARTYPE_RARE);
+		GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
+		GS.iterate();
+		GS.pushRare(G, V.vec_full[vt]->idx_rare, _n_rare_yphased, _n_rare_nphased, 0.8f);
 
 		if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
 		doneSite++;
-		n_common_yphased += _n_common_yphased;
-		n_common_nphased +=_n_common_nphased;
 		n_rare_yphased += _n_rare_yphased;
 		n_rare_nphased += _n_rare_nphased;
 		vrb.progress("  * Processing", doneSite*1.0/totalSite);
@@ -156,54 +144,13 @@ void phaser::phase() {
 	}
 	for(int t = 0; t < nthreads ; t ++) delete thread_hmms[t];
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet("#states = " + stb.str(P.Pstates.size()) + " / #reserved = " + stb.str(P.Pstates.capacity()) + " / Memory = " + stb.str(P.Pstates.capacity() * sizeof(cstate)/1e9, 2) + "Gg");
 
-	//STEP3: Big transpose
-	P.transpose();
-	P.mapping(H.n_scaffold_variants);
+	unsigned long int n_phased = 0;
+	unsigned long int n_total = 0;
+	G.phase(n_phased, n_total, 0.05);
+	vrb.bullet("#rare_phased = " + stb.str(n_phased) + " / " + stb.str(n_total) + " (" + stb.str(n_phased * 100.0 / (n_total), 2) + "%)");
 
-	//STEP4: MCMC loading
-	vector < pair < int, float > > thread_data_serialized;
-	totalSite = 0; doneSite = 0;
-	for (int vt = 0 ; vt < V.vec_scaffold[0]->idx_full ; vt ++) {
-		thread_data_serialized.push_back(pair < int, float > (vt, 0.5f));
-		totalSite++;
-	}
-	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
-		for (int vt = V.vec_scaffold[vs-1]->idx_full + 1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
-			float weight = 0.5f;
-			if ((V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm) > 1e-7) {
-				weight = (V.vec_full[vt]->cm - V.vec_scaffold[vs-1]->cm) / (V.vec_scaffold[vs]->cm - V.vec_scaffold[vs-1]->cm);
-				weight = max (0.00001f, weight);
-				weight = min (0.99999f, weight);
-			}
-			thread_data_serialized.push_back(pair < int, float > (vt, weight));
-			totalSite++;
-		}
-	}
-	for (int vt = V.vec_scaffold.back()->idx_full + 1 ; vt < V.sizeFull() ; vt ++) {
-		thread_data_serialized.push_back(pair < int, float > (vt, 0.5f));
-		totalSite++;
-	}
-
-	//STEP5: MCMC computations
-	vrb.title("Gibbs sampler computations");
-	n_common_yphased = 0;
-	n_common_nphased = 0;
-	n_rare_yphased = 0;
-	n_rare_nphased = 0;
-	thread_data = vector < vector < pair < int, float > > > (nthreads);
-	for(int j = 0; j < thread_data_serialized.size() ; j ++) thread_data[j%nthreads].push_back(thread_data_serialized[j]);
-	if (nthreads > 1) {
-		i_jobs = 0;
-		for (int t = 0 ; t < nthreads ; t++) pthread_create( &id_workers[t] , NULL, gibbscompute_callback, static_cast<void *>(this));
-		for (int t = 0 ; t < nthreads ; t++) pthread_join( id_workers[t] , NULL);
-	} else gibbscompute(0);
-	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	if (G.n_common_variants) vrb.bullet2("#common_phased = " + stb.str(n_common_yphased) + " / " + stb.str(n_common_yphased+n_common_nphased) + " (" + stb.str(n_common_yphased * 100.0 / (n_common_yphased+n_common_nphased), 2) + "%)");
-	vrb.bullet2("#rare_phased = " + stb.str(n_rare_yphased) + " / " + stb.str(n_rare_yphased+n_rare_nphased) + " (" + stb.str(n_rare_yphased * 100.0 / (n_rare_yphased+n_rare_nphased), 2) + "%)");
-
-	//STEP6: PHASE REMAINING HETS
+	//STEP3: PHASE REMAINING HETS
 	vrb.title("Solving remaining hets using PBWT");
 	H.solve(V, G);
 

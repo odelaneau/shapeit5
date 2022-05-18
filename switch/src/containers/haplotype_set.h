@@ -59,7 +59,7 @@ public:
 	void clear();
 
 	void push(string &);
-	void readPedigrees(string);
+	void readPedigrees(string, bool);
 	void assumePhased();
 
 
