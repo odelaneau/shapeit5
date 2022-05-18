@@ -38,8 +38,8 @@ public:
 	~haplotype_reader();
 
 	//IO
-	void readHaplotypes(string ftruth, string festi, string ffreq);
-	void readHaplotypes(string ftruth, string festi);
+	void readHaplotypes(string ftruth, string festi, string ffreq, bool);
+	void readHaplotypes(string ftruth, string festi, bool);
 };
 
 #endif

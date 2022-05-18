@@ -46,6 +46,10 @@ public:
 	genotype_set G;
 	hmm_parameters M;
 	variant_map V;
+
+	//PBWT
+	bool pbwt_auto;
+	int pbwt_depth;
 	double pbwt_modulo;
 
 	//MULTI-THREADING

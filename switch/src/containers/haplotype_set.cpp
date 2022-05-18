@@ -57,7 +57,7 @@ void haplotype_set::push(string & sample_id) {
 }
 
 
-void haplotype_set::readPedigrees(string fped) {
+void haplotype_set::readPedigrees(string fped, bool dupid) {
 	string buffer;
 	vector < string > str;
 	vrb.title("Read pedigrees in [" + fped + "]");
@@ -66,6 +66,7 @@ void haplotype_set::readPedigrees(string fped) {
 	int n_unr = 0, n_duo = 0, n_tri = 0;
 	while (getline(fd, buffer)) {
 		stb.split(buffer, str);
+		if (dupid) for (int i = 0 ; i < 3 ; i++) str[i] = str[i] + "_" + str[i];
 		map < string, int > :: iterator itC = mapSamples.find(str[0]);
 		map < string, int > :: iterator itF = mapSamples.find(str[1]);
 		map < string, int > :: iterator itM = mapSamples.find(str[2]);

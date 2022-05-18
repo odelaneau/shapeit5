@@ -31,7 +31,6 @@ genotype_set::~genotype_set() {
 
 void genotype_set::clear() {
 	n_rare_variants = 0.0;
-	n_common_variants = 0.0;
 	n_samples = 0.0;
 	names.clear();
 	GRvar_genotypes.clear();
@@ -75,59 +74,130 @@ void genotype_set::randomizeSingleton() {
 	vrb.bullet(stb.str(n_solved) + " singletons randomly phased");
 }
 
-void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants, unsigned int _n_common_variants) {
+void genotype_set::impute(unsigned int vr, unsigned int hap, vector < float > & alphaXbeta_prev, vector < float > & alphaXbeta_curr, vector < unsigned int > & H) {
+	float p[2] = { 0.0f };
+
+	int tidx = -1;
+	for (int k = 0, r = 0; (k< H.size()) || (r<GRvar_genotypes[vr].size()) ;) {
+		int tind = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].idx:-1;
+		int tmis = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].mis:-1;
+		int cind = (k<H.size())?H[k]/2:-1;
+
+		if (tind == hap/2) {
+			tidx = r;
+			r++;
+		} else if (tind < 0) {
+			p[major_alleles[vr]] += alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f;
+			k++;
+		} else if (cind < 0) {
+			r++;
+		} else if (tind < cind) {
+			r++;
+		} else if (tind==cind) {
+			if (!tmis) p[!major_alleles[vr]] += alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f;
+			k++;
+		} else {
+			p[major_alleles[vr]] += alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f;
+			k++;
+		}
+	}
+
+	assert (tidx>=0);
+	if (hap%2) GRvar_genotypes[vr][tidx].ph1 = p[1] / (p[0] + p[1]);
+	else GRvar_genotypes[vr][tidx].ph0 = p[1] / (p[0] + p[1]);
+}
+
+void genotype_set::phase(unsigned long int & n_phased, unsigned long int & n_total, float threshold) {
+	n_phased = n_total = 0;
+
+	float ee = 0.9999, ed = 0.0001;
+	vector < float > gprobs = vector < float > (4, 0.0f);
+	for (int vr = 0 ; vr < GRvar_genotypes.size() ; vr ++) {
+		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
+
+			if (GRvar_genotypes[vr][r].het) {
+				float p00 = 1.0f - GRvar_genotypes[vr][r].ph0;
+				float p01 = GRvar_genotypes[vr][r].ph0;
+				float p10 = 1.0f - GRvar_genotypes[vr][r].ph1;
+				float p11 = GRvar_genotypes[vr][r].ph1;
+				float g01 = (p00*ee + p01*ed) * (p10*ed + p11*ee);
+				float g10 = (p00*ed + p01*ee) * (p10*ee + p11*ed);
+				float sum = g01 + g10;
+				g01 /= sum;
+				g10 /= sum;
+
+				if (abs(g01-g10) > threshold) {
+					if (g01>g10) {
+						GRvar_genotypes[vr][r].pha = 1;
+						GRvar_genotypes[vr][r].al0 = 0;
+						GRvar_genotypes[vr][r].al1 = 1;
+					} else {
+						GRvar_genotypes[vr][r].pha = 1;
+						GRvar_genotypes[vr][r].al0 = 1;
+						GRvar_genotypes[vr][r].al1 = 0;
+					}
+					n_phased ++;
+				}
+				n_total ++;
+			}
+
+			if (GRvar_genotypes[vr][r].mis) {
+				float p00 = 1.0f - GRvar_genotypes[vr][r].ph0;
+				float p01 = GRvar_genotypes[vr][r].ph0;
+				float p10 = 1.0f - GRvar_genotypes[vr][r].ph1;
+				float p11 = GRvar_genotypes[vr][r].ph1;
+				gprobs[0] = (p00*ee + p01*ed) * (p10*ee + p11*ed);
+				gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
+				gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
+				gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
+				int maxg = alg.imax(gprobs);
+				GRvar_genotypes[vr][r].pha = 1;
+				switch (maxg) {
+				case 0:	GRvar_genotypes[vr][r].al0 = 0; GRvar_genotypes[vr][r].al1 = 0; break;
+				case 1:	GRvar_genotypes[vr][r].al0 = 0; GRvar_genotypes[vr][r].al1 = 1; break;
+				case 2:	GRvar_genotypes[vr][r].al0 = 1; GRvar_genotypes[vr][r].al1 = 0; break;
+				case 3:	GRvar_genotypes[vr][r].al0 = 1; GRvar_genotypes[vr][r].al1 = 1; break;
+				}
+				n_phased ++;
+				n_total ++;
+			}
+		}
+	}
+}
+
+void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants) {
 	tac.clock();
 
 	n_scaffold_variants = _n_scaffold_variants;
 	n_rare_variants = _n_rare_variants;
-	n_common_variants = _n_common_variants;
 	n_samples = _n_samples;
-
-	if (n_common_variants > 0) {
-		GCvar_alleles.allocate(n_common_variants, 2 * n_samples);
-		GCind_alleles.allocate(2 * n_samples, n_common_variants);
-		GCvar_missing.allocate(n_common_variants, n_samples);
-		GCind_missing.allocate(n_samples, n_common_variants);
-		GCvar_phased.allocate(n_common_variants, n_samples);
-		GCind_phased.allocate(n_samples, n_common_variants);
-		MAPC = vector < unsigned int > (n_common_variants, -1);
-	}
 
 	if (n_rare_variants > 0) {
 		GRvar_genotypes = vector < vector < rare_genotype > > (n_rare_variants);
 		GRind_genotypes = vector < vector < rare_genotype > > (n_samples);
-		MAPR = vector < unsigned int > (n_rare_variants);
+		MAP_R2S = vector < unsigned int > (n_rare_variants);
 		major_alleles = vector < bool > (n_rare_variants, false);
 		for (int r = 0 ; r < V.sizeRare() ; r ++) major_alleles[r] = !V.vec_rare[r]->minor;
 	}
 
 	//Mapping
 	for (int vt = 0 ; vt < V.vec_scaffold[0]->idx_full ; vt ++) {
-		if (V.vec_full[vt]->type == VARTYPE_RARE) MAPR[V.vec_full[vt]->idx_rare] = 0;
-		if (V.vec_full[vt]->type == VARTYPE_COMM) MAPC[V.vec_full[vt]->idx_common] = 0;
+		if (V.vec_full[vt]->type == VARTYPE_RARE) MAP_R2S[V.vec_full[vt]->idx_rare] = 0;
 	}
 	for (int vs = 1 ; vs < V.sizeScaffold() ; vs ++) {
 		for (int vt = V.vec_scaffold[vs-1]->idx_full+1 ; vt < V.vec_scaffold[vs]->idx_full ; vt ++) {
-			if (V.vec_full[vt]->type == VARTYPE_RARE) MAPR[V.vec_full[vt]->idx_rare] = vs;
-			if (V.vec_full[vt]->type == VARTYPE_COMM) MAPC[V.vec_full[vt]->idx_common] = vs;
+			if (V.vec_full[vt]->type == VARTYPE_RARE) MAP_R2S[V.vec_full[vt]->idx_rare] = vs;
 		}
 	}
 	for (int vt = V.vec_scaffold.back()->idx_full + 1 ; vt < V.sizeFull() ; vt ++) {
-		if (V.vec_full[vt]->type == VARTYPE_RARE) MAPR[V.vec_full[vt]->idx_rare] = V.sizeScaffold();
-		if (V.vec_full[vt]->type == VARTYPE_COMM) MAPC[V.vec_full[vt]->idx_common] = V.sizeScaffold();
+		if (V.vec_full[vt]->type == VARTYPE_RARE) MAP_R2S[V.vec_full[vt]->idx_rare] = V.sizeScaffold();
 	}
 
-	if (n_common_variants) vrb.bullet("Genotype set allocation [#common=" + stb.str(n_common_variants) + " / #rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	else vrb.bullet("Genotype set allocation [#rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Genotype set allocation [#rare=" + stb.str(n_rare_variants) + " / #samples=" + stb.str(n_samples) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void genotype_set::transpose() {
 	tac.clock();
-	if (n_common_variants > 0) {
-		GCvar_alleles.transpose(GCind_alleles, n_common_variants, 2 * n_samples);
-		GCvar_missing.transpose(GCind_missing, n_common_variants, n_samples);
-		GCvar_phased.transpose(GCind_phased, n_common_variants, n_samples);
-	}
 
 	if (n_rare_variants > 0) {
 		for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
@@ -141,28 +211,19 @@ void genotype_set::transpose() {
 	vrb.bullet("Genotype set transpose (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void genotype_set::mapUnphasedOntoScaffold(int ind, vector < bool > & map) {
+void genotype_set::mapUnphasedOntoScaffold(int ind, vector < vector < unsigned int > > & map) {
 	map.clear();
-	map = vector < bool > (n_scaffold_variants+1, false);
+	map = vector < vector < unsigned int > > (n_scaffold_variants+1, vector < unsigned int > ());
 
-	//Common
-	for (int vc = 0 ; vc < n_common_variants ; vc ++) {
-		bool phased = GCind_phased.get(ind, vc);
-		bool missing = GCind_missing.get(ind, vc);
-		bool het = (GCind_alleles.get(2*ind+0, vc) != GCind_alleles.get(2*ind+1, vc));
-		if (!phased) {
-			if (missing) map[MAPC[vc]] = true;
-			else if (het) map[MAPC[vc]] = true;
-		}
-	}
 	//Rare
 	for (int vr = 0 ; vr < GRind_genotypes[ind].size() ; vr ++) {
+		unsigned int idx = GRind_genotypes[ind][vr].idx;
 		bool phased = GRind_genotypes[ind][vr].pha;
 		bool missing = GRind_genotypes[ind][vr].mis;
 		bool het = GRind_genotypes[ind][vr].het;
 		if (!phased) {
-			if (missing) map[MAPR[GRind_genotypes[ind][vr].idx]] = true;
-			else if (het) map[MAPR[GRind_genotypes[ind][vr].idx]] = true;
+			if (missing) map[MAP_R2S[idx]].push_back(idx);
+			else if (het) map[MAP_R2S[idx]].push_back(idx);
 		}
 	}
 }

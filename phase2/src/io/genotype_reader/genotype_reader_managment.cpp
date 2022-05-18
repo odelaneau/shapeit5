@@ -23,7 +23,6 @@
 
 genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_map & _V) : H(_H), V(_V), G(_G) {
 	nthreads = 1;
-	n_common_variants = 0;
 	n_scaffold_variants = 0;
 	n_rare_variants = 0;
 	n_samples = 0;
@@ -33,13 +32,11 @@ genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_
 	input_start = 0;
 	input_start = 1000000000;
 	n_scaffold_genotypes = vector < unsigned long > (4, 0);
-	n_common_genotypes = vector < unsigned long > (4, 0);
 	n_rare_genotypes = vector < unsigned long > (4, 0);
 }
 
 genotype_reader::~genotype_reader() {
 	nthreads = 1;
-	n_common_variants = 0;
 	n_scaffold_variants = 0;
 	n_rare_variants = 0;
 	n_samples = 0;
@@ -49,13 +46,12 @@ genotype_reader::~genotype_reader() {
 	input_start = 0;
 	input_start = 1000000000;
 	n_scaffold_genotypes = vector < unsigned long > (4, 0);
-	n_common_genotypes = vector < unsigned long > (4, 0);
 	n_rare_genotypes = vector < unsigned long > (4, 0);
 }
 
 void genotype_reader::allocateGenotypes() {
 	H.allocate(n_samples, n_scaffold_variants);
-	G.allocate(V, n_samples, n_scaffold_variants, n_rare_variants, n_common_variants);
+	G.allocate(V, n_samples, n_scaffold_variants, n_rare_variants);
 }
 
 void genotype_reader::setFilenames (string _funphased, string _fphased) { fphased = _fphased; funphased = _funphased; }

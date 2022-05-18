@@ -26,10 +26,3 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 	dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/step1_preparedata/" -icmd="bcftools view -G -Ob -o $FQF $BCF && bcftools index $FQF" --tag subsetN --tag benchWGS --instance-type mem2_ssd1_v2_x2 --name benchWGS_sub3 --priority normal -y
 	
 done
-
-
-
-	
-	
-	
-

@@ -45,6 +45,10 @@ void genotype_reader::scanGenotypes() {
 	//Sample processing
 	n_main_samples = bcf_hdr_nsamples(sr->readers[0].header);
 	n_ref_samples = panels[1] ? bcf_hdr_nsamples(sr->readers[1].header) : 0;
+	if ((n_main_samples+n_ref_samples) < 50) {
+		if (n_ref_samples) vrb.error("Less than 50 samples is not enough to get reliable phasing");
+		else  vrb.error("Less than 50 samples is not enough to get reliable phasing, consider using a reference panel to increase sample size");
+	}
 
 	bcf1_t * line_main, * line_ref, * line_scaf;
 	int nset, n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
