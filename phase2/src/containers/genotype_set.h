@@ -32,6 +32,10 @@
 
 class rare_genotype {
 public:
+
+	static float ee;
+	static float ed;
+
 	unsigned int idx : 27;
 	unsigned int het : 1;
 	unsigned int mis : 1;
@@ -88,6 +92,34 @@ public:
 			}
 		}
 	}
+
+	void computeProbs(vector < float > & gprobs) {
+		assert(gprobs.size() == 4);
+
+		float p00 = 1.0f - ph0;
+		float p01 = ph0;
+		float p10 = 1.0f - ph1;
+		float p11 = ph1;
+
+		if (het) {
+			gprobs[0] = 0.0f;
+			gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
+			gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
+			gprobs[3] = 0.0f;
+		} else if (mis) {
+			gprobs[0] = (p00*ee + p01*ed) * (p10*ee + p11*ed);
+			gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
+			gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
+			gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
+		}
+
+		float scale = 1.0f / (gprobs[0] + gprobs[1] + gprobs[2] + gprobs[3]);
+
+		gprobs[0] *= scale;
+		gprobs[1] *= scale;
+		gprobs[2] *= scale;
+		gprobs[3] *= scale;
+	}
 };
 
 class genotype_set {
@@ -124,7 +156,7 @@ public:
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
 	void imputeMonomorphic();
 	void randomizeSingleton();
-	void phase(unsigned long int & n_phased, unsigned long int & n_total, float threshold);
+	void phase(unsigned long int & n_phased, unsigned long int & n_total, float);
 
 	void scaffoldTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts);
 	void scaffoldDuoMother(int ikid, int imother, vector < unsigned int > &counts);

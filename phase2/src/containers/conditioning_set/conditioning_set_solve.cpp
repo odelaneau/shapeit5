@@ -122,9 +122,9 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
 			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
-		} else if (G.GRvar_genotypes[vr][g].mis) {
-			S.push_back(g);
-		} else if (G.GRvar_genotypes[vr][g].het) {
+		} else {
+			C[2*G.GRvar_genotypes[vr][g].idx+0] = 0;
+			C[2*G.GRvar_genotypes[vr][g].idx+1] = 0;
 			S.push_back(g);
 		}
 	}
@@ -143,35 +143,15 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 			if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
 			v = v0 - v1;
 
-			if (G.GRvar_genotypes[vr][*s].het) {
-				if (v > thresh) {
-					C[h0] = 1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(2);
-					s = S.erase(s);
-				} else if (v < -thresh) {
-					C[h0] = -1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(1);
-					s = S.erase(s);
-				} else s++;
-			} else {
-				if (v0 == -2 && v1 == -2) {
-					C[h0] = -1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(0);
-					s = S.erase(s);
-				} else if (v0 == -2 && v1 == 2) {
-					C[h0] = -1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(1);
-					s = S.erase(s);
-				} else if (v0 == 2 && v1 == -2) {
-					C[h0] = 1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(2);
-					s = S.erase(s);
-				} else if (v0 == 2 && v1 == 2) {
-					C[h0] = 1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(3);
-					s = S.erase(s);
-				} else s++;
-			}
+			if (v > thresh) {
+				C[h0] = 1.0; C[h1] = -1.0;
+				G.GRvar_genotypes[vr][*s].phase(2);
+				s = S.erase(s);
+			} else if (v < -thresh) {
+				C[h0] = -1.0; C[h1] = 1.0;
+				G.GRvar_genotypes[vr][*s].phase(1);
+				s = S.erase(s);
+			} else s++;
 		}
 		if (S.size() == sizeS) thresh -= 1.0 ;
 	}
@@ -188,28 +168,12 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 		if (R[h1]<(n_haplotypes-1)) v1 -= C[A[R[h1]+1]] * abs(vr_cm - vs_cm[D[R[h1]+1]]);
 		v = v0+v1;
 
-		if (G.GRvar_genotypes[vr][*s].het) {
-			if (v > 0) {
-				C[h0] = 1; C[h1] = -1;
-				CF.emplace_back(2, v);
-			} else {
-				C[h0] = -1; C[h1] = 1;
-				CF.emplace_back(1, v);
-			}
+		if (v > 0) {
+			C[h0] = 1; C[h1] = -1;
+			CF.emplace_back(2, v);
 		} else {
-			if (v0 > 0 && v1 > 0) {
-				C[h0] = 1; C[h1] = 1;
-				CF.emplace_back(3, v0+v1);
-			} else if (v0 > 0 && v1 < 0) {
-				C[h0] = 1; C[h1] = -1;
-				CF.emplace_back(2, v0+v1);
-			} else if (v0 < 0 && v1 > 0) {
-				C[h0] = -1; C[h1] = 1;
-				CF.emplace_back(1, v0+v1);
-			} else {
-				C[h0] = -1; C[h1] = -1;
-				CF.emplace_back(0, v0+v1);
-			}
+			C[h0] = -1; C[h1] = 1;
+			CF.emplace_back(1, v);
 		}
 	}
 }
@@ -221,9 +185,9 @@ void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D,
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
 			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
-		} else if (G.GRvar_genotypes[vr][g].mis) {
-			S.push_back(g);
-		} else if (G.GRvar_genotypes[vr][g].het) {
+		} else {
+			C[2*G.GRvar_genotypes[vr][g].idx+0] = 0;
+			C[2*G.GRvar_genotypes[vr][g].idx+1] = 0;
 			S.push_back(g);
 		}
 	}
@@ -243,35 +207,15 @@ void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D,
 			if (R[h1]<(n_haplotypes-1)) v1 += C[A[R[h1]+1]];
 			v = v0 - v1;
 
-			if (G.GRvar_genotypes[vr][*s].het) {
-				if (v > thresh) {
-					C[h0] = 1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(2);
-					s = Stmp.erase(s);
-				} else if (v < -thresh) {
-					C[h0] = -1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(1);
-					s = Stmp.erase(s);
-				} else s++;
-			} else {
-				if (v0 == -2 && v1 == -2) {
-					C[h0] = -1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(0);
-					s = Stmp.erase(s);
-				} else if (v0 == -2 && v1 == 2) {
-					C[h0] = -1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(1);
-					s = Stmp.erase(s);
-				} else if (v0 == 2 && v1 == -2) {
-					C[h0] = 1.0; C[h1] = -1.0;
-					G.GRvar_genotypes[vr][*s].phase(2);
-					s = Stmp.erase(s);
-				} else if (v0 == 2 && v1 == 2) {
-					C[h0] = 1.0; C[h1] = 1.0;
-					G.GRvar_genotypes[vr][*s].phase(3);
-					s = Stmp.erase(s);
-				} else s++;
-			}
+			if (v > thresh) {
+				C[h0] = 1.0; C[h1] = -1.0;
+				G.GRvar_genotypes[vr][*s].phase(2);
+				s = Stmp.erase(s);
+			} else if (v < -thresh) {
+				C[h0] = -1.0; C[h1] = 1.0;
+				G.GRvar_genotypes[vr][*s].phase(1);
+				s = Stmp.erase(s);
+			} else s++;
 		}
 		if (Stmp.size() == sizeS) thresh -= 1.0 ;
 	}
@@ -290,41 +234,24 @@ void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D,
 			if (R[h1]<(n_haplotypes-1)) v1 -= C[A[R[h1]+1]] * abs(vr_cm - vs_cm[D[R[h1]+1]]);
 			v = v0+v1;
 
-			if (G.GRvar_genotypes[vr][*s].het) {
-				if (v > 0) {
-					C[h0] = 1; C[h1] = -1;
-					ctmp.set(2, v);
-				} else {
-					C[h0] = -1; C[h1] = 1;
-					ctmp.set(1, v);
-				}
+			if (v > 0) {
+				C[h0] = 1; C[h1] = -1;
+				ctmp.set(2, v);
 			} else {
-				if (v0 > 0 && v1 > 0) {
-					C[h0] = 1; C[h1] = 1;
-					ctmp.set(3, v0+v1);
-				} else if (v0 > 0 && v1 < 0) {
-					C[h0] = 1; C[h1] = -1;
-					ctmp.set(2, v0+v1);
-				} else if (v0 < 0 && v1 > 0) {
-					C[h0] = -1; C[h1] = 1;
-					ctmp.set(1, v0+v1);
-				} else {
-					C[h0] = -1; C[h1] = -1;
-					ctmp.set(0, v0+v1);
-				}
+				C[h0] = -1; C[h1] = 1;
+				ctmp.set(1, v);
 			}
 
 			G.GRvar_genotypes[vr][*s].pha = 1;
 			if (!ctmp.betterThan(CF.back())) ctmp = CF.back();
 
-			if (abs(ctmp.support) > 0.01f) {
-				switch (ctmp.pgenotype) {
-				case 0:	G.GRvar_genotypes[vr][*s].al0 = 0; G.GRvar_genotypes[vr][*s].al1 = 0; break;
-				case 1:	G.GRvar_genotypes[vr][*s].al0 = 0; G.GRvar_genotypes[vr][*s].al1 = 1; break;
-				case 2:	G.GRvar_genotypes[vr][*s].al0 = 1; G.GRvar_genotypes[vr][*s].al1 = 0; break;
-				case 3:	G.GRvar_genotypes[vr][*s].al0 = 1; G.GRvar_genotypes[vr][*s].al1 = 1; break;
-				}
-			} else G.GRvar_genotypes[vr][*s].randomize();
+			if (ctmp.pgenotype == 1) {
+				G.GRvar_genotypes[vr][*s].al0 = 0;
+				G.GRvar_genotypes[vr][*s].al1 = 1;
+			} else {
+				G.GRvar_genotypes[vr][*s].al0 = 1;
+				G.GRvar_genotypes[vr][*s].al1 = 0;
+			}
 		}
 		CF.pop_back();
 	}

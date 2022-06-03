@@ -21,6 +21,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <containers/genotype_set.h>
 
+float rare_genotype::ee = 0.9999f;
+float rare_genotype::ed = 0.0001f;
+
 genotype_set::genotype_set() {
 	clear();
 }
@@ -110,55 +113,38 @@ void genotype_set::impute(unsigned int vr, unsigned int hap, vector < float > & 
 void genotype_set::phase(unsigned long int & n_phased, unsigned long int & n_total, float threshold) {
 	n_phased = n_total = 0;
 
-	float ee = 0.9999, ed = 0.0001;
 	vector < float > gprobs = vector < float > (4, 0.0f);
 	for (int vr = 0 ; vr < GRvar_genotypes.size() ; vr ++) {
 		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
 
-			if (GRvar_genotypes[vr][r].het) {
-				float p00 = 1.0f - GRvar_genotypes[vr][r].ph0;
-				float p01 = GRvar_genotypes[vr][r].ph0;
-				float p10 = 1.0f - GRvar_genotypes[vr][r].ph1;
-				float p11 = GRvar_genotypes[vr][r].ph1;
-				float g01 = (p00*ee + p01*ed) * (p10*ed + p11*ee);
-				float g10 = (p00*ed + p01*ee) * (p10*ee + p11*ed);
-				float sum = g01 + g10;
-				g01 /= sum;
-				g10 /= sum;
+			if (!GRvar_genotypes[vr][r].pha) {
 
-				if (abs(g01-g10) > threshold) {
-					if (g01>g10) {
-						GRvar_genotypes[vr][r].pha = 1;
-						GRvar_genotypes[vr][r].al0 = 0;
-						GRvar_genotypes[vr][r].al1 = 1;
-					} else {
-						GRvar_genotypes[vr][r].pha = 1;
-						GRvar_genotypes[vr][r].al0 = 1;
-						GRvar_genotypes[vr][r].al1 = 0;
-					}
-					n_phased ++;
-				}
-				n_total ++;
-			}
+				GRvar_genotypes[vr][r].computeProbs(gprobs);
 
-			if (GRvar_genotypes[vr][r].mis) {
-				float p00 = 1.0f - GRvar_genotypes[vr][r].ph0;
-				float p01 = GRvar_genotypes[vr][r].ph0;
-				float p10 = 1.0f - GRvar_genotypes[vr][r].ph1;
-				float p11 = GRvar_genotypes[vr][r].ph1;
-				gprobs[0] = (p00*ee + p01*ed) * (p10*ee + p11*ed);
-				gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
-				gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
-				gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
 				int maxg = alg.imax(gprobs);
-				GRvar_genotypes[vr][r].pha = 1;
+
 				switch (maxg) {
 				case 0:	GRvar_genotypes[vr][r].al0 = 0; GRvar_genotypes[vr][r].al1 = 0; break;
 				case 1:	GRvar_genotypes[vr][r].al0 = 0; GRvar_genotypes[vr][r].al1 = 1; break;
 				case 2:	GRvar_genotypes[vr][r].al0 = 1; GRvar_genotypes[vr][r].al1 = 0; break;
 				case 3:	GRvar_genotypes[vr][r].al0 = 1; GRvar_genotypes[vr][r].al1 = 1; break;
 				}
-				n_phased ++;
+
+				if (maxg == 1 || maxg == 2) {
+					float sum = gprobs[1] + gprobs[2];
+					GRvar_genotypes[vr][r].ph0 = gprobs[1] / sum;
+					GRvar_genotypes[vr][r].ph1 = gprobs[2] / sum;
+
+					float diff = abs(GRvar_genotypes[vr][r].ph0-GRvar_genotypes[vr][r].ph1);
+					if (diff >= threshold) {
+						GRvar_genotypes[vr][r].pha = 1;
+						n_phased ++;
+					}
+				} else {
+					GRvar_genotypes[vr][r].pha = 1;
+					n_phased ++;
+				}
+
 				n_total ++;
 			}
 		}
