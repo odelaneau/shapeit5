@@ -69,7 +69,6 @@ public:
 	void write_files_and_finalise();
 	//void scan_chunks();
 	void scan_overlap(const int ifname,const char* seek_chr, int seek_pos);
-	void scan_overlap(const vector < int >& main_active_readers,const char* seek_chr, int seek_pos);
 
 
 	//FUNCTIONS
