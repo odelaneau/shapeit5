@@ -126,8 +126,8 @@ void ligater::write_record(htsFile *fd, bcf_hdr_t * out_hdr, bcf_hdr_t * hdr_in,
 {
 	bcf_translate(out_hdr, hdr_in, line);
 	if ( nswap[uphalf] ) phase_update(hdr_in, line, uphalf);
-	remove_info(out_hdr,line);
-	remove_format(out_hdr,line);
+	//remove_info(out_hdr,line);
+	//remove_format(out_hdr,line);
 	if (bcf_write(fd, out_hdr, line) ) vrb.error("Failed to write the record output to file");
 }
 
@@ -136,7 +136,7 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 	bcf_srs_t * sr =  bcf_sr_init();
 	sr->require_index = 1;
 	sr->collapse = COLLAPSE_NONE;
-	sr->max_unpack = BCF_UN_STR;
+	sr->max_unpack = BCF_UN_FMT;
 
 	int n_threads = options["thread"].as < int > ();
 	if (n_threads > 1) bcf_sr_set_threads(sr, n_threads);
@@ -163,9 +163,12 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 		if (line0->n_allele != 2) continue;
 
 		line1 =  bcf_sr_get_line(sr, 1);
+		//bcf_unpack(line0,BCF_UN_FMT);
+		//bcf_unpack(line1,BCF_UN_FMT);
 		int nGTsa = bcf_get_genotypes(sr->readers[0].header, line0, &GTa, &mGTa);
 		int nGTsb = bcf_get_genotypes(sr->readers[1].header, line1, &GTb, &mGTb);
-		if ( nGTsa != 2*nsamples || nGTsb != 2*nsamples ) vrb.error("Non-diploid samples found in overlap");
+		if ( nGTsa != 2*nsamples || nGTsb != 2*nsamples )
+			vrb.error("Non-diploid samples found in overlap at position: " + to_string(line0->pos + 1));
 
 		update_distances();
 		last_pos = line0->pos;
@@ -208,7 +211,7 @@ void ligater::ligate() {
 	vrb.title("Ligating chunks");
 
 	//Create all input file descriptors
-	vrb.bullet("Create all file descriptors");
+	vrb.bullet("Creating file descriptor");
 
 	string file_format = "w";
 	string fname = options["output"].as < string > ();
@@ -246,8 +249,8 @@ void ligater::ligate() {
 	}
 
     for (int i=1; i<nfiles; i++) if ( start_pos[i-1]!=-1 && start_pos[i]!=-1 && start_pos[i]<start_pos[i-1] ) vrb.error("The files not in ascending order");
-
     int i = 0, nrm = 0;
+    /*
     while ( i<out_hdr->nhrec )
     {
     	bcf_hrec_t *hrec = out_hdr->hrec[i];
@@ -273,7 +276,7 @@ void ligater::ligate() {
 		}
     }
     if ( nrm ) if (bcf_hdr_sync(out_hdr) < 0) vrb.error("Failed to update header");
-
+    */
 	nsamples = bcf_hdr_nsamples(out_hdr);
 
 	nswap = {0,0};
