@@ -45,7 +45,8 @@ done
 #				BENCHMARCH SHAPEIT5						#
 #################################################################################################
 
-for N in 2000 5000 10000 20000 50000 100000 147754; do
+#for N in 2000 5000 10000 20000 50000 100000 147754; do
+for N in 147754; do
 	while read LINE; do
 		for T in default scaffold; do
 			iREG=$(echo $LINE | awk '{ print $3; }')

@@ -24,15 +24,11 @@
 
 #include <utils/otools.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
-#include <containers/genotype_set.h>
+#include <containers/genotype_set/genotype_set_header.h>
 #include <objects/hmm_parameters.h>
 #include <containers/state_set.h>
-#include <boost/align/aligned_allocator.hpp>
+
 #include <immintrin.h>
-
-
-template <typename T>
-using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T, 32 > >;
 
 inline
 float horizontal_add (const __m256& a) {
@@ -73,8 +69,9 @@ public:
 	~hmm_scaffold();
 
 	void setup(unsigned int _hap);
-	void forward();
-	void backward(vector < vector < unsigned int > > & cevents, vector < cstate > & cstates);
+	double forward();
+	void backward(vector < vector < unsigned int > > & cevents);
+	void viterbi(vector < int > & path);
 
 };
 

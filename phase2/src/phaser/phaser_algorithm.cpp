@@ -21,11 +21,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <phaser/phaser_header.h>
 
-#include <models/gibbs_sampler/gibbs_sampler_header.h>
-#include <models/pileup_caller/pileup_caller_header.h>
-
-#define ALLOC_CHUNK 40000000
-
 void * hmmcompute_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
 	int id_job, id_thread;
@@ -45,80 +40,31 @@ void * hmmcompute_callback(void * ptr) {
 }
 
 void phaser::hmmcompute(int id_job, int id_thread) {
-	vector < cstate > cstates0, cstates1;
-
 	//Mapping storage events
 	vector < vector < unsigned int > > cevents;
 	G.mapUnphasedOntoScaffold(id_job, cevents);
 
-	//HMM compute
+	//Viterbi paths
+	vector < int > path0, path1;
+
+	//Forward-Backward-Viterbi passes for hap0
 	thread_hmms[id_thread]->setup(2*id_job+0);
-	thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents, cstates0);
+	double pf0 = thread_hmms[id_thread]->forward();
+	thread_hmms[id_thread]->backward(cevents);
+	thread_hmms[id_thread]->viterbi(path0);
+
+	//Forward-Backward-Viterbi passes for hap1
 	thread_hmms[id_thread]->setup(2*id_job+1);
-	thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents, cstates1);
+	double pf1 = thread_hmms[id_thread]->forward();
+	thread_hmms[id_thread]->backward(cevents);
+	thread_hmms[id_thread]->viterbi(path1);
 
-	//Storage of compressed probabilities [Mutex protected]
-	/*
-	if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-	unsigned long int allocated_size = P.Pstates.capacity();
-	unsigned long int necessary_size = P.Pstates.size()+cstates0.size()+cstates1.size();
-	unsigned long int requested_size = 0;
-	if (necessary_size > allocated_size) {
-		if (id_job < (G.n_samples/5)) {
-			requested_size = allocated_size + ALLOC_CHUNK;
-		} else {
-			requested_size = allocated_size + (G.n_samples - id_job + 1) * statCS.mean() * 1.1f;
-		}
-		P.Pstates.reserve(requested_size);
-	}
-	for (int e = 0 ; e < cstates0.size() ; e ++) P.Pstates.push_back(cstates0[e]);
-	for (int e = 0 ; e < cstates1.size() ; e ++) P.Pstates.push_back(cstates1[e]);
-	statCS.push(cstates0.size()+cstates1.size());
-	if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
-	*/
-}
-
-
-void * gibbscompute_callback(void * ptr) {
-	phaser * S = static_cast< phaser * >( ptr );
-	int id_job;
-	for(;;) {
-		pthread_mutex_lock(&S->mutex_workers);
-		id_job = S->i_jobs ++;
-		pthread_mutex_unlock(&S->mutex_workers);
-		if (id_job < S->nthreads) S->gibbscompute(id_job);
-		else pthread_exit(NULL);
-	}
-}
-
-void phaser::gibbscompute(int id_job) {
-	gibbs_sampler GS (G.n_samples, options["mcmc-iterations"].as < int > (), options["mcmc-burnin"].as < int > ());
-	for (int v = 0 ; v < thread_data[id_job].size() ; v ++) {
-		unsigned int _n_rare_yphased = 0, _n_rare_nphased = 0;
-		int vt = thread_data[id_job][v].first;
-		float weight = thread_data[id_job][v].second;
-		assert(V.vec_full[vt]->type == VARTYPE_RARE);
-		GS.loadRare(G, H, P, V.vec_full[vt]->idx_rare, weight);
-		GS.iterate();
-		GS.pushRare(G, V.vec_full[vt]->idx_rare, _n_rare_yphased, _n_rare_nphased, 0.8f);
-
-		if (nthreads > 1) pthread_mutex_lock(&mutex_workers);
-		doneSite++;
-		n_rare_yphased += _n_rare_yphased;
-		n_rare_nphased += _n_rare_nphased;
-		vrb.progress("  * Processing", doneSite*1.0/totalSite);
-		if (nthreads > 1) pthread_mutex_unlock(&mutex_workers);
-	}
+	//Phase remaining unphased using viterbi [singletons, etc ...]
+	G.phaseCoalescentViterbi(id_job, path0, path1, M);
+	//G.phaseCoalescentViterbi2(id_job, pf0, pf1);
 }
 
 void phaser::phase() {
-	//STEP0: SINGLETONS AND MONOMORPHIC
-	vrb.title("Pre-processing");
-	G.imputeMonomorphic();
-	//G.randomizeSingleton();
-
 	//STEP1: haplotype selection
 	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
@@ -126,8 +72,6 @@ void phaser::phase() {
 			options["pbwt-depth-common"].as < int > (),
 			options["pbwt-depth-rare"].as < int > (),
 			options["pbwt-mac"].as < int > ());
-
-	G.transpose();
 	H.select(V, G);
 
 	//STEP2: HMM computations
@@ -145,14 +89,6 @@ void phaser::phase() {
 	for(int t = 0; t < nthreads ; t ++) delete thread_hmms[t];
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 
-	unsigned long int n_phased = 0;
-	unsigned long int n_total = 0;
-	G.phase(n_phased, n_total, 0.05);
-	vrb.bullet("#rare_phased = " + stb.str(n_phased) + " / " + stb.str(n_total) + " (" + stb.str(n_phased * 100.0 / (n_total), 2) + "%)");
-
-	//STEP3: PHASE REMAINING HETS
-	vrb.title("Solving remaining hets using PBWT");
-	H.solve(V, G);
-
-
+	//STEP3: MERGE BACK ALL TOGETHER
+	G.merge_by_transpose_I2V();
 }

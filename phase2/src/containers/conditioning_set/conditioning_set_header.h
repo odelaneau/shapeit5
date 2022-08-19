@@ -26,7 +26,7 @@
 
 #include <containers/variant_map.h>
 #include <containers/haplotype_set.h>
-#include <containers/genotype_set.h>
+#include <containers/genotype_set/genotype_set_header.h>
 
 class cflip {
 public:

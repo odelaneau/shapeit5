@@ -52,12 +52,14 @@ void phaser::read_files_and_initialise() {
 	readerG.scanGenotypes();
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
+	G.imputeMonomorphic();
+	G.fillup_by_transpose_V2I();
 
 	//step4: Read pedigrees
 	if (options.count("pedigree")) {
 		pedigree_reader readerP;
 		readerP.readPedigreeFile(options["pedigree"].as < string > ());
-		G.scaffoldUsingPedigrees(readerP);
+		G.phaseUsingPedigrees(readerP);
 	}
 
 	//step5: Read and initialise genetic map

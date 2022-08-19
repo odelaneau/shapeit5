@@ -129,6 +129,7 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 		}
 	}
 	sort(N.begin(), N.end());
+	/*
 	for (int h = 0 ; h < N.size() ; h ++) {
 		int target_hap = N[h].second;
 		int from = ((h-depth_rare)<0)?0:(h-depth_rare);
@@ -138,6 +139,35 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 			if (target_hap/2 != cond_hap/2) {
 				indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, cond_hap));
 			}
+		}
+	}
+	*/
+
+	for (int h = 0 ; h < N.size() ; h ++) {
+		int target_hap = N[h].second;
+
+		int nstored = 0, offset = 1, done = 0;
+		while (nstored < (2*depth_rare) && !done) {
+
+			done = 1;
+
+			if (h-offset >= 0) {
+				if (N[h-offset].second/2 != target_hap/2) {
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h-offset].second));
+					nstored ++;
+				}
+				done = 0;
+			}
+
+			if (h+offset < N.size()) {
+				if (N[h+offset].second/2 != target_hap/2) {
+					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h+offset].second));
+					nstored ++;
+				}
+				done = 0;
+			}
+
+			offset ++;
 		}
 	}
 }

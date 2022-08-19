@@ -27,7 +27,7 @@
 #include <utils/otools.h>
 #include <objects/hmm_parameters.h>
 
-#include <containers/genotype_set.h>
+#include <containers/genotype_set/genotype_set_header.h>
 #include <containers/state_set.h>
 #include <containers/conditioning_set/conditioning_set_header.h>
 #include <containers/variant_map.h>
@@ -78,7 +78,6 @@ public:
 
 	//METHODS
 	void hmmcompute(int, int);
-	void gibbscompute(int);
 	void phase();
 
 
