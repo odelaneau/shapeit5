@@ -51,6 +51,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
+	bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 
 	//Add samples
 	for (int i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
@@ -59,6 +60,8 @@ void haplotype_writer::writeHaplotypes(string fname) {
 
 	//Add records
 	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
+	float * probabilities = (float*)malloc(bcf_hdr_nsamples(hdr)*1*sizeof(float));
+
 	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
 
 		//Variant informations
@@ -76,6 +79,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 			for (int i = 0 ; i < G.n_samples ; i++) {
 				genotypes[2*i+0] = bcf_gt_phased(major_allele);
 				genotypes[2*i+1] = bcf_gt_phased(major_allele);
+				bcf_float_set_missing(probabilities[i]);
 				count_alt += 2 * major_allele;
 			}
 			for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
@@ -83,9 +87,11 @@ void haplotype_writer::writeHaplotypes(string fname) {
 				bool a1 = G.GRvar_genotypes[vr][i].al1;
 				genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
 				genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
+				probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(G.GRvar_genotypes[vr][i].prob * 1000.0) / 1000.0;
 				count_alt -= 2 * major_allele;
 				count_alt += a0+a1;
 			}
+			bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 		} else {
 			for (int i = 0 ; i < H.n_samples ; i++) {
 				bool a0 = H.Hvar.get(vs, 2*i+0);
@@ -100,6 +106,8 @@ void haplotype_writer::writeHaplotypes(string fname) {
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 		bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
+		if (V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
+
 		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 
 		switch (V.vec_full[vt]->type) {

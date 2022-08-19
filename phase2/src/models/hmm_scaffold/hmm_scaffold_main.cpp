@@ -48,8 +48,9 @@ void hmm_scaffold::setup(unsigned int _hap) {
 	Hhap.transpose(Hvar);
 }
 
-void hmm_scaffold::forward() {
+double hmm_scaffold::forward() {
 	float sum;
+	double loglik = 0.0;
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
 	for (int vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
@@ -75,6 +76,7 @@ void hmm_scaffold::forward() {
 				alpha[vs][offset] = f0 * emit[Hvar.get(vs, offset)];
 				sum += alpha[vs][offset];
 			}
+			loglik += log(sum);
 		} else {
 			const float f0 = M.t[vs-1] / nstates;
 			const float f1 = M.nt[vs-1] / sum;
@@ -97,21 +99,18 @@ void hmm_scaffold::forward() {
 				alpha[vs][offset] = (alpha[vs-1][offset]*f1+f0)*emit[Hvar.get(vs, offset)];
 				sum += alpha[vs][offset];
 			}
+			loglik += log(sum);
 		}
 	}
+	return loglik;
 }
 
-void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector < cstate > & cstates) {
+void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents) {
 	float sum = 0.0f, scale = 0.0f;
-	float threshold = min(1.0f / (nstates + 1), 0.001f);
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
-	//aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
-	//aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
-	vector < float > alphaXbeta_curr = vector < float >(nstates, 0.0f);
-	vector < float > alphaXbeta_prev = vector < float >(nstates, 0.0f);
-
-	cstates.clear();
+	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
+	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
 
 	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
 
@@ -140,29 +139,25 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 		//Products
 		__m256 _scale = _mm256_set1_ps(0.0f);
 		int offset = 0;
-		/*
 		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alpha[vs][k]), _mm256_load_ps(&beta[k]));
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			_scale = _mm256_add_ps(_scale, _prob_temp);
 			offset += 8;
 		}
-		*/
 		scale = (offset > 0)?horizontal_add(_scale):0.0f;
 		for (; offset < nstates ; offset ++) {
 			alphaXbeta_curr[offset] = alpha[vs][offset] * beta[offset];
 			scale += alphaXbeta_curr[offset];
 		}
 		scale = 1.0f / scale;
-		//_scale = _mm256_set1_ps(scale);
+		_scale = _mm256_set1_ps(scale);
 		offset = 0;
-		/*
 		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale);
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			offset += 8;
 		}
-		*/
 		for (; offset < nstates ; offset ++) alphaXbeta_curr[offset] *= scale;
 
 		//Emission
@@ -189,20 +184,8 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 
 			//Impute from full conditioning set
 			for (int vr = 0 ; vr < cevents[vs+1].size() ; vr ++) {
-				G.impute(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap]);
+				G.phaseLiAndStephens(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.6000f);
 			}
-
-			//Store compressed probabilities
-			/*
-			unsigned int nstored = 0;
-			for (int k = 0 ; k < nstates ; k ++) {
-				if (alphaXbeta_curr[k] >= threshold || alphaXbeta_prev[k] >= threshold) {
-					cstates.emplace_back(hap, vs+1, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_prev[k] * 254));
-					nstored ++;
-				}
-			}
-			assert(nstored);
-			*/
 		}
 
 		//Saving products
@@ -213,19 +196,67 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 
 		//Impute from full conditioning set
 		for (int vr = 0 ; vr < cevents[0].size() ; vr ++) {
-			G.impute(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap]);
+			G.phaseLiAndStephens(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.6000f);
 		}
+	}
+}
 
-		//Store compressed probabilities
-		/*
-		unsigned int nstored = 0;
-		for (int k = 0 ; k < nstates ; k ++) {
-			if (alphaXbeta_curr[k] >= threshold) {
-				cstates.emplace_back(hap, 0, k, (unsigned char)(alphaXbeta_curr[k] * 254), (unsigned char)(alphaXbeta_curr[k] * 254));
-				nstored ++;
+void hmm_scaffold::viterbi(vector < int > & path) {
+	float sum, scale, maxv_prev, maxv_curr;
+	int maxi_curr, maxi_prev;
+	vector < vector < int > > _viterbi_paths = vector < vector < int > > (C.n_scaffold_variants, vector < int > (nstates, 0));
+	vector < float > _viterbi_probs = vector < float > (nstates, 0.0f);
+
+	//FORWARD PASS
+	for (int vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
+		const std::array < float, 2 > emit = { match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)] };
+
+		if (!vs) {
+			maxi_curr = -1;
+			sum = maxv_curr = 0.0f;
+			for (int k = 0; k < nstates ; k ++) {
+				_viterbi_probs[k] = emit[Hvar.get(vs, k)];
+				if (_viterbi_probs[k] > maxv_curr) {
+					maxv_curr = _viterbi_probs[k];
+					maxi_curr = k;
+				}
+				sum += _viterbi_probs[k];
+			}
+		} else {
+			maxi_curr = -1;
+			scale = 1.0f / sum;
+			sum = maxv_curr = 0.0f;
+
+			for (int k = 0 ; k < nstates ; k ++) {
+
+				float prob_yrecomb = M.t[vs-1] * maxv_prev * scale;
+				float prob_nrecomb = M.nt[vs-1] * _viterbi_probs[k] * scale;
+
+				if (prob_yrecomb > prob_nrecomb) {		// I switch copying from the most likely state
+					_viterbi_probs[k] = prob_yrecomb;
+					_viterbi_paths[vs][k] = maxi_prev;
+				} else {								// I stay copying from the same state
+					_viterbi_probs[k] = prob_nrecomb;
+					_viterbi_paths[vs][k] = k;
+				}
+
+				_viterbi_probs[k] *= emit[Hvar.get(vs, k)];
+
+				if (_viterbi_probs[k] > maxv_curr) {
+					maxv_curr = _viterbi_probs[k];
+					maxi_curr = k;
+				}
+
+				sum += _viterbi_probs[k];
 			}
 		}
-		assert(nstored);
-		*/
+
+		maxi_prev = maxi_curr;
+		maxv_prev = maxv_curr;
 	}
+
+	//BACKTRACKING PASS
+	path = vector < int > (C.n_scaffold_variants, maxi_curr);
+	for (int vs = C.n_scaffold_variants - 1 ; vs > 0; vs --)
+		path[vs-1] = _viterbi_paths[vs][path[vs]];
 }

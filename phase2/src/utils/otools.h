@@ -44,6 +44,7 @@
 //INCLUDE BOOST USEFULL STUFFS (BOOST)
 #include <boost/program_options.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <boost/align/aligned_allocator.hpp>
 
 //INCLUDE HTS LIBRARY
 #include <htslib/hts.h>
@@ -66,6 +67,10 @@ extern "C" {
 #include <utils/string_utils.h>
 #include <utils/timer.h>
 #include <utils/verbose.h>
+
+//TYPEDEFS
+template <typename T>
+using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T, 32 > >;
 
 //CONSTANTS
 #define RARE_VARIANT_FREQ	0.001f
