@@ -51,7 +51,8 @@ BQ0=rep(0, nSIZE)
 BQ1=rep(0, nSIZE)
 BQ2=rep(0, nSIZE)
 
-for (s in 1:nSIZE) {
+#for (s in 1:nSIZE) {
+for (s in nSIZE:nSIZE) {
 	str1="~/Fuse/PhasingUKB/Phasing/PhasingWGS/step3_runbeagle/N";
 	str2="/benchmark_ukb23352_c20_qc_v1.subset.N";
 	prefix=paste(str1, SIZE[s], str2, SIZE[s], sep="")
@@ -70,10 +71,10 @@ for (s in 1:nSIZE) {
 	str2="/benchmark_ukb23352_c20_qc_v1.subset.N";
 	prefix=paste(str1, SIZE[s], str2, SIZE[s], sep="")
 	suffix=paste("shapeit5.", PAR[2], ".", TYPE[4], ".frequency.switch.txt.gz", sep="")
-	SHPser1 = freqSER(prefix, suffix, s);
-	BQ2[s] = SHPser1[2]
+	#SHPser1 = freqSER(prefix, suffix, s);
+	#BQ2[s] = SHPser1[2]
 	
-	pdf(paste("PDFs/figure2_", SIZE[s], ".pdf", sep=""), 10,5)
+	pdf(paste("PDFs/figure2c_", SIZE[s], ".pdf", sep=""), 10,5)
 	par(mfrow=c(1,2))
 	
 	

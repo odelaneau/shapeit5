@@ -16,7 +16,7 @@ D=read.table("../step1_array/data/data.txt", head=TRUE, stringsAsFactors=FALSE)
 
 #########################################################################################
 #					FIGURE0						#
-#			Plot switch error rates & sepeed vs sample size 		#						
+#			Plot switch error rates & speed vs sample size 		#						
 #########################################################################################
 
 pdf("PDFs/figure0.pdf",6,10)

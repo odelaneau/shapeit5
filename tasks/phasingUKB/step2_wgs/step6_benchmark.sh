@@ -48,7 +48,8 @@ done
 #for N in 2000 5000 10000 20000 50000 100000 147754; do
 for N in 147754; do
 	while read LINE; do
-		for T in default scaffold; do
+		#for T in default scaffold; do
+		for T in default; do
 			iREG=$(echo $LINE | awk '{ print $3; }')
 			oREG=$(echo $LINE | awk '{ print $4; }')
 			BCF=/mnt/project/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/benchmark_ukb23352_c20_qc_v1.subset.N$N\.$iREG\.shapeit5.$T\.bcf
@@ -57,7 +58,7 @@ for N in 147754; do
 			OUT=$(basename $BCF .bcf)\.fqa
 			LOG=$(basename $BCF .bcf)\.fqa.log
 			FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.SNPs.array.bcf
-			dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --tag $iREG --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
+			#dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_0.0.1.tar.gz" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PED --region $oREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --tag $iREG --instance-type mem3_ssd1_v2_x2 --priority low --name benchWGS_switchSHP1_$iREG -y
 			
 			#COMMON SNPS
 			OUT=$(basename $BCF .bcf)\.fqc
