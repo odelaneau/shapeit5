@@ -2,13 +2,13 @@
 
 SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare variants.
 
-- **docker**: all script needed to build a docker file for shapeit5
+- **docker**: all script needed to build a docker file comprising all binaries
 - **docs**: documentation in html
-- **ligate**: ligate multiple phased BF/VCF files into a chromosome length file
+- **ligate**: ligate multiple phased BCF/VCF files into a chromosome length file
 - **maps**: genetics maps in b37 and b38
 - **phase_common**: phase common sites, typically SNP array data
 - **phase_rare**: phase rare variants onto a scaffold of common variants
-- **static_bins**: static binaries of all execeutables
+- **static_bins**: static binaries of all executables
 - **switch**: compute switch error rate and genotyping error rate given simulated or trio data
 - **tasks**: scripts used to phase large datasets, good base to start pipelining
 - **test**: simulated data for first-step testing of the method
