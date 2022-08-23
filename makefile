@@ -1,4 +1,4 @@
-projects = phase1 phase2 switch ligate
+projects = phase_common phase_rare switch ligate
 
 .PHONY: all $(projects)
 
