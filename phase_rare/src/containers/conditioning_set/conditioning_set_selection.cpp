@@ -106,6 +106,17 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 			buffer.push_back(indexes_pbwt_neighbour_serialized[e].second);
 			e++;
 		}
+
+		//Minimal number of states is 50
+		if (buffer.size() < 50) {
+			while (buffer.size() < 50) {
+				if (shuffledO[shuffledI]/2 != h/2) buffer.push_back(rng.getInt(n_haplotypes));
+				shuffledI = (shuffledI<(n_haplotypes-1))?(shuffledI+1):0;
+			}
+			sort(buffer.begin(), buffer.end());
+			buffer.erase(unique(buffer.begin(), buffer.end()), buffer.end());
+		}
+
 		indexes_pbwt_neighbour[h].reserve(buffer.size());
 		indexes_pbwt_neighbour[h] = buffer;
 		assert(indexes_pbwt_neighbour[h].size());
@@ -129,28 +140,12 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 		}
 	}
 	sort(N.begin(), N.end());
-	/*
-	for (int h = 0 ; h < N.size() ; h ++) {
-		int target_hap = N[h].second;
-		int from = ((h-depth_rare)<0)?0:(h-depth_rare);
-		int to = ((h+depth_rare)<N.size())?(h+depth_rare):(N.size()-1);
-		for (int c = from ; c <= to ; c ++) {
-			int cond_hap = N[c].second;
-			if (target_hap/2 != cond_hap/2) {
-				indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, cond_hap));
-			}
-		}
-	}
-	*/
 
 	for (int h = 0 ; h < N.size() ; h ++) {
 		int target_hap = N[h].second;
-
 		int nstored = 0, offset = 1, done = 0;
 		while (nstored < (2*depth_rare) && !done) {
-
 			done = 1;
-
 			if (h-offset >= 0) {
 				if (N[h-offset].second/2 != target_hap/2) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h-offset].second));
@@ -158,7 +153,6 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 				}
 				done = 0;
 			}
-
 			if (h+offset < N.size()) {
 				if (N[h+offset].second/2 != target_hap/2) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h+offset].second));
@@ -166,7 +160,6 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 				}
 				done = 0;
 			}
-
 			offset ++;
 		}
 	}

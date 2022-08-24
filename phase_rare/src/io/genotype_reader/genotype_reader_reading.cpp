@@ -109,6 +109,9 @@ void genotype_reader::readGenotypes() {
 							n_rare_genotypes[a0*2] ++;
 						} else n_rare_genotypes[a0*2] ++;
 					}
+
+					if (G.GRvar_genotypes[vr].size() > (n_samples * 0.1f)) vrb.warning("@robin: I told you to filter for max 10% missing data for god sake!!!");
+
 					vr++; vt ++;
 				}
 			}
