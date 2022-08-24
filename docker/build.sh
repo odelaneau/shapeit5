@@ -1,14 +1,14 @@
 #Compile phase 1
-cd ../phase1/
+cd ../phase_common/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_phase1_static ../static_bins/.
+cp bin/SHAPEIT5_phase_common_static ../static_bins/.
 
 #Compile phase 2
-cd ../phase2/
+cd ../phase_rare/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_phase2_static ../static_bins/.
+cp bin/SHAPEIT5_phase_rare_static ../static_bins/.
 
 #Compile switch
 cd ../switch/
@@ -24,6 +24,7 @@ cp bin/SHAPEIT5_ligate_static ../static_bins/.
 
 #Buld docker image
 cd ../docker/
-cp ../static_bins/SHAPEIT5* ressources/.
-docker build -t shapeit5_0.0.1 -f Dockerfile .
-docker save shapeit5_0.0.1 | gzip -c > shapeit5_0.0.1.tar.gz
+mkdir -p resources
+cp ../static_bins/SHAPEIT5* resources/.
+docker build -t shapeit5_220824_c85eb0c -f Dockerfile .
+docker save shapeit5_220824_c85eb0c | gzip -c > shapeit5_220824_c85eb0c.tar.gz

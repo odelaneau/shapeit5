@@ -40,10 +40,10 @@ RUN curl -SL https://github.com/samtools/bcftools/releases/download/${htslib_ver
     rm -rf bcftools-${htslib_version}
 
 # get GLIMPSE v2.0.0 [binary]
-ADD ressources/SHAPEIT5_phase1_static /bin/SHAPEIT5_phase1_static
-ADD ressources/SHAPEIT5_phase2_static /bin/SHAPEIT5_phase2_static
-ADD ressources/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
-ADD ressources/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
+ADD resources/SHAPEIT5_phase_common_static /bin/SHAPEIT5_phase_common_static
+ADD resources/SHAPEIT5_phase_rare_static /bin/SHAPEIT5_phase_rare_static
+ADD resources/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
+ADD resources/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
 
 RUN chmod +x /bin/SHAPEIT5*
 
