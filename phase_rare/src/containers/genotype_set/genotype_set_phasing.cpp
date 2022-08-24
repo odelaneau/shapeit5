@@ -49,13 +49,33 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 		}
 	}
 
-	assert (tidx>=0);
+	assert(tidx>=0);
+	assert((p[0]+p[1])>=0);
 
 	if (!GRvar_genotypes[vr][tidx].pha) {
 		if (hap%2 == 0) {
 			assert(GRvar_genotypes[vr][tidx].prob < 0.0f);
 			GRvar_genotypes[vr][tidx].prob = p[1] / (p[0] + p[1]);
+
+			/*
+			if (isnan(GRvar_genotypes[vr][tidx].prob)) {
+				cout << endl << "PROB0 = " << p[0] << " " << p[1] << endl;
+				cout << "MISS = " << GRvar_genotypes[vr][tidx].mis << " " << GRvar_genotypes[vr][tidx].het << endl;
+				cout << "K=" << H.size() << " " << GRvar_genotypes[vr].size() << endl;
+				//cout << "rares = " << endl;
+				//for (int e = 0 ; e < GRvar_genotypes[vr].size() ; e ++) cout << "\t" << GRvar_genotypes[vr][e].idx << " " << GRvar_genotypes[vr][e].pha << " " << GRvar_genotypes[vr][e].prob << endl;
+				cout << "states = " << endl;
+				for (int k = 0 ; k < H.size() ; k++) cout << "\t" << H[k]/2 << " " << alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f << endl;
+			}
+			 */
+
 		} else {
+
+			/*
+			if (!(GRvar_genotypes[vr][tidx].prob >= 0.0f)) {
+				cout << endl << "PROB1 = " << GRvar_genotypes[vr][tidx].prob << endl;
+			}
+			 */
 			assert(GRvar_genotypes[vr][tidx].prob >= 0.0f);
 			float pp = GRvar_genotypes[vr][tidx].prob;
 			GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));

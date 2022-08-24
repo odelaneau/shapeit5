@@ -1,0 +1,31 @@
+
+[SHAPEIT5] Phase2 (phase rare variants onto a haplotype scaffold)
+  * Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne
+  * Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com
+  * Version       : 5.0.0
+  * Run date      : 24/08/2022 - 13:41:48
+
+Files:
+  * Input VCF     : [/home/olivier/Fuse/ParentOfOrigin/Processing_pipeline/Datas/Exome_array/chr14/UKB.chr14.exome_array.full.sorted.bcf]
+  * Scaffold VCF  : [/home/olivier/Fuse/ParentOfOrigin/Processing_pipeline/Outputs/step4_phasing/Common/chr14/UKB_chr14.exome_array.FULL.shapeit5.common.bcf]
+  * Genetic Map   : [/home/olivier/Fuse/ParentOfOrigin/data/shapeit_maps/chr14.b38.gmap.gz]
+  * Output VCF    : [test.bcf]
+  * Output LOG    : [test.log]
+
+Parameters:
+  * Seed    : 15052011
+  * Threads : 10 threads
+  * MCMC    : [#iterations=20 / #burn-in=5]
+  * PBWT    : [depth = 2,2 / modulo = 0.1 / mac = 2 / mdr = 0.1]
+  * HMM     : [Ne = 15000 / Recombination rates given by genetic map]
+
+Parsing specified genomic regions
+  * Scaffold region  [chr14:66367292-69924396]
+  * Input region  [chr14:66617414-69674304]
+
+Reading genotype data:
+  * VCF/BCF scanning (7.42s)
+  * HAP allocation [#scaffold=828 / #samples=452644] (0.00s)
+  * Genotype set allocation [#rare=34059 / #samples=452644] (0.00s)
+
+WARNING: @robin: I told you to filter for max 10% missing data for god sake!!!

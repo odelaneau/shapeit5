@@ -73,6 +73,8 @@ public:
 	vector < cflip > CF;
 
 	//STATE DATA
+	unsigned int shuffledI;
+	vector < unsigned int > shuffledO;
 	vector < pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
 	vector < vector < unsigned int > > indexes_pbwt_neighbour;
 
