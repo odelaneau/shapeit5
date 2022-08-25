@@ -47,7 +47,7 @@ public:
 	void writePerType(string);
 	void writeBlock(string);
 	void writeFlipSwitchErrorPerSample(string);
-
+	void writeCalibration(string, int);
 };
 
 inline

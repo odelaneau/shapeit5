@@ -71,7 +71,8 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 
 	//Read GT data
 	int n_variant_tot = 0;
-	int rAC=0, nAC=0, *vAC = NULL, rAN=0, nAN=0, *vAN = NULL;
+	float * vPP = NULL;
+	int rAC=0, nAC=0, *vAC = NULL, rAN=0, nAN=0, *vAN = NULL, nPP = 0, rPP = 0;
 	int nset = 0, *gt_arr_t = NULL, *gt_arr_e = NULL, ngt_arr_t = 0, ngt_arr_e = 0;
 	bcf1_t * line_t, * line_e, * line_f;
 	while ((nset = bcf_sr_next_line (sr))) {
@@ -103,6 +104,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 					H.Htrue[h+1].push_back(a1);
 					H.Missing[h/2].push_back(gt_arr_t[h+0] == bcf_gt_missing || gt_arr_t[h+1] == bcf_gt_missing);
 				}
+
 				//3. Estimation
 				bcf_get_genotypes(sr->readers[1].header, line_e, &gt_arr_e, &ngt_arr_e);
 				for(int h = 0 ; h < 2 * n_samples_estimated ; h += 2) {
@@ -114,7 +116,15 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 						H.Hesti[2*index+1].push_back(a1);
 					}
 				}
+
+				//4. Probabilities
+				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
+				if (rPP == n_samples_estimated) {
+					for(int i = 0 ; i < n_samples_estimated ; i ++) if (vPP[i] != bcf_float_missing) H.Hprob.push_back(make_tuple(H.n_variants, i, vPP[i]));
+				}
+
 				H.n_variants ++;
+
 			}
 		}
 		n_variant_tot ++;
@@ -122,6 +132,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));
+	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Hprob.size()));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 	free(gt_arr_t); free(gt_arr_e);
 	bcf_sr_destroy(sr);
@@ -167,7 +178,8 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 
 	//Read GT data
 	int n_variant_tot = 0;
-	int rAC=0, nAC=0, *vAC = NULL, rAN=0, nAN=0, *vAN = NULL;
+	float * vPP = NULL;
+	int rAC=0, nAC=0, *vAC = NULL, rAN=0, nAN=0, *vAN = NULL, nPP = 0, rPP = 0;
 	int nset = 0, *gt_arr_t = NULL, *gt_arr_e = NULL, ngt_arr_t = 0, ngt_arr_e = 0;
 	bcf1_t * line_t, * line_e;
 	while ((nset = bcf_sr_next_line (sr))) {
@@ -210,6 +222,13 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 						H.Hesti[2*index+1].push_back(a1);
 					}
 				}
+
+				//4. Probabilities
+				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
+				if (rPP == n_samples_estimated) {
+					for(int i = 0 ; i < n_samples_estimated ; i ++) if (!bcf_float_is_missing(vPP[i])) H.Hprob.push_back(make_tuple(H.n_variants, i, vPP[i]));
+				}
+
 				H.n_variants ++;
 			}
 		}
@@ -218,6 +237,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));
+	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Hprob.size()));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 	free(gt_arr_t); free(gt_arr_e);
 	bcf_sr_destroy(sr);

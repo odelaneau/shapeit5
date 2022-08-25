@@ -167,3 +167,28 @@ void haplotype_checker::writeBlock(string fout) {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
+
+void haplotype_checker::writeCalibration(string fout, int nbins) {
+	tac.clock();
+
+	if (H.Hprob.size()) {
+
+		//Compute calibration by bining
+		vector < pair < int, int > > C = vector < pair < int, int > > (nbins, pair < int, int > (0,0));
+		for (long int c = 0 ; c < H.Hprob.size() ; c++) {
+			int var = get<0>(H.Hprob[c]);
+			int ind = get<1>(H.Hprob[c]);
+			int idx = get<2>(H.Hprob[c]) * (nbins-1);
+			C[idx].first += Errors[ind][var];
+			C[idx].second += Checked[ind][var];
+		}
+
+		//Write output file
+		vrb.title("Writing phasing calibration in [" + fout + "]");
+		output_file fdo (fout);
+		for (int c = 0 ; c < C.size() ; c++) {
+			fdo << c << " " << c * 1.0f / nbins << " " << (c+1) * 1.0f / nbins << " " << C[c].first << " " << C[c].second << endl;
+		}
+		fdo.close();
+	}
+}

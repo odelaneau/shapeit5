@@ -1,0 +1,504 @@
+[33mcommit 09892fe56f4e2dc6b1af7d31b9393f498da1dbec[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Simone Rubinacci <simone.rubinacci@unil.ch>
+Date:   Wed Aug 24 14:46:23 2022 +0200
+
+    Scripts update for new tool names
+
+[33mcommit c85eb0cefab390f14d31f4d59fe9cb85581b1ea4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Aug 24 13:44:44 2022 +0200
+
+    temporary fix for super high missing data rate by setting K>50
+
+[33mcommit b56eac68a9de076ea5866bb58da845d1bbf0db3a[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Aug 24 13:43:23 2022 +0200
+
+    temporary fix for super high missing data rate by setting K>50
+
+[33mcommit f6d3674d0157cfa635ba2abff11c078f3bf1d275[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Aug 23 09:13:08 2022 +0200
+
+    Add static binaries
+
+[33mcommit be2e36b2b82e89ae020defcc24e60c5a0425e907[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Aug 23 09:06:10 2022 +0200
+
+    Updating README
+
+[33mcommit fdd7b087bd03a26248f31e4124275c2dc9ff442a[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Aug 23 09:04:46 2022 +0200
+
+    Updating README
+
+[33mcommit d17712fc7cb156e4afd79ce7a5154a0e0cca5112[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Aug 23 08:58:46 2022 +0200
+
+    Renaming methods
+
+[33mcommit 068679f78a499af58aa1a1c267c89e46aae8e716[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon Aug 22 14:57:03 2022 +0200
+
+    Update script
+
+[33mcommit 8572aff7d6ff3e7b8b31a0fda64cd808b2f5692b[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Aug 19 17:08:49 2022 +0200
+
+    stable version, debugged
+
+[33mcommit ad07db33a4a192f84c455eb692ce6704e4b319dc[m
+Author: Simone Rubinacci <simone.rubinacci@unil.ch>
+Date:   Tue Jun 21 16:24:04 2022 +0200
+
+    Report all fields: TODO add option to remove FMT or INFO unwanted
+
+[33mcommit 0e06043abbe6e956044f42724f7dee41ee15e362[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Jun 3 08:27:09 2022 +0200
+
+    Phase2: store phasing probs
+
+[33mcommit 3070fd6ef6a39843edebad2c084ec48287ced658[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed May 18 13:25:56 2022 +0200
+
+    Many small changes before Robin takes over
+
+[33mcommit 72a5c55a0cf3353a889c1bac5f94f54513deefa3[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon May 2 22:13:20 2022 +0200
+
+    Update scripts
+
+[33mcommit 83d1ca628d212aa212750b9c9b9d01021041b022[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon May 2 14:26:52 2022 +0200
+
+    Phase1: impute missing using trios + Phase2: ADD pedigree support [untested]
+
+[33mcommit f826a6155ce731f4dc10a68ad3db8aa57686f01c[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon May 2 12:45:36 2022 +0200
+
+    Update scripts + fixed bug in phase1 --pedigree
+
+[33mcommit adb34bdb5f4f32ec8a3b1a54b5ae1062bd65287d[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon May 2 12:44:33 2022 +0200
+
+    Update scripts + fixed bug in phase1 --pedigree
+
+[33mcommit 3e4c9575f7de1d21277ce58ae487f2ad2da4272f[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Apr 27 09:57:32 2022 +0200
+
+    Phase2: remove MCMC runs / add PBWT phasing as last step
+
+[33mcommit 6f381f5bd5e52bf4301bc3434aa5aace242a4be0[m
+Merge: 57d5d88 870bc8f
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Apr 26 09:04:06 2022 +0200
+
+    Merge branch 'main' of github.com:odelaneau/shapeit5 into main
+
+[33mcommit 57d5d8888201d18e4ed3e07a770d1bc635b5550d[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Apr 26 09:03:44 2022 +0200
+
+    Plenty of updates on phase2
+
+[33mcommit 870bc8fb8cb309bee719ed3fb7205c7758969a4a[m
+Author: Simone Rubinacci <simone.rubinacci@unil.ch>
+Date:   Wed Apr 20 18:29:31 2022 +0200
+
+    Bugfix hets switch
+
+[33mcommit b61c9ae9fa233796c8cbf76ce377eabd04ee108e[m
+Author: Simone Rubinacci <simone.rubinacci@unil.ch>
+Date:   Wed Apr 20 12:33:44 2022 +0200
+
+    Ligate allows non-perfect overlap
+
+[33mcommit b9a8575409aa235b64a8878e7edf95cb8735b7ce[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Apr 20 12:08:50 2022 +0200
+
+    Phase2: set minimal threashold value to 0.005 + shuffle sample processing order
+
+[33mcommit 093a5ba42e3afd8731579512129e88ea67bb3b82[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sun Apr 17 17:28:40 2022 +0200
+
+    Add flip calculations into switch
+
+[33mcommit 0eac39780acfe91a8a0ee04f03019a5647b70aad[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sun Apr 17 17:27:05 2022 +0200
+
+    Add flip calculations into switch
+
+[33mcommit 3e2138027d8a8a3284bc7a3667338f3c688e5bdd[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Apr 15 09:56:55 2022 +0200
+
+    Desactivate PIR in phase2
+
+[33mcommit 303b5f5da26161b7c0382239ea9314f849378c74[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Thu Apr 14 23:38:52 2022 +0200
+
+    First stable version for phase2 PIRs
+
+[33mcommit 3b9aa6f22319aa976817f4becdfca6ca8950895d[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Apr 13 10:59:05 2022 +0200
+
+    Memory allocation optimization in phase
+
+[33mcommit 44fb0f4b882811e07307775451e56cc6e5b8f768[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Apr 13 00:23:02 2022 +0200
+
+    HMM speed up + bugfix interpolation
+
+[33mcommit 07991dddaaa6ed6827378977143bd1a3adc159c4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Apr 12 23:05:58 2022 +0200
+
+    HMM speed up + bugfix interpolation
+
+[33mcommit aa0e2a8613a3545c25f29278391fe23ab7016368[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon Apr 4 18:00:29 2022 +0200
+
+    Fixed underflow issue in phase1
+
+[33mcommit 9a897c022fa9962eb68d6bd6a8255ae32a5ee63f[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Apr 1 00:30:45 2022 +0200
+
+    Small edits
+
+[33mcommit 8efc38b1251b398fd2916f654c7eb15458005688[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Thu Mar 31 13:09:28 2022 +0200
+
+    Finalize test data
+
+[33mcommit 21a489f7a0f8b207d182f4b147c0fa82a5080738[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 30 23:03:01 2022 +0200
+
+    Add test data 10k and lots of bug fixes
+
+[33mcommit 68d2a68ca7005c90e404ca5d3e0672d2e22729d5[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 30 11:30:35 2022 +0200
+
+    First version for ped support in phase 1
+
+[33mcommit d0519a920187043719fdb99f1dcb618a94cdbae2[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 30 10:41:25 2022 +0200
+
+    Update UKB phasing scripts
+
+[33mcommit 3b3b9c9c646b28db43fa5ad5bc7e2f98d87afb91[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 29 22:53:10 2022 +0200
+
+    Templating pedigree support in phase1
+
+[33mcommit 917786dd34e46b69d75058fc08883ff312ae0e69[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 29 09:37:06 2022 +0200
+
+    Bugfix in switch
+
+[33mcommit 2d6fd8167205d1d31ce7134a8c5aeb2e6faadf5b[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 29 06:11:55 2022 +0200
+
+    AVX2 code for phase2
+
+[33mcommit 6825a1ed7f52bd38ddd60c1753c7e4c6afcc65dc[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 29 05:59:31 2022 +0200
+
+    AVX2 code for phase2
+
+[33mcommit 313a4b583e101262c457141c1752ae12fb6c0cdc[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sun Mar 27 12:08:38 2022 +0200
+
+    Phase2 memory improvements + Gibbs Sample parallelized + Bugfixes
+
+[33mcommit 43e3983387d9f096d15dc7e69f7ecd41cfd1c32b[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 26 23:38:48 2022 +0100
+
+    Multiple small edits
+
+[33mcommit d6999043b328f3926e5afdab2bfe876affd1becf[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Mar 25 13:42:26 2022 +0100
+
+    Update UKB SNP array phasing scripts
+
+[33mcommit 149c169f4beb10ee2af7d0e8c598b2e12a447703[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Mar 25 08:24:23 2022 +0100
+
+    Opening VCF error handling
+
+[33mcommit 6e63256ae9ab880a14d1d904bae55046cf08e4c3[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 23:25:13 2022 +0100
+
+    Memory improvements for phase2
+
+[33mcommit f9c9c6b87a6d7024419108a9a304a4255b8da8c4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 18:52:11 2022 +0100
+
+    Use more compact memory structures
+
+[33mcommit 0c3e30511e197b5f630f1102de3bcebd7c699a0f[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 18:51:14 2022 +0100
+
+    Use more compact memory structures
+
+[33mcommit c305cfdf7d3a4ed025e9669aa8abb7e678301c5d[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 12:21:15 2022 +0100
+
+    Update test data for phase2
+
+[33mcommit 04a2ce11e540f2bc276ec00fd83c6744b9247cc0[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 09:00:31 2022 +0100
+
+    Stable version of phase 2
+
+[33mcommit 10941219fe9b5d6345263993e7e4d23cdea89eb4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 08:49:44 2022 +0100
+
+    Stable version of phase 2
+
+[33mcommit e604be92d3072579a0da23c3ae30cc98ea5f4cb4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 23 08:41:50 2022 +0100
+
+    Stable version of phase 2
+
+[33mcommit 492994b9ad2e623ca8b85c9b7d4a9e6363fd0f23[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon Mar 21 23:20:13 2022 +0100
+
+    Working HMM + compressed state probabilities
+
+[33mcommit 8897c2689636080a1e14fd649430d2cc1dd10896[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon Mar 21 18:45:07 2022 +0100
+
+    Major update in phase2, add Multi-Threading
+
+[33mcommit 294752186ae29b5bc9c572bb17ef418df4e6f97c[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sun Mar 20 01:11:39 2022 +0100
+
+    Debug until forward pass
+
+[33mcommit 77787d7767f6cb23099204ced0cdb8043935242e[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 22:18:29 2022 +0100
+
+    Add simulated test data for phase2
+
+[33mcommit 8ffe4e08a9ff375b03dff7f57f25653aabd018b8[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 22:02:48 2022 +0100
+
+    First version of phase 2 that compiles
+
+[33mcommit 35c03a1d0fea28b491e5cce69b55cbb2292c8200[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 11:02:44 2022 +0100
+
+    Add test data for phase2
+
+[33mcommit 1e9a5ea6d0005b8457bc0d69111fdff6d8309d27[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 10:41:08 2022 +0100
+
+    Add test data for phase2
+
+[33mcommit de4b4ca5b4a51217bb125b25ee4fff7bfd3ecca8[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 10:33:44 2022 +0100
+
+    Bugfix in switch for mendel resolution
+
+[33mcommit 221354f4ee59da32228f047d38fbfa2390509567[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 00:12:29 2022 +0100
+
+    Template of phase2 mode
+
+[33mcommit fc5d01d83701c7a86cbd5f86dbed19c3fee88c6f[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Sat Mar 19 00:11:54 2022 +0100
+
+    Template of phase2 mode
+
+[33mcommit ca5011448c909484c8c0c4b2c24ba1d0a158800a[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Fri Mar 18 22:11:05 2022 +0100
+
+    Template of phase2 mode
+
+[33mcommit 779b8b379b03488547dacc57aad209755b3cbce7[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 23:34:41 2022 +0100
+
+    Last push of the day
+
+[33mcommit e40df3f5241bd47fcbcb637032153101e6cca95c[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 23:22:38 2022 +0100
+
+    Fix avx2 flag in makefile
+
+[33mcommit c4ff4c4a05043ac24cd63cb4c3de4add51f30a61[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 19:58:37 2022 +0100
+
+    BugFixes
+
+[33mcommit 82d36b8bf994f3067ac01154608fe81f40103145[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 11:39:31 2022 +0100
+
+    BugFix Makefiles Jura
+
+[33mcommit 1fe2d7468276e4401be1c50daf7b7c157ca6d3d9[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 11:35:12 2022 +0100
+
+    BugFix Makefiles Jura
+
+[33mcommit f5f124f04bd4bcf8cdda9925ce1d67218f0333c8[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 11:11:47 2022 +0100
+
+    Testing gitignore for docker file
+
+[33mcommit 491616a137645e1f01a2de75555b54ee453dfc7b[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 10:31:01 2022 +0100
+
+    Testing gitignore for docker file
+
+[33mcommit 278bf42960238a50f1c7066ed4d07c4619883315[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 10:28:00 2022 +0100
+
+    Update docker/make files
+
+[33mcommit 2da9f6b1e6812042eeefd08854ac9c49567cff89[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 10:23:37 2022 +0100
+
+    Update docker/make files
+
+[33mcommit a71bdb1d9baf4613beae1a5b26530c0b272ba46b[m
+Author: Olivier Delaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 10:08:34 2022 +0100
+
+    Delete shapeit5:0.0.1.tar.gz
+
+[33mcommit c28375dc1b3df1d7f04f2abf596baebb2d001550[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 09:50:12 2022 +0100
+
+    Update docker/make files
+
+[33mcommit d102b19d7799d71a60bdbb7bc85f3da042641b6b[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 09:48:45 2022 +0100
+
+    Update docker scripts and makefiles
+
+[33mcommit 1cf5c24710416b524aebc1597c60a6183d82686e[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Wed Mar 16 09:29:54 2022 +0100
+
+    Start scripts for docker image
+
+[33mcommit 267237f3aa38bbede80a8c7da9655c6597263df4[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 10:11:56 2022 +0100
+
+    Clean-up
+
+[33mcommit dbabb7099aad9f146548e232357dd772e7474173[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 10:11:22 2022 +0100
+
+    Clean-up
+
+[33mcommit fbed6d234fb0d7da23dcdf33559e281425e01fef[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 10:10:44 2022 +0100
+
+    Add Simone's dockerfile
+
+[33mcommit 461ecacd70ff72cbdcdf1588b18d54f68ee483ec[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 10:06:58 2022 +0100
+
+    Clean-up
+
+[33mcommit 71bc43bf11a4f3b61bb1e645dddfd42bb1b80d76[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 10:04:43 2022 +0100
+
+    Switched to Simone's makefiles
+
+[33mcommit 8b10ea016fe54363fb8326e1166ea486493092a5[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 07:36:07 2022 +0100
+
+    Clean-up
+
+[33mcommit e377e7927ad0ea13d1663f4904624d5e0807382e[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 07:32:30 2022 +0100
+
+    Clean-up
+
+[33mcommit 5fe1b56ee69b40dd91014aa432272eb48f6510f8[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 07:32:03 2022 +0100
+
+    Clean-up
+
+[33mcommit f88ae8533f648caff07c692b770fa96c58c98a74[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Tue Mar 15 07:30:14 2022 +0100
+
+    Clean-up
+
+[33mcommit f7db642aa8312f2549304e7467f719ef97cb038d[m
+Author: odelaneau <olivier.delaneau@gmail.com>
+Date:   Mon Mar 14 22:52:16 2022 +0100
+
+    First commit

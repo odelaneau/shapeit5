@@ -38,6 +38,7 @@ void switcher::declare_options() {
 			("frequency,F", bpo::value< string >(), "Variant frequency in VCF/BCF format")
 			("pedigree,P", bpo::value< string >(), "Pedigree file in PED format")
 			("region,R", bpo::value< string >(), "Target region")
+			("nbins", bpo::value<int>()->default_value(20), "Number of bns used for calibration")
 			("dupid", "Duplicate ID for UKB matching IDs");
 	
 	bpo::options_description opt_output ("Output files");
@@ -90,4 +91,5 @@ void switcher::verbose_files() {
 void switcher::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("#threads : " + stb.str(options["thread"].as < int > ()));
+	vrb.bullet("#bins    : " + stb.str(options["nbins"].as < int > ()));
 }
