@@ -10,6 +10,12 @@ dummy_build_folder_obj := $(shell mkdir -p obj)
 CXXFLAG=-O3 -mavx2 -mfma
 LDFLAG=-O3
 
+#COMMIT TRACING
+COMMIT_VERS=$(shell git rev-parse --short HEAD)
+COMMIT_DATE=$(shell date +'%d%m%Y')
+CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
+CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+
 #DYNAMIC LIBRARIES
 DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
 

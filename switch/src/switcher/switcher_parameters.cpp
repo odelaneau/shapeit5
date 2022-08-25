@@ -38,7 +38,7 @@ void switcher::declare_options() {
 			("frequency,F", bpo::value< string >(), "Variant frequency in VCF/BCF format")
 			("pedigree,P", bpo::value< string >(), "Pedigree file in PED format")
 			("region,R", bpo::value< string >(), "Target region")
-			("nbins", bpo::value<int>()->default_value(20), "Number of bns used for calibration")
+			("nbins", bpo::value<int>()->default_value(20), "Number of bins used for calibration")
 			("dupid", "Duplicate ID for UKB matching IDs");
 	
 	bpo::options_description opt_output ("Output files");
@@ -63,7 +63,7 @@ void switcher::parse_command_line(vector < string > & args) {
 	vrb.title("[SHAPEIT5] Switch (validation of haplotypes using trios/duos or true sets)");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : 5." + string(SWITCH_VERSION));
+	vrb.bullet("Version       : 5." + string(SWITCH_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
 	vrb.bullet("Run date      : " + tac.date());
 
 }

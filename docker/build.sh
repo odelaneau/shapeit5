@@ -1,3 +1,8 @@
+#Clean up
+rm ../static_bins/SHAPEIT5_*
+rm resources/SHAPEIT5_*
+
+
 #Compile phase 1
 cd ../phase_common/
 make clean

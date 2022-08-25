@@ -81,7 +81,7 @@ void phaser::parse_command_line(vector < string > & args) {
 	vrb.title("[SHAPEIT5] Phase2 (phase rare variants onto a haplotype scaffold)");
 	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : 5." + string(PHASE2_VERSION));
+	vrb.bullet("Version       : 5." + string(PHASE2_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
 	vrb.bullet("Run date      : " + tac.date());
 }
 
