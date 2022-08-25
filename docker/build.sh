@@ -23,8 +23,11 @@ make -j static_exe
 cp bin/SHAPEIT5_ligate_static ../static_bins/.
 
 #Buld docker image
+LAB=shapeit5_$(date +'%d%m%Y')\_$(git rev-parse --short HEAD)
+
 cd ../docker/
 mkdir -p resources
 cp ../static_bins/SHAPEIT5* resources/.
-docker build -t shapeit5_220824_c85eb0c -f Dockerfile .
-docker save shapeit5_220824_c85eb0c | gzip -c > shapeit5_220824_c85eb0c.tar.gz
+
+docker build -t $LAB -f Dockerfile .
+docker save $LAB | gzip -c > $LAB\.tar.gz
