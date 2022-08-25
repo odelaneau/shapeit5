@@ -2,4 +2,4 @@
 fusermount -u /home/olivier/Fuse
 
 #mount
-dxfuse-linux /home/olivier/Fuse PhasingUKB
+~/Tools/dxfuse-linux /home/olivier/Fuse PhasingUKB
