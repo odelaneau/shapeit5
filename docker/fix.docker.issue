@@ -1,21 +1,21 @@
-https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue
+#https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue
 
-If you want to run docker as non-root user then you need to add it to the docker group. Create the docker group if it does not exist
+#If you want to run docker as non-root user then you need to add it to the docker group. Create the docker group if it does not exist
 
-$ sudo groupadd docker
+sudo groupadd docker
 
-Add your user to the docker group.
+#Add your user to the docker group.
 
-$ sudo usermod -aG docker $USER
+sudo usermod -aG docker $USER
 
-Run the following command or Logout and login again and run (that doesn't work you may need to reboot your machine first)
+#Run the following command or Logout and login again and run (that doesn't work you may need to reboot your machine first)
 
-$ newgrp docker
+newgrp docker
 
-Check if docker can be run without root
+#Check if docker can be run without root
 
-$ docker run hello-world
+docker run hello-world
 
-Reboot if still got error
+#Reboot if still got error
 
-$ reboot
+reboot
