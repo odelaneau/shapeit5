@@ -31,9 +31,10 @@ public:
 	haplotype_set & H;
 	vector < vector < bool > > Errors;
 	vector < vector < bool > > Checked;
+	vector < vector < float > > Calib;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
-	haplotype_checker(haplotype_set &);
+	haplotype_checker(haplotype_set &, int);
 	~haplotype_checker();
 
 	//Routines
@@ -47,7 +48,7 @@ public:
 	void writePerType(string);
 	void writeBlock(string);
 	void writeFlipSwitchErrorPerSample(string);
-	void writeCalibration(string, int);
+	void writeCalibration(string);
 };
 
 inline

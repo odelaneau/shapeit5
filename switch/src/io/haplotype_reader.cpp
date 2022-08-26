@@ -121,11 +121,21 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
 				if (rPP == n_samples_estimated) {
 					for(int i = 0 ; i < n_samples_estimated ; i ++) {
-						if (!bcf_float_is_missing(vPP[i])) {
-							int index = mapping[i];
-							if (index >= 0) {
-								H.Hprob.push_back(make_tuple(H.n_variants, index, vPP[i]));
+						int index = mapping[i];
+						if (index >= 0) {
+							H.Hprob[index].push_back(!bcf_float_is_missing(vPP[i]));
+							if (!bcf_float_is_missing(vPP[i])) {
+								string key = stb.str(H.Hprob[index].size() - 1) + "_" + stb.str(index);
+								//cout << "Inserting " << key << "\t" <<  vPP[i] << endl;
+								H.Vprob.insert(pair < string, float > ( key, vPP[i]));
 							}
+						}
+					}
+				} else {
+					for(int i = 0 ; i < n_samples_estimated ; i ++) {
+						int index = mapping[i];
+						if (index >= 0) {
+							H.Hprob[index].push_back(false);
 						}
 					}
 				}
@@ -139,7 +149,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));
-	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Hprob.size()));
+	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Vprob.size()));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 	free(gt_arr_t); free(gt_arr_e);
 	bcf_sr_destroy(sr);
@@ -234,11 +244,21 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
 				if (rPP == n_samples_estimated) {
 					for(int i = 0 ; i < n_samples_estimated ; i ++) {
-						if (!bcf_float_is_missing(vPP[i])) {
-							int index = mapping[i];
-							if (index >= 0) {
-								H.Hprob.push_back(make_tuple(H.n_variants, index, vPP[i]));
+						int index = mapping[i];
+						if (index >= 0) {
+							H.Hprob[index].push_back(!bcf_float_is_missing(vPP[i]));
+							if (!bcf_float_is_missing(vPP[i])) {
+								string key = stb.str(H.Hprob[index].size() - 1) + "_" + stb.str(index);
+								//cout << "Inserting " << key << "\t" <<  vPP[i] << endl;
+								H.Vprob.insert(pair < string, float > ( key, vPP[i]));
 							}
+						}
+					}
+				} else {
+					for(int i = 0 ; i < n_samples_estimated ; i ++) {
+						int index = mapping[i];
+						if (index >= 0) {
+							H.Hprob[index].push_back(false);
 						}
 					}
 				}
@@ -251,7 +271,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 	}
 	vrb.bullet("#Total variants = " + stb.str(n_variant_tot));
 	vrb.bullet("#Overlapping variants = " + stb.str(H.n_variants));
-	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Hprob.size()));
+	vrb.bullet("#Prob stored [PP field] = " + stb.str(H.Vprob.size()));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 	free(gt_arr_t); free(gt_arr_e);
 	bcf_sr_destroy(sr);

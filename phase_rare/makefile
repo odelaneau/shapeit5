@@ -98,7 +98,7 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2 -mavx2 -mfma
+static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
 static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal

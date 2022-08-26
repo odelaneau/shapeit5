@@ -1,8 +1,9 @@
 #include <models/haplotype_checker.h>
 
-haplotype_checker::haplotype_checker(haplotype_set & _H) : H(_H) {
+haplotype_checker::haplotype_checker(haplotype_set & _H, int nbins) : H(_H) {
 	Errors = vector < vector < bool > > (H.IDXesti.size(), vector < bool > (H.n_variants, false));
 	Checked = vector < vector < bool > > (H.IDXesti.size(), vector < bool > (H.n_variants, false));
+	Calib = vector < vector < float > > (nbins, vector < float > (3, 0.0f));
 }
 
 haplotype_checker::~haplotype_checker() {
@@ -12,6 +13,7 @@ haplotype_checker::~haplotype_checker() {
 
 void haplotype_checker::check() {
 	vrb.title("Check phasing discordances"); tac.clock();
+	unsigned long int n_missed = 0;
 	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
 		for (int l_curr = 0, l_prev = -1 ; l_curr < H.n_variants ; l_curr ++) {
 			bool curr_t0 = H.Htrue[2*H.IDXesti[i]+0][l_curr];
@@ -31,6 +33,22 @@ void haplotype_checker::check() {
 					prev_e1 = H.Hesti[2*H.IDXesti[i]+1][l_prev];
 					Errors[i][l_curr] = ((curr_t0==prev_t0) != (curr_e0==prev_e0));
 					Checked[i][l_curr] = true;
+
+					//Calibration
+					if (H.Hprob[H.IDXesti[i]][l_curr]) {
+						string key = stb.str(l_curr) + "_" + stb.str(H.IDXesti[i]);
+						map < string, float > :: iterator itM = H.Vprob.find(key);
+						if (itM != H.Vprob.end()) {
+							//cout << "Found [" << key << "]" << endl;
+							int bin = itM->second * (Calib.size()-1);
+							Calib[bin][0] += itM->second;
+							Calib[bin][1] += Errors[i][l_curr];
+							Calib[bin][2] += Checked[i][l_curr];
+
+						} else {
+							n_missed ++;
+						}
+					}
 				}
 				l_prev = l_curr;
 
@@ -43,6 +61,7 @@ void haplotype_checker::check() {
 		n_phased_hets += Checked[i][l];
 	}
 	vrb.bullet("#Phasing switch error rate = " + stb.str(n_phasing_errors * 100.0f / n_phased_hets, 5));
+	vrb.bullet("#missed = " + stb.str(n_missed));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
@@ -168,37 +187,14 @@ void haplotype_checker::writeBlock(string fout) {
 }
 
 
-void haplotype_checker::writeCalibration(string fout, int nbins) {
+void haplotype_checker::writeCalibration(string fout) {
 	tac.clock();
 
-	if (H.Hprob.size()) {
-
-		//Mapping validated
-		vector < int > mapping = vector < int > (H.vecSamples.size(), -1);
-		for (int i = 0 ; i < H.IDXesti.size() ; i++) mapping[H.IDXesti[i]] = i;
-
-
-		//Compute calibration by bining
-		vector < pair < int, int > > C = vector < pair < int, int > > (nbins, pair < int, int > (0,0));
-		for (long int c = 0 ; c < H.Hprob.size() ; c++) {
-			int var = get<0>(H.Hprob[c]);
-			int ind = get<1>(H.Hprob[c]);
-			int idx = get<2>(H.Hprob[c]) * (nbins-1);
-			if (mapping[ind] >= 0) {
-				//cout << var << " " << ind << " " << mapping[ind] << " " << idx << endl;
-				//cout << "\t" << Errors.size() << endl;
-				//cout << "\t" << Errors[mapping[ind]].size() << endl;
-				C[idx].first += Errors[mapping[ind]][var];
-				C[idx].second += Checked[mapping[ind]][var];
-			}
-		}
-
-		//Write output file
-		vrb.title("Writing phasing calibration in [" + fout + "]");
-		output_file fdo (fout);
-		for (int c = 0 ; c < C.size() ; c++) {
-			fdo << c << " " << c * 1.0f / nbins << " " << (c+1) * 1.0f / nbins << " " << C[c].first << " " << C[c].second << endl;
-		}
-		fdo.close();
+	//Write output file
+	vrb.title("Writing phasing calibration in [" + fout + "]");
+	output_file fdo (fout);
+	for (int c = 0 ; c < Calib.size() ; c++) {
+		fdo << c << " " << c * 1.0f / Calib.size() << " " << (c+1) * 1.0f / Calib.size() << " " << Calib[c][0] << " " << Calib[c][1] << " " << Calib[c][2] << endl;
 	}
+	fdo.close();
 }
