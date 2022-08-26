@@ -120,7 +120,14 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 				//4. Probabilities
 				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
 				if (rPP == n_samples_estimated) {
-					for(int i = 0 ; i < n_samples_estimated ; i ++) if (!bcf_float_is_missing(vPP[i])) H.Hprob.push_back(make_tuple(H.n_variants, i, vPP[i]));
+					for(int i = 0 ; i < n_samples_estimated ; i ++) {
+						if (!bcf_float_is_missing(vPP[i])) {
+							int index = mapping[i];
+							if (index >= 0) {
+								H.Hprob.push_back(make_tuple(H.n_variants, index, vPP[i]));
+							}
+						}
+					}
 				}
 
 				H.n_variants ++;
@@ -226,7 +233,14 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 				//4. Probabilities
 				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
 				if (rPP == n_samples_estimated) {
-					for(int i = 0 ; i < n_samples_estimated ; i ++) if (!bcf_float_is_missing(vPP[i])) H.Hprob.push_back(make_tuple(H.n_variants, i, vPP[i]));
+					for(int i = 0 ; i < n_samples_estimated ; i ++) {
+						if (!bcf_float_is_missing(vPP[i])) {
+							int index = mapping[i];
+							if (index >= 0) {
+								H.Hprob.push_back(make_tuple(H.n_variants, index, vPP[i]));
+							}
+						}
+					}
 				}
 
 				H.n_variants ++;

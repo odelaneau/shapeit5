@@ -173,14 +173,24 @@ void haplotype_checker::writeCalibration(string fout, int nbins) {
 
 	if (H.Hprob.size()) {
 
+		//Mapping validated
+		vector < int > mapping = vector < int > (H.vecSamples.size(), -1);
+		for (int i = 0 ; i < H.IDXesti.size() ; i++) mapping[H.IDXesti[i]] = i;
+
+
 		//Compute calibration by bining
 		vector < pair < int, int > > C = vector < pair < int, int > > (nbins, pair < int, int > (0,0));
 		for (long int c = 0 ; c < H.Hprob.size() ; c++) {
 			int var = get<0>(H.Hprob[c]);
 			int ind = get<1>(H.Hprob[c]);
 			int idx = get<2>(H.Hprob[c]) * (nbins-1);
-			C[idx].first += Errors[ind][var];
-			C[idx].second += Checked[ind][var];
+			if (mapping[ind] >= 0) {
+				//cout << var << " " << ind << " " << mapping[ind] << " " << idx << endl;
+				//cout << "\t" << Errors.size() << endl;
+				//cout << "\t" << Errors[mapping[ind]].size() << endl;
+				C[idx].first += Errors[mapping[ind]][var];
+				C[idx].second += Checked[mapping[ind]][var];
+			}
 		}
 
 		//Write output file
