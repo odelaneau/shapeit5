@@ -40,8 +40,9 @@ public:
 
 	//Estimated Data
 	vector < vector < bool > > Hesti;
+	vector < vector < bool > > Hprob;
+	map < string, float > Vprob;
 	vector < int > IDXesti;
-	vector < tuple < int, int, float > > Hprob;
 
 	//Variant Data [Columns]
 	vector < int > MAC;

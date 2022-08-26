@@ -63,7 +63,7 @@ laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 laptop: $(BFILE)
 
-debug: CXXFLAG=-g  -mavx2 -mfma
+debug: CXXFLAG=-g -mavx2 -mfma
 debug: LDFLAG=-g
 debug: HTSSRC=$(HOME)/Tools
 debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
@@ -98,7 +98,7 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2 -mavx2 -mfma
+static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
 static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal

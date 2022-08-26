@@ -10,6 +10,12 @@ dummy_build_folder_obj := $(shell mkdir -p obj)
 CXXFLAG=-O3
 LDFLAG=-O3
 
+#COMMIT TRACING
+COMMIT_VERS=$(shell git rev-parse --short HEAD)
+COMMIT_DATE=$(shell date +'%d%m%Y')
+CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
+CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+
 #DYNAMIC LIBRARIES
 DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
 
@@ -74,7 +80,7 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2
+static_exe: CXXFLAG=-O2 -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
 static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal

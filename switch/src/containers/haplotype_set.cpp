@@ -47,6 +47,7 @@ void haplotype_set::push(string & sample_id) {
 	Htrue.push_back(vector < bool > ());
 	Hesti.push_back(vector < bool > ());
 	Hesti.push_back(vector < bool > ());
+	Hprob.push_back(vector < bool > ());
 	Missing.push_back(vector < bool > ());
 	Phased.push_back(vector < bool > ());
 

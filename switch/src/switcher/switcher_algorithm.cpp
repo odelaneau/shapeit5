@@ -28,7 +28,7 @@
 void switcher::process() {
 	mendel_solver MP(H);
 	genotype_checker GC(H);
-	haplotype_checker HC(H);
+	haplotype_checker HC(H, options["nbins"].as < int > ());
 
 	//
 	if (options.count("pedigree")) {
@@ -50,6 +50,6 @@ void switcher::process() {
 	HC.writePerType(options["output"].as < string > () + ".type.switch.txt.gz");
 	HC.writeFlipSwitchErrorPerSample(options["output"].as < string > () + ".flipsAndSwitches.txt.gz");
 	HC.writeBlock(options["output"].as < string > () + ".block.switch.txt.gz");
-	HC.writeCalibration(options["output"].as < string > () + ".calibration.switch.txt.gz", options["nbins"].as < int > ());
+	HC.writeCalibration(options["output"].as < string > () + ".calibration.switch.txt.gz");
 
 }
