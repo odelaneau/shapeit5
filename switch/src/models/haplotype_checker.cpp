@@ -13,7 +13,7 @@ haplotype_checker::~haplotype_checker() {
 
 void haplotype_checker::check() {
 	vrb.title("Check phasing discordances"); tac.clock();
-	unsigned long int n_missed = 0;
+	unsigned long int n_missed = 0, n_incorrect = 0 ;
 	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
 		for (int l_curr = 0, l_prev = -1 ; l_curr < H.n_variants ; l_curr ++) {
 			bool curr_t0 = H.Htrue[2*H.IDXesti[i]+0][l_curr];
@@ -35,19 +35,18 @@ void haplotype_checker::check() {
 					Checked[i][l_curr] = true;
 
 					//Calibration
-					if (H.Hprob[H.IDXesti[i]][l_curr]) {
+					if (H.Hprob[H.IDXesti[i]][l_curr] && H.MAC[l_curr] > 1) {
 						string key = stb.str(l_curr) + "_" + stb.str(H.IDXesti[i]);
 						map < string, float > :: iterator itM = H.Vprob.find(key);
 						if (itM != H.Vprob.end()) {
 							//cout << "Found [" << key << "]" << endl;
-							int bin = itM->second * (Calib.size()-1);
-							Calib[bin][0] += itM->second;
-							Calib[bin][1] += Errors[i][l_curr];
-							Calib[bin][2] += Checked[i][l_curr];
-
-						} else {
-							n_missed ++;
-						}
+							if (itM->second >= 0.0f && itM->second <= 1.0f) {
+								int bin = itM->second * (Calib.size()-1);
+								Calib[bin][0] += itM->second;
+								Calib[bin][1] += Errors[i][l_curr];
+								Calib[bin][2] += Checked[i][l_curr];
+							} else n_incorrect ++;
+						} else n_missed ++;
 					}
 				}
 				l_prev = l_curr;
@@ -61,7 +60,7 @@ void haplotype_checker::check() {
 		n_phased_hets += Checked[i][l];
 	}
 	vrb.bullet("#Phasing switch error rate = " + stb.str(n_phasing_errors * 100.0f / n_phased_hets, 5));
-	vrb.bullet("#missed = " + stb.str(n_missed));
+	vrb.bullet("#missed = " + stb.str(n_missed) + " / #incorrect = " +  stb.str(n_incorrect));
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 

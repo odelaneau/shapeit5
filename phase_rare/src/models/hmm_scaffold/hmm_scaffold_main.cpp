@@ -184,7 +184,7 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents) {
 
 			//Impute from full conditioning set
 			for (int vr = 0 ; vr < cevents[vs+1].size() ; vr ++) {
-				G.phaseLiAndStephens(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.6000f);
+				G.phaseLiAndStephens(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.5001f);
 			}
 		}
 
@@ -196,7 +196,7 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents) {
 
 		//Impute from full conditioning set
 		for (int vr = 0 ; vr < cevents[0].size() ; vr ++) {
-			G.phaseLiAndStephens(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.6000f);
+			G.phaseLiAndStephens(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.5001f);
 		}
 	}
 }
