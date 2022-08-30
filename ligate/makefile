@@ -12,7 +12,7 @@ LDFLAG=-O3
 
 #COMMIT TRACING
 COMMIT_VERS=$(shell git rev-parse --short HEAD)
-COMMIT_DATE=$(shell date +'%d%m%Y')
+COMMIT_DATE=$(shell git log -1 --format=%cd --date=short)
 CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
 CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 

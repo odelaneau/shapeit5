@@ -3,7 +3,7 @@
 MAP=/mnt/project/data/shapeit_maps/chr20.b38.gmap.gz
 SCA=/mnt/project/Phasing/PhasingSNParray/step5_benchmark/benchmark_c20_b0_v2.b38.sorted.N480853.phased.bcf
 
-DOCKER=shapeit5_$(date +'%d%m%Y')\_$(git rev-parse --short HEAD)\.tar.gz
+DOCKER=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)\.tar.gz
 
 for N in 2000 5000 10000 20000 50000 100000 147754; do
 

@@ -4,7 +4,7 @@ BCF=/mnt/project/Phasing/PhasingWGS/step1_preparedata/benchmark_ukb23352_c20_qc_
 VAL=/mnt/project/Phasing/PhasingWGS/step1_preparedata/validation_ukb23352_c20_qc_v1.bcf
 PED=/mnt/project/Phasing/PhasingSNParray/step1_dataqc/samples.families.txt
 
-DOCKER=shapeit5_$(date +'%d%m%Y')\_$(git rev-parse --short HEAD)\.tar.gz
+DOCKER=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)\.tar.gz
 
 #####################################################################################################
 #				BENCHMARCH BEAGLE5							#

@@ -28,7 +28,7 @@ make -j static_exe
 cp bin/SHAPEIT5_ligate_static ../static_bins/.
 
 #Buld docker image
-LAB=shapeit5_$(date +'%d%m%Y')\_$(git rev-parse --short HEAD)
+LAB=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)
 
 cd ../docker/
 mkdir -p resources

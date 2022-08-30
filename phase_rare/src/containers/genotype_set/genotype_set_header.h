@@ -103,7 +103,6 @@ public:
 			float p11 = max(prb1, numeric_limits<float>::min());
 			float p10 = max(1.0f - prb1, numeric_limits<float>::min());
 
-			/*
 			if (het) {
 				gprobs[0] = 0.0f;
 				gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
@@ -115,8 +114,8 @@ public:
 				gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
 				gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
 			}
-			*/
 
+			/*
 			if (het) {
 				gprobs[0] = 0.0f;
 				gprobs[1] = p00 * p11;
@@ -128,6 +127,7 @@ public:
 				gprobs[2] = p01 * p10;
 				gprobs[3] = p01 * p11;
 			}
+			*/
 
 			//cout << stb.str(gprobs, 3) << endl;
 			int maxg = alg.imax(gprobs);
