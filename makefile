@@ -12,6 +12,6 @@ clean:
 	$(MAKE) $@ -C $$dir; \
 	done
 	rm static_bins/*
-	rm docker/ressources/*
-	rm docker/shapeit5_0.0.1.tar.gz
+	rm docker/resources/*
+	rm docker/shapeit5*.tar.gz
 

@@ -70,5 +70,11 @@ void phaser::read_files_and_initialise() {
 		V.setGeneticMap(readerGM);
 	} else V.setGeneticMap();
 	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
+	/*
+	double theta = 1.0f / (log(readerG.n_samples*2) + 0.5);
+	rare_genotype::ed = theta / (2*( readerG.n_samples*2 + theta ));
+	rare_genotype::ee = 1.0f - rare_genotype::ed;
+	vrb.bullet("Emission probability = " + stb.str(rare_genotype::ed));
+	*/
 	H.transposeHaplotypes_V2H();
 }
