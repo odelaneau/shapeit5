@@ -40,3 +40,8 @@ for (s in nSIZE:nSIZE) {
 	}
 }
 
+pdf("calibration2.pdf")
+plot(freq/total, 1.0 - error/total, xlim=c(0.5, 1.0), ylim=c(0.5, 1.0))
+abline(0,1,col="red")
+dev.off()
+

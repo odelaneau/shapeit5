@@ -74,7 +74,7 @@ for (s in nSIZE:nSIZE) {
 	#SHPser1 = freqSER(prefix, suffix, s);
 	#BQ2[s] = SHPser1[2]
 	
-	pdf(paste("PDFs/figure2d_", SIZE[s], ".pdf", sep=""), 10,5)
+	pdf(paste("PDFs/figure2e_", SIZE[s], ".pdf", sep=""), 10,5)
 	par(mfrow=c(1,2))
 	
 	
