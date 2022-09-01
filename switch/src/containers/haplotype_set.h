@@ -41,6 +41,7 @@ public:
 	//Estimated Data
 	vector < vector < bool > > Hesti;
 	vector < vector < bool > > Hprob;
+	vector < vector < bool > > Estimated;
 	map < string, float > Vprob;
 	vector < int > IDXesti;
 

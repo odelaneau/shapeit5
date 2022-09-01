@@ -25,7 +25,8 @@ void haplotype_checker::check() {
 			bool het_check2 = het_check1 && (curr_t0 != curr_t1);				//Validation haplotypes are hets
 			bool het_check3 = het_check2 && !(H.Missing[H.IDXesti[i]][l_curr]); //Validation haplotypes are non-missing
 			bool het_check4 = het_check3 && H.Phased[H.IDXesti[i]][l_curr];		//Validation haplotypes are phased
-			if (het_check4) {
+			bool het_check5 = het_check4 && H.Estimated[H.IDXesti[i]][l_curr];	//Haplotypes have been estimated there
+			if (het_check5) {
 				if (l_prev >= 0) {
 					prev_t0 = H.Htrue[2*H.IDXesti[i]+0][l_prev];
 					prev_t1 = H.Htrue[2*H.IDXesti[i]+1][l_prev];
@@ -35,7 +36,7 @@ void haplotype_checker::check() {
 					Checked[i][l_curr] = true;
 
 					//Calibration
-					if (H.Hprob[H.IDXesti[i]][l_curr] && H.MAC[l_curr] > 1) {
+					if (H.Hprob[H.IDXesti[i]][l_curr]) {
 						string key = stb.str(l_curr) + "_" + stb.str(H.IDXesti[i]);
 						map < string, float > :: iterator itM = H.Vprob.find(key);
 						if (itM != H.Vprob.end()) {

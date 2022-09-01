@@ -21,9 +21,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <io/haplotype_reader.h>
 
-haplotype_reader::haplotype_reader(haplotype_set & _H, string _region, int _nthreads) : H(_H) {
+haplotype_reader::haplotype_reader(haplotype_set & _H, string _region, double _minPP,  int _nthreads) : H(_H) {
 	nthreads = _nthreads;
 	region = _region;
+	minPP = _minPP;
 }
 
 haplotype_reader::~haplotype_reader() {
@@ -124,10 +125,11 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 						int index = mapping[i];
 						if (index >= 0) {
 							H.Hprob[index].push_back(!bcf_float_is_missing(vPP[i]));
+							H.Estimated[index].push_back(true);
 							if (!bcf_float_is_missing(vPP[i])) {
 								string key = stb.str(H.Hprob[index].size() - 1) + "_" + stb.str(index);
-								//cout << "Inserting " << key << "\t" <<  vPP[i] << endl;
 								H.Vprob.insert(pair < string, float > ( key, vPP[i]));
+								if (vPP[i] <= minPP) H.Estimated[index].back() = false;
 							}
 						}
 					}
@@ -136,6 +138,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 						int index = mapping[i];
 						if (index >= 0) {
 							H.Hprob[index].push_back(false);
+							H.Estimated[index].push_back(true);
 						}
 					}
 				}
@@ -247,10 +250,11 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 						int index = mapping[i];
 						if (index >= 0) {
 							H.Hprob[index].push_back(!bcf_float_is_missing(vPP[i]));
+							H.Estimated[index].push_back(true);
 							if (!bcf_float_is_missing(vPP[i])) {
 								string key = stb.str(H.Hprob[index].size() - 1) + "_" + stb.str(index);
-								//cout << "Inserting " << key << "\t" <<  vPP[i] << endl;
 								H.Vprob.insert(pair < string, float > ( key, vPP[i]));
+								if (vPP[i] <= minPP) H.Estimated[index].back() = false;
 							}
 						}
 					}
@@ -259,6 +263,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 						int index = mapping[i];
 						if (index >= 0) {
 							H.Hprob[index].push_back(false);
+							H.Estimated[index].push_back(true);
 						}
 					}
 				}
