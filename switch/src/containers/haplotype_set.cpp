@@ -50,6 +50,7 @@ void haplotype_set::push(string & sample_id) {
 	Hprob.push_back(vector < bool > ());
 	Missing.push_back(vector < bool > ());
 	Phased.push_back(vector < bool > ());
+	Estimated.push_back(vector < bool > ());
 
 	mapSamples.insert(pair < string, int > (sample_id, vecSamples.size()));
 	vecSamples.push_back(sample_id);

@@ -39,6 +39,7 @@ void switcher::declare_options() {
 			("pedigree,P", bpo::value< string >(), "Pedigree file in PED format")
 			("region,R", bpo::value< string >(), "Target region")
 			("nbins", bpo::value<int>()->default_value(20), "Number of bins used for calibration")
+			("min-pp", bpo::value<double>()->default_value(0.0f), "Minimal PP value for entering computations")
 			("dupid", "Duplicate ID for UKB matching IDs");
 	
 	bpo::options_description opt_output ("Output files");
@@ -92,4 +93,5 @@ void switcher::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("#threads : " + stb.str(options["thread"].as < int > ()));
 	vrb.bullet("#bins    : " + stb.str(options["nbins"].as < int > ()));
+	vrb.bullet("MinPP    : " + stb.str(options["min-pp"].as < double > ()));
 }

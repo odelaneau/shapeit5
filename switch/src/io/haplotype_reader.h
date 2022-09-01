@@ -30,11 +30,12 @@ class haplotype_reader {
 public:
 	//DATA
 	int nthreads;
+	double minPP;
 	haplotype_set & H;
 	string region;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	haplotype_reader(haplotype_set &, string region, int _nthreads);
+	haplotype_reader(haplotype_set &, string region, double minPP, int _nthreads);
 	~haplotype_reader();
 
 	//IO
