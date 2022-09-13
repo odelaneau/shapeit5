@@ -74,7 +74,7 @@ for (s in nSIZE:nSIZE) {
 	#SHPser1 = freqSER(prefix, suffix, s);
 	#BQ2[s] = SHPser1[2]
 	
-	pdf(paste("PDFs/figure2e_", SIZE[s], ".pdf", sep=""), 10,5)
+	pdf(paste("PDFs/figure2e1_", SIZE[s], ".pdf", sep=""), 10,5)
 	par(mfrow=c(1,2))
 	
 	
@@ -91,7 +91,8 @@ for (s in nSIZE:nSIZE) {
 	points(X, log10(SHPser0), type="o", pch=20, col=COLdiff[2], lwd=2)
 	#points(X, log10(SHPser1), type="o", pch=20, col=COLdiff[3], lwd=2)
 	#legend("topright", fill=c("black", COLdiff[2:3]), legend=c("Beagle5.4","SHAPEIT5","SHAPEIT5-scaffold"), bg="white")
-	legend("topright", fill=c("black", COLdiff[2]), legend=c("Beagle5.4","SHAPEIT5"), bg="white")
+	#legend("topright", fill=c("black", COLdiff[2]), legend=c("Beagle5.4","SHAPEIT5"), bg="white")
+	legend("topright", fill=c(COLdiff[2], "black"), legend=c("SHAPEIT5", "Beagle5.4"), bg="white")
 	
 	plot(X, (SHPser0 - BGLser) * 100.0 / BGLser, type="n", pch=20, xlab="Minor Allele Count", ylab = "Switch Error Rate Reduction (%)", col="black", lwd=2, xaxt='n', ylim=c(-50, 10), main=paste("B. SER reduction\n[N=", SIZE[s],"]", sep=""), yaxt='n')
 	abline(h=seq(-50, 50, 5), col="lightgrey", lty=2)
