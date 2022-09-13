@@ -120,7 +120,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 
 				//4. Probabilities
 				rPP = bcf_get_format_float(sr->readers[1].header, line_e, "PP", &vPP, &nPP);
-				if (rPP == n_samples_estimated && H.MAC.back() != 1) {
+				if (rPP == n_samples_estimated) {
 					for(int i = 0 ; i < n_samples_estimated ; i ++) {
 						int index = mapping[i];
 						if (index >= 0) {
