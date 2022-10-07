@@ -31,6 +31,7 @@ public:
 	//DATA
 	haplotype_set & H;
 	vector < vector < bool > > Errors;
+	vector < int > CountsD0, CountsD1, CountsD2, CountsT00, CountsT01, CountsT02, CountsT10, CountsT11, CountsT12;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	mendel_solver(haplotype_set &);
@@ -38,13 +39,18 @@ public:
 
 	//Routines
 	void solveT(int locus, int cidx, int fidx, int midx);
-	void solveD(int locus, int cidx, int pidx, bool father);
-	void solve();
+	void solveD(int locus, int cidx, int pidx, bool father, bool singleton);
+	void solve(bool);
+	void countT(int locus, int cidx, int fidx, int midx);
+	void countD(int locus, int cidx, int pidx);
+	void count();
 	void set();
 
 	//Summarize
 	void writePerSample(string);
 	void writePerVariant(string);
+	void writeImbalance(string);
+	void writePedigree(string);
 };
 
 #endif

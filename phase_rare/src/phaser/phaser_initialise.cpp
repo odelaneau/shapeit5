@@ -45,13 +45,22 @@ void phaser::read_files_and_initialise() {
 	genotype_reader readerG(H, G, V);
 	readerG.setThreads(options["thread"].as < int > ());
 	readerG.setRegions(options["scaffold-region"].as < string > (), input_start, input_stop);
-	readerG.setFilenames(options["input"].as < string > (), options["scaffold"].as < string > ());
 	readerG.setMAF(options["input-maf"].as < double > ());
 
 	//step3: Read the genotype data
-	readerG.scanGenotypes();
-	readerG.allocateGenotypes();
-	readerG.readGenotypes();
+	if (options.count("input-plain")) {
+		readerG.setFilenames(options["input-plain"].as < string > (), options["input-plain"].as < string > (), options["scaffold"].as < string > ());
+		readerG.scanGenotypesPlain();
+		readerG.allocateGenotypes();
+		readerG.readGenotypesPlain();
+	} else {
+		readerG.setFilenames(options["input-sparse"].as < string > () + ".bcf", options["input-sparse"].as < string > () + ".bin", options["scaffold"].as < string > ());
+		readerG.scanGenotypesSparse();
+		readerG.allocateGenotypes();
+		readerG.readGenotypesSparse();
+	}
+
+
 	G.imputeMonomorphic();
 	G.fillup_by_transpose_V2I();
 

@@ -26,122 +26,8 @@
 
 #include <containers/bitmatrix.h>
 #include <objects/hmm_parameters.h>
-
+#include <objects/rare_genotype.h>
 #include <io/pedigree_reader.h>
-
-
-class rare_genotype {
-public:
-
-	static float ee;
-	static float ed;
-
-	unsigned int idx : 27;	//Index of the non Major/Major genotype
-	unsigned int het : 1;	//Is it het?
-	unsigned int mis : 1;	//Is it missing?	If none of the two, it is then Minor/Minor
-	unsigned int al0 : 1;	//What's the allele on haplotype 0?
-	unsigned int al1 : 1;	//What's the allele on haplotype 1?
-	unsigned int pha : 1;	//Is the genotype phased?
-	float prob;				//Probability
-
-	rare_genotype() {
-		idx = het = mis = al0 = al1 = pha = 0;
-		prob = -1.0f;
-	}
-
-	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
-		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
-		pha = (!mis && (al0==al1));
-
-		if (al0 != al1) {
-			if (rng.flipCoin()) {
-				al0 = 0;
-				al1 = 1;
-			} else {
-				al0 = 1;
-				al1 = 0;
-			}
-		}
-
-		prob = pha?1.0f:-1.0f;
-	}
-
-	~rare_genotype() {
-		idx = het = mis = al0 = al1 = pha = 0;
-		prob = -1.0f;
-	}
-
-	bool operator < (const rare_genotype & rg) const {
-		return idx < rg.idx;
-	}
-
-	void phase(unsigned int g) {
-		if (!pha) {
-			switch (g) {
-			case 0:	al0 = 0; al1 = 0; break;
-			case 1:	al0 = 0; al1 = 1; break;
-			case 2:	al0 = 1; al1 = 0; break;
-			case 3:	al0 = 1; al1 = 1; break;
-			}
-		}
-	}
-
-	void randomize() {
-		if (!pha) {
-			if (het) phase(rng.getInt(2) + 1);
-			if (mis) phase(rng.getInt(4));
-		}
-	}
-
-	void phase(float prb0, float prb1) {
-		if (!pha && (het || mis)) {
-			vector < double > gprobs = vector < double > (4, 0.0f);
-
-
-			float p01 = max(prb0, numeric_limits<float>::min());
-			float p00 = max(1.0f - prb0, numeric_limits<float>::min());
-			float p11 = max(prb1, numeric_limits<float>::min());
-			float p10 = max(1.0f - prb1, numeric_limits<float>::min());
-
-			if (het) {
-				gprobs[0] = 0.0f;
-				gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
-				gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
-				gprobs[3] = 0.0f;
-			} else {
-				gprobs[0] = (p00*ee + p01*ed) * (p10*ee + p11*ed);
-				gprobs[1] = (p00*ee + p01*ed) * (p10*ed + p11*ee);
-				gprobs[2] = (p00*ed + p01*ee) * (p10*ee + p11*ed);
-				gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
-			}
-
-			/*
-			if (het) {
-				gprobs[0] = 0.0f;
-				gprobs[1] = p00 * p11;
-				gprobs[2] = p01 * p10;
-				gprobs[3] = 0.0f;
-			} else {
-				gprobs[0] = p00 * p10;
-				gprobs[1] = p00 * p11;
-				gprobs[2] = p01 * p10;
-				gprobs[3] = p01 * p11;
-			}
-			*/
-
-			//cout << stb.str(gprobs, 3) << endl;
-			int maxg = alg.imax(gprobs);
-			switch (maxg) {
-			case 0:	al0 = 0; al1 = 0; break;
-			case 1:	al0 = 0; al1 = 1; break;
-			case 2:	al0 = 1; al1 = 0; break;
-			case 3:	al0 = 1; al1 = 1; break;
-			}
-			prob = gprobs[maxg] / (gprobs[0] + gprobs[1] + gprobs[2] + gprobs[3]);
-			//cout << stb.str(prob, 6) << endl;
-		}
-	}
-};
 
 class genotype_set {
 public:
@@ -188,12 +74,12 @@ public:
 	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
 	void pushRareHet(unsigned int vr, unsigned int i);
 	void pushRareHom(unsigned int vr, unsigned int i, bool major);
+	int pushRare(unsigned int vr, unsigned int v);
 
 	//IMPUTE
 	void imputeMonomorphic();
 	void phaseLiAndStephens(unsigned int, unsigned int, aligned_vector32 < float > &, aligned_vector32 < float > &, vector < unsigned int > &, float);
 	void phaseCoalescentViterbi(unsigned int, vector < int > &, vector < int > &, hmm_parameters &);
-	void phaseCoalescentViterbi2(unsigned int, double, double);
 
 	//TRIOS [UNTESTED]
 	void phaseTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts);
@@ -215,6 +101,14 @@ void genotype_set::pushRareHet(unsigned int vr, unsigned int i) {
 inline
 void genotype_set::pushRareHom(unsigned int vr, unsigned int i, bool major) {
 	GRvar_genotypes[vr].emplace_back(i, 0, 0, !major, !major);
+}
+
+inline
+int genotype_set::pushRare(unsigned int vr, unsigned int value) {
+	GRvar_genotypes[vr].emplace_back(value);
+	if (GRvar_genotypes[vr].back().mis) return 3;
+	else if (GRvar_genotypes[vr].back().het) return 1;
+	else return 2*GRvar_genotypes[vr].back().al0;
 }
 
 #endif
