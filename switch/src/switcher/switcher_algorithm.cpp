@@ -32,9 +32,12 @@ void switcher::process() {
 
 	//
 	if (options.count("pedigree")) {
-		MP.solve();
+		MP.solve(options.count("singleton"));
+		MP.count();
 		MP.writePerSample(options["output"].as < string > () + ".sample.mendel.txt.gz");
 		MP.writePerVariant(options["output"].as < string > () + ".variant.mendel.txt.gz");
+		MP.writeImbalance(options["output"].as < string > () + ".variant.imbalance.txt.gz");
+		MP.writePedigree(options["output"].as < string > () + ".sample.pedigree");
 	} else MP.set();
 
 	//

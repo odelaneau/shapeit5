@@ -40,6 +40,7 @@ void switcher::declare_options() {
 			("region,R", bpo::value< string >(), "Target region")
 			("nbins", bpo::value<int>()->default_value(20), "Number of bins used for calibration")
 			("min-pp", bpo::value<double>()->default_value(0.0f), "Minimal PP value for entering computations")
+			("singleton", "Trick to phase singleton")
 			("dupid", "Duplicate ID for UKB matching IDs");
 	
 	bpo::options_description opt_output ("Output files");

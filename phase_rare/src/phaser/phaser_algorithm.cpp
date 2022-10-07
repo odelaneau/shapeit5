@@ -49,19 +49,19 @@ void phaser::hmmcompute(int id_job, int id_thread) {
 
 	//Forward-Backward-Viterbi passes for hap0
 	thread_hmms[id_thread]->setup(2*id_job+0);
-	double pf0 = thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents);
 	thread_hmms[id_thread]->viterbi(path0);
+	double pf0 = thread_hmms[id_thread]->forward();
+	thread_hmms[id_thread]->backward(cevents, path0);
+
 
 	//Forward-Backward-Viterbi passes for hap1
 	thread_hmms[id_thread]->setup(2*id_job+1);
-	double pf1 = thread_hmms[id_thread]->forward();
-	thread_hmms[id_thread]->backward(cevents);
 	thread_hmms[id_thread]->viterbi(path1);
+	double pf1 = thread_hmms[id_thread]->forward();
+	thread_hmms[id_thread]->backward(cevents, path1);
 
 	//Phase remaining unphased using viterbi [singletons, etc ...]
 	G.phaseCoalescentViterbi(id_job, path0, path1, M);
-	//G.phaseCoalescentViterbi2(id_job, pf0, pf1);
 }
 
 void phaser::phase() {

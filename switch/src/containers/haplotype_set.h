@@ -47,6 +47,7 @@ public:
 
 	//Variant Data [Columns]
 	vector < int > MAC;
+	vector < bool > MinorAlleles;
 	vector < int > Positions;
 	vector < string > RSIDs;
 	vector < string > REFs, ALTs;

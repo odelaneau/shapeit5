@@ -56,42 +56,10 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 		if (hap%2 == 0) {
 			assert(GRvar_genotypes[vr][tidx].prob < 0.0f);
 			GRvar_genotypes[vr][tidx].prob = p[1] / (p[0] + p[1]);
-
-			/*
-			if (isnan(GRvar_genotypes[vr][tidx].prob)) {
-				cout << endl << "PROB0 = " << p[0] << " " << p[1] << endl;
-				cout << "MISS = " << GRvar_genotypes[vr][tidx].mis << " " << GRvar_genotypes[vr][tidx].het << endl;
-				cout << "K=" << H.size() << " " << GRvar_genotypes[vr].size() << endl;
-				//cout << "rares = " << endl;
-				//for (int e = 0 ; e < GRvar_genotypes[vr].size() ; e ++) cout << "\t" << GRvar_genotypes[vr][e].idx << " " << GRvar_genotypes[vr][e].pha << " " << GRvar_genotypes[vr][e].prob << endl;
-				cout << "states = " << endl;
-				for (int k = 0 ; k < H.size() ; k++) cout << "\t" << H[k]/2 << " " << alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f << endl;
-			}
-			 */
-
 		} else {
-
-			/*
-			if (!(GRvar_genotypes[vr][tidx].prob >= 0.0f)) {
-				cout << endl << "PROB1 = " << GRvar_genotypes[vr][tidx].prob << endl;
-			}
-			 */
 			assert(GRvar_genotypes[vr][tidx].prob >= 0.0f);
 			float pp = GRvar_genotypes[vr][tidx].prob;
 			GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
-/*
-			if (GRvar_genotypes[vr].size()  == 1 && GRvar_genotypes[vr][tidx].het) {
-				cout << endl << " ================== " << endl;
-				cout << "vr = " << vr << endl;
-				cout << "tidx = " << GRvar_genotypes[vr][tidx].idx  << endl;
-				cout << "prob = " << pp << " " << stb.str(GRvar_genotypes[vr][tidx].prob, 4) << endl;
-				//cout << "rares = " << endl;
-				//for (int e = 0 ; e < GRvar_genotypes[vr].size() ; e ++) cout << "\t" << GRvar_genotypes[vr][e].idx << " " << GRvar_genotypes[vr][e].pha << " " << GRvar_genotypes[vr][e].prob << endl;
-				//cout << "states = " << endl;
-				//for (int k = 0 ; k < H.size() ; k++) cout << "\t" << H[k]/2 << " " << alphaXbeta_prev[k] * 0.5f + alphaXbeta_curr[k] * 0.5f << endl;
-			}
-*/
-
 			if (GRvar_genotypes[vr][tidx].het && GRvar_genotypes[vr][tidx].prob < threshold) {
 				GRvar_genotypes[vr][tidx].prob = -1.0f;
 				GRvar_genotypes[vr][tidx].pha = 0;
@@ -159,27 +127,12 @@ void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pat
 				GRind_genotypes[ind][vr].al0 = 1;
 				GRind_genotypes[ind][vr].al1 = 0;
 			}
+
+			if (GRvar_genotypes[idx].size() == 1) {
+			//	cout << ind << " " << vr << " " << idx << " " << w0 << " " << w1 << endl;
+			}
+
 			GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
 		}
 	}
 }
-
-void genotype_set::phaseCoalescentViterbi2(unsigned int ind, double pf0, double pf1) {
-	for (int vr = 0 ; vr < GRind_genotypes[ind].size() ; vr ++) {
-		unsigned int idx = GRind_genotypes[ind][vr].idx;
-		if (!GRind_genotypes[ind][vr].pha) {
-
-			if (pf0 > pf1) {
-				GRind_genotypes[ind][vr].al0 = 0;
-				GRind_genotypes[ind][vr].al1 = 1;
-			} else {
-				GRind_genotypes[ind][vr].al0 = 1;
-				GRind_genotypes[ind][vr].al1 = 0;
-			}
-			GRind_genotypes[ind][vr].prob = 1.0f;
-		}
-	}
-}
-
-
-

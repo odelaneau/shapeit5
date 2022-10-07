@@ -94,6 +94,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, string ffreq,
 				if (nAC!=1) vrb.error("AC field is needed");
 				if (nAN!=1) vrb.error("AN field is needed");
 				H.MAC.push_back(min(vAC[0], (vAN[0] - vAC[0])));
+				H.MinorAlleles.push_back(vAC[0] < (vAN[0] - vAC[0]));
 
 				//2. Validation
 				bcf_get_genotypes(sr->readers[0].header, line_t, &gt_arr_t, &ngt_arr_t);
@@ -230,6 +231,7 @@ void haplotype_reader::readHaplotypes(string ftruth, string festi, bool dupid) {
 					}
 				}
 				H.MAC.push_back(min(vAC, (vAN - vAC)));
+				H.MinorAlleles.push_back(vAC < (vAN - vAC));
 
 				//3. Estimation
 				bcf_get_genotypes(sr->readers[1].header, line_e, &gt_arr_e, &ngt_arr_e);

@@ -70,7 +70,7 @@ public:
 
 	void setup(unsigned int _hap);
 	double forward();
-	void backward(vector < vector < unsigned int > > & cevents);
+	void backward(vector < vector < unsigned int > > & cevents, vector < int > & vpath);
 	void viterbi(vector < int > & path);
 
 };

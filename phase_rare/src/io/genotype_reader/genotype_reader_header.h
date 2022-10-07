@@ -46,6 +46,7 @@ public:
 	//PARAMETERS
 	string funphased;
 	string fphased;
+	string fbinary;
 	string scaffold_region;
 	int input_start;
 	int input_stop;
@@ -57,14 +58,16 @@ public:
 	~genotype_reader();
 
 	//PARAMS
-	void setFilenames(string, string);
+	void setFilenames(string, string, string);
 	void setThreads(int);
 	void setRegions(string, int, int);
 	void setMAF(float);
 
 	//IO
-	void scanGenotypes();
-	void readGenotypes();
+	void scanGenotypesPlain();
+	void readGenotypesPlain();
+	void scanGenotypesSparse();
+	void readGenotypesSparse();
 	void allocateGenotypes();
 };
 

@@ -54,7 +54,11 @@ void genotype_reader::allocateGenotypes() {
 	G.allocate(V, n_samples, n_scaffold_variants, n_rare_variants);
 }
 
-void genotype_reader::setFilenames (string _funphased, string _fphased) { fphased = _fphased; funphased = _funphased; }
+void genotype_reader::setFilenames (string _funphased, string _fbinary, string _fphased) {
+	fphased = _fphased;
+	fbinary = _fbinary;
+	funphased = _funphased;
+}
 
 void genotype_reader::setThreads(int _nthreads) { nthreads = _nthreads; }
 

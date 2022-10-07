@@ -105,12 +105,14 @@ double hmm_scaffold::forward() {
 	return loglik;
 }
 
-void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents) {
+void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector < int > & vpath) {
 	float sum = 0.0f, scale = 0.0f;
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
 	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
 	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
+
+	//vpath = vector < int > (C.n_scaffold_variants, -1);
 
 	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
 
@@ -177,6 +179,8 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents) {
 			beta[offset] *= emit[Hvar.get(vs, offset)];
 			sum += beta[offset];
 		}
+
+		//vpath[vs] = std::distance(alphaXbeta_curr.begin(),std::max_element(alphaXbeta_curr.begin(), alphaXbeta_curr.end()));
 
 		//Storage
 		if (cevents[vs+1].size()) {
