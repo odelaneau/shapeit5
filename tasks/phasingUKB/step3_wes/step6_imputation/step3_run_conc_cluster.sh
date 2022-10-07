@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#FULL CHR
+OFOLDER=/UKB_PHASING_EXOME_ARRAY/step6_imputation/concordance_test/binning2
+
+METB="beagle5.4"
+METS="shapeit5"
+	#WBI AN=747828
+#for CHR in 20; do
+	#dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20220825_502047a.tar.gz" -icmd="METB=\"beagle5.4\" && for CHR in {1..22}; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/rp_wbic_shapeit5_chr\${CHR}_sites.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METB}/imputed_1k_rp_\${METB}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --allele-counts --thread 4 --input concordance.txt --output imputed_1k_rp_${METB}_allchrs && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METB}_conc_wes --folder "${OFOLDER}" -y
+
+	#dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20220825_502047a.tar.gz" -icmd="METS=\"shapeit5\" && for CHR in {1..22}; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/rp_wbic_shapeit5_chr\${CHR}_sites.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METS}/imputed_1k_rp_\${METS}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --allele-counts --thread 4 --input concordance.txt --output imputed_1k_rp_${METS}_allchrs && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METS}_conc_wes --folder "${OFOLDER}" -y
+
+	#dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20220825_502047a.tar.gz" -icmd="METB=\"beagle5.4\" && for CHR in 1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 19 20 21 22; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/rp_wbic_shapeit5_chr\${CHR}_sites.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METB}/imputed_1k_rp_\${METB}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --allele-counts --thread 4 --input concordance.txt --output imputed_1k_rp_${METB}_allchrs_wgs_af && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METB}_conc_wes --folder "${OFOLDER}" -y
+
+	#dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20220825_502047a.tar.gz" -icmd="METS=\"shapeit5\" && for CHR in 1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 19 20 21 22; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/rp_wbic_shapeit5_chr\${CHR}_sites.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METS}/imputed_1k_rp_\${METS}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --allele-counts --thread 4 --input concordance.txt --output imputed_1k_rp_${METS}_allchrs_wgs_af && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METS}_conc_wes --folder "${OFOLDER}" -y
+
+
+	
+
+	#dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20221005_73decec-dirty.tar.gz" -icmd="METB=\"beagle5.4\" && for CHR in {1..22}; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/sites/rp_s1k_shapeit5_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METB}/imputed_1k_rp_\${METB}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --ac-bins 1 5 10 20 50 100 200 500 1000  2000 5000 10000  20000 50000 100000 446470 --thread 4 --input concordance.txt --output imputed_1k_rp_${METB}_allchrs_rp_af_binning2 && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METB}_conc_wes --folder "${OFOLDER}" -y
+
+	dx run app-swiss-army-knife -iimage_file="/docker/glimpse2_20221005_73decec-dirty.tar.gz" -icmd="METS=\"shapeit5\" && for CHR in {1..22}; do echo \"chr\${CHR} /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/reference_panels/sites/rp_s1k_shapeit5_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/validation/wes_s1k_chr\${CHR}.bcf /mnt/project/UKB_PHASING_EXOME_ARRAY/step6_imputation/imputation/\${METS}/imputed_1k_rp_\${METS}_chr\${CHR}.vcf.gz\" >> concordance.txt; done && GLIMPSE_concordance_v2.0.0 --gt-val --ac-bins 1 5 10 20 50 100 200 500 1000  2000 5000 10000  20000 50000 100000 446470 --thread 4 --input concordance.txt --output imputed_1k_rp_${METS}_allchrs_rp_af_binning2 && rm -f concordance.txt" --instance-type mem1_ssd1_v2_x4 --priority low --name ${METS}_conc_wes --folder "${OFOLDER}" -y
+#done
