@@ -1,0 +1,272 @@
+I"TV<h1 class="no_toc" id="configuration">Configuration</h1>
+
+<p class="fs-6 fw-300">Just the Docs has some specific configuration parameters that can be defined in your Jekyll site’s _config.yml file.</p>
+
+<h2 class="no_toc text-delta" id="table-of-contents">Table of contents</h2>
+
+<ol id="markdown-toc">
+  <li><a href="#site-logo" id="markdown-toc-site-logo">Site logo</a></li>
+  <li><a href="#search" id="markdown-toc-search">Search</a></li>
+  <li><a href="#mermaid-diagrams" id="markdown-toc-mermaid-diagrams">Mermaid Diagrams</a></li>
+  <li><a href="#aux-links" id="markdown-toc-aux-links">Aux links</a></li>
+  <li><a href="#heading-anchor-links" id="markdown-toc-heading-anchor-links">Heading anchor links</a></li>
+  <li><a href="#external-navigation-links" id="markdown-toc-external-navigation-links">External navigation links</a></li>
+  <li><a href="#footer-content" id="markdown-toc-footer-content">Footer content</a></li>
+  <li><a href="#color-scheme" id="markdown-toc-color-scheme">Color scheme</a></li>
+  <li><a href="#callouts" id="markdown-toc-callouts">Callouts</a></li>
+  <li><a href="#google-analytics" id="markdown-toc-google-analytics">Google Analytics</a></li>
+  <li><a href="#document-collections" id="markdown-toc-document-collections">Document collections</a></li>
+</ol>
+
+<hr />
+
+<p>View this site’s <a href="https://github.com/just-the-docs/just-the-docs/tree/main/_config.yml">_config.yml</a> file as an example.</p>
+
+<h2 id="site-logo">Site logo</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Set a path/url to a logo that will be displayed instead of the title</span>
+<span class="na">logo</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/assets/images/just-the-docs.png"</span>
+</code></pre></div></div>
+
+<h2 id="search">Search</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Enable or disable the site search</span>
+<span class="c1"># Supports true (default) or false</span>
+<span class="na">search_enabled</span><span class="pi">:</span> <span class="no">true</span>
+
+<span class="na">search</span><span class="pi">:</span>
+  <span class="c1"># Split pages into sections that can be searched individually</span>
+  <span class="c1"># Supports 1 - 6, default: 2</span>
+  <span class="na">heading_level</span><span class="pi">:</span> <span class="m">2</span>
+  <span class="c1"># Maximum amount of previews per search result</span>
+  <span class="c1"># Default: 3</span>
+  <span class="na">previews</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="c1"># Maximum amount of words to display before a matched word in the preview</span>
+  <span class="c1"># Default: 5</span>
+  <span class="na">preview_words_before</span><span class="pi">:</span> <span class="m">5</span>
+  <span class="c1"># Maximum amount of words to display after a matched word in the preview</span>
+  <span class="c1"># Default: 10</span>
+  <span class="na">preview_words_after</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="c1"># Set the search token separator</span>
+  <span class="c1"># Default: /[\s\-/]+/</span>
+  <span class="c1"># Example: enable support for hyphenated search words</span>
+  <span class="na">tokenizer_separator</span><span class="pi">:</span> <span class="s">/[\s/]+/</span>
+  <span class="c1"># Display the relative url in search results</span>
+  <span class="c1"># Supports true (default) or false</span>
+  <span class="na">rel_url</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="c1"># Enable or disable the search button that appears in the bottom right corner of every page</span>
+  <span class="c1"># Supports true or false (default)</span>
+  <span class="na">button</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<h2 id="mermaid-diagrams">Mermaid Diagrams</h2>
+
+<p>The minimum configuration requires the key for <code class="language-plaintext highlighter-rouge">version</code> (<a href="https://cdn.jsdelivr.net/npm/mermaid/">from jsDelivr</a>) in <code class="language-plaintext highlighter-rouge">_config.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">mermaid</span><span class="pi">:</span>
+  <span class="c1"># Version of mermaid library</span>
+  <span class="c1"># Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/</span>
+  <span class="na">version</span><span class="pi">:</span> <span class="s2">"</span><span class="s">9.1.3"</span>
+</code></pre></div></div>
+
+<p>See <a href="/shapeit5/shapeit5/docs/ui-components/code/#mermaid-diagram-code-blocks">the Code documentation</a> for more configuration options and information.</p>
+
+<h2 id="aux-links">Aux links</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Aux links for the upper right navigation</span>
+<span class="na">aux_links</span><span class="pi">:</span>
+  <span class="s2">"</span><span class="s">Just</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">Docs</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">GitHub"</span><span class="err">:</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">//github.com/just-the-docs/just-the-docs"</span>
+
+<span class="c1"># Makes Aux links open in a new tab. Default is false</span>
+<span class="na">aux_links_new_tab</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<h2 id="heading-anchor-links">Heading anchor links</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Heading anchor links appear on hover over h1-h6 tags in page content</span>
+<span class="c1"># allowing users to deep link to a particular heading on a page.</span>
+<span class="c1">#</span>
+<span class="c1"># Supports true (default) or false</span>
+<span class="na">heading_anchors</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<h2 id="external-navigation-links">External navigation links</h2>
+
+<p>External links can be added to the navigation through the <code class="language-plaintext highlighter-rouge">nav_external_links</code> option.
+See <a href="/shapeit5/shapeit5/docs/navigation-structure/#external-navigation-links">Navigation Structure</a> for more details.</p>
+
+<h2 id="footer-content">Footer content</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Footer content</span>
+<span class="c1"># appears at the bottom of every page's main content</span>
+<span class="c1"># Note: The footer_content option is deprecated and will be removed in a future major release. Please use `_includes/footer_custom.html` for more robust</span>
+<span class="s">markup / liquid-based content.</span>
+<span class="na">footer_content</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Copyright</span><span class="nv"> </span><span class="s">&amp;copy;</span><span class="nv"> </span><span class="s">2017-2020</span><span class="nv"> </span><span class="s">Patrick</span><span class="nv"> </span><span class="s">Marsceill.</span><span class="nv"> </span><span class="s">Distributed</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">an</span><span class="nv"> </span><span class="s">&lt;a</span><span class="nv"> </span><span class="s">href=</span><span class="se">\"</span><span class="s">https://github.com/just-the-docs/just-the-docs/tree/main/LICENSE.txt</span><span class="se">\"</span><span class="s">&gt;MIT</span><span class="nv"> </span><span class="s">license.&lt;/a&gt;"</span>
+
+<span class="c1"># Footer last edited timestamp</span>
+<span class="na">last_edit_timestamp</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># show or hide edit time - page must have `last_modified_date` defined in the frontmatter</span>
+<span class="na">last_edit_time_format</span><span class="pi">:</span> <span class="s2">"</span><span class="s">%b</span><span class="nv"> </span><span class="s">%e</span><span class="nv"> </span><span class="s">%Y</span><span class="nv"> </span><span class="s">at</span><span class="nv"> </span><span class="s">%I:%M</span><span class="nv"> </span><span class="s">%p"</span> <span class="c1"># uses ruby's time format: https://ruby-doc.org/stdlib-2.7.0/libdoc/time/rdoc/Time.html</span>
+
+<span class="c1"># Footer "Edit this page on GitHub" link text</span>
+<span class="na">gh_edit_link</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># show or hide edit this page link</span>
+<span class="na">gh_edit_link_text</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Edit</span><span class="nv"> </span><span class="s">this</span><span class="nv"> </span><span class="s">page</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">GitHub."</span>
+<span class="na">gh_edit_repository</span><span class="pi">:</span> <span class="s2">"</span><span class="s">https://github.com/just-the-docs/just-the-docs"</span> <span class="c1"># the github URL for your repo</span>
+<span class="na">gh_edit_branch</span><span class="pi">:</span> <span class="s2">"</span><span class="s">main"</span> <span class="c1"># the branch that your docs is served from</span>
+<span class="c1"># gh_edit_source: docs # the source that your files originate from</span>
+<span class="na">gh_edit_view_mode</span><span class="pi">:</span> <span class="s2">"</span><span class="s">tree"</span> <span class="c1"># "tree" or "edit" if you want the user to jump into the editor immediately</span>
+</code></pre></div></div>
+
+<p><em>note: <code class="language-plaintext highlighter-rouge">footer_content</code> is deprecated, but still supported. For a better experience we have moved this into an include called <code class="language-plaintext highlighter-rouge">_includes/footer_custom.html</code> which will allow for robust markup / liquid-based content.</em></p>
+
+<ul>
+  <li>the “page last modified” data will only display if a page has a key called <code class="language-plaintext highlighter-rouge">last_modified_date</code>, formatted in some readable date format</li>
+  <li><code class="language-plaintext highlighter-rouge">last_edit_time_format</code> uses Ruby’s DateTime formatter; see examples and more information <a href="https://apidock.com/ruby/DateTime/strftime">at this link.</a></li>
+  <li><code class="language-plaintext highlighter-rouge">gh_edit_repository</code> is the URL of the project’s GitHub repository</li>
+  <li><code class="language-plaintext highlighter-rouge">gh_edit_branch</code> is the branch that the docs site is served from; defaults to <code class="language-plaintext highlighter-rouge">main</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gh_edit_source</code> is the source directory that your project files are stored in (should be the same as <a href="https://jekyllrb.com/docs/configuration/options/">site.source</a>)</li>
+  <li><code class="language-plaintext highlighter-rouge">gh_edit_view_mode</code> is <code class="language-plaintext highlighter-rouge">"tree"</code> by default, which brings the user to the github page; switch to <code class="language-plaintext highlighter-rouge">"edit"</code> to bring the user directly into editing mode</li>
+</ul>
+
+<h2 id="color-scheme">Color scheme</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Color scheme supports "light" (default) and "dark"</span>
+<span class="na">color_scheme</span><span class="pi">:</span> <span class="s">dark</span>
+</code></pre></div></div>
+
+<p><button class="btn js-toggle-dark-mode">Preview dark color scheme</button></p>
+
+<script>
+const toggleDarkMode = document.querySelector('.js-toggle-dark-mode');
+
+jtd.addEvent(toggleDarkMode, 'click', function(){
+  if (jtd.getTheme() === 'dark') {
+    jtd.setTheme('light');
+    toggleDarkMode.textContent = 'Preview dark color scheme';
+  } else {
+    jtd.setTheme('dark');
+    toggleDarkMode.textContent = 'Return to the light side';
+  }
+});
+</script>
+
+<p>See <a href="/shapeit5/shapeit5/docs/customization/">Customization</a> for more information.</p>
+
+<h2 id="callouts">Callouts</h2>
+
+<p>To use this feature, you need to configure a <code class="language-plaintext highlighter-rouge">color</code> and (optionally) <code class="language-plaintext highlighter-rouge">title</code> for each kind of callout you want to use, e.g.:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">callouts</span><span class="pi">:</span>
+  <span class="na">warning</span><span class="pi">:</span>
+    <span class="na">title</span><span class="pi">:</span> <span class="s">Warning</span>
+    <span class="na">color</span><span class="pi">:</span> <span class="s">red</span>
+</code></pre></div></div>
+
+<p>This uses the color <code class="language-plaintext highlighter-rouge">$red-000</code> for the background of the callout, and <code class="language-plaintext highlighter-rouge">$red-300</code> for the title and box decoration.<sup id="fnref:dark" role="doc-noteref"><a href="#fn:dark" class="footnote" rel="footnote">1</a></sup> You can then style a paragraph as a <code class="language-plaintext highlighter-rouge">warning</code> callout like this:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{: .warning }
+A paragraph...
+</code></pre></div></div>
+
+<p>The colors <code class="language-plaintext highlighter-rouge">grey-lt</code>, <code class="language-plaintext highlighter-rouge">grey-dk</code>, <code class="language-plaintext highlighter-rouge">purple</code>, <code class="language-plaintext highlighter-rouge">blue</code>, <code class="language-plaintext highlighter-rouge">green</code>, <code class="language-plaintext highlighter-rouge">yellow</code>, and <code class="language-plaintext highlighter-rouge">red</code> are predefined; to use a custom color, you need to define its <code class="language-plaintext highlighter-rouge">000</code> and <code class="language-plaintext highlighter-rouge">300</code> levels in your SCSS files. For example, to use <code class="language-plaintext highlighter-rouge">pink</code>, add the following to your <code class="language-plaintext highlighter-rouge">_sass/custom/custom.scss</code> file:</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$pink-000</span><span class="p">:</span> <span class="mh">#f77ef1</span><span class="p">;</span>
+<span class="nv">$pink-100</span><span class="p">:</span> <span class="mh">#f967f1</span><span class="p">;</span>
+<span class="nv">$pink-200</span><span class="p">:</span> <span class="mh">#e94ee1</span><span class="p">;</span>
+<span class="nv">$pink-300</span><span class="p">:</span> <span class="mh">#dd2cd4</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>You can override the default <code class="language-plaintext highlighter-rouge">opacity</code> of the background for a particular callout, e.g.:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">callouts</span><span class="pi">:</span>
+  <span class="na">custom</span><span class="pi">:</span>
+    <span class="na">color</span><span class="pi">:</span> <span class="s">pink</span>
+    <span class="na">opacity</span><span class="pi">:</span> <span class="m">0.3</span>
+</code></pre></div></div>
+
+<p>You can change the default opacity (<code class="language-plaintext highlighter-rouge">0.2</code>) for all callouts, e.g.:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">callouts_opacity</span><span class="pi">:</span> <span class="m">0.3</span>
+</code></pre></div></div>
+
+<p>You can also adjust the overall level of callouts.
+The value of <code class="language-plaintext highlighter-rouge">callouts_level</code> is either <code class="language-plaintext highlighter-rouge">quiet</code> or <code class="language-plaintext highlighter-rouge">loud</code>;
+<code class="language-plaintext highlighter-rouge">loud</code> increases the saturation and lightness of the backgrounds.
+The default level is <code class="language-plaintext highlighter-rouge">quiet</code> when using the <code class="language-plaintext highlighter-rouge">light</code> or custom color schemes,
+and <code class="language-plaintext highlighter-rouge">loud</code> when using the <code class="language-plaintext highlighter-rouge">dark color scheme.</code></p>
+
+<p>See <a href="/shapeit5/shapeit5/docs/ui-components/callouts/">Callouts</a> for more information.</p>
+
+<h2 id="google-analytics">Google Analytics</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Google Analytics Tracking (optional)</span>
+<span class="c1"># e.g, UA-1234567-89</span>
+<span class="na">ga_tracking</span><span class="pi">:</span> <span class="s">UA-5555555-55</span>
+<span class="na">ga_tracking_anonymize_ip</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># Use GDPR compliant Google Analytics settings (true by default)</span>
+</code></pre></div></div>
+
+<h2 id="document-collections">Document collections</h2>
+
+<p>By default, the navigation and search include normal <a href="https://jekyllrb.com/docs/pages/">pages</a>.
+You can also use <a href="https://jekyllrb.com/docs/collections/">Jekyll collections</a> which group documents semantically together.</p>
+
+<p>For example, put all your test files in the <code class="language-plaintext highlighter-rouge">_tests</code> folder and create the <code class="language-plaintext highlighter-rouge">tests</code> collection:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Define Jekyll collections</span>
+<span class="na">collections</span><span class="pi">:</span>
+  <span class="c1"># Define a collection named "tests", its documents reside in the "_tests" directory</span>
+  <span class="na">tests</span><span class="pi">:</span>
+    <span class="na">permalink</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/:collection/:path/"</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="no">true</span>
+
+<span class="na">just_the_docs</span><span class="pi">:</span>
+  <span class="c1"># Define which collections are used in just-the-docs</span>
+  <span class="na">collections</span><span class="pi">:</span>
+    <span class="c1"># Reference the "tests" collection</span>
+    <span class="na">tests</span><span class="pi">:</span>
+      <span class="c1"># Give the collection a name</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">Tests</span>
+      <span class="c1"># Exclude the collection from the navigation</span>
+      <span class="c1"># Supports true or false (default)</span>
+      <span class="c1"># nav_exclude: true</span>
+      <span class="c1"># Fold the collection in the navigation</span>
+      <span class="c1"># Supports true or false (default)</span>
+      <span class="c1"># nav_fold: true</span>
+      <span class="c1"># Exclude the collection from the search</span>
+      <span class="c1"># Supports true or false (default)</span>
+      <span class="c1"># search_exclude: true</span>
+</code></pre></div></div>
+
+<p>The navigation for all your normal pages (if any) is displayed before those in collections.</p>
+
+<p>You can reference multiple collections.
+This creates categories in the navigation with the configured names.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">collections</span><span class="pi">:</span>
+  <span class="na">tests</span><span class="pi">:</span>
+    <span class="na">permalink</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/:collection/:path/"</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">tutorials</span><span class="pi">:</span>
+    <span class="na">permalink</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/:collection/:path/"</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="no">true</span>
+
+<span class="na">just_the_docs</span><span class="pi">:</span>
+  <span class="na">collections</span><span class="pi">:</span>
+    <span class="na">tests</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">Tests</span>
+    <span class="na">tutorials</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">Tutorials</span>
+</code></pre></div></div>
+
+<p>When <em>all</em> your pages are in a single collection, its name is not displayed.</p>
+
+<p>The navigation for each collection is a separate name space for page titles: a page in one collection cannot be a child of a page in a different collection, or of a normal page.</p>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:dark" role="doc-endnote">
+
+      <p>If you use the <code class="language-plaintext highlighter-rouge">dark</code> color scheme, this callout uses <code class="language-plaintext highlighter-rouge">$red-300</code> for the background, and <code class="language-plaintext highlighter-rouge">$red-000</code> for the title. <a href="#fnref:dark" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+:ET

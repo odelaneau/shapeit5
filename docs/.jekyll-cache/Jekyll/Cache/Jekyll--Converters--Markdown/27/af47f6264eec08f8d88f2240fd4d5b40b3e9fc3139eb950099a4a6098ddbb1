@@ -1,0 +1,179 @@
+I"0<h1 class="no_toc" id="customization">Customization</h1>
+
+<h2 class="no_toc text-delta" id="table-of-contents">Table of contents</h2>
+
+<ol id="markdown-toc">
+  <li><a href="#color-schemes" id="markdown-toc-color-schemes">Color schemes</a></li>
+  <li><a href="#custom-schemes" id="markdown-toc-custom-schemes">Custom schemes</a>    <ol>
+      <li><a href="#define-a-custom-scheme" id="markdown-toc-define-a-custom-scheme">Define a custom scheme</a></li>
+      <li><a href="#use-a-custom-scheme" id="markdown-toc-use-a-custom-scheme">Use a custom scheme</a></li>
+      <li><a href="#switchable-custom-scheme" id="markdown-toc-switchable-custom-scheme">Switchable custom scheme</a></li>
+    </ol>
+  </li>
+  <li><a href="#override-and-completely-custom-styles" id="markdown-toc-override-and-completely-custom-styles">Override and completely custom styles</a></li>
+  <li><a href="#override-includes" id="markdown-toc-override-includes">Override includes</a>    <ol>
+      <li><a href="#custom-footer" id="markdown-toc-custom-footer">Custom Footer</a></li>
+      <li><a href="#custom-head" id="markdown-toc-custom-head">Custom Head</a></li>
+      <li><a href="#custom-header" id="markdown-toc-custom-header">Custom Header</a></li>
+      <li><a href="#custom-nav-footer" id="markdown-toc-custom-nav-footer">Custom Nav Footer</a></li>
+      <li><a href="#custom-search-placeholder" id="markdown-toc-custom-search-placeholder">Custom Search Placeholder</a></li>
+    </ol>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="color-schemes">Color schemes</h2>
+
+<p class="d-inline-block label label-green">New</p>
+
+<p>Just the Docs supports two color schemes: light (default), and dark.</p>
+
+<p>To enable a color scheme, set the <code class="language-plaintext highlighter-rouge">color_scheme</code> parameter in your site’s <code class="language-plaintext highlighter-rouge">_config.yml</code> file:</p>
+
+<h4 class="no_toc" id="example">Example</h4>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Color scheme supports "light" (default) and "dark"</span>
+<span class="na">color_scheme</span><span class="pi">:</span> <span class="s">dark</span>
+</code></pre></div></div>
+
+<p><button class="btn js-toggle-dark-mode">Preview dark color scheme</button></p>
+
+<script>
+const toggleDarkMode = document.querySelector('.js-toggle-dark-mode');
+
+jtd.addEvent(toggleDarkMode, 'click', function(){
+  if (jtd.getTheme() === 'dark') {
+    jtd.setTheme('light');
+    toggleDarkMode.textContent = 'Preview dark color scheme';
+  } else {
+    jtd.setTheme('dark');
+    toggleDarkMode.textContent = 'Return to the light side';
+  }
+});
+</script>
+
+<h2 id="custom-schemes">Custom schemes</h2>
+
+<h3 id="define-a-custom-scheme">Define a custom scheme</h3>
+
+<p>You can add custom schemes.
+If you want to add a scheme named <code class="language-plaintext highlighter-rouge">foo</code> (can be any name) just add a file <code class="language-plaintext highlighter-rouge">_sass/color_schemes/foo.scss</code> (replace <code class="language-plaintext highlighter-rouge">foo</code> by your scheme name)
+where you override theme variables to change colors, fonts, spacing, etc.</p>
+
+<p>Available variables are listed in the <a href="https://github.com/just-the-docs/just-the-docs/tree/main/_sass/support/_variables.scss">_variables.scss</a> file.</p>
+
+<p>For example, to change the link color from the purple default to blue, include the following inside your scheme file:</p>
+
+<h4 class="no_toc" id="example-1">Example</h4>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$link-color</span><span class="p">:</span> <span class="nv">$blue-000</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Keep in mind that changing a variable will not automatically change the value of other variables that depend on it.
+For example, the default link color (<code class="language-plaintext highlighter-rouge">$link-color</code>) is set to <code class="language-plaintext highlighter-rouge">$purple-000</code>. However, redefining <code class="language-plaintext highlighter-rouge">$purple-000</code> in a custom color scheme will not automatically change <code class="language-plaintext highlighter-rouge">$link-color</code> to match it.
+Instead, each variable that relies on previously-cascaded values must be manually reimplemented by copying the dependent rules from <code class="language-plaintext highlighter-rouge">_variables.scss</code> — in this case, rewriting <code class="language-plaintext highlighter-rouge">$link-color: $purple-000;</code>.</p>
+
+<p><em>Note:</em> Editing the variables directly in <code class="language-plaintext highlighter-rouge">_sass/support/variables.scss</code> is not recommended and can cause other dependencies to fail.
+Please use scheme files.</p>
+
+<h3 id="use-a-custom-scheme">Use a custom scheme</h3>
+
+<p>To use the custom color scheme, only set the <code class="language-plaintext highlighter-rouge">color_scheme</code> parameter in your site’s <code class="language-plaintext highlighter-rouge">_config.yml</code> file:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">color_scheme</span><span class="pi">:</span> <span class="s">foo</span>
+</code></pre></div></div>
+
+<h3 id="switchable-custom-scheme">Switchable custom scheme</h3>
+
+<p>If you want to be able to change the scheme dynamically, for example via javascript, just add a file <code class="language-plaintext highlighter-rouge">assets/css/just-the-docs-foo.scss</code> (replace <code class="language-plaintext highlighter-rouge">foo</code> by your scheme name)
+with the following content:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+---
+{% include css/just-the-docs.scss.liquid color_scheme="foo" %}
+</code></pre></div></div>
+
+<p>This allows you to switch the scheme via the following javascript.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">jtd</span><span class="p">.</span><span class="nx">setTheme</span><span class="p">(</span><span class="dl">"</span><span class="s2">foo</span><span class="dl">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="override-and-completely-custom-styles">Override and completely custom styles</h2>
+
+<p>For styles that aren’t defined as variables, you may want to modify specific CSS classes.
+Additionally, you may want to add completely custom CSS specific to your content.
+To do this, put your styles in the file <code class="language-plaintext highlighter-rouge">_sass/custom/custom.scss</code>.
+This will allow for all overrides to be kept in a single file, and for any upstream changes to still be applied.</p>
+
+<p>For example, if you’d like to add your own styles for printing a page, you could add the following styles.</p>
+
+<h4 class="no_toc" id="example-2">Example</h4>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Print-only styles.</span>
+<span class="k">@media</span> <span class="n">print</span> <span class="p">{</span>
+  <span class="nc">.side-bar</span><span class="o">,</span>
+  <span class="nc">.page-header</span> <span class="p">{</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nc">.main-content</span> <span class="p">{</span>
+    <span class="nl">max-width</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+    <span class="nl">margin</span><span class="p">:</span> <span class="m">1em</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="override-includes">Override includes</h2>
+
+<p>The site can be modified by overriding any of the custom <a href="https://jekyllrb.com/docs/includes/">Jekyll includes</a> provided by default in the theme.</p>
+
+<p>To do this, create an <code class="language-plaintext highlighter-rouge">_includes</code> directory and make a copy of the specific file you wish to modify. Any content added to this file will override the theme defaults. You can learn more about this process in the Jekyll docs for <a href="https://jekyllrb.com/docs/themes/#overriding-theme-defaults">Overriding theme defaults</a>.</p>
+
+<p>The following includes were made available to you:</p>
+
+<h3 id="custom-footer">Custom Footer</h3>
+
+<p><code class="language-plaintext highlighter-rouge">_includes/footer_custom.html</code></p>
+
+<p>This content appears at the bottom of every page’s main content. More info for this include can be found in the <a href="/shapeit5/shapeit5/docs/configuration/#footer-content">Configuration - Footer content</a>.</p>
+
+<h3 id="custom-head">Custom Head</h3>
+
+<p><code class="language-plaintext highlighter-rouge">_includes/head_custom.html</code></p>
+
+<p>Any HTML added to this file will be inserted before the closing <code class="language-plaintext highlighter-rouge">&lt;head&gt;</code> tag. This might include additional <code class="language-plaintext highlighter-rouge">&lt;meta&gt;</code>, <code class="language-plaintext highlighter-rouge">&lt;link&gt;</code>, or <code class="language-plaintext highlighter-rouge">&lt;script&gt;</code> tags.</p>
+
+<h4 class="no_toc" id="example-3">Example</h4>
+
+<p>To add a custom favicon, create <code class="language-plaintext highlighter-rouge">_includes/head_custom.html</code> and add:</p>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"shortcut icon"</span> <span class="na">type=</span><span class="s">"image/png"</span> <span class="na">href=</span><span class="s">"/shapeit5/path/to/your/favicon.png"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<h3 id="custom-header">Custom Header</h3>
+
+<p><code class="language-plaintext highlighter-rouge">_includes/header_custom.html</code></p>
+
+<p>Content added to this file appears at the top of every page’s main content between the site search and auxiliary links if they are enabled. If <code class="language-plaintext highlighter-rouge">search_enabled</code> were set to false and <code class="language-plaintext highlighter-rouge">aux_links</code> were removed, the content of <code class="language-plaintext highlighter-rouge">header_custom.html</code> would occupy the space at the top of every page.</p>
+
+<h3 id="custom-nav-footer">Custom Nav Footer</h3>
+
+<p><code class="language-plaintext highlighter-rouge">_includes/nav_footer_custom.html</code></p>
+
+<p>Any content added to this file will appear at the bottom left of the page below the site’s navigation. By default an attribution to Just the Docs is displayed which reads, <code class="language-plaintext highlighter-rouge">This site uses Just the Docs, a documentation theme for Jekyll.</code>.</p>
+
+<h3 id="custom-search-placeholder">Custom Search Placeholder</h3>
+
+<p><code class="language-plaintext highlighter-rouge">_includes/search_placeholder_custom.html</code></p>
+
+<p>Content added to this file will replace the default placeholder text in the search bar (and its <code class="language-plaintext highlighter-rouge">aria-label</code>), after stripping HTML and leading/trailing whitespace. By default, the content of the include is:</p>
+
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Search <span class="p">{{</span><span class="nv">site</span><span class="p">.</span><span class="nv">title</span><span class="p">}}</span>
+</code></pre></div></div>
+
+<p>Override this file to render a custom placeholder. One common use-case is internationalization; for example,</p>
+
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Chercher notre site
+</code></pre></div></div>
+
+<p>would make the placeholder text “Chercher notre site”. <a href="https://jekyllrb.com/docs/liquid/">Liquid code</a> (including <a href="https://jekyllrb.com/docs/variables/">Jekyll variables</a>) is also supported.</p>
+:ET

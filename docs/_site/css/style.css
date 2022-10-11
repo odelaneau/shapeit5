@@ -1,0 +1,114 @@
+/* General */
+html,
+body {
+    font-size: 20px;
+    width: 100%;
+    padding: 0;
+    margin-left: 0;
+    margin-right: 0;
+    font-family: 'open_sanslight';
+    font-weight: 300;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* Header */
+.header {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color :#fff;
+    width: 100%;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 60px;
+}
+
+/* Section */
+.sections {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative;
+    width: 100%;
+}
+
+.lightbg {
+    background-color: #f9f9f9;
+}
+
+.sections h1 {
+    font-size: 30px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.sections h2 {
+    padding-top: 20px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.sections p {
+    padding-top: 20px;
+}
+
+.separator {
+    height: 4px;
+    width: 300px;
+    margin: auto;
+    margin-bottom: 20px;
+    background: #00a5ff;
+}
+
+/* Tables */
+th, td {
+    padding: 10px;
+}
+
+/*Scroll Up*/
+
+.scrollup{
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    line-height: 50px;
+    color: #ffffff;
+    font-size: 40px;
+    background: #00a5ff;
+    position: absolute;
+    top:-25px;
+    left: 50%;
+    font-weight: normal;
+    border-radius: 100%;
+    transition: all 500ms .2s;
+    cursor: pointer;
+}
+.scrollup:hover{
+    background: #008ac4;
+    color: #fff;
+    transform:scale(1.1);
+}
+
+
+/* Footer Area */
+.footer{
+    padding-top: 30px;
+    padding-bottom: 30px;
+    position: relative;
+}
+.copyright{
+    font-family: 'open_sansregular';
+    font-size: 15px;
+}
+
+
+
+
+
+
+
+

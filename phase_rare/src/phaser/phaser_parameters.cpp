@@ -57,6 +57,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output,O", bpo::value< string >(), "Phased haplotypes in VCF/BCF format")
+			("output-buffer", "Write right and left buffers too in output")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_pbwt).add(opt_hmm).add(opt_output);

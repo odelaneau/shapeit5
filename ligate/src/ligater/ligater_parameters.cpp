@@ -38,7 +38,7 @@ void ligater::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output,O", bpo::value< string >(), "Output ligated file in VCF/BCF format")
-			("index", "Whether to index the ligated output (csi format)");
+			("index", "Whether to index the ligated output (csi format)")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_output);
