@@ -29,7 +29,9 @@ done
 
 
 #Whole CHR convertion BCF to VCF for Beagle
-BCF=/mnt/project/Phasing/PhasingWGS/step1_preparedata/benchmark_ukb23352_c20_qc_v1.subset.N147754.bcf
-VCF=$(basename $BCF .bcf)\.vcf.gz
-dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/step2_splitchunks/" -icmd="bcftools view -Oz -o $VCF $BCF && bcftools index $VCF" --tag bcf2vcf --tag benchWGS --instance-type mem2_ssd1_v2_x2 --name benchWGS_conv --priority normal -y
+for N in 2000 5000 10000 20000 50000 100000; do
+	BCF=/mnt/project/Phasing/PhasingWGS/step1_preparedata/benchmark_ukb23352_c20_qc_v1.subset.N$N\.bcf
+	VCF=$(basename $BCF .bcf)\.vcf.gz
+	dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/step2_splitchunks/" -icmd="bcftools view -Oz -o $VCF $BCF --threads 8 && bcftools index $VCF --threads 8" --tag bcf2vcf --tag benchWGS --instance-type mem2_ssd1_v2_x8 --name benchWGS_conv --priority normal -y
+done
 

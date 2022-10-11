@@ -36,13 +36,17 @@ public:
 	haplotype_set & H;
 	genotype_set & G;
 	variant_map & V;
+	int input_start;
+	int input_stop;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	haplotype_writer(haplotype_set &, genotype_set &, variant_map &, int);
 	~haplotype_writer();
+	void setRegions(int _input_start, int _input_stop);
+
 
 	//IO
-	void writeHaplotypes(string foutput);
+	void writeHaplotypes(string foutput, bool);
 };
 
 #endif

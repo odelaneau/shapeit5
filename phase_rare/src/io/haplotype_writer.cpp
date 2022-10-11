@@ -33,7 +33,14 @@ haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, varian
 haplotype_writer::~haplotype_writer() {
 }
 
-void haplotype_writer::writeHaplotypes(string fname) {
+
+void haplotype_writer::setRegions(int _input_start, int _input_stop) {
+	input_start = _input_start;
+	input_stop = _input_stop;
+}
+
+
+void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 	// Init
 	tac.clock();
 	string file_format = "w";
@@ -64,51 +71,55 @@ void haplotype_writer::writeHaplotypes(string fname) {
 
 	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
 
-		//Variant informations
-		bcf_clear1(rec);
-		rec->rid = bcf_hdr_name2id(hdr, V.vec_full[vt]->chr.c_str());
-		rec->pos = V.vec_full[vt]->bp - 1;
-		bcf_update_id(hdr, rec, V.vec_full[vt]->id.c_str());
-		string alleles = V.vec_full[vt]->ref + "," + V.vec_full[vt]->alt;
-		bcf_update_alleles_str(hdr, rec, alleles.c_str());
+		if (output_buffer || (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp < input_stop)) {
 
-		//Genotypes
-		int count_alt = 0;
-		if (V.vec_full[vt]->type == VARTYPE_RARE) {
-			bool major_allele = !V.vec_full[vt]->minor;
-			for (int i = 0 ; i < G.n_samples ; i++) {
-				genotypes[2*i+0] = bcf_gt_phased(major_allele);
-				genotypes[2*i+1] = bcf_gt_phased(major_allele);
-				bcf_float_set_missing(probabilities[i]);
-				count_alt += 2 * major_allele;
+			//Variant informations
+			bcf_clear1(rec);
+			rec->rid = bcf_hdr_name2id(hdr, V.vec_full[vt]->chr.c_str());
+			rec->pos = V.vec_full[vt]->bp - 1;
+			bcf_update_id(hdr, rec, V.vec_full[vt]->id.c_str());
+			string alleles = V.vec_full[vt]->ref + "," + V.vec_full[vt]->alt;
+			bcf_update_alleles_str(hdr, rec, alleles.c_str());
+
+			//Genotypes
+			int count_alt = 0;
+
+			if (V.vec_full[vt]->type == VARTYPE_RARE) {
+				bool major_allele = !V.vec_full[vt]->minor;
+				for (int i = 0 ; i < G.n_samples ; i++) {
+					genotypes[2*i+0] = bcf_gt_phased(major_allele);
+					genotypes[2*i+1] = bcf_gt_phased(major_allele);
+					bcf_float_set_missing(probabilities[i]);
+					count_alt += 2 * major_allele;
+				}
+				for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+					bool a0 = G.GRvar_genotypes[vr][i].al0;
+					bool a1 = G.GRvar_genotypes[vr][i].al1;
+					genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
+					genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
+					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(G.GRvar_genotypes[vr][i].prob * 1000.0) / 1000.0;
+					count_alt -= 2 * major_allele;
+					count_alt += a0+a1;
+				}
+				bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
+			} else {
+				for (int i = 0 ; i < H.n_samples ; i++) {
+					bool a0 = H.Hvar.get(vs, 2*i+0);
+					bool a1 = H.Hvar.get(vs, 2*i+1);
+					count_alt += a0+a1;
+					genotypes[2*i+0] = bcf_gt_phased(a0);
+					genotypes[2*i+1] = bcf_gt_phased(a1);
+					count_alt += a0+a1;
+				}
 			}
-			for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
-				bool a0 = G.GRvar_genotypes[vr][i].al0;
-				bool a1 = G.GRvar_genotypes[vr][i].al1;
-				genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
-				genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
-				probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(G.GRvar_genotypes[vr][i].prob * 1000.0) / 1000.0;
-				count_alt -= 2 * major_allele;
-				count_alt += a0+a1;
-			}
-			bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
-		} else {
-			for (int i = 0 ; i < H.n_samples ; i++) {
-				bool a0 = H.Hvar.get(vs, 2*i+0);
-				bool a1 = H.Hvar.get(vs, 2*i+1);
-				count_alt += a0+a1;
-				genotypes[2*i+0] = bcf_gt_phased(a0);
-				genotypes[2*i+1] = bcf_gt_phased(a1);
-				count_alt += a0+a1;
-			}
+
+			bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
+			bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
+			bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
+			if (V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
+
+			if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 		}
-
-		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
-		bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
-		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
-		if (V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
-
-		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 
 		switch (V.vec_full[vt]->type) {
 		case VARTYPE_SCAF :	vs++; break;
