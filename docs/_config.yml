@@ -147,14 +147,3 @@ compress_html:
   # ignore:
   #   envs: all
 
-
-collections:
-  tutorials:
-    permalink: "/:collection/:path/"
-    output: true
-
-shapeit5:
-  collections:
-    tutorials:
-      name: Tutorials
-      nav_fold: true
