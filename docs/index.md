@@ -73,7 +73,7 @@ Website under construction: content not available yet!
 
 ### Configure SHAPEIT5
 
-- [See configuration options]({{ site.baseurl }}{% link docs/configuration.md %})
+- [See documentation]({% link docs/documentation/documentation.md %})
 
 ---
 
