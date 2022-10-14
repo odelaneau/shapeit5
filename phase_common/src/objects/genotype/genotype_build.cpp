@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018-2022 Olivier Delaneau, University of Lausanne
+ * Copyright (C) 2022-2023 Olivier Delaneau
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,17 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
-//  h0 000 / h1 100 / h2 010 / h3 110 / h4 001 / h5 101 / h6 011 / h7 111	//haplotype ordering
-// -------- -------- -------- -------- -------- -------- -------- --------
-// 77777777 66666666 55555555 44444444 33333333 22222222 11111111 00000000	//haplotype h0
-// 76543210 76543210 76543210 76543210 76543210 76543210 76543210 76543210	//haplotype h1
-// -------- -------- -------- -------- -------- -------- -------- --------
-// 11111111 11111111 11111111 11111111111111111 11111111 11111111 11111111	//mask for initial.		0xFFFFFFFFFFFFFFFFUL
-// 00000000 10101010 00000000 10101010 00000000 10101010 00000000 10101010	//mask for scaffold		0x00AA00AA00AA00AAUL
-// 01010101 10101010 01010101 10101010 01010101 10101010 01010101 10101010	//mask unfold = 0 		0x55AA55AA55AA55AAUL
-// 00110011 00110011 11001100 11001100 00110011 00110011 11001100 11001100	//mask unfold = 1 		0x3333CCCC3333CCCCUL
-// 00001111 00001111 00001111 00001111 11110000 11110000 11110000 11110000	//mask unfold = 2 		0x0F0F0F0FF0F0F0F0UL
 
 #define MASK_INIT	0xFFFFFFFFFFFFFFFFUL
 #define MASK_SCAF	0x00AA00AA00AA00AAUL
