@@ -38,6 +38,7 @@ public:
 
 	int subset(bitmatrix & BM, vector < unsigned int > rows, unsigned int col_from, unsigned int col_to);
 	void getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
+	void getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
 	void allocate(unsigned int nrow, unsigned int ncol);
 	void allocateFast(unsigned int nrow, unsigned int ncol);
 	void set(unsigned int row, unsigned int col, unsigned char bit);
