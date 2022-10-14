@@ -1,6 +1,7 @@
 #!/bin/bash
 
-for N in 5000 10000 20000 50000 100000 147754; do
+#for N in 2000 5000 10000 20000 50000 100000 147754; do
+for N in 2000; do
 
 	#Produce list of files
 	rm benchmark_ukb23352_c20_qc_v1.subset.N$N\.shapeit5.ligated.list
