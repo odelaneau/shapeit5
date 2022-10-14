@@ -21,7 +21,8 @@
  ******************************************************************************/
 #include <objects/compute_job.h>
 
-#define MAX_OVERLAP_HETS 0.90f
+//#define MAX_OVERLAP_HETS 0.90f
+#define MAX_OVERLAP_HETS 0.5f
 #define N_RANDOM_HAPS 100
 
 compute_job::compute_job(variant_map & _V, genotype_set & _G, conditioning_set & _H, unsigned int n_max_transitions, unsigned int n_max_missing) : V(_V), G(_G), H(_H) {
@@ -75,14 +76,35 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 
 		//3.1. Identify potential IBD2 pairs
 		int count_het, match_het;
+		//int count_het0, match_het0;
 		for (int k = 1; k < Kstates[w].size() ; k++) {
 			unsigned int ind0 = Kstates[w][k-1]/2;
 			unsigned int ind1 = Kstates[w][k]/2;
 			if (ind0 == ind1) {
+
 				H.H_opt_hap.getMatchHetCount(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus, count_het, match_het);
+				//H.H_opt_hap.getMatchHetCount_seq(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus, count_het0, match_het0);
 				float perc_matching_hets = (count_het - match_het) * 1.0f / count_het;
+				//float perc_matching_hets0 = match_het0 * 1.0f / count_het0;
+
+				/*
+
+				if (G.vecG[ind]->name == "1457944" && G.vecG[ind0]->name == "5278831") {
+					cout << endl << G.vecG[ind]->name << " " << G.vecG[ind0]->name << " " << count_het << " " << match_het << " " << perc_matching_hets << endl;
+				}
+
+				if (G.vecG[ind]->name == "5278831" && G.vecG[ind0]->name == "1457944") {
+					cout << endl << G.vecG[ind]->name << " " << G.vecG[ind0]->name << " " << count_het << " " << match_het << " " << perc_matching_hets << endl;
+				}
+				*/
+				/*
+				if (perc_matching_hets > 0.5) {
+					cout << endl << G.vecG[ind]->name << " " << G.vecG[ind0]->name << " " << count_het << " " << match_het << " " << perc_matching_hets <<  "\t" << count_het0 << " " << match_het0 << endl;
+				}
+				*/
+
 				if (perc_matching_hets > MAX_OVERLAP_HETS) {
-					//cout << perc_matching_hets << " " << count_het << " " << match_het << " " << ind << " " << ind0 << endl;
+				//	cout << perc_matching_hets << " " << count_het << " " << match_het << " " << ind << " " << ind0 << endl;
 					toBeRemoved.push_back(k-1);
 					toBeRemoved.push_back(k);
 					Kbanned.emplace_back(ind0, (Windows.W[w].start_locus*3)/2 - Windows.W[w].stop_locus/2, (Windows.W[w].stop_locus*3)/2 - Windows.W[w].start_locus/2);
