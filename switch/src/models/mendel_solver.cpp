@@ -101,19 +101,17 @@ void mendel_solver::solveD(int locus, int cidx, int pidx, bool father, bool sing
 	int cg = H.Htrue[2*cidx+0][locus] + H.Htrue[2*cidx+1][locus];
 	int pg = H.Htrue[2*pidx+0][locus] + H.Htrue[2*pidx+1][locus];
 	bool c0 = false, c1 = false, p0 = false, p1 = false;
-	if (singleton) {
-		if (pg == 1 && cg == 1) { p0 = 1; p1 = 0; c0 = 1; c1 = 0; mendel = 0; phased = 1;}
-	} else {
-		if (pg == 0 && cg == 0) { p0 = 0; p1 = 0; c0 = 0; c1 = 0; mendel = 0; phased = 1;}
-		if (pg == 0 && cg == 1) { p0 = 0; p1 = 0; c0 = 0; c1 = 1; mendel = 0; phased = 1;}
-		if (pg == 0 && cg == 2) { p0 = 0; p1 = 0; c0 = 1; c1 = 1; mendel = 1; phased = 0;}
-		if (pg == 1 && cg == 0) { p0 = 0; p1 = 1; c0 = 0; c1 = 0; mendel = 0; phased = 1;}
-		if (pg == 1 && cg == 1) { p0 = 0; p1 = 1; c0 = 0; c1 = 1; mendel = 0; phased = 0;}
-		if (pg == 1 && cg == 2) { p0 = 1; p1 = 0; c0 = 1; c1 = 1; mendel = 0; phased = 1;}
-		if (pg == 2 && cg == 0) { p0 = 1; p1 = 1; c0 = 0; c1 = 0; mendel = 1; phased = 0;}
-		if (pg == 2 && cg == 1) { p0 = 1; p1 = 1; c0 = 1; c1 = 0; mendel = 0; phased = 1;}
-		if (pg == 2 && cg == 2) { p0 = 1; p1 = 1; c0 = 1; c1 = 1; mendel = 0; phased = 1;}
-	}
+
+	if (pg == 0 && cg == 0) { p0 = 0; p1 = 0; c0 = 0; c1 = 0; mendel = 0; phased = 1;}
+	if (pg == 0 && cg == 1) { p0 = 0; p1 = 0; c0 = 0; c1 = 1; mendel = 0; phased = 1;}
+	if (pg == 0 && cg == 2) { p0 = 0; p1 = 0; c0 = 1; c1 = 1; mendel = 1; phased = 0;}
+	if (pg == 1 && cg == 0) { p0 = 0; p1 = 1; c0 = 0; c1 = 0; mendel = 0; phased = 1;}
+	if (pg == 1 && cg == 1) { p0 = 0; p1 = 1; c0 = 0; c1 = 1; mendel = 0; phased = 0;}
+	if (pg == 1 && cg == 2) { p0 = 1; p1 = 0; c0 = 1; c1 = 1; mendel = 0; phased = 1;}
+	if (pg == 2 && cg == 0) { p0 = 1; p1 = 1; c0 = 0; c1 = 0; mendel = 1; phased = 0;}
+	if (pg == 2 && cg == 1) { p0 = 1; p1 = 1; c0 = 1; c1 = 0; mendel = 0; phased = 1;}
+	if (pg == 2 && cg == 2) { p0 = 1; p1 = 1; c0 = 1; c1 = 1; mendel = 0; phased = 1;}
+
 	if (father) {
 		H.Htrue[2*cidx+0][locus] = c0; H.Htrue[2*cidx+1][locus] = c1;
 		H.Htrue[2*pidx+0][locus] = p0; H.Htrue[2*pidx+1][locus] = p1;
@@ -168,8 +166,8 @@ void mendel_solver::solve(bool singleton_trick) {
 			int fidx = ((H.Fathers[i] >= 0) && (!H.Missing[i][l]) && (!H.Missing[H.Fathers[i]][l]))?H.Fathers[i]:-1;
 			int midx = ((H.Mothers[i] >= 0) && (!H.Missing[i][l]) && (!H.Missing[H.Mothers[i]][l]))?H.Mothers[i]:-1;
 			if (fidx != -1 && midx != -1) solveT(l, i, fidx, midx);
-			if (fidx == -1 && midx != -1) solveD(l, i, midx, false, singleton_trick?(H.MAC[l] == 1):false);
-			if (fidx != -1 && midx == -1) solveD(l, i, fidx, true, singleton_trick?(H.MAC[l] == 1):false);
+			if (fidx == -1 && midx != -1) solveD(l, i, midx, false, false);
+			if (fidx != -1 && midx == -1) solveD(l, i, fidx, true, false);
 		}
 	}
 

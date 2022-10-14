@@ -75,6 +75,41 @@ void bitmatrix::getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int 
 	}
 }
 
+void bitmatrix::getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1) {
+	c1=m1=0;
+	unsigned long n_bytes_per_row = stop/8 - start/8 + 1;
+	unsigned long offset_i0_h0 = (unsigned long)(2*i0+0)*(n_cols/8) + start/8;
+	unsigned long offset_i0_h1 = (unsigned long)(2*i0+1)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h0 = (unsigned long)(2*i1+0)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h1 = (unsigned long)(2*i1+1)*(n_cols/8) + start/8;
+
+	vector < bool > sa_hets = vector < bool > (n_bytes_per_row, false);
+	vector < bool > is_hets = vector < bool > (n_bytes_per_row, false);
+
+	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
+		//unsigned char i0_g0 = (bytes[offset_i0_h0+b]|bytes[offset_i0_h1+b]);
+		unsigned char i0_g1 = (bytes[offset_i0_h0+b]^bytes[offset_i0_h1+b]);
+		//unsigned char i0_g2 = (bytes[offset_i0_h0+b]&bytes[offset_i0_h1+b]);
+		//unsigned char i1_g0 = (bytes[offset_i1_h0+b]|bytes[offset_i1_h1+b]);
+		unsigned char i1_g1 = (bytes[offset_i1_h0+b]^bytes[offset_i1_h1+b]);
+		//unsigned char i1_g2 = (bytes[offset_i1_h0+b]&bytes[offset_i1_h1+b]);
+		//m0 += distance_lookup[i0_g0 ^ i1_g0];
+		if (nbit_set[i0_g1 ^ i1_g1] == 0) sa_hets[b] = true;
+		if (nbit_set[i0_g1 | i1_g1] != 0) is_hets[b] = true;
+	}
+
+	c1 = 0; m1 = 0;
+	int m1_tmp = 0;
+	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
+		if (is_hets[b]) {
+			if (sa_hets[b]) m1_tmp++;
+			else m1_tmp = 0;
+			if (m1_tmp > m1) m1 = m1_tmp;
+			c1 += sa_hets[b];
+		}
+	}
+}
+
 void bitmatrix::allocate(unsigned int nrow, unsigned int ncol) {
 	n_rows = nrow + ((nrow%8)?(8-(nrow%8)):0);
 	n_cols = ncol + ((ncol%8)?(8-(ncol%8)):0);
