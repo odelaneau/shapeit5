@@ -14,6 +14,9 @@ SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare va
 - **test**: simulated data for first-step testing of the method
 - **versions**: versioning
 
+
+Hofmeister R, Ribeiro DM, Rubinacci S., Delaneau O. Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank. BiorXiv (2022)
+
 Delaneau O., et al. Accurate, scalable and integrative haplotype estimation. Nature Communications volume 10, Article number: 5436 (2019). 
 https://www.nature.com/articles/s41467-019-13225-y
 
