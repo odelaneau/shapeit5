@@ -40,7 +40,7 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 		OUT=$(basename $VCF .vcf.gz)\.$REG\.fqd
 		LOG=$(basename $VCF .vcf.gz)\.$REG\.fqd.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.subset.N$N\.ALL.all.bcf
-		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step3_runbeagle/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $VCF --frequency $FRQ --pedigree $PEDDUO --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchBGL4 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchBGL4 -y
+		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step3_runbeagle/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $VCF --frequency $FRQ --pedigree $PEDDUO --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchBGL4 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchBGL4 -y
 			
 		#ALL VARIANTS - TRIOS
 		OUT=$(basename $VCF .vcf.gz)\.$REG\.fqt
@@ -59,18 +59,18 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 	
 	while read LINE; do
 		REG=$(echo $LINE | awk '{ print $4; }')	
-	
+		
 		#SNP ARRAY POSITIONS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqa
 		LOG=$(basename $BCF .bcf)\.$REG\.fqa.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.SNPs.array.bcf
-		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --instance-type mem2_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP1 -y
+		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --instance-type mem2_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP1 -y
 				
 		#COMMON SNPS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqc
 		LOG=$(basename $BCF .bcf)\.$REG\.fqc.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.subset.N$N\.SNPs.common.bcf
-		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP2 -y
+		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP2 -y
 		
 		#ALL VARIANTS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqf
@@ -82,7 +82,7 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 		OUT=$(basename $BCF .bcf)\.$REG\.fqd
 		LOG=$(basename $BCF .bcf)\.$REG\.fqd.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.subset.N$N\.ALL.all.bcf
-		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDDUO --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP4 -y
+		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDDUO --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP4 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP4 -y
 		
 		#ALL VARIANTS - TRIOS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqt

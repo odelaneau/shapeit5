@@ -4,7 +4,7 @@ MAP=/mnt/project/data/shapeit_maps/chr20.b38.gmap.gz
 
 DOCKER=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)\.tar.gz
 
-for N in 5000 10000 20000 50000 100000 147754; do
+for N in 2000 5000 10000 20000 50000 100000 147754; do
 
 	while read LINE; do
 		
