@@ -88,7 +88,7 @@ nav_external_links:
 back_to_top: true
 back_to_top_text: "Back to top"
 
-footer_content: "Copyright &copy; 2022-2023 University of Lausanne | All Rights Reserved | Distributed by an <a href=\"https://github.com/odelaneau/shapeit5/blob/main/LICENSE\">MIT license.</a>"
+footer_content: "Copyright &copy; 2022-2023 Olivier Delaneau | All Rights Reserved | Distributed by an <a href=\"https://github.com/odelaneau/shapeit5/blob/main/LICENSE\">MIT license.</a>"
 
 # Footer last edited timestamp
 last_edit_timestamp: true # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
@@ -147,3 +147,18 @@ compress_html:
   # ignore:
   #   envs: all
 
+# set defaults
+defaults:
+  - scope:
+      path: "docs/*"
+    values:
+      layout: "page"
+
+# Glossary collection
+collections: 
+  glossary:
+    sort_by: title
+
+# compress CSS output
+sass:
+  style: compressed
