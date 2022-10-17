@@ -146,6 +146,13 @@ layout: table_wrappers
               <li class="breadcrumb-nav-list-item"><span>{{ page.title }}</span></li>
             </ol>
           </nav>
+      {% else %}
+      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+        <ol class="breadcrumb-nav-list">
+          <li class="breadcrumb-nav-list-item"><a href="{{ '/' | relative_url }}">SHAPEIT5 docs</a></li>
+          <li class="breadcrumb-nav-list-item"><span>{{ page.title }}</span></li>
+        </ol>
+      </nav>
         {% endif %}
       {% endunless %}
       <div id="main-content" class="main-content" role="main">

@@ -1,0 +1,68 @@
+// add custom sass here to override any styles
+.site-header {
+    //background: black;
+    .cb-logo {
+        text-align: right;
+        width: 25%;
+        img { 
+            height: 53px;
+        }
+    }
+    .cb-title {
+        width: 75%;
+    }
+}
+#menu-button {
+    background-color: black;
+    border: none;
+    .icon { color: white; }
+}
+.text-white {
+    color: white;
+}
+/*
+// change code block color
+.highlighter-rouge {
+    color: #06044e;
+}
+*/
+// make code font size same as body
+code {
+    @include fs-4;
+}
+// add margin to top of code blocks
+div.highlighter-rouge {
+    margin-top: 0.75rem;
+}
+
+/* 
+    Alert border color utilities
+    - cross between bootstrap .alert/.card and JtDs .code-example
+    - color options similar to JtDs btn- classes 
+*/ 
+.alert {
+    padding: $sp-3;
+    margin-top: $sp-6;
+    margin-bottom: $sp-6;
+    border: 2px solid $border-color;
+    border-radius: $border-radius;
+    box-shadow: 3px 3px 5px darkgrey;
+}
+.alert-primary {
+    border-color: $btn-primary-color;
+}
+.alert-purple {
+    border-color: $purple-100;
+}
+.alert-blue {
+    border-color: $blue-000;
+}
+.alert-green {
+    border-color: $green-100;
+}
+.alert-yellow {
+    border-color: $yellow-100;
+}
+.alert-red {
+    border-color: $red-300;
+}

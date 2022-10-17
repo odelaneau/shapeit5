@@ -6,57 +6,64 @@ description: "SHAPEIT5 is a tool for haplotype phasing of high coverage sequenci
 permalink: /
 ---
 {: .warning }
-Website under construction: content not available yet!
+Website under construction.<br>
+A full release of the software, docker images, tutorials and documentation is scheduled for <b>Tuesday the 15th of November 2022</b>.<br>
+Please contact olivier.delaneau@unil.ch if you have questions.
 
+
+
+<!---
 <img src="assets/images/branding/shapeit_logo.png" align="right" alt="Shapeit5" style="height:150px">
+-->
 
 # SHAPEIT5
 {: .fs-9 .fw-500 }
 
-A tool for haplotype phasing of high-coverage sequencing data
+**S**egmented **HAP**lotype **E**stimation and **I**mputation **T**ools version **5**
 {: .fs-5 }
+
+## About
+
+SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare variants. 
+
+## Citation
+
+If you use SHAPEIT5 in your research work, please cite the following paper:
+
+[Robin Hofmeister, Diogo Ribeiro, Simone Rubinacci, Olivier Delaneau. XXXXX. BiorXiv (2022)](link)
+
+---
 
 [Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 .mx-auto }
 [View source code on GitHub](https://github.com/odelaneau/shapeit5){: .btn .fs-5 .mb-4 .mb-md-0 }
 
----
 
+## Description
 
-<div class="code-example" markdown="1">
-## About
+SHAPEIT5 is composed of the following tools:
 
-SHAPEIT5 is a fast and accurate method for estimation of haplotypes for SNP array and and high-coverage datasets containing hundreads of thousands of samples.
+- **phase_common**. Tool to phase common sites, typically SNP array data, or the first step of WES/WGS data.
+- **ligate**. Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
+- **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
+- **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
 
-## Citation
-
-If you use SHAPEIT5 in your research work, please cite the following papers:
-
-[Robin Hofmeister, Diogo Ribeiro, Simone Rubinacci, Olivier Delaneau. XXXXX. BiorXiv (2022)](https://www.nature.com/articles/s41588-020-00756-0)
-
-## Features
-
-- **Feature1**. Description 1.
-- **Feature2**. Description 2.
+[phase_common]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
+[ligate]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
+[phase_rare]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
+[switch]({% link docs/documentation/documentation.md %}){: .btn .btn-blue  }
 
 ## News
 
+<!--
 {: .new }
 > **Version `1.0.0` is available!**
-> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/versions/CHANGELOG.md) for a detailed breakdown.
+> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for a detailed breakdown.
+--->
 
-## SHAPEIT5
-
-Phase common
-Version 1.0.0
-
-Phases common variants using an improved version of the SHAPEIT4 algorithm
-
-Phase rare
-Version 1.0.0
-
-Performs phasing of extremely rare variants down to singletons, using a scaffold of haplotypes built with Phase common
-
-Documentation
+{: .warning }
+Website under construction.<br>
+A full release of the software, docker images, tutorials and documentation is scheduled for <b>Tuesday the 15th of November 2022</b>.<br>
+Please contact olivier.delaneau@unil.ch if you have questions.
 
 ---
 
@@ -84,6 +91,14 @@ SHAPEIT5 is developed by [Olivier Delaneau](https://odelaneau.github.io/lap-page
 ### License
 
 SHAPEIT5 is distributed with [MIT license](https://github.com/odelaneau/shapeit5/blob/main/LICENSE).
+
+### Organisations
+
+<div class="d-flex justify-content-around">
+  <div class="p-5"><a href="https://www.unil.ch/index.html"><img src="assets/images/lausanne_logo.jpg" align="right" alt="unil" style="height:50px"></a></div>
+  <div class="p-5"><a href="https://www.sib.swiss/"><img src="assets/images/sib_logo.jpg" align="right" alt="sib" style="height:50px"></a></div>
+  <div class="p-5"><a href="https://www.snf.ch/en/Pages/default.aspx"><img src="assets/images/snf.gif" align="right" alt="snf" style="height:50px"></a></div>
+</div>
 
 ### Contributing
 

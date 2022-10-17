@@ -1,0 +1,13 @@
+div class="{{include.div-class}}">
+    <div class="card mb-3 {{include.card-class}}">
+        {% if include.header %}<h5 class="card-header">{{ include.header }}</h5>{% endif %}
+        <div class="card-body">
+        {% if include.title %}<h5 class="card-title" id="{{ include.title | slugify }}">{{ include.title }}</h5>{% endif %}
+            <div class="card-text">
+
+            {{ include.text | markdownify }}
+
+            </div>
+        </div>
+    </div>
+</div>
