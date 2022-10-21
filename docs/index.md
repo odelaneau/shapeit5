@@ -47,10 +47,10 @@ SHAPEIT5 is composed of the following tools:
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
 
-[phase_common]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
-[ligate]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
-[phase_rare]({% link docs/documentation/documentation.md %}){: .btn .btn-blue }
-[switch]({% link docs/documentation/documentation.md %}){: .btn .btn-blue  }
+[phase_common]({% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
+[ligate]({% link docs/documentation/ligate.md %}){: .btn .btn-blue }
+[phase_rare]({% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
+[switch]({% link docs/documentation/switch.md %}){: .btn .btn-blue  }
 
 ## News
 
@@ -68,17 +68,6 @@ Please contact olivier.delaneau@unil.ch if you have questions.
 ---
 
 ## Getting started
-
-{: .warning }
-Website under construction: content not available yet!
-
-### Dependencies
-
-
-### Quick start: Use SHAPEIT5 on SNP array data
-
-
-### Configure SHAPEIT5
 
 - [See documentation]({% link docs/documentation/documentation.md %})
 
@@ -103,8 +92,7 @@ SHAPEIT5 is distributed with [MIT license](https://github.com/odelaneau/shapeit5
 ### Contributing
 
 SHAPEIT5 is an open source project and we very much welcome new contributors. When contributing to our repository, please first discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change. Read more about becoming a contributor in [our GitHub repo](https://github.com/odelaneau/shapeit5#contributing).
-
+email, or any other method with the owners of this repository before making a change.
 #### Thank you to the contributors of SHAPEIT5!
 
 <ul class="list-style-none">

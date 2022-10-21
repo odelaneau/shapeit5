@@ -1,15 +1,13 @@
 ---
 layout: default
 title: Documentation
-nav_order: 2
+nav_order: 3
 has_children: true
 permalink: /docs/documentation
 ---
-
-{: .warning }
-Website under construction: content not available yet!
-
 # Documentation
 
-We can add documentation here!
+Command-line documentation and usage of SHAPEIT5
 {: .fs-6 .fw-300 }
+
+Click on a tool below to see its documentation.
