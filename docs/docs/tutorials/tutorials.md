@@ -1,15 +1,12 @@
 ---
 layout: default
 title: Tutorials
-nav_order: 3
+nav_order: 4
 has_children: true
 permalink: /docs/tutorials
 ---
 
-{: .warning }
-Website under construction: content not available yet!
-
 # Tutorials
 
-We can add tutorials here!
+We provide tutorials to help you to get used with SHAPEIT5
 {: .fs-6 .fw-300 }

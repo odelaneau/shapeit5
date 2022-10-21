@@ -1,6 +1,6 @@
 ---
 title: Expert quick start
-nav_order: 12
+nav_order: 10
 ---
 
 # Quick Start  [for experts]
@@ -8,14 +8,12 @@ nav_order: 12
 If you are familiar with phasing and the pipeline of SHAPEIT5, appling SHAPEIT5 on your data will be pretty straightforward to understand.
 Instructions below provide quick steps for phasing your data.
 
-## Phase_common
+{: .warning }
+Website under construction: content not available yet!
 
-1. XX.
-2. YY.
+## Phase_common
 
 ## Ligate
 
 ## Phase_rare
 
-1. XX.
-2. YY.
