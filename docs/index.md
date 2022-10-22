@@ -30,7 +30,7 @@ SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare va
 
 If you use SHAPEIT5 in your research work, please cite the following paper:
 
-[Robin Hofmeister, Diogo Ribeiro, Simone Rubinacci, Olivier Delaneau. XXXXX. BiorXiv (2022)](link)
+[Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank. <br>BioRxiv (2022) doi: https://doi.org/10.1101/2022.10.19.512867 ](https://www.biorxiv.org/content/10.1101/2022.10.19.512867v1)
 
 ---
 
@@ -47,29 +47,22 @@ SHAPEIT5 is composed of the following tools:
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
 
-[phase_common]({% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
-[ligate]({% link docs/documentation/ligate.md %}){: .btn .btn-blue }
-[phase_rare]({% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
-[switch]({% link docs/documentation/switch.md %}){: .btn .btn-blue  }
+[phase_common]({{site.baseurl}}{% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
+[ligate]({{site.baseurl}}{% link docs/documentation/ligate.md %}){: .btn .btn-blue }
+[phase_rare]({{site.baseurl}}{% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
+[switch]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
 
 ## News
 
-<!--
 {: .new }
-> **Version `1.0.0` is available!**
-> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for a detailed breakdown.
---->
-
-{: .warning }
-Website under construction.<br>
-A full release of the software, docker images, tutorials and documentation is scheduled for <b>Tuesday the 15th of November 2022</b>.<br>
-Please contact olivier.delaneau@unil.ch if you have questions.
+> **Version `1.0.0` will be soon available!**
+> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 ---
 
 ## Getting started
 
-- [See documentation]({% link docs/documentation/documentation.md %})
+- [See documentation]({{site.baseurl}}{% link docs/documentation/documentation.md %})
 
 ---
 
