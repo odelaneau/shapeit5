@@ -22,7 +22,7 @@ SHAPEIT5 is a two-step approach that treats each chromosome independently and wo
 
 2. Ligate the phased common variants (MAF >= 0.1%) of a chromosome using **SHAPEIT5_ligate**, only if chunking was performed in step 1. The ligation step is computationally light and uses variants in the intersection of the chunks to provide chromosome-wide haplotypes. The result of this step (or the previous step if no chunking was used), is used as a haplotype scaffold for the next step.
 
-3. Phase rare variants (MAF < 0.1%) of a chromosome using **SHAPEIT5_rare**. To do this, we use the haplotype scaffold generated in step 2 (or 1) and we proceed in relatively small chunks (e.g. 5Mb), as run relatively fast job in parallel. At the end of this step, we have several fully phased chunks across the chromosome.
+3. Phase rare variants (MAF < 0.1%) of a chromosome using **SHAPEIT5_rare**. To do this, we use the haplotype scaffold generated in step 2 (or 1) and we proceed in relatively small chunks (e.g. 5Mb) to run relatively fast job in parallel. At the end of this step, we have several fully phased chunks across the chromosome.
 
 4. Concatenate the phased chunks generated in step 3 using **bcftools concat -n**. As in the previous step haplotypes have been phased onto a haplotype scaffold, there is no need to ligate the chunks, and the files can be concatenated without decompression and recompression. This makes this step almost instantaneous, even for large cohorts.
 
@@ -55,7 +55,7 @@ More realistically, when using WGS data on large sample size, it is good practic
 ../phase_common/bin/SHAPEIT5_phase_common --input 10k/msprime.nodup.bcf --filter-maf 0.001  --output 10k/msprime.common.phased_chr1_1_6000000.bcf --region 1:1-6000000 --thread 8
 bcftools index 10k/msprime.common.phased_chr1_1_6000000.bcf --threads 8
 
-#second chunk: 1:5000001-10000000
+#second chunk: 1:4000001-10000000
 ../phase_common/bin/SHAPEIT5_phase_common --input 10k/msprime.nodup.bcf --filter-maf 0.001  --output 10k/msprime.common.phased_chr1_4000001_10000000.bcf --region 1:4000001-10000000 --thread 8
 bcftools index 10k/msprime.common.phased_chr1_4000001_10000000.bcf --threads 8
 ```
@@ -71,7 +71,7 @@ Ligation  of the phased common variants is performed using the **SHAPEIT5_ligate
 #generate list for SHAPEIT5_ligate
 ls -1v 10k/msprime.common.phased_chr1_*.bcf > list_ligate.txt
 #ligate the chunks
-../phase_ligate/bin/SHAPEIT5_ligate --input list_ligate.txt -10k/msprime.ligated.phased.bcf --thread 8 --index
+../phase_ligate/bin/SHAPEIT5_ligate --input list_ligate.txt --output 10k/msprime.ligated.phased.bcf --thread 8 --index
 ```
 </div>
 
