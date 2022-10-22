@@ -14,17 +14,17 @@ SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare va
 - **test**: simulated data for first-step testing of the method
 - **versions**: versioning
 
+## Citation
+If you use SHAPEIT5 in your research work, please cite the following paper:
 
-Hofmeister R, Ribeiro DM, Rubinacci S., Delaneau O. Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank. BiorXiv (2022)
-
-Delaneau O., et al. Accurate, scalable and integrative haplotype estimation. Nature Communications volume 10, Article number: 5436 (2019). 
-https://www.nature.com/articles/s41467-019-13225-y
+Hofmeister RJ, Ribeiro DM, Rubinacci S., Delaneau O. [Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank](https://www.biorxiv.org/content/10.1101/2022.10.19.512867v1). BiorXiv (2022)
 
 ## Documentation
 
-https://odelaneau.github.io/shapeit5/
+Documentation, installation instructions and tutorials can be found at:
+
+[https://odelaneau.github.io/shapeit5/](https://odelaneau.github.io/shapeit5/)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-# supreme-octo-sniffle
