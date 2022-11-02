@@ -1,11 +1,11 @@
 projects = phase_common phase_rare switch ligate
 
-.PHONY: all $(projects)
+.PHONY: all $(projects) 
 
 all: $(projects)
 
 $(projects):
-	$(MAKE) -C $@
+	+$(MAKE) -C $@ $(MAKECMDGOALS)
 
 clean:
 	for dir in $(projects); do \
