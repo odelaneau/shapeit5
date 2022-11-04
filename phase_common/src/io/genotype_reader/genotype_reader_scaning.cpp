@@ -54,7 +54,7 @@ void genotype_reader::scanGenotypes() {
 	bcf1_t * line_main, * line_ref, * line_scaf;
 	int nset, n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
 	int rAC_main=0, nAC_main=0, *vAC_main=NULL, rAN_main=0, nAN_main=0, *vAN_main=NULL;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 
 		//By defaults, we do not want the variants
 		variant_mask.push_back(false);

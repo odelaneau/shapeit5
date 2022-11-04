@@ -106,7 +106,7 @@ void sparse2plain::convert() {
 
 	//
 	unsigned int nseek = 0, nrare = 0, ncomm = 0, nfull = 0, nset = 0;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_input_comm = bcf_sr_get_line(sr, 0);
 		line_input_rare = bcf_sr_get_line(sr, 1);
 

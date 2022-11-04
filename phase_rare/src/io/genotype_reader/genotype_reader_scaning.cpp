@@ -61,7 +61,7 @@ void genotype_reader::scanGenotypesPlain() {
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, rAC=0, nAC=0, *vAC=NULL, rAN=0, nAN=0, *vAN=NULL;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
@@ -140,7 +140,7 @@ void genotype_reader::scanGenotypesSparse() {
 	//Scan files
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, rAC=0, nAC=0, *vAC=NULL, rAN=0, nAN=0, *vAN=NULL;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_phased =  bcf_sr_get_line(sr, 0);
 		line_unphased =  bcf_sr_get_line(sr, 1);
 
