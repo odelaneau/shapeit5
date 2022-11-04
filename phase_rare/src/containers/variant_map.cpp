@@ -22,6 +22,8 @@
 
 #include <containers/variant_map.h>
 
+using std::vector;
+
 variant_map::variant_map() {
 }
 

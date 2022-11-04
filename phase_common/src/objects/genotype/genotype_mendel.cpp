@@ -22,6 +22,8 @@
 
 #include <objects/genotype/genotype_header.h>
 
+using namespace std;
+
 //counts[0] : # observed mendel errors
 //counts[1] : # possible mendel errors
 //counts[2] : # hets being scaffolded

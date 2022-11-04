@@ -58,8 +58,8 @@ public:
 	~window() {
 	}
 
-	string toString() {
-		string str="";
+	std::string toString() {
+		std::string str="";
 		str += "L=[" + stb.str(start_locus) + "->" + stb.str(stop_locus) + "]";
 		return str;
 	}
@@ -72,7 +72,7 @@ public:
 class window_set {
 public:
 	//
-	vector < window > W;
+	std::vector < window > W;
 
 	//
 	window_set();
@@ -81,7 +81,7 @@ public:
 
 	//
 	int size();
-	bool split(double, int, int, vector < int > &, vector < int > &, vector < double > &, vector < double > &, vector < int > &);
+	bool split(double, int, int, std::vector < int > &, std::vector < int > &, std::vector < double > &, std::vector < double > &, std::vector < int > &);
 	int build (variant_map &, genotype *, float);
 };
 

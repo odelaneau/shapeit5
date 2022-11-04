@@ -23,6 +23,8 @@
 #define _DECLARE_TOOLBOX_HERE
 #include <converter/converter_header.h>
 
+using namespace std;
+
 int main(int argc, char ** argv) {
 	vector < string > args;
 	for (int a = 1 ; a < argc ; a ++) args.push_back(string(argv[a]));

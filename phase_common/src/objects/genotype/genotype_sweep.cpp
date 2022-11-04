@@ -22,6 +22,8 @@
 
 #include <objects/genotype/genotype_header.h>
 
+using namespace std;
+
 void genotype::sample(vector < double > & CurrentTransProbabilities, vector < float > & CurrentMissingProbabilities) {
 	if (rng.getDouble() < 0.5f) sampleForward(CurrentTransProbabilities, CurrentMissingProbabilities);
 	else sampleBackward(CurrentTransProbabilities, CurrentMissingProbabilities);
