@@ -62,7 +62,7 @@ void genotype_reader::readGenotypesPlain() {
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 	int ngt_unphased, *gt_arr_unphased = NULL, ngt_arr_unphased = 0;
 
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
@@ -171,7 +171,7 @@ void genotype_reader::readGenotypesSparse() {
 	int nsk = 0, rsk = 0, *vsk = NULL;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_phased =  bcf_sr_get_line(sr, 0);
 		line_unphased =  bcf_sr_get_line(sr, 1);
 
