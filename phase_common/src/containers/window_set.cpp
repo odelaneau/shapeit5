@@ -22,6 +22,8 @@
 
 #include <containers/window_set.h>
 
+using namespace std;
+
 window_set::window_set() {
 	W.clear();
 }

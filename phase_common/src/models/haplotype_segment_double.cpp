@@ -22,6 +22,8 @@
 
 #include <models/haplotype_segment_double.h>
 
+using namespace std;
+
 haplotype_segment_double::haplotype_segment_double(genotype * _G, bitmatrix & H, vector < unsigned int > & idxH, window & W, hmm_parameters & _M) : G(_G), M(_M){
 	segment_first = W.start_segment;
 	segment_last = W.stop_segment;

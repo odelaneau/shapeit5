@@ -45,15 +45,15 @@ struct track {
 	}
 
 	void merge (const track & rhs) {
-		from = min(from, rhs.from);
-		to = max(to, rhs.to);
+		from = std::min(from, rhs.from);
+		to = std::max(to, rhs.to);
 	}
 };
 
 class ibd2_tracks {
 public:
 
-	vector < vector < track > > IBD2;
+	std::vector < std::vector < track > > IBD2;
 
 
 	ibd2_tracks ();
@@ -62,9 +62,9 @@ public:
 	void initialize(int);
 
 	bool noIBD2(int, int, int);
-	void pushIBD2(int, vector < track > &);
+	void pushIBD2(int, std::vector < track > &);
 
-	int collapse(vector < track > &);
+	int collapse(std::vector < track > &);
 	void collapse();
 };
 

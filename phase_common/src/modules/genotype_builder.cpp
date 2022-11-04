@@ -22,6 +22,8 @@
 
 #include <modules/genotype_builder.h>
 
+using namespace std;
+
 genotype_builder::genotype_builder(genotype_set & _G, int n_thread): G(_G) {
 	this->n_thread = n_thread;
 	if (n_thread > 1) {

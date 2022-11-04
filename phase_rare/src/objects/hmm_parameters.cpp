@@ -22,6 +22,8 @@
 
 #include <objects/hmm_parameters.h>
 
+using namespace std;
+
 hmm_parameters::hmm_parameters() {
 	ed = 0.0001f;
 	ee = 0.9999f;
