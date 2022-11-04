@@ -55,7 +55,7 @@ void genotype_reader::readGenotypesPlain() {
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);
 
 	for (int i = 0 ; i < n_samples ; i ++)
-		G.names.push_back(string(sr->readers[0].header->samples[i]));
+		G.names.push_back(std::string(sr->readers[0].header->samples[i]));
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, vt = 0, vr = 0, vs = 0;
@@ -164,7 +164,7 @@ void genotype_reader::readGenotypesSparse() {
 
 	//Sample processing
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);
-	for (int i = 0 ; i < n_samples ; i ++) G.names.push_back(string(sr->readers[0].header->samples[i]));
+	for (int i = 0 ; i < n_samples ; i ++) G.names.push_back(std::string(sr->readers[0].header->samples[i]));
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, vt = 0, vr = 0, vs = 0;

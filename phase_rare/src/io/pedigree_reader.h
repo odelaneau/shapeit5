@@ -28,16 +28,16 @@
 class pedigree_reader {
 public:
 	//DATA
-	vector < string > kids;
-	vector < string > fathers;
-	vector < string > mothers;
+	std::vector < std::string > kids;
+	std::vector < std::string > fathers;
+	std::vector < std::string > mothers;
 
 	//CONSTRUCTOR/DESTRUCTOR
 	pedigree_reader();
 	~pedigree_reader();
 
 	//IO
-	void readPedigreeFile(string);
+	void readPedigreeFile(std::string);
 };
 
 #endif

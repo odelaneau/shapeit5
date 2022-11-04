@@ -22,6 +22,8 @@
 
 #include <containers/genotype_set.h>
 
+using namespace std;
+
 genotype_set::genotype_set() {
 	n_site = 0;
 	n_ind = 0;

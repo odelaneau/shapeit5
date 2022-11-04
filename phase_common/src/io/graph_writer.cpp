@@ -22,6 +22,8 @@
 
 #include <io/graph_writer.h>
 
+using namespace std;
+
 graph_writer::graph_writer(genotype_set & _G, variant_map & _V): G(_G), V(_V) {
 }
 

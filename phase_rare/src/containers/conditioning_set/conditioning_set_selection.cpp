@@ -22,6 +22,8 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
+using namespace std;
+
 void conditioning_set::select(variant_map & V, genotype_set & G) {
 	tac.clock();
 
@@ -99,7 +101,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	indexes_pbwt_neighbour_serialized.erase(unique(indexes_pbwt_neighbour_serialized.begin(), indexes_pbwt_neighbour_serialized.end()), indexes_pbwt_neighbour_serialized.end());
 	vrb.bullet("PBWT backward selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 
-	basic_stats statK;
+	stats1D statK;
 	for (long int h = 0, e = 0 ; h < n_haplotypes ; h ++) {
 		vector < unsigned int > buffer;
 		while (indexes_pbwt_neighbour_serialized[e].first == h) {

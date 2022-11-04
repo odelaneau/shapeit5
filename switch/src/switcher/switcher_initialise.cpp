@@ -24,6 +24,8 @@
 
 #include <io/haplotype_reader.h>
 
+using std::string;
+
 void switcher::read_files_and_initialise() {
 	//step1: Read input files
 
@@ -33,6 +35,6 @@ void switcher::read_files_and_initialise() {
 		haplotype_reader(H, options["region"].as < string > (), options["min-pp"].as < double > (), options["thread"].as < int > ()).readHaplotypes(options["validation"].as < string > (), options["estimation"].as < string > (), options.count("dupid"));
 
 	//step2: read pedigrees if necessary
-	if (options.count("pedigree")) H.readPedigrees(options["pedigree"].as < string > (), options.count("dupid"));
+	if (options.count("pedigree")) H.readPedigrees(options["pedigree"].as < std::string > (), options.count("dupid"));
 	else H.assumePhased();
 }

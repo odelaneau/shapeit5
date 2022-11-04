@@ -32,11 +32,11 @@
 class variant {
 public :
 	//DATA
-	string chr;
+	std::string chr;
 	int bp;
-	string id;
-	string ref;
-	string alt;
+	std::string id;
+	std::string ref;
+	std::string alt;
 	bool minor;
 	double cm;
 	unsigned int cref;
@@ -51,7 +51,7 @@ public :
 
 
 	//CONSTRUCTOR/DESTRUCTOR
-	variant(string & chr, int bp, string & id, string & ref, string & alt, bool, char);
+	variant(std::string & chr, int bp, std::string & id, std::string & ref, std::string & alt, bool, char);
 	~variant();
 
 	bool isSingleton();

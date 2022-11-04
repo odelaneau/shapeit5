@@ -28,7 +28,7 @@ switcher::switcher() {
 switcher::~switcher() {
 }
 
-void switcher::process(vector < string > & args) {
+void switcher::process(std::vector < std::string > & args) {
 	declare_options();
 	parse_command_line(args);
 	check_options();

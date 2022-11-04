@@ -30,11 +30,11 @@
 class variant_map {
 public :
 	//DATA
-	vector < variant * > vec_full;			//vector of variants ordered by position in bp
-	vector < variant * > vec_scaffold;		//vector of variants ordered by position in bp
-	vector < variant * > vec_common;		//vector of variants ordered by position in bp
-	vector < variant * > vec_rare;			//vector of variants ordered by position in bp
-	multimap < int, variant * > map_pos;	//associative container of variant with position in bp
+	std::vector < variant * > vec_full;			//vector of variants ordered by position in bp
+	std::vector < variant * > vec_scaffold;		//vector of variants ordered by position in bp
+	std::vector < variant * > vec_common;		//vector of variants ordered by position in bp
+	std::vector < variant * > vec_rare;			//vector of variants ordered by position in bp
+	std::multimap < int, variant * > map_pos;	//associative container of variant with position in bp
 
 	//CONSTRUCTOR/DESTRUCTOR
 	variant_map();
@@ -46,16 +46,16 @@ public :
 	unsigned int sizeCommon();
 	unsigned int sizeRare();
 
-	vector < variant * > getByPos(int);
+	std::vector < variant * > getByPos(int);
 	void push(variant *);
 
 	void setGeneticMap(gmap_reader&);
 	void setGeneticMap();
-	int setCentiMorgan(vector < int > & pos_bp, vector < double > & pos_cM);
-	int interpolateCentiMorgan(vector < int > & pos_bp, vector < double > & pos_cM);
+	int setCentiMorgan(std::vector < int > & pos_bp, std::vector < double > & pos_cM);
+	int interpolateCentiMorgan(std::vector < int > & pos_bp, std::vector < double > & pos_cM);
 
-	void getCommonVariants(unsigned int vs0, unsigned int vs1, vector < unsigned int > & VC);
-	void getRareVariants(unsigned int vs0, unsigned int vs1, vector < unsigned int > & VR);
+	void getCommonVariants(unsigned int vs0, unsigned int vs1, std::vector < unsigned int > & VC);
+	void getRareVariants(unsigned int vs0, unsigned int vs1, std::vector < unsigned int > & VR);
 
 
 	unsigned int lengthBP();

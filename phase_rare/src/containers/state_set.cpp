@@ -22,6 +22,8 @@
 
 #include <containers/state_set.h>
 
+using namespace std;
+
 state_set::state_set() {
 	clear();
 }

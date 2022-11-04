@@ -30,9 +30,9 @@ class haplotype_checker {
 public:
 	//DATA
 	haplotype_set & H;
-	vector < vector < bool > > Errors;
-	vector < vector < bool > > Checked;
-	vector < vector < float > > Calib;
+	std::vector < std::vector < bool > > Errors;
+	std::vector < std::vector < bool > > Checked;
+	std::vector < std::vector < float > > Calib;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	haplotype_checker(haplotype_set &, int);
@@ -40,20 +40,20 @@ public:
 
 	//Routines
 	void check();
-	bool isSNP(string &, string &);
+	bool isSNP(std::string &, std::string &);
 
 	//Summarize
-	void writePerSample(string);
-	void writePerVariant(string);
-	void writePerFrequency(string);
-	void writePerType(string);
-	void writeBlock(string);
-	void writeFlipSwitchErrorPerSample(string);
-	void writeCalibration(string);
+	void writePerSample(std::string);
+	void writePerVariant(std::string);
+	void writePerFrequency(std::string);
+	void writePerType(std::string);
+	void writeBlock(std::string);
+	void writeFlipSwitchErrorPerSample(std::string);
+	void writeCalibration(std::string);
 };
 
 inline
-bool haplotype_checker::isSNP(string & ref, string &alt) {
+bool haplotype_checker::isSNP(std::string & ref, std::string &alt) {
 	bool bref = (ref == "A") || (ref == "T") || (ref == "G") || (ref == "C");
 	bool balt = (alt == "A") || (alt == "T") || (alt == "G") || (alt == "C");
 	return bref && balt;

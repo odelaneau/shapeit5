@@ -55,20 +55,20 @@ public:
 
 	//MULTI-THREADING
 	int i_workers, i_jobs;
-	vector < pthread_t > id_workers;
+	std::vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
-	vector < compute_job > threadData;
+	std::vector < compute_job > threadData;
 
 	//MCMC
-	vector < unsigned int > iteration_types;
-	vector < unsigned int > iteration_counts;
+	std::vector < unsigned int > iteration_types;
+	std::vector < unsigned int > iteration_counts;
 	unsigned int iteration_stage;
 	int n_underflow_recovered_summing;
 	int n_underflow_recovered_precision;
 
 	//STATS
-	basic_stats statH,statS;
-	vector < double > storedKsizes;
+	stats1D statH,statS;
+	std::vector < double > storedKsizes;
 
 	//CONSTRUCTOR
 	phaser();
@@ -81,16 +81,16 @@ public:
 
 	//PARAMETERS
 	void declare_options();
-	void parse_command_line(vector < string > &);
-	void parse_iteration_scheme(string);
-	string get_iteration_scheme();
+	void parse_command_line(std::vector < std::string > &);
+	void parse_iteration_scheme(std::string);
+	std::string get_iteration_scheme();
 	void check_options();
 	void verbose_options();
 	void verbose_files();
 
 	//
 	void read_files_and_initialise();
-	void phase(vector < string > &);
+	void phase(std::vector < std::string > &);
 	void write_files_and_finalise();
 };
 

@@ -72,12 +72,12 @@ private:
 	aligned_vector32 < double > prob;
 	aligned_vector32 < double > probSumK;
 	aligned_vector32 < double > probSumH;
-	vector < aligned_vector32 < double > > Alpha;
-	vector < aligned_vector32 < double > > AlphaSum;
-	vector < int > AlphaLocus;
+	std::vector < aligned_vector32 < double > > Alpha;
+	std::vector < aligned_vector32 < double > > AlphaSum;
+	std::vector < int > AlphaLocus;
 	aligned_vector32 < double > AlphaSumSum;
-	vector < aligned_vector32 < double > > AlphaMissing;
-	vector < aligned_vector32 < double > > AlphaSumMissing;
+	std::vector < aligned_vector32 < double > > AlphaMissing;
+	std::vector < aligned_vector32 < double > > AlphaSumMissing;
 	double HProbs [HAP_NUMBER * HAP_NUMBER] __attribute__ ((aligned(32)));
 	double DProbs [HAP_NUMBER * HAP_NUMBER * HAP_NUMBER * HAP_NUMBER] __attribute__ ((aligned(32)));
 
@@ -98,21 +98,21 @@ private:
 	void COLLAPSE_AMB();
 	void COLLAPSE_MIS();
 	void SUMK();
-	void IMPUTE(vector < float > & );
+	void IMPUTE(std::vector < float > & );
 	bool TRANS_HAP();
 	bool TRANS_DIP_MULT();
 	bool TRANS_DIP_ADD();
-	void SET_FIRST_TRANS(vector < double > & );
-	int SET_OTHER_TRANS(vector < double > & );
+	void SET_FIRST_TRANS(std::vector < double > & );
+	int SET_OTHER_TRANS(std::vector < double > & );
 
 public:
 	//CONSTRUCTOR/DESTRUCTOR
-	haplotype_segment_double(genotype *, bitmatrix &, vector < unsigned int > &, window &, hmm_parameters &);
+	haplotype_segment_double(genotype *, bitmatrix &, std::vector < unsigned int > &, window &, hmm_parameters &);
 	~haplotype_segment_double();
 
 	//void fetch();
 	void forward();
-	int backward(vector < double > &, vector < float > &);
+	int backward(std::vector < double > &, std::vector < float > &);
 };
 
 /*******************************************************************************/
@@ -400,7 +400,7 @@ bool haplotype_segment_double::TRANS_HAP() {
 		_mm256_store_pd(&HProbs[h1*HAP_NUMBER+4], _sum1);
 		sumHProbs += HProbs[h1*HAP_NUMBER+0]+HProbs[h1*HAP_NUMBER+1]+HProbs[h1*HAP_NUMBER+2]+HProbs[h1*HAP_NUMBER+3]+HProbs[h1*HAP_NUMBER+4]+HProbs[h1*HAP_NUMBER+5]+HProbs[h1*HAP_NUMBER+6]+HProbs[h1*HAP_NUMBER+7];
 	}
-	return (isnan(sumHProbs) || isinf(sumHProbs) || sumHProbs < numeric_limits<double>::min());
+	return (isnan(sumHProbs) || isinf(sumHProbs) || sumHProbs < std::numeric_limits<double>::min());
 }
 
 inline
@@ -418,7 +418,7 @@ bool haplotype_segment_double::TRANS_DIP_MULT() {
 			}
 		}
 	}
-	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < numeric_limits<double>::min());
+	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
 }
 
 inline
@@ -436,11 +436,11 @@ bool haplotype_segment_double::TRANS_DIP_ADD() {
 			}
 		}
 	}
-	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < numeric_limits<double>::min());
+	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
 }
 
 inline
-void haplotype_segment_double::IMPUTE(vector < float > & missing_probabilities) {
+void haplotype_segment_double::IMPUTE(std::vector < float > & missing_probabilities) {
 	__m256d _sum0 = _mm256_set1_pd(0.0f);
 	__m256d _sum1 = _mm256_set1_pd(0.0f);
 

@@ -22,6 +22,8 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
+using namespace std;
+
 void * selecter_callback(void * ptr) {
 	conditioning_set * S = static_cast< conditioning_set * >( ptr );
 

@@ -22,6 +22,8 @@
 
 #include <containers/haplotype_set.h>
 
+using namespace std;
+
 haplotype_set::haplotype_set() {
 	clear();
 }

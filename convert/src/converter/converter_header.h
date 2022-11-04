@@ -40,14 +40,14 @@ public:
 
 	//PARAMETERS
 	void declare_options();
-	void parse_command_line(vector < string > &);
+	void parse_command_line(std::vector < std::string > &);
 	void check_options();
 	void verbose_options();
 	void verbose_files();
 
 	//
 	void read_files_and_initialise();
-	void convert(vector < string > &);
+	void convert(std::vector < std::string > &);
 	void write_files_and_finalise();
 };
 
