@@ -25,6 +25,8 @@
 #include <io/sparse2plain.h>
 #include <objects/rare_genotype.h>
 
+using namespace std;
+
 sparse2plain::sparse2plain(string _plain_vcf, string _sparse_prefix, string _region, int _nthreads) {
 	file_full_bcf = _plain_vcf;
 	file_comm_bcf = _sparse_prefix +".comm.bcf";

@@ -31,8 +31,8 @@ public:
 
 	//DATA
 	haplotype_set & H;
-	vector < vector < bool > > Errors;
-	vector < int > CountsD0, CountsD1, CountsD2, CountsT00, CountsT01, CountsT02, CountsT10, CountsT11, CountsT12;
+	std::vector < std::vector < bool > > Errors;
+	std::vector < int > CountsD0, CountsD1, CountsD2, CountsT00, CountsT01, CountsT02, CountsT10, CountsT11, CountsT12;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	mendel_solver(haplotype_set &);
@@ -48,10 +48,10 @@ public:
 	void set();
 
 	//Summarize
-	void writePerSample(string);
-	void writePerVariant(string);
-	void writeImbalance(string);
-	void writePedigree(string);
+	void writePerSample(std::string);
+	void writePerVariant(std::string);
+	void writeImbalance(std::string);
+	void writePedigree(std::string);
 };
 
 #endif

@@ -66,7 +66,7 @@
 class genotype {
 public:
 	// INTERNAL DATA
-	string name;
+	std::string name;
 	unsigned int index;						// Index in containers
 	unsigned int n_segments;				// Number of segments
 	unsigned int n_variants;				// Number of variants	(to iterate over Variants)
@@ -81,33 +81,33 @@ public:
 
 
 	// VARIANT / HAPLOTYPE / DIPLOTYPE DATA
-	vector < unsigned char > Variants;		// 0.5 byte per variant
-	vector < unsigned char > Ambiguous;		// 1 byte per ambiguous variant
-	vector < unsigned long > Diplotypes;	// 8 bytes per segment
-	vector < unsigned short > Lengths;		// 2 bytes per segment
+	std::vector < unsigned char > Variants;		// 0.5 byte per variant
+	std::vector < unsigned char > Ambiguous;		// 1 byte per ambiguous variant
+	std::vector < unsigned long > Diplotypes;	// 8 bytes per segment
+	std::vector < unsigned short > Lengths;		// 2 bytes per segment
 
 	//PHASE PROBS
-	vector < bool > ProbMask;
-	vector < float > ProbStored;
-	vector < float > ProbMissing;
+	std::vector < bool > ProbMask;
+	std::vector < float > ProbStored;
+	std::vector < float > ProbMissing;
 
 	//METHODS
 	genotype(unsigned int);
 	~genotype();
 	void free();
-	void make(vector < unsigned char > &, vector < float > &);
-	void make(vector < unsigned char > &);
+	void make(std::vector < unsigned char > &, std::vector < float > &);
+	void make(std::vector < unsigned char > &);
 	void build();
-	void sample(vector < double > &, vector < float > &);
-	void sampleForward(vector < double > &, vector < float > &);
-	void sampleBackward(vector < double > &, vector < float > &);
+	void sample(std::vector < double > &, std::vector < float > &);
+	void sampleForward(std::vector < double > &, std::vector < float > &);
+	void sampleBackward(std::vector < double > &, std::vector < float > &);
 	void solve();
-	void mapMerges(vector < double > &, double , vector < bool > &);
-	void performMerges(vector < double > &, vector < bool > &);
-	void store(vector < double > &, vector < float > &);
-	void scaffoldTrio(genotype *, genotype *, vector < unsigned int > &);
-	void scaffoldDuoFather(genotype *, vector < unsigned int > &);
-	void scaffoldDuoMother(genotype *, vector < unsigned int > &);
+	void mapMerges(std::vector < double > &, double , std::vector < bool > &);
+	void performMerges(std::vector < double > &, std::vector < bool > &);
+	void store(std::vector < double > &, std::vector < float > &);
+	void scaffoldTrio(genotype *, genotype *, std::vector < unsigned int > &);
+	void scaffoldDuoFather(genotype *, std::vector < unsigned int > &);
+	void scaffoldDuoMother(genotype *, std::vector < unsigned int > &);
 
 	//INLINES
 	unsigned int countDiplotypes(unsigned long);
@@ -118,7 +118,7 @@ public:
 
 inline
 bool genotype::isOrdered(unsigned long _dip) {
-    fill(begin(curr_hapcodes), begin(curr_hapcodes)+16, 0);
+    std::fill(std::begin(curr_hapcodes), std::begin(curr_hapcodes)+16, 0);
 	for (unsigned int d = 0, i = 0 ; d < 64 ; ++d) {
 		if (DIP_GET(_dip, d)) {
 			unsigned char hap0 = DIP_HAP0(d);

@@ -22,6 +22,8 @@
 
 #include <objects/genotype/genotype_header.h>
 
+using namespace std;
+
 genotype::genotype(unsigned int _index) {
 	index = _index;
 	n_segments = 0;

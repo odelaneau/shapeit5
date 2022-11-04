@@ -47,15 +47,15 @@ public:
 	unsigned int nhets_coalescent;
 
 	//Sample IDs
-	vector < string > names;
+	std::vector < std::string > names;
 
 	//Mapping on scaffold
-	vector < unsigned int > MAP_R2S;
+	std::vector < unsigned int > MAP_R2S;
 
 	//Genotypes at rare unphased variants
-	vector < bool > major_alleles;
-	vector < vector < rare_genotype > > GRvar_genotypes;
-	vector < vector < rare_genotype > > GRind_genotypes;
+	std::vector < bool > major_alleles;
+	std::vector < std::vector < rare_genotype > > GRvar_genotypes;
+	std::vector < std::vector < rare_genotype > > GRind_genotypes;
 
 	//
 	genotype_set();
@@ -64,7 +64,7 @@ public:
 	//BASIC
 	void clear();
 	void allocate(variant_map &, unsigned int, unsigned int , unsigned int);
-	void mapUnphasedOntoScaffold(int ind, vector < vector < unsigned int > > & map);
+	void mapUnphasedOntoScaffold(int ind, std::vector < std::vector < unsigned int > > & map);
 
 	//TRANSPOSE
 	void fillup_by_transpose_V2I();
@@ -79,13 +79,13 @@ public:
 
 	//IMPUTE
 	void imputeMonomorphic();
-	void phaseLiAndStephens(unsigned int, unsigned int, aligned_vector32 < float > &, aligned_vector32 < float > &, vector < unsigned int > &, float);
-	void phaseCoalescentViterbi(unsigned int, vector < int > &, vector < int > &, hmm_parameters &);
+	void phaseLiAndStephens(unsigned int, unsigned int, aligned_vector32 < float > &, aligned_vector32 < float > &, std::vector < unsigned int > &, float);
+	void phaseCoalescentViterbi(unsigned int, std::vector < int > &, std::vector < int > &, hmm_parameters &);
 
 	//TRIOS [UNTESTED]
-	void phaseTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts);
-	void phaseDuoMother(int ikid, int imother, vector < unsigned int > &counts);
-	void phaseDuoFather(int ikid, int ifather, vector < unsigned int > &counts);
+	void phaseTrio(int ikid, int ifather, int imother, std::vector < unsigned int > &counts);
+	void phaseDuoMother(int ikid, int imother, std::vector < unsigned int > &counts);
+	void phaseDuoFather(int ikid, int ifather, std::vector < unsigned int > &counts);
 	void phaseUsingPedigrees(pedigree_reader & pr);
 };
 

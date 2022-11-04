@@ -23,6 +23,8 @@
 #define _GLOBAL
 #include <objects/variant.h>
 
+using std::string;
+
 variant::variant(string & chr, int bp, string & id, string & ref, string & alt, bool _minor, char _type) {
 	this->chr = chr;
 	this->bp = bp;
@@ -45,12 +47,12 @@ variant::~variant() {
 }
 
 unsigned int variant::getMAC() {
-	return min(cref, calt);
+	return std::min(cref, calt);
 }
 
 double variant::getMAF() {
 	double freq = cref * 1.0f / (cref + calt);
-	return min(freq, 1.0f-freq);
+	return std::min(freq, 1.0f-freq);
 }
 
 double variant::getAF() {

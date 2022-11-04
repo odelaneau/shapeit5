@@ -28,6 +28,8 @@
 
 #include <objects/genotype/genotype_header.h>
 
+using namespace std;
+
 void genotype::build() {
 	//1. Count number of segments
 	unsigned n_rel_unf = 0, n_rel_var = 0, n_rel_sca = 0, n_abs_seg = 0, n_abs_amb = 0, n_rel_amb = 0, n_abs_mis = 0;

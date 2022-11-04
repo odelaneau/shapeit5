@@ -27,6 +27,7 @@
 #include <utils/otools.h>
 #include <utils/basic_stats.h>
 
+using namespace std;
 
 #define OFILE_VCFU	0
 #define OFILE_VCFC	1

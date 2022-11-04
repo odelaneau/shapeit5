@@ -41,18 +41,18 @@ public:
 	conditioning_set & H;
 
 	//Probabilities
-	vector < double > T;
-	vector < float > M;
+	std::vector < double > T;
+	std::vector < float > M;
 
 	//Windows
 	window_set Windows;
 
 	//States
-	vector < track > Kbanned;
-	vector < vector < unsigned int > > Kstates;
+	std::vector < track > Kbanned;
+	std::vector < std::vector < unsigned int > > Kstates;
 
 	//Random states
-	vector < unsigned int > Ordering;
+	std::vector < unsigned int > Ordering;
 	int Oiterator;
 
 

@@ -27,6 +27,7 @@
 #include <io/gmap_reader.h>
 #include <io/pedigree_reader.h>
 
+using namespace std;
 
 void phaser::read_files_and_initialise() {
 	//step0: Initialize seed

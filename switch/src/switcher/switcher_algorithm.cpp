@@ -26,6 +26,8 @@
 #include <models/genotype_checker.h>
 #include <models/haplotype_checker.h>
 
+using namespace std;
+
 void switcher::process() {
 	mendel_solver MP(H);
 	genotype_checker GC(H);

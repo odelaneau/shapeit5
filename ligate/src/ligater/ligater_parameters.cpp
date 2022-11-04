@@ -24,6 +24,8 @@
 #include "../../versions/versions.h"
 #include <ligater/ligater_header.h>
 
+using namespace std;
+
 void ligater::declare_options() {
 	bpo::options_description opt_base ("Basic options");
 	opt_base.add_options()

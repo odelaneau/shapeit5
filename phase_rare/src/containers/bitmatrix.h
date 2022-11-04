@@ -45,7 +45,7 @@ public:
 	void reallocate(unsigned int nrow, unsigned int ncol);
 
 
-	void subset(bitmatrix & BM, vector < unsigned int > & rows);
+	void subset(bitmatrix & BM, std::vector < unsigned int > & rows);
 	void getMatchHetCount(unsigned int i0, unsigned int i1, int & c1, int & m1);
 	void set(unsigned int row, unsigned int col, unsigned char bit);
 	unsigned char get(unsigned int row, unsigned int col);

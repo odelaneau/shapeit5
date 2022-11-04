@@ -22,6 +22,8 @@
 
 #include <containers/ibd2_tracks.h>
 
+using namespace std;
+
 ibd2_tracks::ibd2_tracks () {
 	clear();
 }

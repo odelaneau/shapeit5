@@ -25,6 +25,8 @@
 #include <io/sparse2plain.h>
 #include <io/plain2sparse.h>
 
+using namespace std;
+
 void converter::convert() {
 
 	int mode1 = options.count("input-plain") + options.count("output-sparse");
