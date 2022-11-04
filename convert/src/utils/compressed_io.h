@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +48,7 @@ public:
 			push(boost::iostreams::bzip2_decompressor());
 		} else if (filename.substr(filename.find_last_of(".") + 1) == "bin") {
 			file_descriptor.open(filename.c_str(), std::ios::in | std::ios::binary);
-			//push(boost::iostreams::gzip_decompressor());
+			push(boost::iostreams::gzip_decompressor());
 		} else file_descriptor.open(filename.c_str());
 		if (!file_descriptor.fail()) push(file_descriptor);
 	}
@@ -82,7 +83,7 @@ public:
 			push(boost::iostreams::bzip2_compressor());
 		} else if (filename.substr(filename.find_last_of(".") + 1) == "bin") {
 			file_descriptor.open(filename.c_str(), std::ios::out | std::ios::binary);
-			//push(boost::iostreams::gzip_compressor());
+			push(boost::iostreams::gzip_compressor());
 		} else file_descriptor.open(filename.c_str());
 		if (!file_descriptor.fail()) push(file_descriptor);
 	}

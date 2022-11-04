@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +31,7 @@
 #include <stack>
 #include <bitset>
 #include <set>
+#include <tuple>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
@@ -44,11 +46,14 @@
 //INCLUDE BOOST USEFULL STUFFS (BOOST)
 #include <boost/program_options.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <boost/align/aligned_allocator.hpp>
 
 //INCLUDE HTS LIBRARY
 #include <htslib/hts.h>
 #include <htslib/kseq.h>
 #include <htslib/sam.h>
+#include <htslib/faidx.h>
+#include <htslib/regidx.h>
 extern "C" {
 	#include <htslib/vcf_sweep.h>
 	#include <htslib/synced_bcf_reader.h>
@@ -64,6 +69,10 @@ extern "C" {
 #include <utils/string_utils.h>
 #include <utils/timer.h>
 #include <utils/verbose.h>
+
+//TYPEDEFS
+template <typename T>
+using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T, 32 > >;
 
 //CONSTANTS
 #define RARE_VARIANT_FREQ	0.001f

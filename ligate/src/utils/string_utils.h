@@ -36,6 +36,23 @@ public:
 	string_utils () {};
 	~string_utils () {};
 
+	int split(const std::string & str, std::vector < std::string > & tokens, char sep , unsigned int n_max_tokens = 1000000) {
+		tokens.clear();
+		if (str == ""){
+			tokens.push_back("");
+			return tokens.size();
+		}
+		std::string::size_type p_last = str.find_first_not_of(sep, 0);
+		std::string::size_type p_curr = str.find_first_of(sep, p_last);
+		while ((std::string::npos != p_curr || std::string::npos != p_last) && tokens.size() < n_max_tokens) {
+			tokens.push_back(str.substr(p_last, p_curr - p_last));
+			p_last = str.find_first_not_of(sep, p_curr);
+			p_curr = str.find_first_of(sep, p_last);
+		}
+		if (tokens.back()[tokens.back().size()-1] == '\r') tokens.back() = tokens.back().substr(0, tokens.back().size()-1);
+		return tokens.size();
+	}
+
 	int split(const std::string & str, std::vector < std::string > & tokens, std::string sep = " 	", unsigned int n_max_tokens = 1000000) {
 		tokens.clear();
 		if (str == ""){

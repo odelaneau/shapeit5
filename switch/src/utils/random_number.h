@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,6 +76,16 @@ public:
 
 	bool flipCoin() {
 		return (getDouble() < 0.5);
+	}
+
+	int sample(std::vector < float > & vec, float sum) {
+		float csum = vec[0];
+		float u = getDouble() * sum;
+		for (int i = 0; i < vec.size() - 1; ++i) {
+			if ( u <= csum ) return i;
+			csum += vec[i+1];
+		}
+		return vec.size() - 1;
 	}
 
 	int sample(std::vector < double > & vec, double sum) {
