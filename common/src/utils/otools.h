@@ -80,8 +80,8 @@ using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T,
 #define MAX_AMB				22
 
 //MACROS
-#define DIV2(v)	(v>>1)
-#define MOD2(v)	(v&1)
+#define DIV2(v)	((v)>>1)
+#define MOD2(v)	((v)&1)
 
 //NAMESPACE
 namespace bio = boost::iostreams;
