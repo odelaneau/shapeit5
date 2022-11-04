@@ -11,7 +11,7 @@ clean:
 	for dir in $(projects); do \
 	$(MAKE) $@ -C $$dir; \
 	done
-	rm static_bins/*
-	rm docker/resources/*
-	rm docker/shapeit5*.tar.gz
+	rm -f static_bins/*
+	rm -f docker/resources/*
+	rm -f docker/shapeit5*.tar.gz
 
