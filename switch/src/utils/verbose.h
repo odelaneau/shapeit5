@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +81,11 @@ public:
 	void bullet(string s) {
 		if (verbose_on_screen) cout << "  * " << s << endl;
 		if (verbose_on_log) log << "  * " << s << endl;
+	}
+
+	void bullet2(string s) {
+		if (verbose_on_screen) cout << "      + " << s << endl;
+		if (verbose_on_log) log << "      + " << s << endl;
 	}
 
 	void warning(string s) {

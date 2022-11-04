@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,18 +26,102 @@
 
 #include <vector>
 
-// CODE TAKEN FROM THERE: https://www.johndcook.com/blog/standard_deviation/
-
-class basic_stats {
+class stats2D {
 protected:
-	uint32_t m_n;
+	unsigned long int m_n;
+	double m_oldMx, m_newMx;
+	double m_oldSx, m_newSx;
+	double m_oldMy, m_newMy;
+	double m_oldSy, m_newSy;
+	double m_oldC, m_newC;
+
+public:
+
+	stats2D() {
+		m_n = 0;
+		m_oldMx = 0; m_newMx = 0;
+		m_oldMy = 0; m_newMy = 0;
+		m_oldSx = 0; m_newSx = 0;
+		m_oldSy = 0; m_newSy = 0;
+		m_oldC = 0; m_newC = 0;
+	}
+
+	void clear() {
+		m_n = 0;
+		m_oldMx = 0; m_newMx = 0;
+		m_oldMy = 0; m_newMy = 0;
+		m_oldSx = 0; m_newSx = 0;
+		m_oldSy = 0; m_newSy = 0;
+		m_oldC = 0; m_newC = 0;
+	}
+
+	template <class T>
+	void push(T x, T y) {
+		m_n++;
+		if (m_n == 1) {
+			m_oldMx = m_newMx = x;
+			m_oldMy = m_newMy = y;
+			m_oldSx = m_oldSy = 0.0;
+			m_oldC = m_newC = 0.0;
+		} else {
+			m_newMy = m_oldMy + (y - m_oldMy)/m_n;
+			m_newC = m_oldC + (x - m_oldMx) * (y - m_newMy);
+			m_newMx = m_oldMx + (x - m_oldMx)/m_n;
+			m_newSx = m_oldSx + (x - m_oldMx)*(x - m_newMx);
+			m_newSy = m_oldSy + (y - m_oldMy)*(y - m_newMy);
+
+			m_oldC = m_newC;
+			m_oldMx = m_newMx;
+            m_oldSx = m_newSx;
+            m_oldMy = m_newMy;
+            m_oldSy = m_newSy;
+		}
+	}
+
+	unsigned long int size() const {
+		return m_n;
+	}
+
+	double meanX() const {
+		return (m_n > 0) ? m_newMx : 0.0;
+	}
+
+	double meanY() const {
+		return (m_n > 0) ? m_newMy : 0.0;
+	}
+
+	double varX() const {
+		return ( (m_n > 1) ? m_newSx/(m_n-1) : 0.0 );
+	}
+
+	double varY() const {
+		return ( (m_n > 1) ? m_newSy/(m_n-1) : 0.0 );
+	}
+
+	double sdX() const {
+		return sqrt( varX() );
+	}
+
+	double sdY() const {
+		return sqrt( varY() );
+	}
+
+	double corrXY() const {
+		return ( (m_n > 0) ? (m_newC/((m_n-1)*sdX()*sdY())) : 0.0 );
+	}
+};
+
+// Code taken from there: https://www.johndcook.com/blog/standard_deviation/ and there: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+class stats1D {
+protected:
+	unsigned long int m_n;
 	double m_oldM;
 	double m_newM;
 	double m_oldS;
 	double m_newS;
 
 public:
-	basic_stats() {
+	stats1D() {
 		m_n = 0;
 		m_oldM = 0;
 		m_newM = 0;
@@ -45,7 +130,7 @@ public:
 	}
 
 	template <class T>
-	basic_stats(std::vector < T > & X) {
+	stats1D(std::vector < T > & X) {
 		m_n = 0;
 		m_oldM = 0;
 		m_newM = 0;
@@ -76,7 +161,7 @@ public:
 		}
 	}
 
-	int size() const {
+	unsigned long int size() const {
 		return m_n;
 	}
 

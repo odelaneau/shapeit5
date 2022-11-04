@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (C) 2022-2023 Olivier Delaneau
+ * Copyright (C) 2022-2023 Simone Rubinacci
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -91,7 +92,7 @@ public:
 		double csum = vec[0];
 		double u = getDouble() * sum;
 		for (int i = 0; i < vec.size() - 1; ++i) {
-			if ( u <= csum ) return i;
+			if ( u < csum ) return i;
 			csum += vec[i+1];
 		}
 		return vec.size() - 1;
@@ -101,7 +102,7 @@ public:
 		double csum = vec[0];
 		double u = getDouble() * sum;
 		for (int i = 0; i < 3; ++i) {
-			if ( u <= csum ) return i;
+			if ( u < csum ) return i;
 			csum += vec[i+1];
 		}
 		return 3;

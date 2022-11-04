@@ -31,6 +31,7 @@
 #include <stack>
 #include <bitset>
 #include <set>
+#include <tuple>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
@@ -45,11 +46,14 @@
 //INCLUDE BOOST USEFULL STUFFS (BOOST)
 #include <boost/program_options.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <boost/align/aligned_allocator.hpp>
 
 //INCLUDE HTS LIBRARY
 #include <htslib/hts.h>
 #include <htslib/kseq.h>
 #include <htslib/sam.h>
+#include <htslib/faidx.h>
+#include <htslib/regidx.h>
 extern "C" {
 	#include <htslib/vcf_sweep.h>
 	#include <htslib/synced_bcf_reader.h>
@@ -66,6 +70,15 @@ extern "C" {
 #include <utils/timer.h>
 #include <utils/verbose.h>
 
+//TYPEDEFS
+template <typename T>
+using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T, 32 > >;
+
+//CONSTANTS
+#define RARE_VARIANT_FREQ	0.001f
+#define HAP_NUMBER			8
+#define MAX_AMB				22
+
 //MACROS
 #define DIV2(v)	(v>>1)
 #define MOD2(v)	(v&1)
@@ -76,7 +89,7 @@ namespace bio = boost::iostreams;
 namespace bpo = boost::program_options;
 namespace bid = boost::uuids;
 
-//MAKE SOME TOOL FULLY ACCESSIBLE THROUGHOUT THE SOFTWARE
+//MAKE SOME TOOLS FULLY ACCESSIBLE THROUGHOUT THE SOFTWARE
 #ifdef _DECLARE_TOOLBOX_HERE
 	random_number_generator rng;	//Random number generator
 	string_utils stb;				//String manipulation
