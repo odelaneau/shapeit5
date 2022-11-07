@@ -25,9 +25,9 @@
 
 #include <utils/otools.h>
 
-#define SETBIT(n,i)	n|=(1UL<<i);
-#define CLRBIT(n,i)	n&=~(1UL<<i);
-#define GETBIT(n,i)	((n>>i)&1U);
+#define SETBIT(n,i)	(n)|=(1UL<<(i));
+#define CLRBIT(n,i)	(n)&=~(1UL<<i);
+#define GETBIT(n,i)	(((n)>>(i))&1U);
 
 
 class rare_genotype {
