@@ -25,10 +25,9 @@
 
 #include <utils/otools.h>
 
-
-#define SETBIT(n,i)	n|=(1UL<<i);
-#define CLRBIT(n,i)	n&=~(1UL<<i);
-#define GETBIT(n,i)	((n>>i)&1U);
+#define SETBIT(n,i)	(n)|=(1UL<<(i));
+#define CLRBIT(n,i)	(n)&=~(1UL<<i);
+#define GETBIT(n,i)	(((n)>>(i))&1U);
 
 
 class rare_genotype {
@@ -121,11 +120,11 @@ public:
 
 	void phase(float prb0, float prb1) {
 		if (!pha && (het || mis)) {
-			vector < double > gprobs = vector < double > (4, 0.0f);
-			float p01 = max(prb0, numeric_limits<float>::min());
-			float p00 = max(1.0f - prb0, numeric_limits<float>::min());
-			float p11 = max(prb1, numeric_limits<float>::min());
-			float p10 = max(1.0f - prb1, numeric_limits<float>::min());
+			std::vector < double > gprobs = std::vector < double > (4, 0.0f);
+			float p01 = std::max(prb0, std::numeric_limits<float>::min());
+			float p00 = std::max(1.0f - prb0, std::numeric_limits<float>::min());
+			float p11 = std::max(prb1, std::numeric_limits<float>::min());
+			float p10 = std::max(1.0f - prb1, std::numeric_limits<float>::min());
 
 			if (het) {
 				gprobs[0] = 0.0f;

@@ -35,8 +35,8 @@ public:
 	//FILE DATA
 	int nfiles;
 
-	vector < string > filenames;
-	vector < int > prev_readers;
+	std::vector < std::string > filenames;
+	std::vector < int > prev_readers;
 
 	//SAMPLE DATA
 
@@ -44,10 +44,10 @@ public:
 
 	std::array<int,2> nswap;
 	std::array<std::vector<bool>,2> swap_phase;
-	vector < int > nmatch;
-	vector < int > nmism;
+	std::vector < int > nmatch;
+	std::vector < int > nmism;
 
-	vector < int > nsites_buff_d2;
+	std::vector < int > nsites_buff_d2;
 
 	int32_t *GTa, *GTb, mGTa, mGTb;
 
@@ -57,14 +57,14 @@ public:
 
 	//PARAMETERS
 	void declare_options();
-	void parse_command_line(vector < string > &);
+	void parse_command_line(std::vector < std::string > &);
 	void check_options();
 	void verbose_options();
 	void verbose_files();
 
 	//FILE I/O
 	void read_files_and_initialise();
-	void ligate(vector < string > &);
+	void ligate(std::vector < std::string > &);
 	void ligate();
 	void write_files_and_finalise();
 	//void scan_chunks();

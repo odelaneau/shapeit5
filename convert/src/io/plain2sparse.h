@@ -29,17 +29,17 @@
 class plain2sparse {
 public:
 	//PARAMETERS
-	string file_full_vcf;
-	string file_comm_bcf;
-	string file_rare_bcf;
-	string file_rare_bin;
-	string region;
-	string contig;
+	std::string file_full_vcf;
+	std::string file_comm_bcf;
+	std::string file_rare_bcf;
+	std::string file_rare_bin;
+	std::string region;
+	std::string contig;
 	float minmaf;
 	int nthreads;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	plain2sparse(string, string, string, int, float);
+	plain2sparse(std::string, std::string, std::string, int, float);
 	~plain2sparse();
 
 	//PROCESS

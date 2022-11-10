@@ -23,7 +23,7 @@
 #define _GLOBAL
 #include <objects/variant.h>
 
-variant::variant(string & chr, int bp, string & id, string & ref, string & alt, int idx) {
+variant::variant(std::string & chr, int bp, std::string & id, std::string & ref, std::string & alt, int idx) {
 	this->chr = chr;
 	this->bp = bp;
 	this->id = id;
@@ -40,11 +40,11 @@ variant::~variant() {
 }
 
 unsigned int variant::getMAC() {
-	return min(cref, calt);
+	return std::min(cref, calt);
 }
 
 double variant::getMAF() {
-	return min(cref, calt) * 1.0f / (cref + calt);
+	return std::min(cref, calt) * 1.0f / (cref + calt);
 }
 
 double variant::getAF() {

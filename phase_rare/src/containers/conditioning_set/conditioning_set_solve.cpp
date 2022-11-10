@@ -22,6 +22,8 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
+using namespace std;
+
 void conditioning_set::solve(variant_map & V, genotype_set & G) {
 	tac.clock();
 

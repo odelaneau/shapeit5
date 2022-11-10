@@ -22,6 +22,8 @@
 
 #include <phaser/phaser_header.h>
 
+using namespace std;
+
 void * hmmcompute_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
 	int id_job, id_thread;

@@ -28,6 +28,7 @@
 #include <io/pedigree_reader.h>
 #include <modules/genotype_builder.h>
 
+using namespace std;
 
 void phaser::read_files_and_initialise() {
 	//step0: Initialize seed and multi-threading

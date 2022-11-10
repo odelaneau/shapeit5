@@ -40,16 +40,16 @@ public:
 	unsigned long n_variants;
 	unsigned long n_main_samples;
 	unsigned long n_ref_samples;
-	vector < unsigned long > n_genotypes;
+	std::vector < unsigned long > n_genotypes;
 
 	//PARAMETERS
-	vector< string > filenames;
-	vector< char > panels;
-	string region;
+	std::vector< std::string > filenames;
+	std::vector< char > panels;
+	std::string region;
 	int threads;
 	float filter_min_maf;
 	bool filter_snp_only;
-	vector < bool > variant_mask;
+	std::vector < bool > variant_mask;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	genotype_reader(haplotype_set &, genotype_set &, variant_map &);
@@ -58,11 +58,11 @@ public:
 	//PARAMS
 	void setFilterMAF(float);
 	void setFilterSNP();
-	void setMainFilename(string);
-	void addReferenceFilename(string);
-	void addScaffoldFilename(string);
+	void setMainFilename(std::string);
+	void addReferenceFilename(std::string);
+	void addScaffoldFilename(std::string);
 	void setThreads(int);
-	void setRegion(string);
+	void setRegion(std::string);
 
 	//IO
 	void scanGenotypes();

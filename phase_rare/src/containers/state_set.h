@@ -51,8 +51,8 @@ public:
 
 class state_set {
 public:
-	vector < cstate > Pstates;
-	vector < long int > Pmapping;
+	std::vector < cstate > Pstates;
+	std::vector < long int > Pmapping;
 
 	//
 	state_set();

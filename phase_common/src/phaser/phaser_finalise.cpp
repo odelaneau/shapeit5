@@ -37,8 +37,8 @@ void phaser::write_files_and_finalise() {
 	H.transposeHaplotypes_H2V(false);
 
 	//step1: writing best guess haplotypes in VCF/BCF file
-	if (options.count("bingraph")) graph_writer(G, V).writeGraphs(options["bingraph"].as < string > ());
-	if (options.count("output")) haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < string > ());
+	if (options.count("bingraph")) graph_writer(G, V).writeGraphs(options["bingraph"].as < std::string > ());
+	if (options.count("output")) haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > ());
 
 	//step2: Measure overall running time
 	vrb.bullet("Total running time = " + stb.str(tac.abs_time()) + " seconds");

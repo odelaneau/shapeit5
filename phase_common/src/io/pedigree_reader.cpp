@@ -22,6 +22,8 @@
 
 #include <io/pedigree_reader.h>
 
+using namespace std;
+
 pedigree_reader::pedigree_reader() {
 }
 

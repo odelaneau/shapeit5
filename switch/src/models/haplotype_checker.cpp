@@ -22,6 +22,8 @@
 
 #include <models/haplotype_checker.h>
 
+using namespace std;
+
 haplotype_checker::haplotype_checker(haplotype_set & _H, int nbins) : H(_H) {
 	Errors = vector < vector < bool > > (H.IDXesti.size(), vector < bool > (H.n_variants, false));
 	Checked = vector < vector < bool > > (H.IDXesti.size(), vector < bool > (H.n_variants, false));

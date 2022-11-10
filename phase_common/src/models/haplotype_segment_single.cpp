@@ -22,6 +22,8 @@
 
 #include <models/haplotype_segment_single.h>
 
+using namespace std;
+
 haplotype_segment_single::haplotype_segment_single(genotype * _G, bitmatrix & H, vector < unsigned int > & idxH, window & W, hmm_parameters & _M) : G(_G), M(_M){
 	segment_first = W.start_segment;
 	segment_last = W.stop_segment;

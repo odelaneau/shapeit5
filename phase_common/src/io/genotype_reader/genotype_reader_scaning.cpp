@@ -54,7 +54,7 @@ void genotype_reader::scanGenotypes() {
 	bcf1_t * line_main, * line_ref, * line_scaf;
 	int nset, n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
 	int rAC_main=0, nAC_main=0, *vAC_main=NULL, rAN_main=0, nAN_main=0, *vAN_main=NULL;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 
 		//By defaults, we do not want the variants
 		variant_mask.push_back(false);
@@ -84,8 +84,8 @@ void genotype_reader::scanGenotypes() {
 
 		//Keep SNPs only
 		if (filter_snp_only) {
-			string ref = string(line_main->d.allele[0]);
-			string alt = string(line_main->d.allele[1]);
+			std::string ref = std::string(line_main->d.allele[0]);
+			std::string alt = std::string(line_main->d.allele[1]);
 			bool bref = (ref == "A") || (ref == "T") || (ref == "G") || (ref == "C");
 			bool balt = (alt == "A") || (alt == "T") || (alt == "G") || (alt == "C");
 			n_variants_notsnp += (!bref || !balt);
@@ -98,18 +98,18 @@ void genotype_reader::scanGenotypes() {
 			rAC_main = bcf_get_info_int32(sr->readers[0].header, line_main, "AC", &vAC_main, &nAC_main);
 			if (nAC_main!=1) vrb.error("AC field is needed in main file for MAF filtering");
 			if (nAN_main!=1) vrb.error("AN field is needed in main file for MAF filtering");
-			float maf = min(vAC_main[0] * 1.0f / vAN_main[0], (vAN_main[0] - vAC_main[0]) * 1.0f / vAN_main[0]);
+			float maf = std::min(vAC_main[0] * 1.0f / vAN_main[0], (vAN_main[0] - vAC_main[0]) * 1.0f / vAN_main[0]);
 			n_variants_rare += (maf < filter_min_maf);
 			if (maf < filter_min_maf) continue;
 		}
 
 		//Push variant information
 		bcf_unpack(line_main, BCF_UN_STR);
-		string chr = bcf_hdr_id2name(sr->readers[0].header, line_main->rid);
+		std::string chr = bcf_hdr_id2name(sr->readers[0].header, line_main->rid);
 		int pos = line_main->pos + 1;
-		string id = string(line_main->d.id);
-		string ref = string(line_main->d.allele[0]);
-		string alt = string(line_main->d.allele[1]);
+		std::string id = std::string(line_main->d.id);
+		std::string ref = std::string(line_main->d.allele[0]);
+		std::string alt = std::string(line_main->d.allele[1]);
 		V.push(new variant (chr, pos, id, ref, alt, V.size()));
 
 		//Flag it!

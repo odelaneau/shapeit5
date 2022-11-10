@@ -22,6 +22,8 @@
 
 #include <phaser/phaser_header.h>
 
+using namespace std;
+
 phaser::phaser() {
 }
 

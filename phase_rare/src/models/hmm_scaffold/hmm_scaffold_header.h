@@ -61,7 +61,7 @@ public:
 	bitmatrix Hhap;
 
 	//ARRAYS
-	vector < aligned_vector32 < float > > alpha;
+	std::vector < aligned_vector32 < float > > alpha;
 	aligned_vector32 < float > beta;
 
 public:
@@ -71,8 +71,8 @@ public:
 
 	void setup(unsigned int _hap);
 	double forward();
-	void backward(vector < vector < unsigned int > > & cevents, vector < int > & vpath);
-	void viterbi(vector < int > & path);
+	void backward(std::vector < std::vector < unsigned int > > & cevents, std::vector < int > & vpath);
+	void viterbi(std::vector < int > & path);
 
 };
 

@@ -30,10 +30,10 @@ class hmm_parameters {
 public :
 	//DATA
 	int Neff, Nhap;
-	vector < float > t;
-	vector < float > nt;
-	vector < float > cm;
-	vector < char > rare_allele;
+	std::vector < float > t;
+	std::vector < float > nt;
+	std::vector < float > cm;
+	std::vector < char > rare_allele;
 	double ee;
 	double ed;
 
