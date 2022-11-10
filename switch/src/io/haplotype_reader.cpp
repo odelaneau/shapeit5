@@ -22,6 +22,8 @@
 
 #include <io/haplotype_reader.h>
 
+using namespace std;
+
 haplotype_reader::haplotype_reader(haplotype_set & _H, string _region, double _minPP,  int _nthreads) : H(_H) {
 	nthreads = _nthreads;
 	region = _region;

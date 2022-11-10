@@ -22,6 +22,8 @@
 
 #include <containers/genotype_set/genotype_set_header.h>
 
+using namespace std;
+
 void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned_vector32 < float > & alphaXbeta_prev, aligned_vector32 < float > & alphaXbeta_curr, vector < unsigned int > & H, float threshold) {
 	float p[2] = { 0.0f };
 

@@ -28,15 +28,15 @@
 class gmap_reader {
 public:
 	//DATA
-	vector < int > pos_bp;
-	vector < double > pos_cm;
+	std::vector < int > pos_bp;
+	std::vector < double > pos_cm;
 
 	//CONSTRUCTOR/DESTRUCTOR
 	gmap_reader();
 	~gmap_reader();
 
 	//IO
-	void readGeneticMapFile(string);
+	void readGeneticMapFile(std::string);
 };
 
 #endif

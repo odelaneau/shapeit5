@@ -22,6 +22,8 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
+using namespace std;
+
 struct solver_callback_params {
 	genotype_set * GS;
 	conditioning_set * CS;

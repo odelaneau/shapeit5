@@ -23,6 +23,8 @@
 #include "../../versions/versions.h"
 #include <io/haplotype_writer.h>
 
+using namespace std;
+
 #define OFILE_VCFU	0
 #define OFILE_VCFC	1
 #define OFILE_BCFC	2

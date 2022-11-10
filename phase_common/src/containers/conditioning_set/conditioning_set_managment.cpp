@@ -22,6 +22,8 @@
 
 #include <containers/conditioning_set/conditioning_set_header.h>
 
+using namespace std;
+
 conditioning_set::conditioning_set() {
 	depth = 0;
 	nthread = 0;

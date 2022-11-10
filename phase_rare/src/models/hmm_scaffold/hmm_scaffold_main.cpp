@@ -22,6 +22,8 @@
 
 #include <models/hmm_scaffold/hmm_scaffold_header.h>
 
+using namespace std;
+
 hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M) : V(_V), G(_G), C(_C), M(_M){
 	match_prob[0] = 1.0f; match_prob[1] = M.ed/M.ee;
 

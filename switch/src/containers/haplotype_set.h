@@ -35,36 +35,36 @@ public:
 	unsigned int n_variants;
 
 	//Validation Data
-	vector < vector < bool > > Htrue;
-	vector < vector < bool > > Missing;
-	vector < vector < bool > > Phased;
+	std::vector < std::vector < bool > > Htrue;
+	std::vector < std::vector < bool > > Missing;
+	std::vector < std::vector < bool > > Phased;
 
 	//Estimated Data
-	vector < vector < bool > > Hesti;
-	vector < vector < bool > > Hprob;
-	vector < vector < bool > > Estimated;
-	map < string, float > Vprob;
-	vector < int > IDXesti;
+	std::vector < std::vector < bool > > Hesti;
+	std::vector < std::vector < bool > > Hprob;
+	std::vector < std::vector < bool > > Estimated;
+	std::map < std::string, float > Vprob;
+	std::vector < int > IDXesti;
 
 	//Variant Data [Columns]
-	vector < int > MAC;
-	vector < bool > MinorAlleles;
-	vector < int > Positions;
-	vector < string > RSIDs;
-	vector < string > REFs, ALTs;
+	std::vector < int > MAC;
+	std::vector < bool > MinorAlleles;
+	std::vector < int > Positions;
+	std::vector < std::string > RSIDs;
+	std::vector < std::string > REFs, ALTs;
 
 	//Family Data [Rows]
-	vector < string > vecSamples;
-	map < string, int > mapSamples;
-	vector < int > Mothers, Fathers;
+	std::vector < std::string > vecSamples;
+	std::map < std::string, int > mapSamples;
+	std::vector < int > Mothers, Fathers;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	haplotype_set();
 	~haplotype_set();
 	void clear();
 
-	void push(string &);
-	void readPedigrees(string, bool);
+	void push(std::string &);
+	void readPedigrees(std::string, bool);
 	void assumePhased();
 
 

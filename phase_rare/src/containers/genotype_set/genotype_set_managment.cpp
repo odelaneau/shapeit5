@@ -22,6 +22,8 @@
 
 #include <containers/genotype_set/genotype_set_header.h>
 
+using namespace std;
+
 float rare_genotype::ee = 0.9999f;
 float rare_genotype::ed = 0.0001f;
 
