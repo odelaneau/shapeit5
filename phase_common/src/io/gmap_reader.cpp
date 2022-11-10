@@ -22,6 +22,8 @@
 
 #include <io/gmap_reader.h>
 
+using namespace std;
+
 gmap_reader::gmap_reader() {
 }
 

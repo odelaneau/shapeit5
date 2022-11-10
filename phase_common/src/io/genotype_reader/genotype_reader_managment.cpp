@@ -22,6 +22,8 @@
 
 #include <io/genotype_reader/genotype_reader_header.h>
 
+using namespace std;
+
 genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_map & _V) : H(_H), G(_G), V(_V) {
 	nthreads = 1;
 	n_variants = 0;

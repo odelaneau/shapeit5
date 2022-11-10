@@ -22,6 +22,8 @@
 
 #include <objects/genotype/genotype_header.h>
 
+using namespace std;
+
 class Transition {
 public:
 	double prob;

@@ -30,7 +30,7 @@ class genotype_checker {
 public:
 	//DATA
 	haplotype_set & H;
-	vector < vector < bool > > Errors;
+	std::vector < std::vector < bool > > Errors;
 
 	//CONSTRUCTOR/DESTRUCTOR/INITIALIZATION
 	genotype_checker(haplotype_set &);
@@ -40,8 +40,8 @@ public:
 	void check();
 
 	//Summarize
-	void writePerSample(string);
-	void writePerVariant(string);
+	void writePerSample(std::string);
+	void writePerVariant(std::string);
 };
 
 #endif

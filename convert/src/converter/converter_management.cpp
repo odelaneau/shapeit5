@@ -22,6 +22,8 @@
 
 #include <converter/converter_header.h>
 
+using namespace std;
+
 converter::converter() {
 }
 

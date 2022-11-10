@@ -34,9 +34,9 @@ class genotype_set {
 public:
 	//DATA
 	int n_site, n_ind;							//Number of variants, number of individuals
-	vector < genotype * > vecG;					//Vector of genotype graphs
-	vector < genotype * > vecFathers;			//Points to fathers, NULL otherwise
-	vector < genotype * > vecMothers;			//Points to mothers, NULL otherwise
+	std::vector < genotype * > vecG;					//Vector of genotype graphs
+	std::vector < genotype * > vecFathers;			//Points to fathers, NULL otherwise
+	std::vector < genotype * > vecMothers;			//Points to mothers, NULL otherwise
 
 	//CONSTRUCTOR/DESTRUCTOR
 	genotype_set();

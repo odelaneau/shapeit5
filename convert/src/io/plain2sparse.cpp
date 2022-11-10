@@ -25,6 +25,8 @@
 #include <io/plain2sparse.h>
 #include <objects/rare_genotype.h>
 
+using namespace std;
+
 plain2sparse::plain2sparse(string _plain_vcf, string _sparse_prefix, string _region, int _nthreads, float _minmaf) {
 	file_full_vcf = _plain_vcf;
 	file_comm_bcf = _sparse_prefix +".comm.bcf";
@@ -177,7 +179,7 @@ void plain2sparse::convert() {
 			bcf_update_info_int32(hdr_comm_bcf, line_output_comm, "AC", vac, 1);
 			bcf_update_info_int32(hdr_comm_bcf, line_output_comm, "AN", van, 1);
 			bcf_update_genotypes(hdr_comm_bcf, line_output_comm, vgt, ngt);
-			if (bcf_write1(fp_comm_bcf, hdr_comm_bcf, line_output_comm) < 0) vrb.error("Failing to write VCF/record for rare variants");
+			if (bcf_write1(fp_comm_bcf, hdr_comm_bcf, line_output_comm) < 0) vrb.error("Failing to write VCF/record for common variants");
 			ncomm ++;
 		}
 		nfull ++;

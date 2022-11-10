@@ -23,6 +23,8 @@
 
 #include <ligater/ligater_header.h>
 
+using namespace std;
+
 ligater::ligater()
 {
 }

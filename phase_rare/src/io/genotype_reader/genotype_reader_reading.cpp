@@ -55,14 +55,14 @@ void genotype_reader::readGenotypesPlain() {
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);
 
 	for (int i = 0 ; i < n_samples ; i ++)
-		G.names.push_back(string(sr->readers[0].header->samples[i]));
+		G.names.push_back(std::string(sr->readers[0].header->samples[i]));
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, vt = 0, vr = 0, vs = 0;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 	int ngt_unphased, *gt_arr_unphased = NULL, ngt_arr_unphased = 0;
 
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
@@ -164,14 +164,14 @@ void genotype_reader::readGenotypesSparse() {
 
 	//Sample processing
 	n_samples = bcf_hdr_nsamples(sr->readers[0].header);
-	for (int i = 0 ; i < n_samples ; i ++) G.names.push_back(string(sr->readers[0].header->samples[i]));
+	for (int i = 0 ; i < n_samples ; i ++) G.names.push_back(std::string(sr->readers[0].header->samples[i]));
 
 	bcf1_t * line_phased = NULL, * line_unphased = NULL;
 	int nset, vt = 0, vr = 0, vs = 0;
 	int nsk = 0, rsk = 0, *vsk = NULL;
 	int ngt_phased, *gt_arr_phased = NULL, ngt_arr_phased = 0;
 
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_phased =  bcf_sr_get_line(sr, 0);
 		line_unphased =  bcf_sr_get_line(sr, 1);
 

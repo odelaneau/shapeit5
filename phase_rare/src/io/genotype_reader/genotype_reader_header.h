@@ -41,14 +41,14 @@ public:
 	unsigned int n_scaffold_variants;
 	unsigned int n_rare_variants;
 	unsigned int n_samples;
-	vector < unsigned long > n_scaffold_genotypes;
-	vector < unsigned long > n_rare_genotypes;
+	std::vector < unsigned long > n_scaffold_genotypes;
+	std::vector < unsigned long > n_rare_genotypes;
 
 	//PARAMETERS
-	string funphased;
-	string fphased;
-	string fbinary;
-	string scaffold_region;
+	std::string funphased;
+	std::string fphased;
+	std::string fbinary;
+	std::string scaffold_region;
 	int input_start;
 	int input_stop;
 	int nthreads;
@@ -59,9 +59,9 @@ public:
 	~genotype_reader();
 
 	//PARAMS
-	void setFilenames(string, string, string);
+	void setFilenames(std::string, std::string, std::string);
 	void setThreads(int);
-	void setRegions(string, int, int);
+	void setRegions(std::string, int, int);
 	void setMAF(float);
 
 	//IO

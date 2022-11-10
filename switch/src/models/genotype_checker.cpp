@@ -22,6 +22,8 @@
 
 #include <models/genotype_checker.h>
 
+using namespace std;
+
 genotype_checker::genotype_checker(haplotype_set & _H) : H(_H) {
 	Errors = vector < vector < bool > > (H.IDXesti.size(), vector < bool > (H.n_variants, false));
 }
