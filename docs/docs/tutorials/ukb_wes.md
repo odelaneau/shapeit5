@@ -21,10 +21,19 @@ Website under construction: content not available yet!
 
 ## Rationale
 Similar to the WGS data, the WES data can be phased in two steps, separating common and rare markers. However, the specificity of the WES phasing is that we first merged it with the SNP array data to increase the density of common markers, in particular in between genes.
+<br>
 
 ## Phasing the WES data
-
+<br>
+### Set up your environment
+<div class="code-example" markdown="1">
+```bash
 dx mkdir -p Phasing/PhasingWES/step0_merge/support/
+dx mkdir -p Phasing/PhasingWES/step1_phase_common/
+dx mkdir -p Phasing/PhasingWES/step2_phase_rare/chunks/
+```
+</div>
+<br>
 
 ### Merging WES and SNP array datas
 
@@ -85,13 +94,163 @@ for CHR in {1..22}; do
 ```
 </div>
 
+<br>
 
 
 
 
 
+### Phasing
+SHAPEIT5 phases common variants using the SHAPEIT5_phase_common tool. As an input, **SHAPEIT5_phase_common** requires an unphased file (with AC and AN tags), and automatically sub-sets the file to the desired MAF (e.g. 0.001). There are different strategies to phase common variants. Conversly to the WGS phasing, the phasing of common variants for the WES data can be performed across entire chromosomes. However, the phasing of rare variants will be performed in chunks.
+<br>
+
+#### Phasing common
+We phase common variants using **SHAPEIT5_phase_common** across entire chromosomes. This phasing is then used as a scaffold to phase rare variants in chunks.
 
 
+**IMPORTANT**: in the following code make sure to change the shapeit5 docker image name (here `shapeit5_beta.tar.gz`) to the latest version that you've downloaded [here](https://odelaneau.github.io/shapeit5/docs/installation/docker)
+
+
+<div class="code-example" markdown="1">
+```bash
+# step1. Download map files
+dx mkdir -p data/shapeit_maps/
+wget https://github.com/odelaneau/shapeit5/raw/main/maps/genetic_maps.b38.tar.gz
+tar -xvzf genetic_maps.b38.tar.gz
+dx upload *.b38.gmap.gz --path="data/shapeit_maps/"
+
+# step2. Phasing
+for CHR in {1..22}; do
+	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
+	CUT=0.001
+	THREADS=64
+	BCF=/mnt/project/Phasing/PhasingWES/step0_merge/UKB.chr${CHR}.exome_array.full.sorted.bcf		
+	OUT=UKB_chr${CHR}.exome_array.shapeit5.common_${CUT}.bcf
+	LOG=UKB_chr${CHR}.exome_array.shapeit5.common_${CUT}.log
+	TIM=UKB_chr${CHR}.exome_array.shapeit5.common_${CUT}.time
+	dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="./Phasing/PhasingWES/step1_phase_common/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common_static --input $BCF --map $MAP --output $OUT --thread $THREADS --log $LOG --filter-maf $CUT --region chr${CHR} && bcftools index -f $OUT --threads $THREADS" --instance-type mem2_ssd1_v2_x64 --priority normal --name shapeit5_common_chr${CHR} -y
+done
+```
+</div>
+
+The full list of options for the **SHAPEIT5_phase_common** command can be found [here](https://odelaneau.github.io/shapeit5/docs/documentation/phase_common/).
+
+
+<br>
+#### Phasing rare
+
+We phase rare variants using **SHAPEIT5_phase_rare** for small regions (i.e chunks), that we then concatenate to resolve the phasing for the entire chromosome. For this, we use as a scaffold the phasing of common variants (previous step)
+
+
+<div class="code-example" markdown="1">
+```bash
+# step1. Download chunk file
+(available soon)
+
+# step2. Phasing 
+for CHR in {1..22}; do
+	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
+	CHUNKS=
+	CUT=0.001
+	THREADS=32
+	while read LINE; do
+			SCAFFOLD_REG=$(echo $LINE | awk '{ print $3; }')
+			SCAFFOLD_REG_START=$(echo ${SCAFFOLD_REG} | cut -d":" -f 2 | cut -d"-" -f1)
+			SCAFFOLD_REG_END=$(echo ${SCAFFOLD_REG} | cut -d":" -f 2 | cut -d"-" -f2)
+			SCAFFOLD_REG_NAME=${CHR}_${SCAFFOLD_REG_START}_${SCAFFOLD_REG_END}
+			INPUT_REG=$(echo $LINE | awk '{ print $4; }')
+			INPUT_REG_START=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f1)
+			INPUT_REG_END=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f2)
+			INPUT_REG_NAME=${CHR}_${INPUT_REG_START}_${INPUT_REG_END}
+			BCF=/mnt/project/Phasing/PhasingWES/step0_merge/UKB.chr${CHR}.exome_array.WO_parents.sorted.bcf
+			SCAFFOLD=/mnt/project/Phasing/PhasingWES/step1_phase_common/UKB_chr${CHR}.exome_array.shapeit5.common_${CUT}.bcf
+			OUT=UKB_chr${CHR}.exome_array.${INPUT_REG_NAME}.shapeit5.WO_parents.rares_${CUT}.bcf
+			LOG=UKB_chr${CHR}.exome_array.${INPUT_REG_NAME}.shapeit5.WO_parents.rares_${CUT}.log
+			TIM=UKB_chr${CHR}.exome_array.${INPUT_REG_NAME}.shapeit5.WO_parents.rares_${CUT}.time
+			dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="./Phasing/PhasingWES/step2_phase_rare/chunks/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare_static --input $BCF --scaffold $SCAFFOLD --map $MAP --output $OUT --log $LOG --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG --thread $THREADS && bcftools index -f $OUT --threads $THREADS" --instance-type mem2_ssd1_v2_x32 --priority normal --name shapeit5_rares_$INPUT_REG_NAME -y		
+	done < $CHUNKS
+done
+```
+</div>
+
+
+To accurately phase the edges of our chunks, we included a buffer region, overlapping the previous and next chunks. Before merging all phasing chunks, we need to remove this buffer to avoid aving duplicated markers.
+
+<div class="code-example" markdown="1">
+```bash
+for CHR in {1..22}; do
+	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
+	CHUNKS=
+	CUT=0.001
+	THREADS=16
+	while read LINE; do
+			INPUT_REG=$(echo $LINE | awk '{ print $4; }')
+			INPUT_REG_START=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f1)
+			INPUT_REG_END=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f2)
+			INPUT_REG_NAME=${CHR}_${INPUT_REG_START}_${INPUT_REG_END}
+			INPUT_NBR=$(echo $LINE | awk '{ print $1; }')
+			IN=/mnt/project//Phasing/PhasingWES/step2_phase_rare/chunks/UKB_chr${CHR}.exome_array.${INPUT_REG_NAME}.shapeit5.rares_${CUT}.bcf
+			OUT=UKB_chr${CHR}.exome_array.${INPUT_NBR}.shapeit5.rares_${CUT}.bcf
+			dx run app-swiss-army-knife --folder="./Phasing/PhasingWES/step2_phase_rare/chunks/" -icmd="bcftools view -r ${INPUT_REG} --threads ${THREADS} -Ob -o ${OUT} ${IN} && bcftools index ${OUT} --threads ${THREADS}" --instance-type mem1_ssd1_v2_x16 --priority normal --name trim_$INPUT_REG_NAME -y
+	done < $CHUNKS
+done
+```
+</div>
+
+
+
+We can finally merge all our phasing chunks using the command ""bcftools concat**.
+
+
+<div class="code-example" markdown="1">
+```bash
+for CHR in {1..22}; do
+	dx run app-swiss-army-knife --folder="./Phasing/PhasingWES/step2_phase_rare/" -icmd="bcftools concat -n /mnt/project/Phasing/PhasingWES/step2_phase_rare/chunks/UKB_chr${CHR}.exome_array.*.shapeit5.rares_*.bcf" -Ob -o UKB_chr${CHR}.phased.bcf && bcftools index UKB_chr${CHR}.phased.bcf" --instance-type mem1_ssd1_v2_x16 --priority normal --name concat_chr${CHR} -y
+done
+```
+</div>
+
+
+
+
+## Validation of your phasing
+You can validate the quality of the haplotypes using the **SHAPEIT5_switch** tool. For this you will need parent-offspring duos or trios stored in a three-columns file (here called `family.ped`) following this format:
+
+<div class="code-example" markdown="1">
+- family.ped:      `offspring_id`    `parent1_id`    `parent2_id`
+
+</div>
+
+
+To validate the phasing using family data, the phasing must be performed by excluding parental genomes, so that offsprings are phased regardless of their parental genomes. This can be done using the **bcftools view** command, with as input the merged SNP array + WES data (located here `/mnt/project/Phasing/PhasingWES/step0_merge/UKB.chr${CHR}.exome_array.full.sorted.bcf`).
+
+<div class="code-example" markdown="1">
+```bash
+dx mkdir -p Phasing/PhasingWES/benchmark/
+for CHR in {1..22}; do
+IN=/mnt/project/Phasing/PhasingWES/step0_merge/UKB.chr${CHR}.exome_array.full.sorted.bcf
+OUT=benchmark_UKB.chr${CHR}.exome_array.full.sorted.bcf
+dx run app-swiss-army-knife --folder "/Phasing/PhasingWES/benchmark/" -icmd="bcftools view --threads 16 -S ^parents.txt -Ob -o ${OUT} ${IN} && bcftools index ${OUT} --threads 16" --instance-type mem1_ssd1_v2_x16 --priority normal --name benchmark_wes_chr${CHR} -y
+done
+```
+</div>
+
+After excluding parental genomes with the above command, proceed with the normal phasing procedure as detailed above.
+
+Let's consider that you performed the above steps of phasing using the input data exluding parental genomes, which produced a phased output file that you named `benchmark_UKB.chr${CHR}.exome_array.full.sorted.phased.bcf`). You can validate you phasing using the following command:
+
+
+<div class="code-example" markdown="1">
+```bash
+for CHR in 20; do
+dx run app-swiss-army-knife --folder "/Phasing/PhasingWES/benchmark/" -iimage_file="/docker/shapeit5_beta.tar.gz" -icmd="SHAPEIT5_switch --validation /mnt/project/Phasing/PhasingWES/step0_merge/UKB.chr${CHR}.exome_array.full.sorted.bcf --estimation benchmark_UKB.chr${CHR}.exome_array.full.sorted.phased.bcf --region ${CHR} --output benchmark_wes_chr${CHR}"  --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_wes_chr${CHR} -y
+done
+```
+</div>
+
+
+
+The full list of options for the **SHAPEIT5_switch** command can be found [here](https://odelaneau.github.io/shapeit5/docs/documentation/switch/).
 
 
 
