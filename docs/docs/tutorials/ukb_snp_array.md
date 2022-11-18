@@ -6,9 +6,7 @@ parent: Tutorials
 ---
 # UK Biobank SNP array data
 {: .no_toc }
-
-{: .warning }
-Website under construction: content not available yet!
+<br>
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -20,10 +18,16 @@ Website under construction: content not available yet!
 
 **IMPORTANT: For this tutorial, we work on the UK Biobank Research Analysis Platform (RAP).**
 
-## Rational
+## Rationale
 Although designed to phase rare variants from sequencing data, SHAPEIT5 can also be used to phase common variant from SNP array technologies using **SHAPEIT5_phase_common** only. This can be done as a single job per chromosome for SNP arrays.
 
-## Set up your environment
+
+
+
+<br>
+## Phasing of SNP array data
+<br>
+### Set up your environment
 To be consistent in your analysis, create output folders for each of the analysis steps as follows. You can choose the change the name of these folders but you will have to change our code accordingly.
 <div class="code-example" markdown="1">
 ```bash
@@ -33,11 +37,6 @@ dx mkdir -p Phasing/PhasingSNParray/step3_swapalleles/
 dx mkdir -p Phasing/PhasingSNParray/step4_liftover/
 ```
 </div>
-
-
-
-
-## Phasing of SNP array data
 <br>
 ### Quality Control
 For the phasing of the UK Biobank SNP array data, we first perform a quality control of the data. For this, we use the UK Biobank SNPs and samples QC file (UK Biobank Resource 531) to only retain SNPs and individuals that have been used for the official phasing of the Axiom array data.
@@ -93,7 +92,7 @@ The lift over we perform consist of three phases:
 </div>
 
 
-<br><br>
+<br>
 
 #### Rename chromosomes
 
@@ -190,7 +189,7 @@ The full list of options for the **SHAPEIT5_phase_common** command can be found 
 
 <br>
 ## Validation of your phasing
-You can validate the quality of the haplotypes at common variants using the **SHAPEIT5_switch** tool. For this you will need parent-offspring duos or trios stored in a three-columns file (here called `family.ped`) following this format:
+You can validate the quality of the haplotypes using the **SHAPEIT5_switch** tool. For this you will need parent-offspring duos or trios stored in a three-columns file (here called `family.ped`) following this format:
 
 <div class="code-example" markdown="1">
 - family.ped:      `offspring_id`    `parent1_id`    `parent2_id`
@@ -198,15 +197,28 @@ You can validate the quality of the haplotypes at common variants using the **SH
 </div>
 
 
-To validate the phasing using family data, the phasing must be performed by excluding parental genomes, so that offsprings are phased regardless of their parental genomes. This can be done using **bcftools view -S ^parents.txt**.
+To validate the phasing using family data, the phasing must be performed by excluding parental genomes, so that offsprings are phased regardless of their parental genomes. This can be done using the **bcftools view** command, with as input the original SNP array data after the quality control and liftover steps (located here `/Phasing/PhasingSNParray/step4_liftover/full_c$CHR\_b0_v2.b38.sorted.vcf.gz`)
 
-Let's consider that you performed the previous steps of phasing using an input data exluding parental genomes (named `benchmark_c$CHR\_b0_v2.b38.sorted.vcf.gz`), which produced a phased output file (named `benchmark_c${CHR}_b0_v2.b38.sorted.phased.bcf`). You can validate you phasing using the following command:
+<div class="code-example" markdown="1">
+```bash
+dx mkdir -p Phasing/PhasingSNParray/benchmark/
+for CHR in {1..22}; do
+IN=/mnt/project/Phasing/PhasingSNParray/step4_liftover/full_c$CHR\_b0_v2.b38.sorted.vcf.gz
+OUT=benchmark_c$CHR\_b0_v2.b38.sorted.vcf.gz
+dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/benchmark/" -icmd="bcftools view --threads 16 -S ^parents.txt -Ob -o ${OUT} ${IN} && bcftools index ${OUT} --threads 16" --instance-type mem1_ssd1_v2_x16 --priority normal --name phasing_chr${CHR} -y
+done
+```
+</div>
+
+After excluding parental genomes with the above command, proceed with the normal phasing procedure as detailed above.
+
+Let's consider that you performed the above steps of phasing using the input data exluding parental genomes, which produced a phased output file that you named `benchmark_c${CHR}_b0_v2.b38.sorted.phased.bcf`). You can validate your phasing using the following command:
 
 
 <div class="code-example" markdown="1">
 ```bash
 for CHR in {1..22}; do
-./switch/bin/SHAPEIT5_switch --validation c$CHR\_b0_v2.b38.sorted.vcf.gz --estimation benchmark_c${CHR}_b0_v2.b38.sorted.phased.bcf --region ${CHR} --output benchmark_chr${CHR}
+dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/benchmark/" -iimage_file="/docker/shapeit5_beta.tar.gz" -icmd="SHAPEIT5_switch --validation /Phasing/PhasingSNParray/step4_liftover/full_c$CHR\_b0_v2.b38.sorted.vcf.gz --estimation benchmark_c${CHR}_b0_v2.b38.sorted.phased.bcf --region ${CHR} --output benchmark_chr${CHR}"  --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_chr${CHR} -y
 done
 ```
 </div>
