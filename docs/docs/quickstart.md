@@ -8,8 +8,6 @@ nav_order: 10
 If you are familiar with phasing and the pipeline of SHAPEIT5, appling SHAPEIT5 on your data will be pretty straightforward to understand.
 Instructions below provide quick steps for phasing your data.
 
-{: .warning }
-Website under construction: content not available yet!
 
 ## Phase_common
 This command phase only common variants (above the specified MAF threshold). The output of this phasing is used as a scaffold to phase rare variants. If this phasing is done by chunks, you will have to ligate the chunks using **SHAPEIT5_ligate* tool. If this phasing is done for entire chromosome, you don't need to ligate.
