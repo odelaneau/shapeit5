@@ -6,9 +6,7 @@ parent: Tutorials
 ---
 # UK Biobank WGS data
 {: .no_toc }
-
-{: .warning }
-Website under construction: content not available yet!
+<br>
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -19,7 +17,7 @@ Website under construction: content not available yet!
 ---
 
 
-## Rational
+## Rationale
 SHAPEIT5 is a two-step approach that treats each chromosome independently and works as follows:
 
 1. Phase common variants (MAF >= 0.1%) of a chromosome using SHAPEIT5_phase_common. This can be done as a single job for SNP array or WES data, but it might be necessary to split the chromosome into large chunks (e.g. 20 cM) in the case of WGS data.
@@ -30,17 +28,19 @@ SHAPEIT5 is a two-step approach that treats each chromosome independently and wo
 
 4. Concatenate the phased chunks generated in step 3 using bcftools concat -n. As in the previous step haplotypes have been phased onto a haplotype scaffold, there is no need to ligate the chunks, and the files can be concatenated without decompression and recompression. This makes this step almost instantaneous, even for large cohorts.
 
-
-## Set up your environment
+<br>
+## Phasing the WGS data
+<br>
+### Set up your environment
 To be consistent in your analysis, create output folders for each of the analysis steps as follows. You can choose the change the name of these folders but you will have to change our code accordingly.
 <div class="code-example" markdown="1">
 ```bash
 dx mkdir -p Phasing/PhasingWGS/step0_qc/chunks/support
+dx mkdir -p Phasing/PhasingWGS/step1_phase_common/chunks
+dx mkdir -p Phasing/PhasingWGS/step2_phase_rare/chunks
 ```
 </div>
-
-
-## Phasing the WGS data
+<br>
 
 ### Quality control
 We perform quality control of the variant sites and filtered out SNPs and indels for (i) Hardy-Weinberg p-value < 10-30, (ii) more than 10% of the individuals having no data (GQ score=0; missing data), (iii) heterozygous excess less than 0.5 or greater than 1.5, and (iv) alternative alleles with AAscore < 0.5. Additionally, we keep only variant sites with the tag "FILTER=PASS", as suggested by the data providers (*Halldorsson et al., Nature 2022*).
@@ -75,62 +75,168 @@ done
 ```
 </div>
 
-
+<br>
 ### Phasing
 SHAPEIT5 phases common variants using the SHAPEIT5_phase_common tool. As an input, **SHAPEIT5_phase_common** requires an unphased file (with AC and AN tags), and automatically sub-sets the file to the desired MAF (e.g. 0.001). There are different strategies to phase common variants. The first, is to phase the whole chromosome in a single job. This is feasible for SNP array data and WES data, but it is not optimal for WGS data. Therefore we recommend to chunk the chromosome into large chunks (e.g. 20 cM) if using large WGS data. In the following we see how to phase WGS data in chunks.
-
+<br>
 #### Phasing common variants in chunks
 When using WGS data on large sample size, it is good practice to run **SHAPEIT5_phase_common** in different large regions of the chromosomes (e.g. 20cM). In the following, we perform phasing in chunks with overlapping regions that are large enough to have a good amount of heterozygous sites for the ligation step (i.e, assembling all chunks together).
+
+The chunks can be found here (link available soon).
+
+
+**IMPORTANT**: in the following code make sure to change the shapeit5 docker image name (here `shapeit5_beta.tar.gz`) to the latest version that you've downloaded [here](https://odelaneau.github.io/shapeit5/docs/installation/docker)
 
 
 <div class="code-example" markdown="1">
 ```bash
+# step1. Download map files
+dx mkdir -p data/shapeit_maps/
+wget https://github.com/odelaneau/shapeit5/raw/main/maps/genetic_maps.b38.tar.gz
+tar -xvzf genetic_maps.b38.tar.gz
+dx upload *.b38.gmap.gz --path="data/shapeit_maps/"
 
 
+# step2. Download chunk file
+
+
+# step3. Phasing
+for CHR in 20; do
+	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
+	while read LINE; do
+		REG=$(echo $LINE | awk '{ print $3; }')
+		BCF=/mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf
+		
+		OUT=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.bcf
+		LOG=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.log
+		TIM=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.time
+		
+		dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step1_phase_common/chunks/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common --input $BCF --map $MAP --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --region $REG && bcftools index -f $OUT --threads 32" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_common_$REG -y
+		
+	done < ${CHUNK_FILE}
+done
+
+```
+</div>
+
+The full list of options for the **SHAPEIT5_phase_common** command can be found [here](https://odelaneau.github.io/shapeit5/docs/documentation/phase_common/).
+
+
+One advantage of this approach is that these two chunks can run in parallel and they require less computational resources than the single job. However, as we wish to perform phasing at rare variants using a haplotype scaffold, we need to ligate these chunks to create a single file for the entire region.
+
+<br>
+#### Ligate chunks
+Ligation of the phased common variants is performed using the SHAPEIT5_ligate tool. The program requires an ordered list of the phased common variants. We recommend using appropriate naming of the files in the previous step, so that a command such as ls -1v can directly produce the list of files in the right order.
+
+
+<div class="code-example" markdown="1">
+```bash
+CHR=20
+#generate list for SHAPEIT5_ligate
+dx ls -1v /Phasing/PhasingWGS/step1_phase_common/chunks/ukb23352_c${CHR}_qc_v1.*.shapeit5.bcf > list_ligate.chr${CHR}.txt
+dx upload list_ligate.chr${CHR}.txt --path="/Phasing/PhasingWGS/step1_phase_common/"
+
+#ligate the chunks
+dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step1_phase_common/" -icmd="SHAPEIT5_ligate --input /mnt/proejct/Phasing/PhasingWGS/step1_phase_common/list_ligate.chr${CHR}.txt --output ukb23352_c${CHR}_qc_v1.bcf --thread 32 --index" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_chr${CHR}_ligate -y
+```
+</div>
+
+At the end of this step, we have a region-wide haplotype scaffold.
+
+<br>
+#### Phasing rare variants in chunks
+Having obtained the haplotype scaffold at common variants in the previous step, we can now phase rare variants using the **SHAPEIT5_phase_rare** tool. We always do this in chunks, in order to maximise the parallelization of our jobs (e.g. in 5Mb chunks). The program requires two input files, one is the haplotype scaffold generated in the previous steps, and the other input required is a file containing the whole unphased region, the same input file provided for **SHAPEIT5_phase_common**: SHAPEIT5 automatically discards common variants for this file, duplicated in the phased scaffold.
+
+
+
+
+		
+<div class="code-example" markdown="1">
+```bash
+for CHR in 20; do
+	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
+	while read LINE; do
+		REG=$(echo $LINE | awk '{ print $3; }')
+		BCF=/mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf
+		SCAF=/mnt/project/Phasing/PhasingWGS/step1_phase_common/ukb23352_c20_qc_v1.bcf
+		
+		OUT=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.bcf
+		LOG=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.log
+		TIM=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.time
+		
+		dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step2_phase_rare/chunks/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare --input-plain $BCF --map $MAP --scaffold $SCAF --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --region $REG && bcftools index -f $OUT --threads 32" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_rare_$REG -y
+		
+	done < ${CHUNK_FILE}
+done
+
+```
+</div>	
+
+The full list of options for the **SHAPEIT5_phase_rare** command can be found [here](https://odelaneau.github.io/shapeit5/docs/documentation/phase_rare/).
+
+<br>
+
+#### Concatenate chunks
+Since the phasing of rare variants has been performed using a ligated haplotype scaffold, the chunks can now be concatenated together to resolve the phasing for the entire chromosome. This is done using the **bcftools concat** command.
+
+
+<div class="code-example" markdown="1">
+```bash
+CHR=20
+#generate list for bcftools concat
+dx ls -1v /Phasing/PhasingWGS/step2_phase_rare/chunks/ukb23352_c${CHR}_qc_v1.*.shapeit5.bcf > list_ligate.chr${CHR}.txt
+dx upload list_ligate.chr${CHR}.txt --path="/Phasing/PhasingWGS/step1_phase_rares/"
+
+#concatenate chunks
+OUT=ukb23352_c${CHR}_qc_v1.phased.bcf
+dx run app-swiss-army-knife --folder="/Phasing/PhasingWGS/step2_phase_rare/" -icmd="bcftools concat -n -f /mnt/project/Phasing/PhasingWGS/step1_phase_rares/list_ligate.chr${CHR}.txt -Ob -o $OUT --threads 32 && bcftools index -f $OUT --threads 32" --instance-type mem1_ssd1_v2_x32 --priority normal --name WGS_shapeit5_rare_chr${CHR}_concat -y	
+
+```
+</div>	
+
+
+
+<br>
+
+
+## Validation of your phasing
+You can validate the quality of the haplotypes using the **SHAPEIT5_switch** tool. For this you will need parent-offspring duos or trios stored in a three-columns file (here called `family.ped`) following this format:
+
+<div class="code-example" markdown="1">
+- family.ped:      `offspring_id`    `parent1_id`    `parent2_id`
+
+</div>
+
+
+To validate the phasing using family data, the phasing must be performed by excluding parental genomes, so that offsprings are phased regardless of their parental genomes. This can be done using the **bcftools view** command, with as input the output data of the quality control step (located here `/mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf`).
+
+<div class="code-example" markdown="1">
+```bash
+dx mkdir -p Phasing/PhasingWGS/benchmark/
+for CHR in {1..22}; do
+IN=/mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf
+OUT=benchmark_ukb23352_c${CHR}_qc_v1.bcf
+dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/benchmark/" -icmd="bcftools view --threads 16 -S ^parents.txt -Ob -o ${OUT} ${IN} && bcftools index ${OUT} --threads 16" --instance-type mem1_ssd1_v2_x16 --priority normal --name phasing_chr${CHR} -y
+done
+```
+</div>
+
+After excluding parental genomes with the above command, proceed with the normal phasing procedure as detailed above.
+
+Let's consider that you performed the above steps of phasing using the input data exluding parental genomes, which produced a phased output file that you named `benchmark_ukb23352_c${CHR}_qc_v1.phased.bcf`). You can validate you phasing using the following command:
+
+
+<div class="code-example" markdown="1">
+```bash
+for CHR in 20; do
+dx run app-swiss-army-knife --folder "/Phasing/PhasingWGS/benchmark/" -iimage_file="/docker/shapeit5_beta.tar.gz" -icmd="SHAPEIT5_switch --validation /mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf --estimation benchmark_ukb23352_c${CHR}_qc_v1.phased.bcf --region ${CHR} --output benchmark_chr${CHR}"  --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_chr${CHR} -y
+done
 ```
 </div>
 
 
 
-One advantage of this approach is that these two chunks can run in parallel and they require less computational resources than the single job. However, as we wish to perform phasing at rare variants using a haplotype scaffold, we need to ligate these chunks to create a single file for the entire region.
-
-
-#### Ligate chunks
-
-#### Phasing rare variants
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The full list of options for the **SHAPEIT5_switch** command can be found [here](https://odelaneau.github.io/shapeit5/docs/documentation/switch/).
 
 
 
