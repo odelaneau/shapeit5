@@ -32,7 +32,7 @@ SHAPEIT5 is a two-step approach that treats each chromosome independently and wo
 ## Phasing the WGS data
 <br>
 ### Set up your environment
-To be consistent in your analysis, create output folders for each of the analysis steps as follows. You can choose the change the name of these folders but you will have to change our code accordingly.
+To structure the outputs of the analysis and to simplify the understanding of each step of this tutorial, we first create output folders as follows. You can choose the change the name of these folders but you will have to change the code accordingly.
 <div class="code-example" markdown="1">
 ```bash
 dx mkdir -p Phasing/PhasingWGS/step0_qc/chunks/support

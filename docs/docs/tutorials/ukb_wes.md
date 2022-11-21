@@ -26,6 +26,7 @@ Similar to the WGS data, the WES data can be phased in two steps, separating com
 ## Phasing the WES data
 <br>
 ### Set up your environment
+To structure the outputs of the analysis and to simplify the understanding of each step of this tutorial, we first create output folders as follows. You can choose the change the name of these folders but you will have to change the code accordingly.
 <div class="code-example" markdown="1">
 ```bash
 dx mkdir -p Phasing/PhasingWES/step0_merge/support/
