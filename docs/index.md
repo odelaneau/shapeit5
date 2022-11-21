@@ -24,7 +24,7 @@ Please contact olivier.delaneau@unil.ch if you have questions.
 
 ## About
 
-SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare variants. 
+SHAPEIT5 estimates haplotypes in large datasets (WGS, WES, SNP array), with a special focus on rare variants. 
 
 ## Citation
 
@@ -68,7 +68,7 @@ SHAPEIT5 is composed of the following tools:
 
 ## About the project
 
-SHAPEIT5 is developed by [Olivier Delaneau](https://odelaneau.github.io/lap-page).
+SHAPEIT5 is developed by [Olivier Delaneau's group](https://odelaneau.github.io/lap-page).
 
 ### License
 

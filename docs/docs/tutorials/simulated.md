@@ -34,6 +34,27 @@ SHAPEIT5 phases common variants using the **SHAPEIT5_phase_common** tool. As an 
 
 There are different strategies to phase common variants. The first, is to phase the whole chromosome in a single job. This is feasible for SNP array data and WES data, but it is not optimal for WGS data. Therefore we recommend to chunk the chromosome into large chunks (e.g. 20 cM) if using large WGS data. In the following we see how to impute the simulated region using both strategies: the chunking performed in this tutorial is under optimal for real data, such as the UK Biobank dataset. For that please refer to the tutorial using real data.
 
+
+Before starting this tutorial, be sure to clone the SHAPEIT5 github and compile SHAPEIT5 (documentation [here](https://odelaneau.github.io/shapeit5/docs/installation/build_from_source/compile_shapeit5), and to navigate in the main shapeit5 folder. In that folder, you should see at the following folders:
+
+<div class="code-example" markdown="1">
+```bash
+$ ls -l
+
+common/
+docker/
+ligate/
+maps/
+phase_common/
+phase_rare/
+switch/
+test/
+```
+</div>
+
+
+The simulated data that we use in this tutorial are located in `test/10k/`.
+
 #### Phasing all common variants in one job
 SHAPEIT5 can phase common variants (MAF >= 0.001) for the the whole 10Mb region using the following command:
 
