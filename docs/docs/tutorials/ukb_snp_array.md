@@ -19,7 +19,9 @@ parent: Tutorials
 **IMPORTANT: For this tutorial, we work on the UK Biobank Research Analysis Platform (RAP).**
 
 ## Rationale
-Although designed to phase rare variants from sequencing data, SHAPEIT5 can also be used to phase common variant from SNP array technologies using **SHAPEIT5_phase_common** only. This can be done as a single job per chromosome for SNP arrays.
+Although designed to phase rare variants from sequencing data, SHAPEIT5 contains several tools and therefore can also be used to phase common variant only, for example from SNP array technologies. This can be done using a single tool: **SHAPEIT5_phase_common**. As the number of marker on a SNP array is much small than in WGS data, the phasing of SNP array can be done in a single job per chromosome.
+
+In this tutorial, we cover the phasing of the UK Biobank Axiom array across ~500k individuals on the UKB RAP platform.
 
 
 
@@ -28,13 +30,14 @@ Although designed to phase rare variants from sequencing data, SHAPEIT5 can also
 ## Phasing of SNP array data
 <br>
 ### Set up your environment
-To be consistent in your analysis, create output folders for each of the analysis steps as follows. You can choose the change the name of these folders but you will have to change our code accordingly.
+To structure the outputs of the analysis and to simplify the understanding of each step of this tutorial, we first create output folders as follows. You can choose the change the name of these folders but you will have to change the code accordingly.
 <div class="code-example" markdown="1">
 ```bash
 dx mkdir -p Phasing/PhasingSNParray/step1_dataqc/
 dx mkdir -p Phasing/PhasingSNParray/step2_chrrename/
 dx mkdir -p Phasing/PhasingSNParray/step3_swapalleles/
 dx mkdir -p Phasing/PhasingSNParray/step4_liftover/
+dx mkdir -p Phasing/PhasingSNParray/step5_phasing/
 ```
 </div>
 <br>
@@ -177,7 +180,7 @@ for CHR in {1..22}; do
 	OUT=c${CHR}_b0_v2.b38.sorted.phased.bcf
 	TIM=c${CHR}_b0_v2.b38.sorted.phased.time
 
-	dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/step5_benchmark/" -iimage_file="/docker/shapeit5_beta.tar.gz" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common --input $INP --map $MAP --output $OUT --region chr${CHR} --log $LOG --thread 16 && bcftools index $OUT --threads 16" --instance-type mem2_ssd1_v2_x16 --priority normal --name phasing_chr${CHR} -y
+	dx run app-swiss-army-knife --folder "/Phasing/PhasingSNParray/step5_phasing/" -iimage_file="/docker/shapeit5_beta.tar.gz" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common --input $INP --map $MAP --output $OUT --region chr${CHR} --log $LOG --thread 16 && bcftools index $OUT --threads 16" --instance-type mem2_ssd1_v2_x16 --priority normal --name phasing_chr${CHR} -y
 done
 
 ```
