@@ -23,11 +23,11 @@ Simple run
 
 <div class="code-example" markdown="1">
 ```bash
-SHAPEIT5_phase_common --input 10k/msprime.nodup.bcf --filter-maf 0.001  --output 10k/msprime.common.phased.bcf --region 1 --thread 8
+SHAPEIT5_phase_common --input test/10k/msprime.nodup.bcf --filter-maf 0.001  --output test/10k/msprime.common.phased.bcf --region 1 --thread 8
 ```
 </div>
 
-The program phases common variants (\-\-filter-maf 0.001) from the input file (\-\-input 10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the full chromosome 1 (\-\-region 1) and saves the results in the output file (\-\-output 10k/msprime.common.phased.bcf).
+The program phases common variants (\-\-filter-maf 0.001) from the input file (\-\-input test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the full chromosome 1 (\-\-region 1) and saves the results in the output file (\-\-output test/10k/msprime.common.phased.bcf).
 
 ---
 
@@ -49,7 +49,7 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 | \-H \[\-\-reference \]| STRING  | NA       | Reference panel of haplotypes in VCF/BCF format  |
 | \-S \[\-\-scaffold \]| STRING  | NA       | Scaffold of haplotypes in VCF/BCF format  |
 | \-M \[\-\-map \]     | STRING  | NA       | Genetic map  |
-| \-\-pedigree         | STRING  | NA       | Pedigree information (chile father mother) |
+| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother) |
 | \-R \[\-\-region \]  | STRING  | NA       | Target region  |
 
 
