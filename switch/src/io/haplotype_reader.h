@@ -33,15 +33,15 @@ public:
 	int nthreads;
 	double minPP;
 	haplotype_set & H;
-	string region;
+	std::string region;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	haplotype_reader(haplotype_set &, string region, double minPP, int _nthreads);
+	haplotype_reader(haplotype_set &, std::string region, double minPP, int _nthreads);
 	~haplotype_reader();
 
 	//IO
-	void readHaplotypes(string ftruth, string festi, string ffreq, bool);
-	void readHaplotypes(string ftruth, string festi, bool);
+	void readHaplotypes(std::string ftruth, std::string festi, std::string ffreq, bool);
+	void readHaplotypes(std::string ftruth, std::string festi, bool);
 };
 
 #endif

@@ -28,16 +28,16 @@
 class sparse2plain {
 public:
 	//PARAMETERS
-	string file_full_bcf;
-	string file_comm_bcf;
-	string file_rare_bcf;
-	string file_rare_bin;
-	string region;
-	string contig;
+	std::string file_full_bcf;
+	std::string file_comm_bcf;
+	std::string file_rare_bcf;
+	std::string file_rare_bin;
+	std::string region;
+	std::string contig;
 	int nthreads;
 
 	//CONSTRUCTORS/DESCTRUCTORS
-	sparse2plain(string, string, string, int);
+	sparse2plain(std::string, std::string, std::string, int);
 	~sparse2plain();
 
 	//PROCESS

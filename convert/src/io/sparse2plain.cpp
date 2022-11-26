@@ -25,6 +25,8 @@
 #include <io/sparse2plain.h>
 #include <objects/rare_genotype.h>
 
+using namespace std;
+
 sparse2plain::sparse2plain(string _plain_vcf, string _sparse_prefix, string _region, int _nthreads) {
 	file_full_bcf = _plain_vcf;
 	file_comm_bcf = _sparse_prefix +".comm.bcf";
@@ -104,7 +106,7 @@ void sparse2plain::convert() {
 
 	//
 	unsigned int nseek = 0, nrare = 0, ncomm = 0, nfull = 0, nset = 0;
-	while (nset = bcf_sr_next_line (sr)) {
+	while ((nset = bcf_sr_next_line (sr))) {
 		line_input_comm = bcf_sr_get_line(sr, 0);
 		line_input_rare = bcf_sr_get_line(sr, 1);
 

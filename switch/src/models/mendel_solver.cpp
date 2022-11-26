@@ -22,6 +22,8 @@
 
 #include <models/mendel_solver.h>
 
+using namespace std;
+
 mendel_solver::mendel_solver(haplotype_set & _H) : H(_H) {
 	Errors = vector < vector < bool > > (H.vecSamples.size(), vector < bool > (H.n_variants, false));
 	H.Phased = vector < vector < bool > > (H.vecSamples.size(), vector < bool > (H.n_variants, false));

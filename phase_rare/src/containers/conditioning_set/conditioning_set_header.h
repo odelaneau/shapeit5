@@ -59,9 +59,9 @@ public:
 class conditioning_set : public haplotype_set {
 public:
 	//VARIANT INDEXING
-	vector < bool > sites_pbwt_evaluation;
-	vector < bool > sites_pbwt_selection;
-	vector < int > sites_pbwt_grouping;
+	std::vector < bool > sites_pbwt_evaluation;
+	std::vector < bool > sites_pbwt_selection;
+	std::vector < int > sites_pbwt_grouping;
 	unsigned int sites_pbwt_ngroups;
 	unsigned long int ncollisions;
 	unsigned long int npushes;
@@ -71,13 +71,13 @@ public:
 	int depth_rare;
 
 	//PHASE DATA
-	vector < cflip > CF;
+	std::vector < cflip > CF;
 
 	//STATE DATA
 	unsigned int shuffledI;
-	vector < unsigned int > shuffledO;
-	vector < pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
-	vector < vector < unsigned int > > indexes_pbwt_neighbour;
+	std::vector < unsigned int > shuffledO;
+	std::vector < std::pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
+	std::vector < std::vector < unsigned int > > indexes_pbwt_neighbour;
 
 	//CONSTRUCTOR/DESTRUCTOR
 	conditioning_set();
@@ -85,16 +85,16 @@ public:
 	void initialize(variant_map &, float, float, int, int, int);
 
 	//STATES PROCESSING
-	void storeCommon(vector < int > & A, vector < int > & M);
-	void storeRare(vector < int > & R, vector < rare_genotype > & G);
+	void storeCommon(std::vector < int > & A, std::vector < int > & M);
+	void storeRare(std::vector < int > & R, std::vector < rare_genotype > & G);
 	void select(variant_map &, genotype_set & G);
 
 	/*
-	void solveRare1(vector < int > &, vector < int > &, genotype_set &, unsigned int);
-	void solveRare2(vector < int > &, vector < int > &, vector < int > &, genotype_set &, unsigned int, unsigned int, vector < float > &);
+	void solveRare1(std::vector < int > &, std::vector < int > &, genotype_set &, unsigned int);
+	void solveRare2(std::vector < int > &, std::vector < int > &, std::vector < int > &, genotype_set &, unsigned int, unsigned int, std::vector < float > &);
 	*/
-	void solveRareForward(vector < int > & A, vector < int > & C, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm);
-	void solveRareBackward(vector < int > & A, vector < int > & C, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm);
+	void solveRareForward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
+	void solveRareBackward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
 
 	void solve(variant_map &, genotype_set &);
 };

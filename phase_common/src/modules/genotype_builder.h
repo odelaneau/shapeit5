@@ -35,7 +35,7 @@ public:
 	int i_workers;
 	int n_thread;
 	pthread_mutex_t mutex_workers;
-	vector < pthread_t > id_workers;
+	std::vector < pthread_t > id_workers;
 
 	//CONSTRUCTOR/DESTRUCTOR
 	genotype_builder(genotype_set &, int n_thread = 1);

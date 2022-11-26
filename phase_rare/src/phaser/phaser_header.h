@@ -49,10 +49,10 @@ public:
 
 	//MULTI-THREADING
 	int i_jobs, i_threads, nthreads;
-	vector < pthread_t > id_workers;
+	std::vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
-	vector < vector < pair < int, float > > > thread_data;
-	vector < hmm_scaffold * > thread_hmms;
+	std::vector < std::vector < std::pair < int, float > > > thread_data;
+	std::vector < hmm_scaffold * > thread_hmms;
 
 	//STATS
 	int totalSite, doneSite;
@@ -60,16 +60,16 @@ public:
 	unsigned long int n_common_nphased;
 	unsigned long int n_rare_yphased;
 	unsigned long int n_rare_nphased;
-	basic_stats statCS;
+	stats1D statCS;
 
 	//GENOMIC REGION
-	string chrid;
+	std::string chrid;
 	int input_start;
 	int input_stop;
 	int scaffold_start;
 	int scaffold_stop;
-	string input_gregion;
-	string scaffold_gregion;
+	std::string input_gregion;
+	std::string scaffold_gregion;
 
 	//CONSTRUCTOR
 	phaser();
@@ -83,14 +83,14 @@ public:
 	//PARAMETERS
 	void buildCoordinates();
 	void declare_options();
-	void parse_command_line(vector < string > &);
+	void parse_command_line(std::vector < std::string > &);
 	void check_options();
 	void verbose_options();
 	void verbose_files();
 
 	//
 	void read_files_and_initialise();
-	void phase(vector < string > &);
+	void phase(std::vector < std::string > &);
 	void write_files_and_finalise();
 };
 

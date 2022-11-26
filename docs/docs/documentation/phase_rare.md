@@ -24,14 +24,14 @@ Simple run
 <div class="code-example" markdown="1">
 ```bash
 #chunk1
-SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold 10k/msprime.common.truth.bcf --output 10k/msprime.rare.chunk1.bcf --scaffold-region 1:1000000-3000000 --input-region 1:1500000-2500000 --thread 8
+SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk1.bcf --scaffold-region 1:1000000-3000000 --input-region 1:1500000-2500000 --thread 8
 
 #chunk2
-SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold 10k/msprime.common.truth.bcf --output 10k/msprime.rare.chunk2.bcf --scaffold-region 1:2000000-4000000 --input-region 1:2500001-3500000 --thread 8
+SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk2.bcf --scaffold-region 1:2000000-4000000 --input-region 1:2500001-3500000 --thread 8
 ```
 </div>
 
-The first command phases rare variants from the input file (\-\-input-plain 10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the region 1500000-2500000 of chromosome 1 (\-\-input-region 1:1500000-2500000) using a haplotype scaffold phased for the full chromosome 1 obtained from the phase_common program in the region 1000000-3000000 of chromosome 1 (\-\-scaffold-region 1:1000000-3000000) and saves the results in the output file (\-\-output 10k/msprime.rare.chunk1.bcf).
+The first command phases rare variants from the input file (\-\-input-plain test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the region 1500000-2500000 of chromosome 1 (\-\-input-region 1:1500000-2500000) using a haplotype scaffold phased for the full chromosome 1 obtained from the phase_common program in the region 1000000-3000000 of chromosome 1 (\-\-scaffold-region 1:1000000-3000000) and saves the results in the output file (\-\-output test/10k/msprime.rare.chunk1.bcf).
 
 The obtained files can be quickly concatenated to generate chromosome-wide files using bcftools concat --naive.
 
@@ -57,7 +57,7 @@ The obtained files can be quickly concatenated to generate chromosome-wide files
 | \-\-scaffold         | STRING  | NA       | Scaffold of haplotypes in VCF/BCF format  |
 | \-\-scaffold-region  | STRING  | NA       | Region to be considered in \-\-scaffold  |
 | \-\-map              | STRING  | NA       | Genetic map  |
-| \-\-pedigree         | STRING  | NA       | Pedigree information (chile father mother) |
+| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother) |
 
 
 #### PBWT parameters

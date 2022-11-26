@@ -22,6 +22,10 @@
 
 #include <containers/variant_map.h>
 
+using std::vector;
+using std::pair;
+using std::multimap;
+
 variant_map::variant_map() {
 }
 

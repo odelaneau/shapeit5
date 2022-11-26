@@ -22,6 +22,8 @@
 
 #include <containers/genotype_set/genotype_set_header.h>
 
+using namespace std;
+
 void genotype_set::phaseTrio(int ikid, int ifather, int imother, vector < unsigned int > &counts) {
 	for (int vr_kid = 0, vr_fat = 0, vr_mot = 0 ; vr_kid < GRind_genotypes[ikid].size() ; vr_kid ++) {
 

@@ -44,25 +44,25 @@ void genotype_reader::readGenotypes() {
 	}
 
 	//Main sample IDs processing
-	map < string, int > map_names;
+	std::map < std::string, int > map_names;
 	for (int i = 0 ; i < n_main_samples ; i ++) {
-		G.vecG[i]->name = string(sr->readers[0].header->samples[i]);
-		map_names.insert(pair < string, int > (G.vecG[i]->name, i));
+		G.vecG[i]->name = std::string(sr->readers[0].header->samples[i]);
+		map_names.insert(std::pair < std::string, int > (G.vecG[i]->name, i));
 	}
 
 	//Scaffold sample IDs processing
 	int n_scaf_samples = 0;
-	vector < int > mappingS2M;
+	std::vector < int > mappingS2M;
 	if (panels[2]) {
 		int n_with_scaffold = 0;
 		n_scaf_samples = bcf_hdr_nsamples(sr->readers[panels[1]+panels[2]].header);
-		mappingS2M = vector < int > (n_scaf_samples, -1);
-		vector < string > tokens_tmp;
+		mappingS2M = std::vector < int > (n_scaf_samples, -1);
+		std::vector < std::string > tokens_tmp;
 		for (int i = 0 ; i < n_scaf_samples ; i ++) {
-			string buffer_tmp = string(sr->readers[panels[1]+panels[2]].header->samples[i]);
+			std::string buffer_tmp = std::string(sr->readers[panels[1]+panels[2]].header->samples[i]);
 			stb.split(buffer_tmp, tokens_tmp, "_");
-			string scaf_name = tokens_tmp[0];
-			map < string, int > :: iterator it = map_names.find(scaf_name);
+			std::string scaf_name = tokens_tmp[0];
+			std::map < std::string, int > :: iterator it = map_names.find(scaf_name);
 			if (it != map_names.end()) {
 				mappingS2M[i] = it->second;
 				n_with_scaffold++;
@@ -164,11 +164,11 @@ void genotype_reader::readGenotypes() {
 
 	// Report
 	unsigned long n_genotypes_total = accumulate(n_genotypes.begin(), n_genotypes.begin() + 4, 0UL);
-	string str0 = "0/0=" + stb.str(n_genotypes[0]*100.0/n_genotypes_total, 3) + "%";
-	string str1 = "0/1=" + stb.str(n_genotypes[1]*100.0/n_genotypes_total, 3) + "%";
-	string str2 = "1/1=" + stb.str(n_genotypes[2]*100.0/n_genotypes_total, 3) + "%";
-	string str3 = "./.=" + stb.str(n_genotypes[3]*100.0/n_genotypes_total, 3) + "%";
-	string str4 = "0|1=" + stb.str(n_genotypes[4]*100.0/n_genotypes_total, 3) + "%";
-	string str5 = stb.str(tac.rel_time()*1.0/1000, 2) + "s";
+	std::string str0 = "0/0=" + stb.str(n_genotypes[0]*100.0/n_genotypes_total, 3) + "%";
+	std::string str1 = "0/1=" + stb.str(n_genotypes[1]*100.0/n_genotypes_total, 3) + "%";
+	std::string str2 = "1/1=" + stb.str(n_genotypes[2]*100.0/n_genotypes_total, 3) + "%";
+	std::string str3 = "./.=" + stb.str(n_genotypes[3]*100.0/n_genotypes_total, 3) + "%";
+	std::string str4 = "0|1=" + stb.str(n_genotypes[4]*100.0/n_genotypes_total, 3) + "%";
+	std::string str5 = stb.str(tac.rel_time()*1.0/1000, 2) + "s";
 	vrb.bullet("VCF/BCF parsing ["+str0+" / "+str1+" / "+str2+" / "+str3+" / "+str4+"] ("+str5+")");
 }

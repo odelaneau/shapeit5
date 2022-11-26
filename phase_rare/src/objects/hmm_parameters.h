@@ -30,7 +30,7 @@ class hmm_parameters {
 public :
 	//DATA
 	unsigned int Neff, Nhap;
-	vector < float > t, nt, cm;
+	std::vector < float > t, nt, cm;
 	float ee, ed;
 
 	//CONSTRUCTOR/DESTRUCTOR

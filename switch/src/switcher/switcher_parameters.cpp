@@ -25,6 +25,8 @@
 
 #include <switcher/switcher_header.h>
 
+using namespace std;
+
 void switcher::declare_options() {
 	bpo::options_description opt_base ("Basic options");
 	opt_base.add_options()

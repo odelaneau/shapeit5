@@ -23,6 +23,8 @@
 
 #include <ligater/ligater_header.h>
 
+using namespace std;
+
 void ligater::read_files_and_initialise() {
 	//step0: Initialize seed & other
 	rng.setSeed(options["seed"].as < int > ());
