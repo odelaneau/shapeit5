@@ -85,5 +85,12 @@ amazonlinux2022: BOOST_LIB_IO=/usr/lib64/libboost_iostreams.a
 amazonlinux2022: BOOST_LIB_PO=/usr/lib64/libboost_program_options.a
 amazonlinux2022: $(BFILE)
 
+ubuntu: HTSLIB_INC=/usr/local/include/htslib
+ubuntu: HTSLIB_LIB=/usr/local/lib/libhts.a
+ubuntu: BOOST_INC=/usr/include
+ubuntu: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+ubuntu: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+ubuntu: $(BFILE)
+
 #COMPILATION RULES
 all: desktop
