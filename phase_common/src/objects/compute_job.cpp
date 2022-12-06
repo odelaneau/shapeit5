@@ -24,7 +24,6 @@
 
 using namespace std;
 
-//#define MAX_OVERLAP_HETS 0.90f
 #define MAX_OVERLAP_HETS 0.8f
 #define N_RANDOM_HAPS 100
 
