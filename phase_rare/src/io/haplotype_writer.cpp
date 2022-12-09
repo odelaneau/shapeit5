@@ -74,7 +74,7 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 
 	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
 
-		if (output_buffer || (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp < input_stop)) {
+		if (output_buffer || (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop)) {
 
 			//Variant informations
 			bcf_clear1(rec);
