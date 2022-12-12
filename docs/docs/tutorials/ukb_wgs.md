@@ -132,12 +132,9 @@ Ligation of the phased common variants is performed using the SHAPEIT5_ligate to
 <div class="code-example" markdown="1">
 ```bash
 CHR=20
-#generate list for SHAPEIT5_ligate
-dx ls -1v /Phasing/PhasingWGS/step1_phase_common/chunks/ukb23352_c${CHR}_qc_v1.*.shapeit5.bcf > list_ligate.chr${CHR}.txt
-dx upload list_ligate.chr${CHR}.txt --path="/Phasing/PhasingWGS/step1_phase_common/"
 
-#ligate the chunks
-dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step1_phase_common/" -icmd="SHAPEIT5_ligate --input /mnt/proejct/Phasing/PhasingWGS/step1_phase_common/list_ligate.chr${CHR}.txt --output ukb23352_c${CHR}_qc_v1.bcf --thread 32 --index" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_chr${CHR}_ligate -y
+#generate list for SHAPEIT5_ligate & ligate the chunks
+dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step1_phase_common/" -icmd="ls -1v mnt/project//Phasing/PhasingWGS/step1_phase_common/chunks/ukb23352_c${CHR}_qc_v1.*.shapeit5.bcf > list_ligate.chr${CHR}.txt && SHAPEIT5_ligate --input list_ligate.chr${CHR}.txt --output ukb23352_c${CHR}_qc_v1.bcf --thread 32 --index" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_chr${CHR}_ligate -y
 ```
 </div>
 
