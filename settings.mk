@@ -92,5 +92,12 @@ ubuntu: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 ubuntu: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 ubuntu: $(BFILE)
 
+centos7: HTSLIB_INC=/usr/local/include/htslib
+centos7: HTSLIB_LIB=/usr/local/lib/libhts.a
+centos7: BOOST_INC=/usr/include
+centos7: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
+centos7: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
+centos7: $(BFILE)
+
 #COMPILATION RULES
 all: desktop
