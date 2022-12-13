@@ -36,7 +36,7 @@ haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, varian
 haplotype_writer::~haplotype_writer() {
 }
 
-void haplotype_writer::writeHaplotypes(string fname) {
+void haplotype_writer::writeHaplotypes(string fname, double filter_maf) {
 	// Init
 	tac.clock();
 	string file_format = "w";
@@ -55,6 +55,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
+	bcf_hdr_append(hdr, std::string("##SPARSE_MAF="+stb.str(filter_maf)).c_str());
 
 	//Add samples
 	for (int i = 0 ; i < G.n_ind ; i ++) bcf_hdr_add_sample(hdr, G.vecG[i]->name.c_str());

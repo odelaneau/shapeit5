@@ -31,6 +31,7 @@ genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_
 	n_samples = 0;
 	funphased = "";
 	fphased = "";
+	foutput = "";
 	scaffold_region = "";
 	input_start = 0;
 	input_start = 1000000000;
@@ -57,10 +58,11 @@ void genotype_reader::allocateGenotypes() {
 	G.allocate(V, n_samples, n_scaffold_variants, n_rare_variants);
 }
 
-void genotype_reader::setFilenames (string _funphased, string _fbinary, string _fphased) {
+void genotype_reader::setFilenames (string _funphased, string _fbinary, string _fphased, string _foutput) {
 	fphased = _fphased;
 	fbinary = _fbinary;
 	funphased = _funphased;
+	foutput = _foutput;
 }
 
 void genotype_reader::setThreads(int _nthreads) { nthreads = _nthreads; }
