@@ -156,15 +156,27 @@ Having obtained the haplotype scaffold at common variants in the previous step, 
 for CHR in 20; do
 	MAP=/mnt/project/data/shapeit_maps/chr${CHR}.b38.gmap.gz
 	while read LINE; do
-		REG=$(echo $LINE | awk '{ print $3; }')
+
 		BCF=/mnt/project/Phasing/PhasingWGS/step0_qc/ukb23352_c${CHR}_qc_v1.bcf
 		SCAF=/mnt/project/Phasing/PhasingWGS/step1_phase_common/ukb23352_c20_qc_v1.bcf
 		
+
+		SCAFFOLD_REG=$(echo $LINE | awk '{ print $3; }')
+		SCAFFOLD_REG_START=$(echo ${SCAFFOLD_REG} | cut -d":" -f 2 | cut -d"-" -f1)
+		SCAFFOLD_REG_END=$(echo ${SCAFFOLD_REG} | cut -d":" -f 2 | cut -d"-" -f2)
+		SCAFFOLD_REG_NAME=${CHR}_${SCAFFOLD_REG_START}_${SCAFFOLD_REG_END}
+			
+		INPUT_REG=$(echo $LINE | awk '{ print $4; }')
+		INPUT_REG_START=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f1)
+		INPUT_REG_END=$(echo ${INPUT_REG} | cut -d":" -f 2 | cut -d"-" -f2)
+		INPUT_REG_NAME=${CHR}_${INPUT_REG_START}_${INPUT_REG_END}
+
+
 		OUT=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.bcf
 		LOG=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.log
 		TIM=ukb23352_c${CHR}_qc_v1.$REG.shapeit5.time
 		
-		dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step2_phase_rare/chunks/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare --input-plain $BCF --map $MAP --scaffold $SCAF --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --region $REG && bcftools index -f $OUT --threads 32" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_rare_$REG -y
+		dx run app-swiss-army-knife -iimage_file="/docker/shapeit5_beta.tar.gz" --folder="/Phasing/PhasingWGS/step2_phase_rare/chunks/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare --input-plain $BCF --map $MAP --scaffold $SCAF --output $OUT --thread 32 --log $LOG --filter-maf 0.001 --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG && bcftools index -f $OUT --threads 32" --instance-type mem3_ssd1_v2_x32 --priority normal --name WGS_shapeit5_rare_$REG -y
 		
 	done < ${CHUNK_FILE}
 done

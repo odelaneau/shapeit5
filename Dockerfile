@@ -16,4 +16,5 @@ FROM amazonlinux:2022
 
 COPY --from=builder /usr/local/bin/bcftools /usr/bin/
 COPY --from=builder /usr/local/bin/tabix /usr/bin/
+COPY --from=builder /usr/local/bin/bgzip /usr/bin/
 COPY --from=builder /shapeit5/*/bin/* /usr/bin/

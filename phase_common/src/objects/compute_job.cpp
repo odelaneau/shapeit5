@@ -24,8 +24,7 @@
 
 using namespace std;
 
-//#define MAX_OVERLAP_HETS 0.90f
-#define MAX_OVERLAP_HETS 0.5f
+#define MAX_OVERLAP_HETS 0.8f
 #define N_RANDOM_HAPS 100
 
 compute_job::compute_job(variant_map & _V, genotype_set & _G, conditioning_set & _H, unsigned int n_max_transitions, unsigned int n_max_missing) : V(_V), G(_G), H(_H) {

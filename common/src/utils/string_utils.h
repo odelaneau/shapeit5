@@ -28,6 +28,9 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <regex>
+#include <algorithm>
+#include <iostream>
 
 class string_utils {
 public:
@@ -90,6 +93,44 @@ public:
 		for (int e = 0 ; e < v.size() ; e ++) ss << (e>0?" ":"") << v[e] ;
 		return ss.str();
 	}
+
+	std::string findExtension ( const std::string & filename ) {
+	   auto position = filename.find_last_of ( '.' ) ;
+	   if ( position == std::string::npos )
+	      return "" ;
+	   else {
+	      std::string extension ( filename.substr( position + 1 ) ) ;
+	      if (std::regex_search (extension, std::regex("[^A-Za-z0-9]") ))
+	         return "" ;
+	      else
+	         return extension ;
+	   }
+	}
+
+	std::string get_name_from_vcf(std::string filename)
+	{
+		std::string ext = findExtension(filename);
+		if (ext == "vcf" || "bcf")
+		{
+		    size_t lastdot = filename.find_last_of(".");
+		    if (lastdot == std::string::npos) return filename;
+		    return filename.substr(0, lastdot);
+		}
+		else if (ext=="gz") //check for vcf.gz
+		{
+		    size_t lastdot = filename.find_last_of(".");
+		    if (lastdot == std::string::npos) return filename;
+		    std::string filename2 =  filename.substr(0, lastdot);
+		    if (findExtension(filename2) == "vcf")
+		    {
+		    	lastdot = filename2.find_last_of(".");
+		    	if (lastdot == std::string::npos) return filename2;
+		    	return filename.substr(0, lastdot);
+		    }
+		}
+		return filename;
+	}
+
 };
 
 #endif
