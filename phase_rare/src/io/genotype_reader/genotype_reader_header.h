@@ -48,6 +48,7 @@ public:
 	std::string funphased;
 	std::string fphased;
 	std::string fbinary;
+	std::string foutput;//for reporting
 	std::string scaffold_region;
 	int input_start;
 	int input_stop;
@@ -59,7 +60,7 @@ public:
 	~genotype_reader();
 
 	//PARAMS
-	void setFilenames(std::string, std::string, std::string);
+	void setFilenames(std::string, std::string, std::string, std::string);
 	void setThreads(int);
 	void setRegions(std::string, int, int);
 	void setMAF(float);

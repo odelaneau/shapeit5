@@ -7,7 +7,7 @@ permalink: /
 ---
 {: .warning }
 Website under construction.<br>
-A full release of the software, docker images, tutorials and documentation is scheduled for <b>Tuesday the 25th of November 2022</b>.<br>
+A full release of the software, docker images, tutorials and documentation is scheduled for <b>Monday the 19th of December 2022</b>.<br>
 Please contact olivier.delaneau@unil.ch if you have questions.
 
 
