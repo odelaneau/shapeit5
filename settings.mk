@@ -78,6 +78,17 @@ static_exe: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
 static_exe: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 static_exe: $(EXEFILE)
 
+# static desktop Robin
+static_exe_robin_desktop: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+static_exe_robin_desktop: LDFLAG=-O2
+static_exe_robin_desktop: HTSSRC=/home/robin/Dropbox/LIB
+static_exe_robin_desktop: HTSLIB_INC=$(HTSSRC)/htslib_minimal
+static_exe_robin_desktop: HTSLIB_LIB=$(HTSSRC)/htslib_minimal/libhts.a
+static_exe_robin_desktop: BOOST_INC=/usr/include
+static_exe_robin_desktop: BOOST_LIB_IO=$(HTSSRC)/boost/lib/libboost_iostreams.a
+static_exe_robin_desktop: BOOST_LIB_PO=$(HTSSRC)/boost/lib/libboost_program_options.a
+static_exe_robin_desktop: $(EXEFILE)
+
 amazonlinux2022: HTSLIB_INC=/usr/local/include/htslib
 amazonlinux2022: HTSLIB_LIB=/usr/local/lib/libhts.a
 amazonlinux2022: BOOST_INC=/usr/include
