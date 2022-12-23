@@ -77,39 +77,43 @@ void bitmatrix::getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int 
 	}
 }
 
-void bitmatrix::getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1) {
-	c1=m1=0;
+void bitmatrix::getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & _ibd2_start, int & _ibd2_stop) {
 	unsigned long n_bytes_per_row = stop/8 - start/8 + 1;
 	unsigned long offset_i0_h0 = (unsigned long)(2*i0+0)*(n_cols/8) + start/8;
 	unsigned long offset_i0_h1 = (unsigned long)(2*i0+1)*(n_cols/8) + start/8;
 	unsigned long offset_i1_h0 = (unsigned long)(2*i1+0)*(n_cols/8) + start/8;
 	unsigned long offset_i1_h1 = (unsigned long)(2*i1+1)*(n_cols/8) + start/8;
 
-	vector < bool > sa_hets = vector < bool > (n_bytes_per_row, false);
-	vector < bool > is_hets = vector < bool > (n_bytes_per_row, false);
+	vector < bool > mismatches = vector < bool > (n_bytes_per_row, false);
 
 	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
-		//unsigned char i0_g0 = (bytes[offset_i0_h0+b]|bytes[offset_i0_h1+b]);
+
 		unsigned char i0_g1 = (bytes[offset_i0_h0+b]^bytes[offset_i0_h1+b]);
-		//unsigned char i0_g2 = (bytes[offset_i0_h0+b]&bytes[offset_i0_h1+b]);
-		//unsigned char i1_g0 = (bytes[offset_i1_h0+b]|bytes[offset_i1_h1+b]);
+		unsigned char i0_g2 = (bytes[offset_i0_h0+b]&bytes[offset_i0_h1+b]);
+
 		unsigned char i1_g1 = (bytes[offset_i1_h0+b]^bytes[offset_i1_h1+b]);
-		//unsigned char i1_g2 = (bytes[offset_i1_h0+b]&bytes[offset_i1_h1+b]);
-		//m0 += distance_lookup[i0_g0 ^ i1_g0];
-		if (nbit_set[i0_g1 ^ i1_g1] == 0) sa_hets[b] = true;
-		if (nbit_set[i0_g1 | i1_g1] != 0) is_hets[b] = true;
+		unsigned char i1_g2 = (bytes[offset_i1_h0+b]&bytes[offset_i1_h1+b]);
+
+		mismatches[b] = ((nbit_set[i0_g1 ^ i1_g1] == 0) && (nbit_set[i0_g2 ^ i1_g2] == 0));
 	}
 
-	c1 = 0; m1 = 0;
-	int m1_tmp = 0;
+	int ibd2_length = 0, ibd2_start = 0, ibd2_stop = 0;
 	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
-		if (is_hets[b]) {
-			if (sa_hets[b]) m1_tmp++;
-			else m1_tmp = 0;
-			if (m1_tmp > m1) m1 = m1_tmp;
-			c1 += sa_hets[b];
+		if (mismatches[b]) {
+			ibd2_start = b;
+			ibd2_stop = b;
+		} else {
+			if ((ibd2_stop - ibd2_start + 1) > ibd2_length) {
+				ibd2_length = ibd2_stop - ibd2_start + 1;
+				_ibd2_start = ibd2_start;
+				_ibd2_stop = ibd2_stop;
+			}
+			ibd2_stop ++;
 		}
 	}
+
+	_ibd2_start = max(_ibd2_start/8 + start, start);
+	_ibd2_stop = min(_ibd2_stop/8 + start, stop);
 }
 
 void bitmatrix::allocate(unsigned int nrow, unsigned int ncol) {
