@@ -34,7 +34,7 @@ for CHR in 20; do
 		
 		##beagle imp
 		#from vcf.gz		
-		JOBID2=$(dx run app-swiss-army-knife -iin="/docker/beagle.19Apr22.7c0.jar" -icmd="java -Xmx16G -jar beagle.19Apr22.7c0.jar gt=/mnt/project/Phasing/PhasingWGS/step8_imputation/target_snp_array/axiom_1k_c${CHR}_b0_v2.b38.vcf.gz map=/mnt/project/data/plink_maps/plink.prefix.chr20.GRCh38.map ref=/mnt/project/Phasing/PhasingWGS/step8_imputation/reference_panels/rp_s1k_${METB}_chr${CHR}_${REGS}_${REGE}.vcf.gz out=imputed_1k_rp_${METB}_chr${CHR}_${REGS}_${REGE} window=500.0  nthreads=4 chrom=${IRG} impute=true gp=true && bcftools index -f imputed_1k_rp_${METB}_chr${CHR}_${REGS}_${REGE}.vcf.gz --threads 4" --folder="/Phasing/PhasingWGS/step8_imputation/imputation/${METB}" --instance-type mem3_ssd1_v2_x4 --priority low --name imp_rp_${METB}_${IDG} -y | tail -n1 | cut -d" " -f3) #--depends-on ${JOBID0}
+		#JOBID2=$(dx run app-swiss-army-knife -iin="/docker/beagle.19Apr22.7c0.jar" -icmd="java -Xmx16G -jar beagle.19Apr22.7c0.jar gt=/mnt/project/Phasing/PhasingWGS/step8_imputation/target_snp_array/axiom_1k_c${CHR}_b0_v2.b38.vcf.gz map=/mnt/project/data/plink_maps/plink.prefix.chr20.GRCh38.map ref=/mnt/project/Phasing/PhasingWGS/step8_imputation/reference_panels/rp_s1k_${METB}_chr${CHR}_${REGS}_${REGE}.vcf.gz out=imputed_1k_rp_${METB}_chr${CHR}_${REGS}_${REGE} window=500.0  nthreads=4 chrom=${IRG} impute=true gp=true && bcftools index -f imputed_1k_rp_${METB}_chr${CHR}_${REGS}_${REGE}.vcf.gz --threads 4" --folder="/Phasing/PhasingWGS/step8_imputation/imputation/${METB}" --instance-type mem3_ssd1_v2_x4 --priority low --name imp_rp_${METB}_${IDG} -y | tail -n1 | cut -d" " -f3) #--depends-on ${JOBID0}
 
 		####################################
 
@@ -44,7 +44,7 @@ for CHR in 20; do
 
 		##shapeit imp
 		#from vcf.gz		
-		#JOBID2=$(dx run app-swiss-army-knife -iin="/docker/beagle.19Apr22.7c0.jar" -icmd="java -Xmx16G -jar beagle.19Apr22.7c0.jar gt=/mnt/project/Phasing/PhasingWGS/step8_imputation/target_snp_array/axiom_1k_c${CHR}_b0_v2.b38.vcf.gz map=/mnt/project/data/plink_maps/plink.prefix.chr20.GRCh38.map ref=/mnt/project/Phasing/PhasingWGS/step8_imputation/reference_panels/rp_s1k_${METS}_chr${CHR}_${REGS}_${REGE}.vcf.gz out=imputed_1k_rp_${METS}_chr${CHR}_${REGS}_${REGE} window=500.0  nthreads=4 chrom=${IRG} impute=true gp=true && bcftools index -f imputed_1k_rp_${METS}_chr${CHR}_${REGS}_${REGE}.vcf.gz --threads 4" --folder="/Phasing/PhasingWGS/step8_imputation/imputation/${METS}" --instance-type mem2_ssd1_v2_x4 --priority low --name imp_rp_${METS}_${IDG} --depends-on ${JOBID0} -y | tail -n1 | cut -d" " -f3)
+		JOBID2=$(dx run app-swiss-army-knife -iin="/docker/beagle.19Apr22.7c0.jar" -icmd="java -Xmx16G -jar beagle.19Apr22.7c0.jar gt=/mnt/project/Phasing/PhasingWGS/step8_imputation/target_snp_array/axiom_1k_c${CHR}_b0_v2.b38.vcf.gz map=/mnt/project/data/plink_maps/plink.prefix.chr20.GRCh38.map ref=/mnt/project/Phasing/PhasingWGS/step8_imputation/reference_panels/rp_s1k_${METS}_chr${CHR}_${REGS}_${REGE}.vcf.gz out=imputed_1k_rp_${METS}_chr${CHR}_${REGS}_${REGE} window=500.0  nthreads=4 chrom=${IRG} impute=true gp=true && bcftools index -f imputed_1k_rp_${METS}_chr${CHR}_${REGS}_${REGE}.vcf.gz --threads 4" --folder="/Phasing/PhasingWGS/step8_imputation/imputation/${METS}" --instance-type mem2_ssd1_v2_x4 --priority low --name imp_rp_${METS}_${IDG} --depends-on ${JOBID0} -y | tail -n1 | cut -d" " -f3)
 
 		NLINE=$((NLINE+1))
 	done < ../step2_splitchunks/chr20.size4Mb.txt
