@@ -1,0 +1,3 @@
+Prefix,Cov,ImpFolder,NameRef,NameRef2,NameTar,Met,Met1,Vtype,Chr,Label,Version,Hex,Hex2,lty,ch
+BEAGLE_v5.4_1k,UKB axiom array,imputation,UKB WGS - Beagle v5.4 phased,UK Biobank WGS (140k samples),100,BEAGLE v5.4,beagle5.4,all,20,-,v5.4,#d40025,#d40025,1,20
+SHAPEIT_v5.0.0_1k,UKB axiom array,imputation,UKB WGS - SHAPEIT v5.0.0 phased,UK Biobank WGS (140k samples),100,SHAPEIT v5.0.0,shapeit5,all,20,-,v5.0.0,#ff8095,#E69F00,1,20
