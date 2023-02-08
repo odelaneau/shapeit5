@@ -45,7 +45,7 @@ You will find the following scripts to perform the phasing on the UK Biobank WGS
 - **step4_concat_rare.sh** : concatenate the final phasing into a single file per chromosome.
 
 <br>
-It is important to note that a genome-wide chunking has been produce for this phasing. We used large chunks (~20-30MB) to phase common variants and smaller chunks (~4-7MB) to phase rare variants. This chunking has been optimized for phasing accuracy and computational costs. It can easyly be used on another dataset in genome built GRCh38. The chunking can be found in our github repository by navigating into the `chunks/` folder.
+It is important to note that a genome-wide chunking has been produce for this phasing. We used large chunks (~20-25MB) to phase common variants and smaller chunks (~4-7MB) to phase rare variants. This chunking has been optimized for phasing accuracy and computational costs. We based our chunking algorithm on the number of variant per chunk, the size of chunks in megabase and the size of chunks in centimorgan, to have similar chunk parameters along the genome. It can easyly be used on another dataset in genome built GRCh38. The chunking can be found in our github repository by navigating into the `chunks/` folder.
 
 <br>
 
