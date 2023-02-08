@@ -8,7 +8,7 @@ layout: default
 All notable changes to this project are documented in this file.
 
 {: .highlight }
-Version 1.0.0 will be released on the 15th of November 2022.
+Version 1.0.0 is now available [here] (https://github.com/odelaneau/shapeit5/releases) as docker image (`shapeit5_v1.0.0.tar.gz`) or static binaries. 
 
 ## v1.0.0
 
