@@ -5,12 +5,14 @@ nav_order: 1
 description: "SHAPEIT5 is a tool for haplotype phasing of high coverage sequencing data."
 permalink: /
 ---
-{: .warning }
-Website under construction.<br>
-A full release of the software, docker images, tutorials and documentation is scheduled for <b>Monday the 19th of December 2022</b>.<br>
-Please contact olivier.delaneau@unil.ch if you have questions.
+## News
+
+{: .new }
+> **Version `1.0.0` is now available!**
+> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 
+---
 
 <!---
 <img src="assets/images/branding/shapeit_logo.png" align="right" alt="Shapeit5" style="height:150px">
@@ -52,11 +54,6 @@ SHAPEIT5 is composed of the following tools:
 [phase_rare]({{site.baseurl}}{% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
 [switch]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
 
-## News
-
-{: .new }
-> **Version `1.0.0` will be soon available!**
-> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 ---
 

@@ -1,3 +1,6 @@
+#RELEASE
+RLS=v1.0.0
+
 #COMPILER MODE C++17
 CXX=g++ -std=c++17
 
@@ -25,8 +28,8 @@ OFILE=$(shell for file in `find src -name *.cpp`; do echo obj/$$(basename $$file
 VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); done)
 
 NAME=$(shell basename $(CURDIR))
-BFILE=bin/SHAPEIT5_$(NAME)
-EXEFILE=bin/SHAPEIT5_$(NAME)_static
+BFILE=bin/SHAPEIT5_$(NAME)_${RLS}
+EXEFILE=bin/SHAPEIT5_$(NAME)_static_${RLS}
 
 #CONDITIONAL PATH DEFINITON
 system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
