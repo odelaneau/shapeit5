@@ -171,7 +171,7 @@ for CHR in {1..22}; do
 		LOG=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_common.log
 		TIM=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_common.time
 		
-		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common_static --input $BCF --map $MAP --output $OUT --thread 72 --log $LOG --filter-maf 0.001 --region $REG && bcftools index -f $OUT --threads 72" --instance-type mem1_ssd1_v2_x72 --priority normal --name WGS_shapeit5_common_chr${CHR}_${CHUNK_NBR} -y
+		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_common_static_v1.0.0 --input $BCF --map $MAP --output $OUT --thread 72 --log $LOG --filter-maf 0.001 --region $REG && bcftools index -f $OUT --threads 72" --instance-type mem1_ssd1_v2_x72 --priority normal --name WGS_shapeit5_common_chr${CHR}_${CHUNK_NBR} -y
 		
 	done < ${CHUNKS}
 done
@@ -200,7 +200,7 @@ ODIR=PhasingWGS_Official_release/step1_phase_common/
 
 threads=36
 for CHR in {1..22}; do
-	dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="ls -1v /mnt/project/PhasingWGS_Official_release/step1_phase_common/chunks/UKB_chr${CHR}.chunk_*.shapeit5_common.bcf > list_ligate.chr${CHR}.txt && SHAPEIT5_ligate_static --input list_ligate.chr${CHR}.txt --output UKB_chr${CHR}.shapeit5_common_ligate.bcf --thread ${threads} --index" --instance-type mem1_ssd1_v2_x8 --priority low --name WGS_shapeit5_chr${CHR}_ligate -y
+	dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="ls -1v /mnt/project/PhasingWGS_Official_release/step1_phase_common/chunks/UKB_chr${CHR}.chunk_*.shapeit5_common.bcf > list_ligate.chr${CHR}.txt && SHAPEIT5_ligate_static_v1.0.0 --input list_ligate.chr${CHR}.txt --output UKB_chr${CHR}.shapeit5_common_ligate.bcf --thread ${threads} --index" --instance-type mem1_ssd1_v2_x8 --priority low --name WGS_shapeit5_chr${CHR}_ligate -y
 
 done
 ```
@@ -253,7 +253,7 @@ for CHR in {1..22}; do
 		LOG=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_rare.log
 		TIM=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_rare.time
 		
-		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare_static --input-plain $BCF --map $MAP --output $OUT --thread ${threads} --log $LOG --scaffold $SCAF --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG && bcftools index -f $OUT --threads ${threads}" --instance-type mem3_ssd1_v2_x48 --priority normal --name WGS_shapeit5_rare_chr${CHR}_${CHUNK_NBR} -y
+		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare_static_v1.0.0 --input-plain $BCF --map $MAP --output $OUT --thread ${threads} --log $LOG --scaffold $SCAF --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG && bcftools index -f $OUT --threads ${threads}" --instance-type mem3_ssd1_v2_x48 --priority normal --name WGS_shapeit5_rare_chr${CHR}_${CHUNK_NBR} -y
 		
 	done < ${CHUNKS}
 done
@@ -332,7 +332,7 @@ EST=/mnt/project/PhasingWGS_Official_release/benchmark/benchmark_ukb23352_c${CHR
 
 dx mkdir -p ${ODIR}
 for CHR in 20; do
-	dx run app-swiss-army-knife --folder "${ODIR}" -iimage_file="/${BIN}" -icmd="SHAPEIT5_switch --validation ${VAL} --estimation ${EST} --region chr${CHR} --output benchmark_chr${CHR}"  --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_chr${CHR} -y
+	dx run app-swiss-army-knife --folder "${ODIR}" -iimage_file="/${BIN}" -icmd="SHAPEIT5_switch_v1.0.0 --validation ${VAL} --estimation ${EST} --region chr${CHR} --output benchmark_chr${CHR}"  --instance-type mem2_ssd1_v2_x16 --priority normal --name benchmark_chr${CHR} -y
 done
 ```
 </div>
