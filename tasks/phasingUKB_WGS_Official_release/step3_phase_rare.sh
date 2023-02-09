@@ -33,7 +33,7 @@ for CHR in {1..22}; do
 		LOG=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_rare.log
 		TIM=UKB_chr${CHR}.chunk_${CHUNK_NBR}.shapeit5_rare.time
 		
-		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare_static --input-plain $BCF --map $MAP --output $OUT --thread ${threads} --log $LOG --scaffold $SCAF --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG && bcftools index -f $OUT --threads ${threads}" --instance-type mem3_ssd1_v2_x48 --priority normal --name WGS_shapeit5_rare_chr${CHR}_${CHUNK_NBR} -y
+		dx run app-swiss-army-knife -iimage_file="/${BIN}" --folder="${ODIR}/" -icmd="/usr/bin/time -vo $TIM SHAPEIT5_phase_rare_static_v1.0.0 --input-plain $BCF --map $MAP --output $OUT --thread ${threads} --log $LOG --scaffold $SCAF --scaffold-region $SCAFFOLD_REG --input-region $INPUT_REG && bcftools index -f $OUT --threads ${threads}" --instance-type mem3_ssd1_v2_x48 --priority normal --name WGS_shapeit5_rare_chr${CHR}_${CHUNK_NBR} -y
 		
 	done < ${CHUNKS}
 done
