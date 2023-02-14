@@ -44,5 +44,5 @@ cd ../docker/
 mkdir -p resources
 cp ../static_bins/SHAPEIT5* resources/.
 
-docker build -t $LAB -f Dockerfile .
-docker save $LAB | gzip -c > $LAB\.tar.gz
+sudo docker build -t $LAB -f Dockerfile .
+sudo docker save $LAB | gzip -c > $LAB\.tar.gz
