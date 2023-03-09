@@ -1,0 +1,264 @@
+/*******************************************************************************
+ * Copyright (C) 2022-2023 Olivier Delaneau
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
+#ifndef _XCF_H
+#define _XCF_H
+
+#include <otools.h>
+
+#define XCF_NONE	-1
+#define XCF_BCF		0	// [XCF_BCF]  | *.bcf	| HTS genotypes	(in bcf)	| 1 unit32_t pergenotype			| Small dataset
+#define XCF_HTS		1	// [XCF_HTS]  | *.hts	| HTS genotypes (separate)	| 1 unit32_t pergenotype			| Small dataset
+#define XCF_GBIN	2	// [XCF_GBIN] | *.gbin	| Binary genotypes 			| 2 bits per genotype				| SNP array dataset
+#define XCF_HBIN	3	// [XCF_HBIN] | *.hbin	| Binary haplotypes			| 1 bit allele						| SNP array phased dataset
+#define XCF_GSPA	4	// [XCF_GSPA] | *.sgen	| Sparse Genotypes			| 1 unit32_t per non Major/Major	| WGS dataset
+#define XCF_HSPA	5	// [XCF_HSPA] | *.shap	| Sparse Haplotypes 		| 1 unit32_t per Minor haplotype	| Phased WGS dataset
+#define XCF_PSPA	6	// [XCF_PSPA] | *.sprb	| Spare Probabilities		| 1 float per non Major/Major 		| Phased WGS dataset
+#define XCF_DS		7	// [XCF_DS]   | *.ds	| Imputation Dosages		| 1 byte per DS						| Imputed dataset
+#define XCF_HP		8	// [XCF_HP]   | *.hp	| Haplotype posteriors		| 1 bytes per HP					| Imputed dataset
+#define XCF_GP		9	// [XCF_GP]   | *.gp	| Imputation posteriors		| 3 bytes per GP					| Imputed dataset
+#define XCF_MAX		10
+
+class xcf_reader {
+public:
+
+	//File types definition
+	std::vector < std::string > file_types_info;
+	std::vector < std::string > file_types_fext;
+	std::vector < uint32_t > file_types_bits;
+
+	//HTS part
+	bcf_srs_t * sync_reader;
+	uint32_t sync_number;
+	bcf1_t * bcf_line;
+
+	//INFO field
+	int32_t nsk;
+	int32_t rsk;
+	int32_t * vsk;
+
+	//Pedigree file
+	std::vector < uint32_t> ind_number;
+	std::vector < std::vector < std::string > > ind_names;
+	std::vector < std::vector < std::string > > ind_fathers;
+	std::vector < std::vector < std::string > > ind_mothers;
+
+	//Binary files [files x types]
+	std::vector < std::vector < std::ifstream > > bin_fds;		//File Descriptors
+	std::vector < std::vector < uint8_t > > bin_flag_file;		//Has file?
+	std::vector < std::vector < uint8_t > > bin_flag_record;	//Has record?
+	std::vector < std::vector < uint64_t > > bin_iseek;			//Record location
+	std::vector < std::vector < uint32_t > > bin_nseek;			//Number of records at location
+
+	//
+	xcf_reader(uint32_t nthreads);
+	~xcf_reader();
+
+	//
+	void setRegion(std::string region);
+	void addFile(std::string fname);
+
+	//
+	void readPedigree(std::string fped);
+
+	//
+	int32_t nextRecord();
+	int32_t hasRecord(uint8_t file, uint8_t type);
+	int32_t readRecord(uint8_t file, uint8_t type, char *);
+
+	//
+	int32_t closeFile(uint8_t ifile);
+	int32_t closeFiles();
+};
+
+xcf_reader::xcf_reader(uint32_t nthreads) {
+	sync_number = 0;
+	sync_reader = bcf_sr_init();
+	sync_reader->collapse = COLLAPSE_NONE;
+	sync_reader->require_index = 1;
+	if (nthreads > 1) bcf_sr_set_threads(sync_reader, nthreads);
+	nsk = 0;
+	rsk = 0;
+	vsk = NULL;
+	bcf_line =
+
+	//File type disctionary
+	file_types_info = std::vector < std::string > (XCF_MAX);
+	file_types_fext = std::vector < std::string > (XCF_MAX);
+
+	file_types_info[XCF_BCF] = string("XCF_BCF");	file_types_fext[XCF_BCF] = string("bcf");
+	file_types_info[XCF_HTS] = string("XCF_HTS");	file_types_fext[XCF_HTS] = string("hts");
+	file_types_info[XCF_GBIN] = string("XCF_GBIN");	file_types_fext[XCF_GBIN] = string("gbin");
+	file_types_info[XCF_HBIN] = string("XCF_HBIN");	file_types_fext[XCF_HBIN] = string("hbin");
+	file_types_info[XCF_GSPA] = string("XCF_GSPA");	file_types_fext[XCF_GSPA] = string("gspa");
+	file_types_info[XCF_HSPA] = string("XCF_HSPA");	file_types_fext[XCF_HSPA] = string("hspa");
+	file_types_info[XCF_PSPA] = string("XCF_PSPA");	file_types_fext[XCF_PSPA] = string("pspa");
+	file_types_info[XCF_DS] = string("XCF_DS");		file_types_fext[XCF_DS] = string("ds");
+	file_types_info[XCF_HP] = string("XCF_HP");		file_types_fext[XCF_HP] = string("hp");
+	file_types_info[XCF_GP] = string("XCF_GP");		file_types_fext[XCF_GP] = string("gp");
+}
+
+xcf_reader::~xcf_reader() {
+	bcf_sr_destroy(sync_reader);
+}
+
+void xcf_reader::setRegion(std::string region) {
+	if (bcf_sr_set_regions(sync_reader, region.c_str(), 0) == -1)
+		vrb.error("Impossible to jump to region [" + region + "]");
+}
+
+void xcf_reader::readPedigree(uint8_t ifile, std::string fname) {
+	std::string buffer;
+	std::vector < std::string > tokens;
+
+	//Alloc
+	ind_number.push_back(0);
+	ind_names.push_back(std::vector < std::string >());
+	ind_fathers.push_back(std::vector < std::string >());
+	ind_mothers.push_back(std::vector < std::string >());
+
+	//Parsing
+	input_file fd(fname);
+	if (fd.fail()) vrb.error("Cannot open pedigree file [" + fname + "] for reading");
+	while (getline(fd_list, buffer)) {
+		stb.split(buffer, tokens);
+		ind_names.back().push_back(tokens[0]);
+		if (tokens.size() >=3 ) {
+			ind_fathers.back().push_back(tokens[1]);
+			ind_mothers.back().push_back(tokens[2]);
+		}
+	}
+	ind_number.back() = ind_names.back().size();
+	fd.close();
+}
+
+uint32_t xcf_reader::addFile(uint8_t ifile, std::string fname, uint8_t tfile, std::string sfile, std::string fext) {
+	int32_t id = bcf_hdr_id2int(sync_reader->readers[ifile].header, BCF_DT_ID, sfile.c_str());
+	if (bcf_hdr_idinfo_exists(sync_reader->readers[ifile].header, BCF_HL_INFO, id)) {
+		std::string filename = stb.get_name_from_vcf(fname) + "." + fext;
+		bin_fds[ifile][tfile].open(fname.c_str(), std::ios::in | std::ios::binary);
+		if (!bin_fds[ifile][tfile]) vrb.error("Cannot open file [" + fname + "] for reading");
+		bin_flag_file[ifile][tfile] = 1;
+		bin_flag_record[ifile][tfile] = 0;
+		bin_iseek[ifile][tfile] = 0;
+		bin_nseek[ifile][tfile] = 0;
+		return 1;
+	}
+	return 0;
+}
+
+uint32_t xcf_reader::addFile(std::string fname) {
+	uint32_t nbinaryfiles = 0;
+
+	//Open BCF file and add it in sync reader
+	if (!(bcf_sr_add_reader (sync_reader, fname.c_str()))) {
+		switch (sr->errnum) {
+		case not_bgzf:			vrb.error("Opening [" + fname + "]: not compressed with bgzip"); break;
+		case idx_load_failed: 	vrb.error("Opening [" + fname + "]: impossible to load index file"); break;
+		case file_type_error: 	vrb.error("Opening [" + fname + "]: file format not supported by HTSlib"); break;
+		default : 				vrb.error("Opening [" + fname + "]: unknown error"); break;
+		}
+	}
+
+	//Open pedigree file and read sample names and eventually father/mother names
+	std::string ped_fname = stb.get_name_from_vcf(fname) + ".fam";
+	readPedigree(sync_number, fname);
+
+	//Allocation for bin_* fields
+	bin_fds.push_back(std::vector < std::ifstream > (XCF_MAX));
+	bin_flag_file.push_back(std::vector < uint8_t > (XCF_MAX, 0));
+	bin_flag_record.push_back(std::vector < uint8_t > (XCF_MAX, 0));
+	bin_iseek.push_back(std::vector < uint64_t > (XCF_MAX, 0));
+	bin_nseek.push_back(std::vector < uint32_t > (XCF_MAX, 0));
+
+	//Check header to fill up bin_* fields (i.e. associated body files)
+	for (unit32_t t = 1 ; t < XCF_MAX ; t ++)
+		nbinaryfiles += addFile(sync_number, fname, t, file_types_info[t], file_types_fext[t]);
+
+	//DATA is in the BCF file
+	if (!nbinaryfiles) bin_flag_file[sync_number][0] = 1;
+
+	//
+	sync_number++;
+}
+
+int32_t xcf_reader::nextRecord() {
+	int32_t ret = bcf_sr_next_line (sync_reader);
+	if (ret) {
+		for (uint32_t r = 0 ; r < sync_number ; r++) {
+
+			if (bcf_sr_has_line(sr, r)) {
+
+				//Standard BCF format
+				if (bin_flag_file[r][0]) bin_flag_record[r][0] = 0;
+
+				//Other formats / check seek informations
+				else {
+					for (uint32_t f = 0 ; f < XCF_MAX ; f ++) {
+						if (bin_flag_file[r][f]) {
+							rsk = bcf_get_info_int32(sr->readers[1].header, line_input_rare, file_types_info[f].c_str(), &vsk, &nsk);
+							if (nsk) {
+								if (nsk != 3) vrb.error("INFO/" + file_types_info[bin_types[r][t]] + " field should contain 3 numbers");
+								else {
+									bin_iseek[r][f] = vsk[0];
+									bin_iseek[r][f] *= MOD30BITS;
+									bin_iseek[r][f] += vsk[1];
+									bin_nseek[r][f] = vsk[2];
+									assert(vsk[2]>=0);
+									bin_flag_record[r][f] = 1;
+								}
+							} else {
+								bin_iseek[r][f] = 0;
+								bin_nseek[r][f] = 0;
+								bin_flag_record[r][f] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+int32_t xcf_reader::hasRecord(uint32_t file, uint8_t type) {
+	return bin_flag_record[file][type];
+}
+
+int32_t xcf_reader::readRecord(uint32_t file, uint8_t type, char * buffer) {
+	if (!bin_flag_record[file][type]) return -1;
+	else {
+		if (ifile == XCF_BCF) {
+			int32_t ngt, rgt;
+			bcf_line = bcf_sr_get_line(sync_reader, file);
+			rgt = bcf_get_genotypes(sync_reader->readers[file].header, bcf_line, &buffer, &ngt);
+			return rgt;
+		} else {
+			bin_fds[file][type].seekg(bin_iseek[r][f], bin_fds[file][type].beg);
+			bin_fds[file][type].read(buffer, bin_nseek[r][f]);
+			return bin_nseek[r][f];
+		}
+	}
+}
+
+#endif
+

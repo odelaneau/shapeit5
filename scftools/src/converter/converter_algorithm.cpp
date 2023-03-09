@@ -20,35 +20,23 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _HAPLOTYPE_WRITER_H
-#define _HAPLOTYPE_WRITER_H
+#include <converter/converter_header.h>
 
-#include <utils/otools.h>
+#include <io/sparse2plain.h>
+#include <io/plain2sparse.h>
 
-#include <containers/variant_map.h>
-#include <containers/haplotype_set.h>
-#include <containers/genotype_set/genotype_set_header.h>
+using namespace std;
 
+void converter::convert() {
 
-class haplotype_writer {
-public:
-	//DATA
-	int nthreads;
-	haplotype_set & H;
-	genotype_set & G;
-	variant_map & V;
-	int input_start;
-	int input_stop;
+	int mode1 = options.count("input-plain") + options.count("output-sparse");
+	int mode2 = options.count("input-sparse") + options.count("output-plain");
 
-	//CONSTRUCTORS/DESCTRUCTORS
-	haplotype_writer(haplotype_set &, genotype_set &, variant_map &, int);
-	~haplotype_writer();
-	void setRegions(int _input_start, int _input_stop);
-
-
-	//IO
-	void writeHaplotypesPlain(std::string foutput, bool);
-	void writeHaplotypesSparse(std::string foutput);
-};
-
-#endif
+	if (mode1==2 && mode2==0) {
+		vector < string > files = options["output-sparse"].as < vector < string > > ();
+		plain2sparse(options["input-plain"].as < string > (), files[0], files[1], options["region"].as < string > (), options["thread"].as < int > (), options["maf"].as < double > ()).convert(options.count("force-unphased"));
+	} else if (mode1==0 && mode2==2) {
+		vector < string > files = options["input-sparse"].as < vector < string > > ();
+		sparse2plain(files[0], files[1], options["output-plain"].as < string > (), options["region"].as < string > (), options["thread"].as < int > ()).convert();
+	}
+}

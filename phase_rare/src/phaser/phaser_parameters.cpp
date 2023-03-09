@@ -38,7 +38,6 @@ void phaser::declare_options() {
 			("input-plain", bpo::value< string >(), "Genotypes to be phased in plain VCF/BCF format")
 			("input-sparse", bpo::value< string >(), "Genotypes to be phased in sparse binary format")
 			("input-region", bpo::value< string >(), "Region to be considered in --input-sparse or --input-plain")
-			("input-maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation in --input-plain")
 			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
 			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
 			("map", bpo::value< string >(), "Genetic map")
@@ -58,7 +57,8 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
-			("output,O", bpo::value< string >(), "Phased haplotypes in VCF/BCF format")
+			("output-plain", bpo::value< string >(), "Phased haplotypes in plain VCF/BCF format (common + rare variants)")
+			("output-sparse", bpo::value< string >(), "Phased haplotypes in sparse VCF/BCF format (ONLY rare variants)")
 			("output-buffer", "Write right and left buffers too in output")
 			("log", bpo::value< string >(), "Log file");
 
@@ -96,8 +96,8 @@ void phaser::check_options() {
 	if (!options.count("scaffold-region"))
 		vrb.error("--scaffold-region missing");
 
-	if (!options.count("output"))
-		vrb.error("You must specify a phased output file with --output");
+	if (!options.count("output-plain") && !options.count("output-sparse"))
+		vrb.error("You must specify a phased output file with --output-plain or --output-sparse");
 
 	if (options.count("seed") && options["seed"].as < int > () < 0)
 		vrb.error("Random number generator needs a positive seed value");
@@ -124,7 +124,8 @@ void phaser::verbose_files() {
 	vrb.bullet("Scaff [V/B]CF : [" + options["scaffold"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
 	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
-	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
+	if (options.count("output-sparse")) vrb.bullet("Output sparse : [" + options["output-sparse"].as < string > () + "]");
+	else vrb.bullet("Output plain  : [" + options["output-plain"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 

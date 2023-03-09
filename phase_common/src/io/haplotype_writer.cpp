@@ -55,7 +55,6 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
-	//bcf_hdr_append(hdr, std::string("##SPARSE_MAF="+stb.str(filter_maf)).c_str());
 
 	//Add samples
 	for (int i = 0 ; i < G.n_ind ; i ++) bcf_hdr_add_sample(hdr, G.vecG[i]->name.c_str());
@@ -94,4 +93,5 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
+	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }

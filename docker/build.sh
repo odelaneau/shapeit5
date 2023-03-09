@@ -27,11 +27,11 @@ make clean
 make -j static_exe
 cp bin/SHAPEIT5_ligate_static ../static_bins/.
 
-#Compile convert
-cd ../convert/
+#Compile scftools
+cd ../scftools/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_convert_static ../static_bins/.
+cp bin/SHAPEIT5_scftools_static ../static_bins/.
 
 #Buld docker image
 LAB=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)

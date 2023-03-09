@@ -25,6 +25,8 @@
 
 #include <utils/otools.h>
 
+#include <containers/variant_map.h>
+
 struct track {
 	int ind, from, to;
 
@@ -44,26 +46,30 @@ struct track {
 		return ((ind==rhs.ind) && (rhs.to >= from) && (rhs.from <= to));
 	}
 
-	void merge (const track & rhs) {
+	bool merge (const track & rhs) {
+		bool inclusive0 = (from <= rhs.from) && (to >= rhs.to);
+		bool inclusive1 = (rhs.from <= from) && (rhs.to >= to);
 		from = std::min(from, rhs.from);
 		to = std::max(to, rhs.to);
+		return (!inclusive0 && !inclusive1);
 	}
 };
 
 class ibd2_tracks {
 public:
 
+	std::vector < float > vec_cm;
 	std::vector < std::vector < track > > IBD2;
-
 
 	ibd2_tracks ();
 	~ibd2_tracks ();
 	void clear();
-	void initialize(int);
+	void initialize(int, variant_map &);
 
 	bool noIBD2(int, int, int);
 	void pushIBD2(int, std::vector < track > &);
 
+	void expand(std::vector < track > &);
 	int collapse(std::vector < track > &);
 	void collapse();
 };

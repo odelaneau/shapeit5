@@ -20,15 +20,31 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#define _DECLARE_TOOLBOX_HERE
-#include <converter/converter_header.h>
+#ifndef _PLAIN2SPARSE_H
+#define _PLAIN2SPARSE_H
 
-using namespace std;
+#include <utils/otools.h>
 
-int main(int argc, char ** argv) {
-	vector < string > args;
-	for (int a = 1 ; a < argc ; a ++) args.push_back(string(argv[a]));
-	converter().convert(args);
-	return 0;
-}
 
+class plain2sparse {
+public:
+	//PARAMETERS
+	std::string file_full_bcf;
+	std::string file_comm_bcf;
+	std::string file_rare_bcf;
+	std::string file_rare_bin;
+	std::string file_rare_prb;
+	std::string region;
+	std::string contig;
+	float minmaf;
+	int nthreads;
+
+	//CONSTRUCTORS/DESCTRUCTORS
+	plain2sparse(std::string, std::string, std::string, std::string, int, float);
+	~plain2sparse();
+
+	//PROCESS
+	void convert(bool);
+};
+
+#endif

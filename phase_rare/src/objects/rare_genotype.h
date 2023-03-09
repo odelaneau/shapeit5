@@ -25,8 +25,8 @@
 
 #include <utils/otools.h>
 
-#define SETBIT(n,i)	(n)|=(1UL<<(i));
-#define CLRBIT(n,i)	(n)&=~(1UL<<i);
+#define SETBIT(n,i)	(n)|=(1U<<(i));
+#define CLRBIT(n,i)	(n)&=~(1U<<i);
 #define GETBIT(n,i)	(((n)>>(i))&1U);
 
 
@@ -51,24 +51,22 @@ public:
 
 	rare_genotype(unsigned int value) {
 		set(value);
-		prob = -1.0f;
+		prob = pha?1.0f:-1.0f;
 	}
 
-	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1) {
+	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) {
 		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
-		pha = (!mis && (al0==al1));
 
-		if (al0 != al1) {
-			if (rng.flipCoin()) {
-				al0 = 0;
-				al1 = 1;
-			} else {
-				al0 = 1;
-				al1 = 0;
+		pha = _pha || (!het && !mis);
+
+		if (pha) prob = 1.0f;
+		else {
+			prob = -1.0f;
+			if (al0 != al1) {
+				if (rng.flipCoin()) { al0 = 0; al1 = 1; }
+				else { al0 = 1; al1 = 0; }
 			}
 		}
-
-		prob = pha?1.0f:-1.0f;
 	}
 
 	~rare_genotype() {
@@ -78,6 +76,12 @@ public:
 
 	bool operator < (const rare_genotype & rg) const {
 		return idx < rg.idx;
+	}
+
+	int get(bool majorA) {
+		if (mis) return -1;
+		if (het) return 1;
+		return 2-majorA;
 	}
 
 	unsigned int get() {
@@ -96,8 +100,7 @@ public:
 		mis = GETBIT(value, 3);
 		al0 = GETBIT(value, 2);
 		al1 = GETBIT(value, 1);
-		//pha = GETBIT(value, 0);
-		pha = 0;
+		pha = GETBIT(value, 0);
 	}
 
 	void phase(unsigned int g) {
@@ -147,6 +150,10 @@ public:
 			}
 			prob = gprobs[maxg] / (gprobs[0] + gprobs[1] + gprobs[2] + gprobs[3]);
 		}
+	}
+
+	std::string str() {
+		return std::string("[" + stb.str(idx) + "/" + stb.str(het) + "/" + stb.str(mis) + "/" + stb.str(al0) + "/" + stb.str(al1) + "/" + stb.str(pha) + "]");
 	}
 };
 

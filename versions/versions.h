@@ -27,6 +27,6 @@
 #define LIGATE_VERSION "0.1"
 #define SAMPLE_VERSION "0.1"
 #define SWITCH_VERSION "0.1"
-#define CONVER_VERSION "0.1"
+#define SCFTLS_VERSION "0.1"
 
 #endif

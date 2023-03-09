@@ -27,11 +27,12 @@
 
 using namespace std;
 
-plain2sparse::plain2sparse(string _plain_vcf, string _sparse_prefix, string _region, int _nthreads, float _minmaf) {
-	file_full_vcf = _plain_vcf;
-	file_comm_bcf = _sparse_prefix +".comm.bcf";
-	file_rare_bcf = _sparse_prefix +".rare.bcf";
-	file_rare_bin = _sparse_prefix +".rare.bin";
+plain2sparse::plain2sparse(string _plain_bcf, string _sparse_common, string _sparse_rare, string _region, int _nthreads, float _minmaf) {
+	file_full_bcf = _plain_bcf;
+	file_comm_bcf = _sparse_common;
+	file_rare_bcf = _sparse_rare;
+	file_rare_bin = stb.get_name_from_vcf(_sparse_rare) + ".bin";
+	file_rare_prb = stb.get_name_from_vcf(_sparse_rare) + ".prb";
 	region = _region;
 	minmaf = _minmaf;
 	nthreads = _nthreads;
@@ -45,7 +46,7 @@ plain2sparse::plain2sparse(string _plain_vcf, string _sparse_prefix, string _reg
 plain2sparse::~plain2sparse() {
 }
 
-void plain2sparse::convert() {
+void plain2sparse::convert(bool unphased) {
 	tac.clock();
 	vrb.title("Converting from plain VCF/BCF file to sparse BCF");
 	vrb.bullet("Region        : " + region);
@@ -58,12 +59,12 @@ void plain2sparse::convert() {
 	sr->collapse = COLLAPSE_NONE;
 	sr->require_index = 1;
 	if (bcf_sr_set_regions(sr, region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + region + "]");
-	if (!(bcf_sr_add_reader (sr, file_full_vcf.c_str()))) {
+	if (!(bcf_sr_add_reader (sr, file_full_bcf.c_str()))) {
     	switch (sr->errnum) {
-		case not_bgzf:			vrb.error("Opening [" + file_full_vcf + "]: not compressed with bgzip"); break;
-		case idx_load_failed: 	vrb.error("Opening [" + file_full_vcf + "]: impossible to load index file"); break;
-		case file_type_error: 	vrb.error("Opening [" + file_full_vcf + "]: file format not supported by HTSlib"); break;
-		default : 				vrb.error("Opening [" + file_full_vcf + "]: unknown error"); break;
+		case not_bgzf:			vrb.error("Opening [" + file_full_bcf + "]: not compressed with bgzip"); break;
+		case idx_load_failed: 	vrb.error("Opening [" + file_full_bcf + "]: impossible to load index file"); break;
+		case file_type_error: 	vrb.error("Opening [" + file_full_bcf + "]: file format not supported by HTSlib"); break;
+		default : 				vrb.error("Opening [" + file_full_bcf + "]: unknown error"); break;
 		}
 	}
 
@@ -78,7 +79,7 @@ void plain2sparse::convert() {
 
 	//Create and write VCF header for common
 	bcf_hdr_t * hdr_comm_bcf = bcf_hdr_init("w");
-	bcf_hdr_append(hdr_comm_bcf, string("##source=shapeit5 convert v" + string(CONVER_VERSION)).c_str());
+	bcf_hdr_append(hdr_comm_bcf, string("##source=shapeit5 convert v" + string(SCFTLS_VERSION)).c_str());
 	bcf_hdr_append(hdr_comm_bcf, string("##contig=<ID="+ contig + ">").c_str());
 	bcf_hdr_append(hdr_comm_bcf, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr_comm_bcf, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
@@ -90,11 +91,11 @@ void plain2sparse::convert() {
 
 	//Create and write VCF header for rare
 	bcf_hdr_t * hdr_rare_bcf = bcf_hdr_init("w");
-	bcf_hdr_append(hdr_rare_bcf, string("##source=shapeit5 convert v" + string(CONVER_VERSION)).c_str());
+	bcf_hdr_append(hdr_rare_bcf, string("##source=shapeit5 convert v" + string(SCFTLS_VERSION)).c_str());
 	bcf_hdr_append(hdr_rare_bcf, string("##contig=<ID="+ contig + ">").c_str());
 	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
-	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SEEK,Number=2,Type=Integer,Description=\"Index of the first record and number of records for the variant site in associated bin file\">");
+	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SGEN,Number=3,Type=Integer,Description=\"Index and number of sparse genotypes in sparse genotype file\">");
 	bcf_hdr_add_sample(hdr_rare_bcf, NULL);
 	if (bcf_hdr_write(fp_rare_bcf, hdr_rare_bcf) < 0) vrb.error("Failing to write VCF/header for rare variants");
 
@@ -106,10 +107,11 @@ void plain2sparse::convert() {
 	int ngt = 0, rgt = 0, *vgt = NULL;
 	int nac = 0, rac = 0, *vac = NULL;
 	int nan = 0, ran = 0, *van = NULL;
-	int nsk, rsk, *vsk = (int*)malloc(2*sizeof(int));
+	int nsk, rsk, *vsk = (int*)malloc(3*sizeof(int));
 
 	//
-	unsigned int nseek = 0, nrare = 0, ncomm = 0, nfull = 0;
+	unsigned int nrare = 0, ncomm = 0, nfull = 0;
+	uint64_t nseek = 0;
 	while (bcf_sr_next_line (sr)) {
 		line_input = bcf_sr_get_line(sr, 0);
 
@@ -143,33 +145,31 @@ void plain2sparse::convert() {
 			bcf_update_alleles_str(hdr_rare_bcf, line_output_rare, alleles.c_str());
 
 			//
-
-			vsk[0] = nseek; vsk[1] = 0;
+			vsk[0] = nseek / MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
+			vsk[1] = nseek % MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
+			vsk[2] = 0;
 			bool minor_allele = ((van[0] - vac[0]) > vac[0]);
 			for(int i = 0 ; i < 2 * n_samples ; i += 2) {
 				bool a0 = (bcf_gt_allele(vgt[i+0])==1);
 				bool a1 = (bcf_gt_allele(vgt[i+1])==1);
 				bool mi = (vgt[i+0] == bcf_gt_missing || vgt[i+1] == bcf_gt_missing);
-				bool ph = (bcf_gt_is_phased(vgt[i+0]) || bcf_gt_is_phased(vgt[i+1]));
 				if ( a0 == minor_allele || a1 == minor_allele || mi) {
-					rare_genotype rg_struct = rare_genotype(i/2, (a0!=a1), mi, a0, a1, ph);
+					bool ph = (bcf_gt_is_phased(vgt[i+0]) || bcf_gt_is_phased(vgt[i+1]));
+					rare_genotype rg_struct = rare_genotype(i/2, (a0!=a1), mi, a0, a1, unphased?0:ph);
 					unsigned int rg_int = rg_struct.get();
 					fp_rare_bin.write(reinterpret_cast < char * > (&rg_int), sizeof(unsigned int));
-					vsk[1] ++;
+					vsk[2] ++;
 					nseek ++;
 				}
 			}
 
 			//
-			bcf_update_info_int32(hdr_rare_bcf, line_output_rare, "SEEK", vsk, 2);
 			bcf_update_info_int32(hdr_rare_bcf, line_output_rare, "AC", vac, 1);
 			bcf_update_info_int32(hdr_rare_bcf, line_output_rare, "AN", van, 1);
+			bcf_update_info_int32(hdr_rare_bcf, line_output_rare, "SGEN", vsk, 3);
 			if (bcf_write1(fp_rare_bcf, hdr_rare_bcf, line_output_rare) < 0) vrb.error("Failing to write VCF/record for rare variants");
 			nrare++;
-		}
-
-		//COMMON VARIANT
-		if (currmaf >= minmaf) {
+		} else {
 			bcf_clear1(line_output_comm);
 			line_output_comm->rid = bcf_hdr_name2id(hdr_comm_bcf, chr.c_str());
 			line_output_comm->pos = pos;
@@ -198,8 +198,13 @@ void plain2sparse::convert() {
 	if (hts_close(fp_rare_bcf)) vrb.error("Non zero status when closing VCF/BCF file descriptor for rare variants");
 	if (hts_close(fp_comm_bcf)) vrb.error("Non zero status when closing VCF/BCF file descriptor for common variants");
 
-
 	// Report
 	vrb.bullet("VCF/BCF parsing done ("+stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	vrb.bullet("Indexing ["+file_comm_bcf + "]");
+	if (bcf_index_build3(file_comm_bcf.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
+
+	vrb.bullet("Indexing ["+file_rare_bcf + "]");
+	if (bcf_index_build3(file_rare_bcf.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
 

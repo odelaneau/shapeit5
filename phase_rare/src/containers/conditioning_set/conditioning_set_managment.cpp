@@ -67,6 +67,7 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 
 	//ALLOCATE
 	indexes_pbwt_neighbour = vector < vector < unsigned int > > (n_haplotypes);
+	IBD2 = vector < vector < unsigned int > > (n_haplotypes / 2);
 	shuffledI = 0;
 	shuffledO = vector < unsigned int > (n_haplotypes);
 	iota(shuffledO.begin(), shuffledO.end(), 0);

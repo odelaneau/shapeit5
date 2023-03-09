@@ -20,35 +20,23 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _HAPLOTYPE_WRITER_H
-#define _HAPLOTYPE_WRITER_H
+#include <concater/concater_header.h>
 
-#include <utils/otools.h>
+using namespace std;
 
-#include <containers/variant_map.h>
-#include <containers/haplotype_set.h>
-#include <containers/genotype_set/genotype_set_header.h>
+concater::concater() {
+}
 
+concater::~concater() {
+}
 
-class haplotype_writer {
-public:
-	//DATA
-	int nthreads;
-	haplotype_set & H;
-	genotype_set & G;
-	variant_map & V;
-	int input_start;
-	int input_stop;
-
-	//CONSTRUCTORS/DESCTRUCTORS
-	haplotype_writer(haplotype_set &, genotype_set &, variant_map &, int);
-	~haplotype_writer();
-	void setRegions(int _input_start, int _input_stop);
-
-
-	//IO
-	void writeHaplotypesPlain(std::string foutput, bool);
-	void writeHaplotypesSparse(std::string foutput);
-};
-
-#endif
+void concater::concat(vector < string > & args) {
+	declare_options();
+	parse_command_line(args);
+	check_options();
+	verbose_files();
+	verbose_options();
+	read_files_and_initialise();
+	concat();
+	write_files_and_finalise();
+}

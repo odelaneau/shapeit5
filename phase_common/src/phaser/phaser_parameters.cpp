@@ -50,21 +50,21 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
-			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.025cM by default)")
-			("pbwt-depth", bpo::value < int >()->default_value(4), "Depth of PBWT indexes to condition on")
-			("pbwt-mac", bpo::value < int >()->default_value(5), "Minimal Minor Allele Count at which PBWT is evaluated")
-			("pbwt-mdr", bpo::value < double >()->default_value(0.1), "Maximal Missing Data Rate at which PBWT is evaluated")
-			("pbwt-window", bpo::value < double >()->default_value(4), "Run PBWT selection in windows of this size");
+			("pbwt-modulo", bpo::value < double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM (i.e. storage every 0.1cM by default)")
+			("pbwt-depth", bpo::value < int >()->default_value(4), "Depth of PBWT indexes to condition on (default 4)")
+			("pbwt-mac", bpo::value < int >()->default_value(5), "Minimal Minor Allele Count at which PBWT is evaluated (default 5)")
+			("pbwt-mdr", bpo::value < double >()->default_value(0.1), "Maximal Missing Data Rate at which PBWT is evaluated (default 10%)")
+			("pbwt-window", bpo::value < double >()->default_value(4), "Run PBWT selection in windows of this size (default 4cM)");
 	
 	bpo::options_description opt_hmm ("HMM parameters");
 	opt_hmm.add_options()
-			("hmm-window", bpo::value < double >()->default_value(4), "Minimal size of the phasing window in cM")
-			("hmm-ne", bpo::value < int >()->default_value(15000), "Effective size of the population");
+			("hmm-window", bpo::value < double >()->default_value(4), "Minimal size of the phasing window in cM (default 4cM)")
+			("hmm-ne", bpo::value < int >()->default_value(15000), "Effective size of the population (default 15,000)");
 
 	bpo::options_description opt_filter ("FILTER parameters");
 	opt_filter.add_options()
 			("filter-snp", "Only consider SNPs")
-			("filter-maf", bpo::value < double >()->default_value(0.0), "Only consider variants with at lest this MAF, requires AC/AN tags");
+			("filter-maf", bpo::value < double >()->default_value(0.0), "Only retains variants with a MAF above the specified value, requires AC/AN tags");
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
