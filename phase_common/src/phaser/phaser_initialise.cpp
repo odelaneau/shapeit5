@@ -80,7 +80,7 @@ void phaser::read_files_and_initialise() {
 	//step6: Initialize PBWT for selecting states
 	if (pbwt_auto) {
 		unsigned int cumulative_sample_size = readerG.n_main_samples + readerG.n_ref_samples;
-		pbwt_depth = max(min((int)round(10-log10(cumulative_sample_size)), 8), 2);
+		pbwt_depth = max(min((int)round(9-log10(cumulative_sample_size)), 8), 2);
 		pbwt_modulo = max(min((log(cumulative_sample_size) - log(50) + 1) * 0.01, 0.15), 0.005);
 		vrb.bullet("PBWT parameters auto setting : [modulo = " + stb.str(pbwt_modulo, 3) + " / depth = " + stb.str(pbwt_depth, 3) + "]");
 	} else {

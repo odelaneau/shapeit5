@@ -20,30 +20,38 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _PLAIN2SPARSE_H
-#define _PLAIN2SPARSE_H
+#ifndef _CONCATER_H
+#define _CONCATER_H
 
 #include <utils/otools.h>
 
-
-class plain2sparse {
+class concater {
 public:
+	//COMMAND LINE OPTIONS
+	bpo::options_description descriptions;
+	bpo::variables_map options;
+
+	//CONSTRUCTOR
+	concater();
+	~concater();
+
+	//METHODS
+	void concat();
+
 	//PARAMETERS
-	std::string file_full_vcf;
-	std::string file_comm_bcf;
-	std::string file_rare_bcf;
-	std::string file_rare_bin;
-	std::string region;
-	std::string contig;
-	float minmaf;
-	int nthreads;
+	void declare_options();
+	void parse_command_line(std::vector < std::string > &);
+	void check_options();
+	void verbose_options();
+	void verbose_files();
 
-	//CONSTRUCTORS/DESCTRUCTORS
-	plain2sparse(std::string, std::string, std::string, int, float);
-	~plain2sparse();
-
-	//PROCESS
-	void convert();
+	//
+	void read_files_and_initialise();
+	void concat(std::vector < std::string > &);
+	void write_files_and_finalise();
 };
 
+
 #endif
+
+

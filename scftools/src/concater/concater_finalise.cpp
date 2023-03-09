@@ -20,34 +20,11 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <io/pedigree_reader.h>
+#include <concater/concater_header.h>
 
-using namespace std;
+void concater::write_files_and_finalise() {
+	vrb.title("Finalization:");
 
-pedigree_reader::pedigree_reader() {
-}
-
-pedigree_reader::~pedigree_reader() {
-	vector < string > ().swap(fathers);
-	vector < string > ().swap(mothers);
-	vector < string > ().swap(kids);
-}
-
-void pedigree_reader::readPedigreeFile(string fped) {
-	tac.clock();
-	string buffer;
-	vector < string > tokens;
-	int line = 0;
-	input_file fd_ped(fped);
-	if (fd_ped.fail()) vrb.error("Cannot open pedigree file");
-	while (getline(fd_ped, buffer)) {
-		stb.split(buffer, tokens);
-		if (tokens.size() != 3) vrb.error("Problem in pedigree file; each line should have 3 columns");
-		kids.push_back(tokens[0]);
-		fathers.push_back(tokens[1]);
-		mothers.push_back(tokens[2]);
-		line ++;
-	}
-	fd_ped.close();
-	vrb.bullet("PED parsing [n=" + stb.str(line) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	//step0: Measure overall running time
+	vrb.bullet("Total running time = " + stb.str(tac.abs_time()) + " seconds");
 }

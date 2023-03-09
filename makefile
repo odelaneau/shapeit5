@@ -1,4 +1,4 @@
-projects = phase_common phase_rare switch ligate
+projects = phase_common phase_rare switch ligate scftools
 
 .PHONY: all $(projects)
 

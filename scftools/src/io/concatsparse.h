@@ -20,22 +20,26 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <converter/converter_header.h>
+#ifndef _CONCATSPARSE_H
+#define _CONCATSPARSE_H
 
-#include <io/sparse2plain.h>
-#include <io/plain2sparse.h>
+#include <utils/otools.h>
 
-using namespace std;
+class concatsparse {
+public:
+	//PARAMETERS
+	std::string file_list_txt;
+	std::string file_rare_bcf;
+	std::string region;
+	std::string contig;
+	int nthreads;
 
-void converter::convert() {
+	//CONSTRUCTORS/DESCTRUCTORS
+	concatsparse(std::string, std::string, std::string, int);
+	~concatsparse();
 
-	int mode1 = options.count("input-plain") + options.count("output-sparse");
-	int mode2 = options.count("input-sparse") + options.count("output-plain");
+	//PROCESS
+	void concat();
+};
 
-	if (mode1==2 && mode2==0) {
-		plain2sparse(options["input-plain"].as < string > (), options["output-sparse"].as < string > (), options["region"].as < string > (), options["thread"].as < int > (), options["maf"].as < double > ()).convert();
-	} else if (mode1==0 && mode2==2) {
-		sparse2plain(options["output-plain"].as < string > (), options["input-sparse"].as < string > (), options["region"].as < string > (), options["thread"].as < int > ()).convert();
-	}
-
-}
+#endif

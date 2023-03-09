@@ -22,11 +22,11 @@
 
 #include "../../versions/versions.h"
 
-#include <converter/converter_header.h>
+#include <concater/concater_header.h>
 
 using namespace std;
 
-void converter::declare_options() {
+void concater::declare_options() {
 	bpo::options_description opt_base ("Basic options");
 	opt_base.add_options()
 			("help", "Produce help message")
@@ -35,21 +35,18 @@ void converter::declare_options() {
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
-			("input-plain", bpo::value< string >(), "Input genotype data in plain VCF/BCF format")
-			("input-sparse", bpo::value< string >(), "Input genotype data in sparse VCF/BCF format")
-			("region", bpo::value< string >(), "Region to be considered in --input")
-			("maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation");
+			("input-sparse-list", bpo::value< string >(), "Input genotype data in sparse VCF/BCF format")
+			("region", bpo::value< string >(), "Region to be considered in --input");
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
-			("output-plain", bpo::value< string >(), "Output genotype data in plain VCF/BCF format")
 			("output-sparse", bpo::value< string >(), "Output genotype data in sparse VCF/BCF format")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_output);
 }
 
-void converter::parse_command_line(vector < string > & args) {
+void concater::parse_command_line(vector < string > & args) {
 	try {
 		bpo::store(bpo::command_line_parser(args).options(descriptions).run(), options);
 		bpo::notify(options);
@@ -60,19 +57,19 @@ void converter::parse_command_line(vector < string > & args) {
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Convert from/to sparse VCF/BCF");
+	vrb.title("[SHAPEIT5] Concat multiple sparse VCF/BCF");
 	vrb.bullet("Authors       : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
-	vrb.bullet("Version       : 5." + string(CONVER_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
+	vrb.bullet("Version       : 5." + string(SCFTLS_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
 	vrb.bullet("Run date      : " + tac.date());
 }
 
-void converter::check_options() {
-	int ninput = options.count("input-plain") + options.count("input-sparse");
-	int noutput = options.count("output-plain") + options.count("output-sparse");
+void concater::check_options() {
+	int ninput = options.count("input-sparse-list");
+	int noutput = options.count("output-sparse");
 
-	if (ninput != 1) vrb.error("Use either --input-plain or --input-sparse as input.");
-	if (noutput != 1) vrb.error("Use either --output-plain or --output-sparse as output.");
+	if (ninput != 1) vrb.error("Use --input-sparse-list as input.");
+	if (noutput != 1) vrb.error("Use --output-sparse as output.");
 
 	if (!options.count("region"))
 		vrb.error("--region missing");
@@ -84,31 +81,17 @@ void converter::check_options() {
 		vrb.error("You must use at least 1 thread");
 }
 
-void converter::verbose_files() {
+void concater::verbose_files() {
 	vrb.title("Files:");
 
-	int mode1 = options.count("input-plain") + options.count("output-sparse");
-	int mode2 = options.count("input-sparse") + options.count("output-plain");
-
-	if (mode1==2 && mode2==0) {
-		vrb.bullet("Input plain VCF/BCF : [" + options["input-plain"].as < string > () + "]");
-		vrb.bullet("Output sparse prefix: [" + options["output-sparse"].as < string > () + "]");
-	} else if (mode1==0 && mode2==2) {
-		vrb.bullet("Input sparse prefix : [" + options["input-sparse"].as < string > () + "]");
-		vrb.bullet("Output plain VCF/BCF: [" + options["output-plain"].as < string > () + "]");
-	} else {
-		vrb.error("Unrecognized conversion mode. Use --input-plain with --output-sparse OR --input-sparse with --output-plain.");
-	}
+	vrb.bullet("Input sparse files: [" + options["input-sparse-list"].as < string > () + "]");
+	vrb.bullet("Output sparse file: [" + options["output-sparse"].as < string > () + "]");
 
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 
-void converter::verbose_options() {
+void concater::verbose_options() {
 	vrb.title("Parameters:");
 	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
 	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
-	int mode1 = options.count("input-plain") + options.count("output-sparse");
-	int mode2 = options.count("input-sparse") + options.count("output-plain");
-	if (mode1 == 2) vrb.bullet("Mode    : Plain VCF to sparse VCF");
-	if (mode2 == 2) vrb.bullet("Mode    : Sparse VCF to plain VCF");
 }

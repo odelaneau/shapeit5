@@ -20,35 +20,23 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _HAPLOTYPE_WRITER_H
-#define _HAPLOTYPE_WRITER_H
+#define _DECLARE_TOOLBOX_HERE
+#include <converter/converter_header.h>
+#include <concater/concater_header.h>
 
-#include <utils/otools.h>
+using namespace std;
 
-#include <containers/variant_map.h>
-#include <containers/haplotype_set.h>
-#include <containers/genotype_set/genotype_set_header.h>
+int main(int argc, char ** argv) {
+	vector < string > args;
 
+	assert(argc >= 2);
+	string mode = string(argv[1]);
+	for (int a = 2 ; a < argc ; a ++) args.push_back(string(argv[a]));
 
-class haplotype_writer {
-public:
-	//DATA
-	int nthreads;
-	haplotype_set & H;
-	genotype_set & G;
-	variant_map & V;
-	int input_start;
-	int input_stop;
+	if (mode == "convert") converter().convert(args);
+	else if (mode == "concat") concater().concat(args);
+	else vrb.error("Unknown mode [" + mode + "]");
 
-	//CONSTRUCTORS/DESCTRUCTORS
-	haplotype_writer(haplotype_set &, genotype_set &, variant_map &, int);
-	~haplotype_writer();
-	void setRegions(int _input_start, int _input_stop);
+	return 0;
+}
 
-
-	//IO
-	void writeHaplotypesPlain(std::string foutput, bool);
-	void writeHaplotypesSparse(std::string foutput);
-};
-
-#endif

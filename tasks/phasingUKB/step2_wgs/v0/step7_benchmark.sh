@@ -64,13 +64,13 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 		OUT=$(basename $BCF .bcf)\.$REG\.fqa
 		LOG=$(basename $BCF .bcf)\.$REG\.fqa.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.SNPs.array.bcf
-		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --instance-type mem2_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP1 -y
+		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP1 --instance-type mem2_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP1 -y
 				
 		#COMMON SNPS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqc
 		LOG=$(basename $BCF .bcf)\.$REG\.fqc.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.subset.N$N\.SNPs.common.bcf
-		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP2 -y
+		#dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N$N/chunks/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $REG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP2 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP2 -y
 		
 		#ALL VARIANTS
 		OUT=$(basename $BCF .bcf)\.$REG\.fqf
@@ -92,4 +92,3 @@ for N in 2000 5000 10000 20000 50000 100000 147754; do
 	done < /home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/step2_splitchunks/chr20.size4Mb.txt		
 
 done
-

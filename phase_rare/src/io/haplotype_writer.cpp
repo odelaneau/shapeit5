@@ -42,8 +42,7 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-
-void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
+void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 	// Init
 	tac.clock();
 	string file_format = "w";
@@ -100,7 +99,7 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 					bool a1 = G.GRvar_genotypes[vr][i].al1;
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
-					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(G.GRvar_genotypes[vr][i].prob * 1000.0) / 1000.0;
+					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(min(G.GRvar_genotypes[vr][i].prob, 1.0f) * 1000.0) / 1000.0;
 					count_alt -= 2 * major_allele;
 					count_alt += a0+a1;
 				}
@@ -109,7 +108,6 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 				for (int i = 0 ; i < H.n_samples ; i++) {
 					bool a0 = H.Hvar.get(vs, 2*i+0);
 					bool a1 = H.Hvar.get(vs, 2*i+1);
-					count_alt += a0+a1;
 					genotypes[2*i+0] = bcf_gt_phased(a0);
 					genotypes[2*i+1] = bcf_gt_phased(a1);
 					count_alt += a0+a1;
@@ -133,6 +131,7 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 		vrb.progress("  * VCF writing", (vt+1)*1.0/V.sizeFull());
 	}
 	free(genotypes);
+	free(probabilities);
 	bcf_destroy1(rec);
 	bcf_hdr_destroy(hdr);
 	if (hts_close(fp)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
@@ -141,4 +140,100 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
+
+	vrb.bullet("Indexing ["+fname + "]");
+	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
+
+void haplotype_writer::writeHaplotypesSparse(string fname) {
+
+	// Init
+	tac.clock();
+
+	//Opening all sparse files
+	string file_rare_bcf = fname;
+	string file_rare_bin = stb.get_name_from_vcf(fname) + ".bin";
+	string file_rare_prb = stb.get_name_from_vcf(fname) + ".prb";
+	htsFile * fp_rare_bcf = hts_open(file_rare_bcf.c_str(), "wb");
+	if (!fp_rare_bcf) vrb.error("Cannot open " + file_rare_bcf + " for writing, check permissions");
+	ofstream fp_rare_bin (file_rare_bin, std::ios::out | std::ios::binary);
+	if (!fp_rare_bin) vrb.error("Cannot open " + file_rare_bin + " for writing, check permissions");
+	ofstream fp_rare_prb (file_rare_prb, std::ios::out | std::ios::binary);
+	if (!fp_rare_prb) vrb.error("Cannot open " + file_rare_bin + " for writing, check permissions");
+
+	//Create and write VCF header for rare BCF
+	bcf_hdr_t * hdr_rare_bcf = bcf_hdr_init("w");
+	bcf_hdr_append(hdr_rare_bcf, string("##source=shapeit5 convert v" + string(SCFTLS_VERSION)).c_str());
+	bcf_hdr_append(hdr_rare_bcf, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
+	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Allele Frequency\">");
+	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
+	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SGEN,Number=3,Type=Integer,Description=\"Index and number of sparse genotypes in sparse file\">");
+	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SPRB,Number=3,Type=Integer,Description=\"Index and number of sparse probabilities in sparse file\">");
+	bcf_hdr_add_sample(hdr_rare_bcf, NULL);
+	if (bcf_hdr_write(fp_rare_bcf, hdr_rare_bcf) < 0) vrb.error("Failing to write VCF/header for rare variants");
+
+	//
+	bcf1_t *rec = bcf_init1();
+	uint64_t seek = 0;
+	int nsk, rsk, *vsk = (int*)malloc(3*sizeof(int));
+	unsigned int * genotypes = (unsigned int *)malloc(G.n_samples*sizeof(unsigned int));
+	float * probabilities = (float*)malloc(G.n_samples*sizeof(float));
+
+	for (int vr = 0 ; vr < V.sizeRare() ; vr ++) {
+
+		//Variant informations
+		bcf_clear1(rec);
+		rec->rid = bcf_hdr_name2id(hdr_rare_bcf, V.vec_rare[vr]->chr.c_str());
+		rec->pos = V.vec_rare[vr]->bp - 1;
+		bcf_update_id(hdr_rare_bcf, rec, V.vec_rare[vr]->id.c_str());
+		string alleles = V.vec_rare[vr]->ref + "," + V.vec_rare[vr]->alt;
+		bcf_update_alleles_str(hdr_rare_bcf, rec, alleles.c_str());
+
+		//Seek information
+		vsk[0] = seek / MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
+		vsk[1] = seek % MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
+		vsk[2] = 0;
+
+		//Compact genotypes and probabilities
+		bool major_allele = !V.vec_rare[vr]->minor;
+		unsigned int count_alt = 2 * G.n_samples * major_allele;
+		for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
+			bool a0 = G.GRvar_genotypes[vr][r].al0;
+			bool a1 = G.GRvar_genotypes[vr][r].al1;
+			if (a0 != major_allele || a1 != major_allele) {
+				probabilities[r] = min(G.GRvar_genotypes[vr][r].prob, 1.0f);
+				rare_genotype rg_struct = rare_genotype(G.GRvar_genotypes[vr][r].idx, (a0!=a1), 0, a0, a1, 1);
+				genotypes[r] = rg_struct.get();
+				count_alt -= 2 * major_allele;
+				count_alt += a0+a1;
+				vsk[2] ++;
+				seek ++;
+			}
+		}
+
+		//Write genotypes and probabilities
+		fp_rare_bin.write(reinterpret_cast < char * > (genotypes), vsk[2] * sizeof(unsigned int));
+		fp_rare_prb.write(reinterpret_cast < char * > (probabilities), vsk[2] * sizeof(float));
+
+		//BCF INFO fields
+		bcf_update_info_int32(hdr_rare_bcf, rec, "AC", &count_alt, 1);
+		bcf_update_info_int32(hdr_rare_bcf, rec, "AN", &G.n_samples, 1);
+		bcf_update_info_int32(hdr_rare_bcf, rec, "SGEN", vsk, 3);
+		bcf_update_info_int32(hdr_rare_bcf, rec, "SPRB", vsk, 3);
+		if (bcf_write1(fp_rare_bcf, hdr_rare_bcf, rec) < 0) vrb.error("Failing to write VCF/record");
+
+		vrb.progress("  * VCF writing", (vr+1)*1.0/V.sizeRare());
+	}
+	free(vsk);
+	free(probabilities);
+	bcf_destroy1(rec);
+	bcf_hdr_destroy(hdr_rare_bcf);
+	if (hts_close(fp_rare_bcf)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
+	fp_rare_bin.close();
+	fp_rare_prb.close();
+	vrb.bullet("Sparse BCF writing [N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeRare()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
+
+	vrb.bullet("Indexing ["+file_rare_bcf + "]");
+	if (bcf_index_build3(file_rare_bcf.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
+}
+

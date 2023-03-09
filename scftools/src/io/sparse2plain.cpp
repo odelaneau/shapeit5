@@ -27,11 +27,12 @@
 
 using namespace std;
 
-sparse2plain::sparse2plain(string _plain_vcf, string _sparse_prefix, string _region, int _nthreads) {
-	file_full_bcf = _plain_vcf;
-	file_comm_bcf = _sparse_prefix +".comm.bcf";
-	file_rare_bcf = _sparse_prefix +".rare.bcf";
-	file_rare_bin = _sparse_prefix +".rare.bin";
+sparse2plain::sparse2plain(string _sparse_common, string _sparse_rare, string _plain_bcf, string _region, int _nthreads) {
+	file_full_bcf = _plain_bcf;
+	file_comm_bcf = _sparse_common;
+	file_rare_bcf = _sparse_rare;
+	file_rare_bin = stb.get_name_from_vcf(_sparse_rare) + ".bin";
+	file_rare_prb = stb.get_name_from_vcf(_sparse_rare) + ".prb";
 	region = _region;
 	nthreads = _nthreads;
 
@@ -73,9 +74,21 @@ void sparse2plain::convert() {
 		}
 	}
 
+	//Checking binary files to open
+	int id = bcf_hdr_id2int(sr->readers[1].header, BCF_DT_ID, "SGEN");
+	if (!bcf_hdr_idinfo_exists(sr->readers[1].header, BCF_HL_INFO, id)) vrb.error("Cannot retrieve SGEN flag in VCF/BCF for sparse rare variants.");
+	id = bcf_hdr_id2int(sr->readers[1].header, BCF_DT_ID, "SPRB");
+	bool hasProbs = bcf_hdr_idinfo_exists(sr->readers[1].header, BCF_HL_INFO, id);
+	if (hasProbs) vrb.bullet("Sparse probability file detected");
+
 	//Opening sparse BIN file
 	std::ifstream fp_rare_bin (file_rare_bin, std::ios::in | std::ios::binary);
 	if (!fp_rare_bin) vrb.error("Cannot open " + file_rare_bin + " for reading, check permissions");
+	std::ifstream fp_rare_prb;
+	if (hasProbs) {
+		fp_rare_prb.open(file_rare_prb, std::ios::in | std::ios::binary);
+		if (!fp_rare_prb) vrb.error("Cannot open " + file_rare_prb + " for reading, check permissions");
+	}
 
 	//Opening plain file
 	htsFile * fp_full_bcf = hts_open(file_full_bcf.c_str(), "wb");
@@ -84,11 +97,12 @@ void sparse2plain::convert() {
 
 	//Create and write VCF header for plain version
 	bcf_hdr_t * hdr_full_bcf = bcf_hdr_init("w");
-	bcf_hdr_append(hdr_full_bcf, string("##source=shapeit5 convert v" + string(CONVER_VERSION)).c_str());
+	bcf_hdr_append(hdr_full_bcf, string("##source=shapeit5 convert v" + string(SCFTLS_VERSION)).c_str());
 	bcf_hdr_append(hdr_full_bcf, string("##contig=<ID="+ contig + ">").c_str());
 	bcf_hdr_append(hdr_full_bcf, "##INFO=<ID=AN,Number=1,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr_full_bcf, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
 	bcf_hdr_append(hdr_full_bcf, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
+	if (hasProbs) bcf_hdr_append(hdr_full_bcf, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 	int n_samples = bcf_hdr_nsamples(sr->readers[0].header);
 	for (int i = 0 ; i < n_samples ; i ++) bcf_hdr_add_sample(hdr_full_bcf, sr->readers[0].header->samples[i]);
 	bcf_hdr_add_sample(hdr_full_bcf, NULL);
@@ -102,10 +116,13 @@ void sparse2plain::convert() {
 	int nac = 0, rac = 0, *vac = NULL;
 	int nan = 0, ran = 0, *van = NULL;
 	int nsk = 0, rsk = 0, *vsk = NULL;
-	int ngs = 0, rgs = 0, *vgs = (int*)malloc(bcf_hdr_nsamples(hdr_full_bcf)*2*sizeof(int));
+	int ngs = 0, rgs = 0, *vgs = (int*)malloc(n_samples*2*sizeof(int));
+	float * probabilities = (float*)malloc(n_samples*sizeof(float));
+	unsigned int * rg_buffer = (unsigned int *)malloc(n_samples * sizeof(unsigned int));
+	float * rp_buffer = (float*)malloc(n_samples*sizeof(float));
 
 	//
-	unsigned int nseek = 0, nrare = 0, ncomm = 0, nfull = 0, nset = 0;
+	unsigned int nrare = 0, ncomm = 0, nfull = 0, nset = 0;
 	while ((nset = bcf_sr_next_line (sr))) {
 		line_input_comm = bcf_sr_get_line(sr, 0);
 		line_input_rare = bcf_sr_get_line(sr, 1);
@@ -115,12 +132,11 @@ void sparse2plain::convert() {
 		int pos;
 
 		//Skip not bi-allelic
-		if (nset != 1) continue;
 		if (line_input_comm && line_input_comm->n_allele != 2) continue;
 		if (line_input_rare && line_input_rare->n_allele != 2) continue;
 
 		//
-		if (line_input_comm && line_input_rare) vrb.error("Duplicate variant!");
+		if (nset == 2) vrb.error("Duplicate variant at pos= " + stb.str(pos+1));
 
 		//Reading in variant information for COMMON
 		if (line_input_comm) {
@@ -145,19 +161,34 @@ void sparse2plain::convert() {
 			ref = string(line_input_rare->d.allele[0]);
 			alt = string(line_input_rare->d.allele[1]);
 
+			//Process MAF
 			ran = bcf_get_info_int32(sr->readers[1].header, line_input_rare, "AN", &van, &nan); if (nan!=1) vrb.error("AN field is needed in rare file");
 			rac = bcf_get_info_int32(sr->readers[1].header, line_input_rare, "AC", &vac, &nac); if (nac!=1) vrb.error("AC field is needed in rare file");
-			rsk = bcf_get_info_int32(sr->readers[1].header, line_input_rare, "SEEK", &vsk, &nsk); if (nsk!=2) vrb.error("SEEK field is needed in rare file");
-
 			float curraf = vac[0] * 1.0f / van[0];
 			for (int i = 0 ; i < 2*n_samples; i ++) vgs[i] = bcf_gt_phased(curraf >= 0.5f);
+			if (hasProbs) for (int i = 0 ; i < n_samples; i ++) bcf_float_set_missing(probabilities[i]);
 			ngs = 2*n_samples;
 
-			unsigned int * rg_buffer = (unsigned int *)malloc(vsk[1] * sizeof(unsigned int));
-			fp_rare_bin.seekg(vsk[0]*sizeof(unsigned int), fp_rare_bin.beg);
-			fp_rare_bin.read((char *)rg_buffer, vsk[1] * sizeof(unsigned int));
+			//Process sparse genotypes addressing
+			rsk = bcf_get_info_int32(sr->readers[1].header, line_input_rare, "SGEN", &vsk, &nsk); if (nsk!=3) vrb.error("SEEK field is needed in rare file");
+			uint64_t sgenotypes = vsk[0];
+			sgenotypes *= MOD30BITS;
+			sgenotypes += vsk[1];
+			uint32_t ngenotypes = vsk[2];
 
-			for (int r = 0 ; r < vsk[1] ; r++) {
+			//Read sparse genotypes in file
+			fp_rare_bin.seekg(sgenotypes * sizeof(unsigned int), fp_rare_bin.beg);
+			fp_rare_bin.read((char *)rg_buffer, ngenotypes * sizeof(unsigned int));
+
+			//Read sparse probabilities
+			if (hasProbs) {
+				fp_rare_prb.seekg(sgenotypes * sizeof(float), fp_rare_prb.beg);
+				fp_rare_prb.read((char *)rp_buffer, ngenotypes * sizeof(float));
+			}
+
+			//Parse sparse genotypes and probs
+			for (int r = 0 ; r < ngenotypes ; r++) {
+				//
 				rare_genotype rg;
 				rg.set(rg_buffer[r]);
 				if (rg.mis) {
@@ -172,9 +203,11 @@ void sparse2plain::convert() {
 						vgs[2*rg.idx+1] = bcf_gt_unphased(rg.al1);
 					}
 				}
+				//
+				probabilities[rg.idx] = rp_buffer[r];
 			}
 
-			free(rg_buffer);
+			//
 			nrare++;
 		}
 
@@ -186,9 +219,12 @@ void sparse2plain::convert() {
 		string alleles = ref + "," + alt;
 		bcf_update_alleles_str(hdr_full_bcf, line_output, alleles.c_str());
 
-		//Writing genotypes COMMON
+		//Writing genotypes
 		if (line_input_comm) bcf_update_genotypes(hdr_full_bcf, line_output, vgt, ngt);
-		if (line_input_rare) bcf_update_genotypes(hdr_full_bcf, line_output, vgs, ngs);
+		if (line_input_rare) {
+			bcf_update_genotypes(hdr_full_bcf, line_output, vgs, ngs);
+			if (hasProbs) bcf_update_format_float(hdr_full_bcf, line_output, "PP", probabilities, bcf_hdr_nsamples(hdr_full_bcf));
+		}
 		bcf_update_info_int32(hdr_full_bcf, line_output, "AC", vac, 1);
 		bcf_update_info_int32(hdr_full_bcf, line_output, "AN", van, 1);
 		if (bcf_write1(fp_full_bcf, hdr_full_bcf, line_output) < 0) vrb.error("Failing to write VCF/record");
@@ -198,17 +234,23 @@ void sparse2plain::convert() {
 	}
 
 	//Closing stuffs
+	free(rg_buffer);
+	free(rp_buffer);
+	free(probabilities);
 	free(vgt);
 	free(vgs);
 	free(vac);
 	free(van);
 	free(vsk);
 	bcf_sr_destroy(sr);
-
 	fp_rare_bin.close();
+	fp_rare_prb.close();
 	if (hts_close(fp_full_bcf)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
 
 	// Report
 	vrb.bullet("VCF/BCF writing done ("+stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+
+	vrb.bullet("Indexing ["+file_full_bcf + "]");
+	if (bcf_index_build3(file_full_bcf.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
 

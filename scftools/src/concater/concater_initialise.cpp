@@ -20,28 +20,10 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _SPARSE2PLAIN_H
-#define _SPARSE2PLAIN_H
+#include <concater/concater_header.h>
 
-#include <utils/otools.h>
+void concater::read_files_and_initialise() {
 
-class sparse2plain {
-public:
-	//PARAMETERS
-	std::string file_full_bcf;
-	std::string file_comm_bcf;
-	std::string file_rare_bcf;
-	std::string file_rare_bin;
-	std::string region;
-	std::string contig;
-	int nthreads;
-
-	//CONSTRUCTORS/DESCTRUCTORS
-	sparse2plain(std::string, std::string, std::string, int);
-	~sparse2plain();
-
-	//PROCESS
-	void convert();
-};
-
-#endif
+	//step0: Initialize seed
+	rng.setSeed(options["seed"].as < int > ());
+}

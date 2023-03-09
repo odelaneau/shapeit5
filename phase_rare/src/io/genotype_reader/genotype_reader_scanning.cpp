@@ -65,7 +65,7 @@ void genotype_reader::scanGenotypesPlain() {
 		line_unphased =  bcf_sr_get_line(sr, 0);
 		line_phased =  bcf_sr_get_line(sr, 1);
 
-		assert(line_unphased);
+		//assert(line_unphased);
 
 		if (line_phased && line_phased->n_allele != 2) continue;
 		if (line_unphased && line_unphased->n_allele != 2) continue;
@@ -83,7 +83,7 @@ void genotype_reader::scanGenotypesPlain() {
 		} else {
 			bcf_unpack(line_unphased, BCF_UN_STR);
 			int pos = line_unphased->pos + 1;
-			if (pos >= input_start && pos < input_stop) {
+			if (pos >= input_start && pos <= input_stop) {
 				std::string chr = bcf_hdr_id2name(sr->readers[0].header, line_unphased->rid);
 				std::string id = std::string(line_unphased->d.id);
 				std::string ref = std::string(line_unphased->d.allele[0]);
@@ -103,7 +103,6 @@ void genotype_reader::scanGenotypesPlain() {
 	if (n_rare_variants == 0) vrb.error("No variants to be phased!");
 	vrb.bullet("plain VCF/BCF scanning (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
-
 
 void genotype_reader::scanGenotypesSparse() {
 	tac.clock();
@@ -148,6 +147,8 @@ void genotype_reader::scanGenotypesSparse() {
 		if (line_phased && line_phased->n_allele != 2) continue;
 		if (line_unphased && line_unphased->n_allele != 2) continue;
 
+		if (line_phased && line_unphased) vrb.error("Same record found inboth rare and common variant files");
+
 		if (line_phased) {
 			bcf_unpack(line_phased, BCF_UN_STR);
 			std::string chr = bcf_hdr_id2name(sr->readers[0].header, line_phased->rid);
@@ -161,7 +162,7 @@ void genotype_reader::scanGenotypesSparse() {
 		} else {
 			bcf_unpack(line_unphased, BCF_UN_STR);
 			int pos = line_unphased->pos + 1;
-			if (pos >= input_start && pos < input_stop) {
+			if (pos >= input_start && pos <= input_stop) {
 				std::string chr = bcf_hdr_id2name(sr->readers[1].header, line_unphased->rid);
 				std::string id = std::string(line_unphased->d.id);
 				std::string ref = std::string(line_unphased->d.allele[0]);
@@ -180,3 +181,4 @@ void genotype_reader::scanGenotypesSparse() {
 	if (n_rare_variants == 0) vrb.error("No variants to be phased!");
 	vrb.bullet("VCF/BCF scanning (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
+

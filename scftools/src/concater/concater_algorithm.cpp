@@ -20,24 +20,13 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _PEDIGREE_READER_H
-#define _PEDIGREE_READER_H
+#include <concater/concater_header.h>
 
-#include <utils/otools.h>
+#include <io/concatsparse.h>
 
-class pedigree_reader {
-public:
-	//DATA
-	std::vector < std::string > kids;
-	std::vector < std::string > fathers;
-	std::vector < std::string > mothers;
 
-	//CONSTRUCTOR/DESTRUCTOR
-	pedigree_reader();
-	~pedigree_reader();
+using namespace std;
 
-	//IO
-	void readPedigreeFile(std::string);
-};
-
-#endif
+void concater::concat() {
+	concatsparse(options["input-sparse-list"].as < string > (), options["output-sparse"].as < string > (), options["region"].as < string > (), options["thread"].as < int > ()).concat();
+}
