@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 
+
 LABEL org.opencontainers.image.created="2022-03-16"
 LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
 LABEL org.opencontainers.image.version="1.0.0"
@@ -40,10 +41,10 @@ RUN curl -SL https://github.com/samtools/bcftools/releases/download/${htslib_ver
     rm -rf bcftools-${htslib_version}
 
 # get GLIMPSE v2.0.0 [binary]
-ADD resources/SHAPEIT5_phase_common_static /bin/SHAPEIT5_phase_common_static
-ADD resources/SHAPEIT5_phase_rare_static /bin/SHAPEIT5_phase_rare_static
-ADD resources/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
-ADD resources/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
+ADD resources/SHAPEIT5_phase_common_static_v1.0.0 /bin/SHAPEIT5_phase_common_static_v1.0.0
+ADD resources/SHAPEIT5_phase_rare_static_v1.0.0 /bin/SHAPEIT5_phase_rare_static_v1.0.0
+ADD resources/SHAPEIT5_switch_static_v1.0.0 /bin/SHAPEIT5_switch_static_v1.0.0
+ADD resources/SHAPEIT5_ligate_static_v1.0.0 /bin/SHAPEIT5_ligate_static_v1.0.0
 
 RUN chmod +x /bin/SHAPEIT5*
 
