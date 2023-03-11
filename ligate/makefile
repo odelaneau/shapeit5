@@ -1,9 +1,5 @@
-#RELEASE
-RLS=v1.0.0
-
-
-#COMPILER MODE C++11
-CXX=g++ -std=c++11
+#COMPILER MODE C++17
+CXX=g++ -std=c++17
 
 
 #create folders
@@ -11,7 +7,7 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3
+CXXFLAG=-O3 -mavx2 -mfma
 LDFLAG=-O3
 
 #COMMIT TRACING
@@ -29,8 +25,8 @@ OFILE=$(shell for file in `find src -name *.cpp`; do echo obj/$$(basename $$file
 VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); done)
 
 NAME=$(shell basename $(CURDIR))
-BFILE=bin/SHAPEIT5_$(NAME)_${RLS}
-EXEFILE=bin/SHAPEIT5_$(NAME)_static_${RLS}
+BFILE=bin/SHAPEIT5_$(NAME)
+EXEFILE=bin/SHAPEIT5_$(NAME)_static
 
 #CONDITIONAL PATH DEFINITON
 system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
@@ -52,12 +48,30 @@ desktop: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 desktop: $(BFILE)
 
 olivier: HTSSRC=$(HOME)/Tools
-olivier: HTSLIB_INC=$(HTSSRC)/htslib-1.9
-olivier: HTSLIB_LIB=$(HTSSRC)/htslib-1.9/libhts.a
+olivier: HTSLIB_INC=$(HTSSRC)/htslib-1.15
+olivier: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
 olivier: BOOST_INC=/usr/include
 olivier: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 olivier: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 olivier: $(BFILE)
+
+laptop: HTSSRC=$(HOME)/Tools
+laptop: HTSLIB_INC=$(HTSSRC)/htslib-1.10
+laptop: HTSLIB_LIB=$(HTSSRC)/htslib-1.10/libhts.a
+laptop: BOOST_INC=/usr/include
+laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+laptop: $(BFILE)
+
+debug: CXXFLAG=-g -mavx2 -mfma
+debug: LDFLAG=-g
+debug: HTSSRC=$(HOME)/Tools
+debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
+debug: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
+debug: BOOST_INC=/usr/include
+debug: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+debug: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+debug: $(BFILE)
 
 curnagl: DYN_LIBS=-lz -lpthread -lcrypto /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/xz-5.2.5-3zvzfm67t6ebuerybemshylrysbphghz/lib/liblzma.so /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/bzip2-1.0.8-tsmb67uwhlqn5g6h6etjvftugq7y6mtl/lib/libbz2.so /dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/curl-7.74.0-fcqjhj645xhqp2ilrzafwqtqqnu7g42v/lib/libcurl.so
 curnagl: HTSSRC=/dcsrsoft/spack/hetre/v1.1/spack/opt/spack/linux-rhel8-zen2/gcc-9.3.0/htslib-1.12-p4n5q4icj4g5e4of7mxq2i5xly4v4tax
@@ -84,7 +98,7 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2 -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
 static_exe: HTSSRC=../..
 static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal
@@ -93,7 +107,6 @@ static_exe: BOOST_INC=/usr/include
 static_exe: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
 static_exe: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 static_exe: $(EXEFILE)
-
 
 # static desktop Robin
 static_exe_robin_desktop: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
@@ -105,8 +118,6 @@ static_exe_robin_desktop: BOOST_INC=/usr/include
 static_exe_robin_desktop: BOOST_LIB_IO=$(HTSSRC)/boost/lib/libboost_iostreams.a
 static_exe_robin_desktop: BOOST_LIB_PO=$(HTSSRC)/boost/lib/libboost_program_options.a
 static_exe_robin_desktop: $(EXEFILE)
-
-
 
 
 #COMPILATION RULES

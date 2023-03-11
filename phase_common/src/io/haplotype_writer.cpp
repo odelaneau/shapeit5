@@ -93,5 +93,6 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
+	vrb.bullet("Writing index file");
 	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }

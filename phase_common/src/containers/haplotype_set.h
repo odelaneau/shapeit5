@@ -51,11 +51,6 @@ public:
 	void updateHaplotypes(genotype_set & G, bool first_time = false);
 	void transposeHaplotypes_H2V(bool full, bool verbose = true);
 	void transposeHaplotypes_V2H(bool full, bool verbose = true);
-
-	/*
-	unsigned int distanceK2P(int hidx, int pidx);
-	void checkScaffoldPedigrees(genotype_set & G, std::string fped);
-	*/
 };
 
 #endif

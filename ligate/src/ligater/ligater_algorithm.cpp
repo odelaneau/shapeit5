@@ -282,7 +282,7 @@ void ligater::ligate() {
 	nsamples = bcf_hdr_nsamples(out_hdr);
 
 	//Olivier: Get samples Names + mapping to PED file
-	scaffolded = std::vector < bool > (false);
+	scaffolded = std::vector < bool > (nsamples, false);
 	if (options.count("pedigree")) {
 
 		//Collect sample IDs
@@ -294,7 +294,7 @@ void ligater::ligate() {
 		}
 
 		//Mapping sample IDs with PED structure and scaffold if kid
-		int n_trios = 0, n_duosF = 0, n_duosM = 0;
+		int n_trios = 0, n_duosF = 0, n_duosM = 0, nscaffolded = 0;;
 		for (int i = 0 ; i < kids.size() ; i ++) {
 			map < std::string, int >::iterator itK = mapS2I.find(kids[i]);
 			map < std::string, int >::iterator itF = mapS2I.find(fathers[i]);
@@ -302,20 +302,26 @@ void ligater::ligate() {
 			if (itK != mapS2I.end()) {
 				if (itF != mapS2I.end() && itM != mapS2I.end()) {
 					scaffolded[itK->second] = true;
+					nscaffolded++;
 					n_trios++;
 				}
 				if (itF != mapS2I.end() && itM == mapS2I.end()) {
 					scaffolded[itK->second] = true;
+					nscaffolded++;
 					n_duosF++;
 				}
 				if (itF == mapS2I.end() && itM != mapS2I.end()) {
 					scaffolded[itK->second] = true;
+					nscaffolded++;
 					n_duosM++;
 				}
 			}
 		}
 		vrb.bullet("#trios = " + stb.str(n_trios) + " / #paternal_duos = " +  stb.str(n_duosF) + " / #maternal_duos = " +  stb.str(n_duosM));
+		vrb.bullet("#scaffolded = " + stb.str(nscaffolded) + " / #unscaffolded = " +  stb.str(nsamples - nscaffolded));
 	}
+
+
 
 	nswap = {0,0};
 	swap_phase = {std::vector<bool>(nsamples, false), std::vector<bool>(nsamples, false)};
