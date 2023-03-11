@@ -39,8 +39,11 @@ public:
 	std::vector < int > prev_readers;
 
 	//SAMPLE DATA
-
 	int nsamples;
+	std::vector < std::string > kids;
+	std::vector < std::string > fathers;
+	std::vector < std::string > mothers;
+	std::vector < bool > scaffolded;
 
 	std::array<int,2> nswap;
 	std::array<std::vector<bool>,2> swap_phase;

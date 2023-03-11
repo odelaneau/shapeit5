@@ -110,7 +110,7 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	for (int i = 0 ; i < n_ind ; i ++) mapG.insert(pair < string, genotype * > (vecG[i]->name, vecG[i]));
 
 	//Mapping samples
-	unsigned int ntrios = 0, nduos = 0, nmendels = 0;
+	unsigned int ntrios = 0, nduosM = 0, nduosF = 0, nmendels = 0;
 	map < string, genotype * > :: iterator itK, itM, itF;
 	for (int i = 0 ; i < pr.kids.size() ; i ++) {
 		itK = mapG.find(pr.kids[i]);
@@ -125,18 +125,17 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 				ntrios++;
 			} else if (gfather) {
 				gkid->scaffoldDuoFather(gfather, counts);
-				nduos++;
+				nduosF++;
 			} else if (gmother) {
 				gkid->scaffoldDuoMother(gmother, counts);
-				nduos++;
+				nduosM++;
 			}
 		}
 	}
 
 	//Verbose
 	vrb.bullet("PED mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duos = " + stb.str(nduos));
+	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duosFat = " + stb.str(nduosF) + " / #duosMat = " + stb.str(nduosM));
 	vrb.bullet2("%mendel_errors = " + stb.str(counts[0] *100.0 / counts[1], 2) + "% (n=" + stb.str(counts[0]) + ")");
 	vrb.bullet2("%hets_phased = " + stb.str(counts[2]*100.0 / (counts[2]+counts[3]), 2) + "% (n=" + stb.str(counts[2]) + ")");
 }
-

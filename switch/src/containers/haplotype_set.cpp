@@ -97,3 +97,10 @@ void haplotype_set::assumePhased() {
 	Phased = vector < vector < bool > > (vecSamples.size(), vector < bool > (n_variants, false));
 	for (int i = 0 ; i < vecSamples.size() ; i ++) for (int l = 0 ; l < n_variants ; l ++) Phased[i][l] = !Missing[i][l] && (Htrue[2*i+0][l]!=Htrue[2*i+1][l]);
 }
+
+unsigned int haplotype_set::distance(unsigned int h0, unsigned int h1) {
+	unsigned int dist = 0;
+	for (int l = 0 ; l < n_variants ; l++) dist += (Phased[h1/2][l] && (Htrue[h0][l] != Hesti[h1][l]));
+	return dist;
+}
+

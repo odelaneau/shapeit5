@@ -52,6 +52,8 @@ public:
 	void writePerVariant(std::string);
 	void writeImbalance(std::string);
 	void writePedigree(std::string);
+	void writeDistances(std::string fout);
+
 };
 
 #endif
