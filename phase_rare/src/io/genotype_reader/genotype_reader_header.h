@@ -24,7 +24,6 @@
 #define _GENOTYPE_READER_H
 
 #include <utils/otools.h>
-#include <utils/xcf.h>
 
 #include <containers/variant_map.h>
 #include <containers/haplotype_set.h>

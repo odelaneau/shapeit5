@@ -1,6 +1,3 @@
-#RELEASE
-RLS=v1.0.0
-
 #COMPILER MODE C++17
 CXX=g++ -std=c++17
 
@@ -28,8 +25,8 @@ OFILE=$(shell for file in `find src -name *.cpp`; do echo obj/$$(basename $$file
 VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); done)
 
 NAME=$(shell basename $(CURDIR))
-BFILE=bin/SHAPEIT5_$(NAME)_${RLS}
-EXEFILE=bin/SHAPEIT5_$(NAME)_static_${RLS}
+BFILE=bin/SHAPEIT5_$(NAME)
+EXEFILE=bin/SHAPEIT5_$(NAME)_static
 
 #CONDITIONAL PATH DEFINITON
 system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
@@ -66,7 +63,7 @@ laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 laptop: $(BFILE)
 
-debug: CXXFLAG=-g  -mavx2 -mfma
+debug: CXXFLAG=-g -mavx2 -mfma
 debug: LDFLAG=-g
 debug: HTSSRC=$(HOME)/Tools
 debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
@@ -111,7 +108,6 @@ static_exe: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
 static_exe: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 static_exe: $(EXEFILE)
 
-
 # static desktop Robin
 static_exe_robin_desktop: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe_robin_desktop: LDFLAG=-O2
@@ -122,7 +118,6 @@ static_exe_robin_desktop: BOOST_INC=/usr/include
 static_exe_robin_desktop: BOOST_LIB_IO=$(HTSSRC)/boost/lib/libboost_iostreams.a
 static_exe_robin_desktop: BOOST_LIB_PO=$(HTSSRC)/boost/lib/libboost_program_options.a
 static_exe_robin_desktop: $(EXEFILE)
-
 
 
 #COMPILATION RULES
