@@ -63,11 +63,11 @@ public:
 	~haplotype_set();
 	void clear();
 
+	unsigned int distance(unsigned int, unsigned int);
+
 	void push(std::string &);
 	void readPedigrees(std::string, bool);
 	void assumePhased();
-
-
 };
 
 #endif

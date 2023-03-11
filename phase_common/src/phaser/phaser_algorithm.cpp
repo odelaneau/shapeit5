@@ -136,6 +136,9 @@ void phaser::phase() {
 			H.Kbanned.collapse();
 			//UPDATE H with new sampled haplotypes
 			H.updateHaplotypes(G);
+			/*
+			if (options.count("pedigree")) H.checkScaffoldPedigrees(G, options["pedigree"].as < string > ());
+			*/
 			//TRANSPOSE H from Hfirst to Vfirst (for next PBWT compute)
 			H.transposeHaplotypes_H2V(false);
 			//UPDATE PS after prunning

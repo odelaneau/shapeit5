@@ -29,6 +29,9 @@
 #include <containers/genotype_set.h>
 #include <containers/variant_map.h>
 
+#include <io/pedigree_reader.h>
+
+
 class haplotype_set {
 public:
 	//Haplotype Data
@@ -48,6 +51,11 @@ public:
 	void updateHaplotypes(genotype_set & G, bool first_time = false);
 	void transposeHaplotypes_H2V(bool full, bool verbose = true);
 	void transposeHaplotypes_V2H(bool full, bool verbose = true);
+
+	/*
+	unsigned int distanceK2P(int hidx, int pidx);
+	void checkScaffoldPedigrees(genotype_set & G, std::string fped);
+	*/
 };
 
 #endif

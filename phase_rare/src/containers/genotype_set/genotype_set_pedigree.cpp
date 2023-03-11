@@ -42,7 +42,7 @@ void genotype_set::phasePedigrees(string fped) {
 	if (fd_ped.fail()) vrb.error("Cannot open pedigree file");
 	while (getline(fd_ped, buffer)) {
 		stb.split(buffer, tokens);
-		if (tokens.size() != 3) vrb.error("Problem in pedigree file; each line should have 3 columns");
+		if (tokens.size() < 3) vrb.error("Problem in pedigree file; each line should have at least 3 columns");
 		samples_ped.push_back(tokens[0]);
 		fathers_ped.push_back(tokens[1]);
 		mothers_ped.push_back(tokens[2]);
