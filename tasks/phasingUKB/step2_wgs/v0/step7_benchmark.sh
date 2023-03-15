@@ -101,12 +101,13 @@ for N in 147754; do
 	while read LINE; do
 		SREG=$(echo $LINE | awk '{ print $3; }')
 		IREG=$(echo $LINE | awk '{ print $4; }')
-		#BCF=/mnt/project/Phasing/PhasingWGS/step5_runshapeit_phase2/N147754.test/benchmark_ukb23352_c20_qc_v1.subset.N147754.$SREG\.shapeit5.ped2.bcf
-		BCF=/mnt/project/Phasing/PhasingWGS/step9_production/ukb23352_c20_qc_v1.common.phased.bcf
-		
+		#BCF=/mnt/project/Phasing/PhasingWGS/step5_runshapeit_phase2/N147754.test/benchmark_ukb23352_c20_qc_v1.subset.N147754.$SREG\.shapeit5.ligated.bcf
+		#BCF=/mnt/project/Phasing/PhasingWGS/step9_production/ukb23352_c20_qc_v1.common.phased.bcf
+		BCF=/mnt/project/phasing_rare/rephased/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.fullchr.shapeit5.ligated.bcf_rephased.bcf 
+				         
 		#ALL VARIANTS
-		OUT=$(basename $BCF .bcf)\.tmp.fqf
-		LOG=$(basename $BCF .bcf)\.fqf.log
+		OUT=$(basename $BCF .bcf)\.$IREG\.pir.fqf
+		LOG=$(basename $BCF .bcf)\.$IREG\.pir.fqf.log
 		FRQ=/mnt/project/Phasing/PhasingWGS/step1_preparedata/frequencies.subset.N$N\.ALL.all.bcf
 		dx run app-swiss-army-knife -iimage_file="/docker/$DOCKER" --folder="/Phasing/PhasingWGS/step5_runshapeit_phase2/N147754.test/" -icmd="SHAPEIT5_switch_static --validation $VAL --estimation $BCF --frequency $FRQ --pedigree $PEDALL --region $IREG --output $OUT --log $LOG --thread 2" --tag benchWGS --tag switchSHP3 --instance-type mem3_ssd1_v2_x2 --priority normal --name benchWGS_switchSHP3 -y
 	done < /home/olivier/Dropbox/Repository/shapeit5/tasks/phasingUKB/step2_wgs/v0/step2_splitchunks/chr20.size4Mb.txt		
