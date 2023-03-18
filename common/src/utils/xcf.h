@@ -26,6 +26,11 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <numeric>
+#include <regex>
+#include <chrono>
+#include <iomanip>
+
 
 //INCLUDE HTS LIBRARY
 extern "C" {
@@ -112,6 +117,15 @@ namespace helper_tools
 		std::cout << std::endl << "\x1B[31m" << "ERROR: " <<  "\033[0m" << s << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	inline std::string date() {
+		auto now = std::chrono::system_clock::now();
+		auto in_time_t = std::chrono::system_clock::to_time_t(now);
+		std::stringstream ss;
+	    ss << std::put_time(std::localtime(&in_time_t), "%d/%m/%Y - %X");
+	    return ss.str();
+	}
+
 }
 
 /*****************************************************************************/
@@ -183,10 +197,10 @@ public:
 		//Open BCF file and add it in the synchronized reader
 		if (!(bcf_sr_add_reader (sync_reader, fname.c_str()))) {
 			switch (sync_reader->errnum) {
-			case not_bgzf:			vrb.error("Opening [" + fname + "]: not compressed with bgzip"); break;
-			case idx_load_failed: 	vrb.error("Opening [" + fname + "]: impossible to load index file"); break;
-			case file_type_error: 	vrb.error("Opening [" + fname + "]: file format not supported by HTSlib"); break;
-			default : 				vrb.error("Opening [" + fname + "]: unknown error"); break;
+			case not_bgzf:			helper_tools::error("Opening [" + fname + "]: not compressed with bgzip"); break;
+			case idx_load_failed: 	helper_tools::error("Opening [" + fname + "]: impossible to load index file"); break;
+			case file_type_error: 	helper_tools::error("Opening [" + fname + "]: file format not supported by HTSlib"); break;
+			default : 				helper_tools::error("Opening [" + fname + "]: unknown error"); break;
 			}
 		}
 
@@ -212,18 +226,18 @@ public:
 		/************************************************************************************/
 		if (flagSEEK && nsamples == 0) {
 			//Open Binary file
-			std::string bfname = stb.get_name_from_vcf(fname) + ".bin";
+			std::string bfname = helper_tools::get_name_from_vcf(fname) + ".bin";
 			bin_fds[sync_number].open(bfname.c_str(), std::ios::in | std::ios::binary);
-			if (!bin_fds[sync_number]) vrb.error("Cannot open file [" + bfname + "] for reading");
+			if (!bin_fds[sync_number]) helper_tools::error("Cannot open file [" + bfname + "] for reading");
 			//Read PED file
-			std::string ped_fname = stb.get_name_from_vcf(fname) + ".fam";
-			input_file fdp(ped_fname);
-			if (fdp.fail()) vrb.error("Cannot open pedigree file [" + ped_fname + "] for reading");
+			std::string ped_fname = helper_tools::get_name_from_vcf(fname) + ".fam";
+			std::ifstream fdp(ped_fname);
+			if (!fdp.is_open()) helper_tools::error("Cannot open pedigree file [" + ped_fname + "] for reading");
 			ind_names.push_back(std::vector < std::string >());
 			ind_fathers.push_back(std::vector < std::string >());
 			ind_mothers.push_back(std::vector < std::string >());
 			while (getline(fdp, buffer)) {
-				stb.split(buffer, tokens);
+				helper_tools::split(buffer, tokens);
 				ind_names[sync_number].push_back(tokens[0]);
 				if (tokens.size() >=3 ) { ind_fathers[sync_number].push_back(tokens[1]); ind_mothers[sync_number].push_back(tokens[2]); }
 				else { ind_fathers[sync_number].push_back("NA"); ind_mothers[sync_number].push_back("NA"); }
@@ -257,7 +271,7 @@ public:
 		/************************************************************************************/
 		/*   CASE4: There is a binary file and data in the BCF 								*/
 		/************************************************************************************/
-		if (flagSEEK && nsamples != 0) vrb.error("Binary file found for a non-empty BCF file");
+		if (flagSEEK && nsamples != 0) helper_tools::error("Binary file found for a non-empty BCF file");
 
 		//Increment number of readers
 		sync_number++;
@@ -339,14 +353,14 @@ public:
 					//Get AC/AN information
 					int32_t rAC = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "AC", &vAC, &nAC);
 					int32_t rAN = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "AN", &vAN, &nAN);
-					if (rAC != 1) vrb.error("AC field is needed in file");
-					if (rAN != 1) vrb.error("AN field is needed in file");
+					if (rAC != 1) helper_tools::error("AC field is needed in file");
+					if (rAN != 1) helper_tools::error("AN field is needed in file");
 					AC[r] = vAC[0]; AN[r] = vAN[0];
 
 					//Get SEEK information
 					if (sync_types[r] == FILE_BINARY) {
 						int32_t rsk = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "SEEK", &vSK, &nSK);
-						if (nSK != 4) vrb.error("INFO/SEEK field should contain 4 numbers");
+						if (nSK != 4) helper_tools::error("INFO/SEEK field should contain 4 numbers");
 						else {
 							bin_type[r] = vSK[0];
 							bin_seek[r] = vSK[1];
@@ -483,7 +497,7 @@ public:
 			oformat = "wz";			//Compressed VCF for file
 		} else if (hts_fname.size() > 3 && hts_fname.substr(hts_fname.size()-5) == "vcf") {
 			oformat = "wv";			//Uncompressed VCF for file
-		} else vrb.error("Filename extension of [" + hts_fname + "] not recognized");
+		} else helper_tools::error("Filename extension of [" + hts_fname + "] not recognized");
 
 		hts_genotypes = _hts_genotypes;
 		nthreads = _nthreads;
@@ -499,9 +513,9 @@ public:
 
 		if (!hts_genotypes) {
 			//BINARY
-			std::string bfname = stb.get_name_from_vcf(hts_fname) + ".bin";
+			std::string bfname = helper_tools::get_name_from_vcf(hts_fname) + ".bin";
 			bin_fds.open(bfname.c_str(), std::ios::out | std::ios::binary);
-			if (!bin_fds) vrb.error("Cannot open file [" + bfname + "] for writing");
+			if (!bin_fds) helper_tools::error("Cannot open file [" + bfname + "] for writing");
 		}
 	}
 
@@ -514,7 +528,7 @@ public:
 	void writeHeader(std::vector < std::string > & samples, std::string contig, std::string source) {
 		//
 		hts_hdr = bcf_hdr_init("w");
-		bcf_hdr_append(hts_hdr, std::string("##fileDate="+tac.date()).c_str());
+		bcf_hdr_append(hts_hdr, std::string("##fileDate="+helper_tools::date()).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##source=" + source).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##contig=<ID="+ contig + ">").c_str());
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
@@ -529,13 +543,13 @@ public:
 			bcf_hdr_add_sample(hts_hdr, NULL);      // to update internal structures
 		} else {
 			//Samples are in PED file
-			std::string ffname = stb.get_name_from_vcf(hts_fname) + ".fam";
-			output_file fd (ffname);
-			if (fd.fail()) vrb.error("Cannot open [" + ffname + "] for writing");
+			std::string ffname = helper_tools::get_name_from_vcf(hts_fname) + ".fam";
+			std::ofstream fd (ffname);
+			if (!fd.is_open()) helper_tools::error("Cannot open [" + ffname + "] for writing");
 			for (uint32_t i = 0 ; i < samples.size() ; i++) fd << samples[i] << "\tNA\tNA" << std::endl;
 			fd.close();
 		}
-		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) vrb.error("Failing to write VCF/header");
+		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) helper_tools::error("Failing to write VCF/header");
 		bcf_clear1(hts_record);
 	}
 
@@ -543,7 +557,7 @@ public:
 	void writeHeader(std::vector < std::string > & samples, std::vector < int > & fathers, std::vector < int > & mothers, std::string contig, std::string source) {
 		//
 		hts_hdr = bcf_hdr_init("w");
-		bcf_hdr_append(hts_hdr, std::string("##fileDate="+tac.date()).c_str());
+		bcf_hdr_append(hts_hdr, std::string("##fileDate="+helper_tools::date()).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##source=" + source).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##contig=<ID="+ contig + ">").c_str());
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
@@ -558,9 +572,9 @@ public:
 			bcf_hdr_add_sample(hts_hdr, NULL);      // to update internal structures
 		} else {
 			//Samples are in PED file
-			std::string ffname = stb.get_name_from_vcf(hts_fname) + ".fam";
-			output_file fd (ffname);
-			if (fd.fail()) vrb.error("Cannot open [" + ffname + "] for writing");
+			std::string ffname = helper_tools::get_name_from_vcf(hts_fname) + ".fam";
+			std::ofstream fd (ffname);
+			if (!fd.is_open()) helper_tools::error("Cannot open [" + ffname + "] for writing");
 			for (uint32_t i = 0 ; i < samples.size() ; i++) {
 				std::string sfather = (fathers[i]>=0)?samples[fathers[i]]:"NA";
 				std::string smother = (mothers[i]>=0)?samples[mothers[i]]:"NA";
@@ -568,7 +582,7 @@ public:
 			}
 			fd.close();
 		}
-		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) vrb.error("Failing to write VCF/header");
+		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) helper_tools::error("Failing to write VCF/header");
 		bcf_clear1(hts_record);
 	}
 
@@ -583,10 +597,13 @@ public:
 		bcf_update_info_int32(hts_hdr, hts_record, "AN", &AN, 1);
 	}
 
-	//Write genotypes / needs extension to write other HTS fields than GTs
-	void writeRecord(uint32_t type, char * buffer, uint32_t nbytes) {
+	//Write genotypes
+	void writeRecord(uint32_t type, char * buffer, uint32_t nbytes, std::string tag = "GT") {
 		if (hts_genotypes) {
-			bcf_update_genotypes(hts_hdr, hts_record, buffer, nbytes/sizeof(int32_t));
+			if (tag == "GT") bcf_update_genotypes(hts_hdr, hts_record, buffer, nbytes/sizeof(int32_t));
+			else if (tag == "PP") bcf_update_format_float(hts_hdr, hts_record, "PP", buffer, nbytes / sizeof(float));
+			else if (tag == "DS") bcf_update_format_float(hts_hdr, hts_record, "DS", buffer, nbytes / sizeof(float));
+			else if (tag == "GP") bcf_update_format_float(hts_hdr, hts_record, "GP", buffer, nbytes / sizeof(float));
 		} else {
 			vsk[0] = type;
 			vsk[1] = bin_seek / MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
@@ -596,7 +613,7 @@ public:
 			bin_seek += nbytes;
 			bcf_update_info_int32(hts_hdr, hts_record, "SEEK", vsk, 4);
 		}
-		if (bcf_write1(hts_fd, hts_hdr, hts_record) < 0) vrb.error("Failing to write VCF/record for rare variants");
+		if (bcf_write1(hts_fd, hts_hdr, hts_record) < 0) helper_tools::error("Failing to write VCF/record for rare variants");
 		bcf_clear1(hts_record);
 	}
 
@@ -604,9 +621,9 @@ public:
 		free(vsk);
 		bcf_destroy1(hts_record);
 		bcf_hdr_destroy(hts_hdr);
-		if (hts_close(hts_fd)) vrb.error("Non zero status when closing [" + hts_fname + "]");
+		if (hts_close(hts_fd)) helper_tools::error("Non zero status when closing [" + hts_fname + "]");
 		if (hts_fname!="-") {
-			if (bcf_index_build3(hts_fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file [" + hts_fname + "]");
+			if (bcf_index_build3(hts_fname.c_str(), NULL, 14, nthreads) < 0) helper_tools::error("Fail to index file [" + hts_fname + "]");
 		}
 
 	}
