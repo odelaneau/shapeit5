@@ -23,19 +23,97 @@
 #ifndef _XCF_H
 #define _XCF_H
 
-#include <utils/otools.h>
+#include <iostream>
+#include <sstream>
+#include <fstream>
 
-#define FILE_VOID	0	//No data
-#define FILE_BCF	1	//Data in BCF file
-#define FILE_BINARY	2	//Data in Binary file
+//INCLUDE HTS LIBRARY
+extern "C" {
+	#include <htslib/synced_bcf_reader.h>
+}
 
-#define RECORD_VOID				0
-#define RECORD_BCFVCF_GENOTYPE	1
-#define RECORD_SPARSE_GENOTYPE	2
-#define RECORD_SPARSE_HAPLOTYPE	3
-#define RECORD_BINARY_GENOTYPE	4
-#define RECORD_BINARY_HAPLOTYPE	5
+#define FILE_VOID	0					//No data
+#define FILE_BCF	1					//Data in BCF file
+#define FILE_BINARY	2					//Data in Binary file
+
+#define RECORD_VOID				0		//No record
+#define RECORD_BCFVCF_GENOTYPE	1		//Record in BCF GT format
+#define RECORD_SPARSE_GENOTYPE	2		//Record in sparse genotype format (see rare_genotype.h)
+#define RECORD_SPARSE_HAPLOTYPE	3		//Record in sparse haplotype format (uint32_t for indexing)
+#define RECORD_BINARY_GENOTYPE	4		//Record in binary genotype format (2bits per genotype; 10 for missing)
+#define RECORD_BINARY_HAPLOTYPE	5		//Record in binary haplotype format (1bit per allele; no missing allowed)
 #define RECORD_NUMBER_TYPES		6
+
+#define MOD30BITS			0x40000000
+
+/*****************************************************************************/
+/*****************************************************************************/
+/******						XCF_UTILS									******/
+/*****************************************************************************/
+/*****************************************************************************/
+
+namespace helper_tools
+{
+	inline std::string findExtension ( const std::string & filename ) {
+	   auto position = filename.find_last_of ( '.' ) ;
+	   if ( position == std::string::npos )
+	      return "" ;
+	   else {
+	      std::string extension ( filename.substr( position + 1 ) ) ;
+	      if (std::regex_search (extension, std::regex("[^A-Za-z0-9]") ))
+	         return "" ;
+	      else
+	         return extension ;
+	   }
+	}
+
+	inline std::string get_name_from_vcf(std::string filename)
+	{
+		std::string ext = findExtension(filename);
+		if (ext == "vcf" || "bcf")
+		{
+			size_t lastdot = filename.find_last_of(".");
+			if (lastdot == std::string::npos) return filename;
+			return filename.substr(0, lastdot);
+		}
+		else if (ext=="gz") //check for vcf.gz
+		{
+			size_t lastdot = filename.find_last_of(".");
+			if (lastdot == std::string::npos) return filename;
+			std::string filename2 =  filename.substr(0, lastdot);
+			if (findExtension(filename2) == "vcf")
+			{
+				lastdot = filename2.find_last_of(".");
+				if (lastdot == std::string::npos) return filename2;
+				return filename.substr(0, lastdot);
+			}
+		}
+		return filename;
+	}
+
+	inline int split(const std::string & str, std::vector < std::string > & tokens, std::string sep = " 	", unsigned int n_max_tokens = 1000000) {
+		tokens.clear();
+		if (str == ""){
+			tokens.push_back("");
+			return tokens.size();
+		}
+		std::string::size_type p_last = str.find_first_not_of(sep, 0);
+		std::string::size_type p_curr = str.find_first_of(sep, p_last);
+		while ((std::string::npos != p_curr || std::string::npos != p_last) && tokens.size() < n_max_tokens) {
+			tokens.push_back(str.substr(p_last, p_curr - p_last));
+			p_last = str.find_first_not_of(sep, p_curr);
+			p_curr = str.find_first_of(sep, p_last);
+		}
+		if (tokens.back()[tokens.back().size()-1] == '\r') tokens.back() = tokens.back().substr(0, tokens.back().size()-1);
+		return tokens.size();
+	}
+
+	inline void error(std::string s) {
+		std::cout << std::endl << "\x1B[31m" << "ERROR: " <<  "\033[0m" << s << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
 /*****************************************************************************/
 /*****************************************************************************/
 /******						XCF_READER									******/
@@ -52,6 +130,7 @@ public:
 	std::vector < bool > sync_flags;			//Has record?
 
 	//Variant information
+	bool multi;
 	std::string chr;
 	uint32_t pos;
 	std::string ref;
@@ -79,13 +158,14 @@ public:
 	std::vector < uint32_t > bin_size;			//Amount of Binary records in bytes		//Integer 4 in INFO/SEEK field
 
 	//CONSTRUCTOR
-	xcf_reader(std::string region, uint32_t nthreads) {
+	xcf_reader(std::string region, uint32_t nthreads) : pos(0), multi(false) {
 		sync_number = 0;
 		sync_reader = bcf_sr_init();
 		sync_reader->collapse = COLLAPSE_NONE;
 		sync_reader->require_index = 1;
 		if (nthreads > 1) bcf_sr_set_threads(sync_reader, nthreads);
-		if (bcf_sr_set_regions(sync_reader, region.c_str(), 0) == -1) vrb.error("Impossible to jump to region [" + region + "]");
+		if (bcf_sr_set_regions(sync_reader, region.c_str(), 0) == -1) helper_tools::error("Impossible to jump to region [" + region + "]");
+		if (bcf_sr_set_targets(sync_reader, region.c_str(), 0, 0) == -1) helper_tools::error("Impossible to constrain to region [" + region + "]");
 		vAC = vAN = vSK = NULL;
 		nAC = nAN = nSK = 0;
 	}
@@ -184,12 +264,25 @@ public:
 		return (sync_number-1);
 	}
 
+
+
+
 	//GET SAMPLES
 	int32_t getSamples(uint32_t file, std::vector < std::string > & samples) {
 		samples.clear();
 		for (uint32_t i = 0 ; i < ind_number[file] ; i ++) samples.push_back(ind_names[file][i]);
 		return samples.size();
 	}
+
+	int32_t getSamples(uint32_t file, std::map < std::string, int32_t > & samples) {
+		samples.clear();
+		for (uint32_t i = 0 ; i < ind_number[file] ; i ++) samples.insert(std::pair < std::string, int32_t > (ind_names[file][i], i));
+		return samples.size();
+	}
+
+	//GET SAMPLE COUNTS
+	int32_t getSamples() { return std::accumulate(ind_number.begin(), ind_number.end(), 0); }
+	int32_t getSamples(uint32_t file) { return ind_number[file]; }
 
 	//GET ACs/ANs/AFs
 	uint32_t getAC(uint32_t file) { return AC[file]; }
@@ -199,10 +292,11 @@ public:
 	float getAF(uint32_t file) { return AC[file]*1.0f/AN[file]; }
 	float getAF() { return std::accumulate(AC.begin(), AC.end(), 0)*1.0f/std::accumulate(AN.begin(), AN.end(), 0); }
 
+
+
 	//SET SYNCHRONIZED READER TO NEXT RECORD
 	int32_t nextRecord() {
 
-	next_record:
 		//Go to next record
 		int32_t ret = bcf_sr_next_line (sync_reader);
 		if (!ret) return 0;
@@ -216,7 +310,7 @@ public:
 		std::fill(bin_size.begin(), bin_size.end(), 0);
 
 		//Loop over readers
-		for (uint32_t r = 0, firstfile = 0 ; r < sync_number ; r++) {
+		for (uint32_t r = 0, firstfile = 1 ; r < sync_number ; r++) {
 
 			//Check if reader has a record
 			bool hasRecord = bcf_sr_has_line(sync_reader, r);
@@ -225,47 +319,50 @@ public:
 			if (hasRecord) {
 
 				//Get the record
-				sync_lines[sync_number] = bcf_sr_get_line(sync_reader, 0);
+				sync_lines[r] = bcf_sr_get_line(sync_reader, r);
 
-				//If non bi-allelic, goto next variant
-				if (sync_lines[sync_number]->n_allele != 2) goto next_record;
+				//If bi-allelic, proceed
+				if (sync_lines[r]->n_allele == 2) {
 
-				//Get variant information
-				if (!firstfile) {
-					chr = bcf_hdr_id2name(sync_reader->readers[0].header, sync_lines[sync_number]->rid);
-					pos = sync_lines[sync_number]->pos + 1;
-					rsid = std::string(sync_lines[sync_number]->d.id);
-					ref = std::string(sync_lines[sync_number]->d.allele[0]);
-					alt = std::string(sync_lines[sync_number]->d.allele[1]);
-					firstfile = 1;
-				}
+					//If first time we see the record across files
+					if (firstfile) {
 
-				//Get AC/AN information
-				int32_t rAC = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[sync_number], "AC", &vAC, &nAC);
-				int32_t rAN = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[sync_number], "AN", &vAN, &nAN);
-				if (rAC != 1) vrb.error("AC field is needed in main file for MAF filtering");
-				if (rAN != 1) vrb.error("AN field is needed in main file for MAF filtering");
-				AC[r] = vAC[0]; AN[r] = vAN[0];
-
-				//Get SEEK information
-				if (sync_types[r] == FILE_BINARY) {
-					int32_t rsk = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[sync_number], "SEEK", &vSK, &nSK);
-					if (nSK != 4) vrb.error("INFO/SEEK field should contain 4 numbers");
-					else {
-						bin_type[r] = vSK[0];
-						bin_seek[r] = vSK[1];
-						bin_seek[r] *= MOD30BITS;
-						bin_seek[r] += vSK[2];
-						bin_size[r] = vSK[3];
+						//Get variant information
+						chr = bcf_hdr_id2name(sync_reader->readers[0].header, sync_lines[r]->rid);
+						pos = sync_lines[r]->pos + 1;
+						rsid = std::string(sync_lines[r]->d.id);
+						ref = std::string(sync_lines[r]->d.allele[0]);
+						alt = std::string(sync_lines[r]->d.allele[1]);
+						firstfile = 0;
 					}
-				} else if (sync_types[r] == FILE_BCF) {
-					bin_type[r] = RECORD_BCFVCF_GENOTYPE;
-					bin_seek[r] = 0;
-					bin_size[r] = 0;
-				}
 
-				//Set flag
-				sync_flags[r] = true;
+					//Get AC/AN information
+					int32_t rAC = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "AC", &vAC, &nAC);
+					int32_t rAN = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "AN", &vAN, &nAN);
+					if (rAC != 1) vrb.error("AC field is needed in file");
+					if (rAN != 1) vrb.error("AN field is needed in file");
+					AC[r] = vAC[0]; AN[r] = vAN[0];
+
+					//Get SEEK information
+					if (sync_types[r] == FILE_BINARY) {
+						int32_t rsk = bcf_get_info_int32(sync_reader->readers[r].header, sync_lines[r], "SEEK", &vSK, &nSK);
+						if (nSK != 4) vrb.error("INFO/SEEK field should contain 4 numbers");
+						else {
+							bin_type[r] = vSK[0];
+							bin_seek[r] = vSK[1];
+							bin_seek[r] *= MOD30BITS;
+							bin_seek[r] += vSK[2];
+							bin_size[r] = vSK[3];
+						}
+					} else if (sync_types[r] == FILE_BCF) {
+						bin_type[r] = RECORD_BCFVCF_GENOTYPE;
+						bin_seek[r] = 0;
+						bin_size[r] = 0;
+					}
+
+					//Set "has record" flag
+					sync_flags[r] = true;
+				}
 			}
 		}
 
@@ -294,6 +391,11 @@ public:
 		return bin_type[file];
 	}
 
+	//RETURN THE SIZE OF RECORD IN BYTES
+	int32_t sizeRecord(uint32_t file) {
+		return bin_size[file];
+	}
+
 	//READ DATA OF THE AVAILABLE RECORD
 	// =0: No sample data available
 	// >0: Amount of data read in bytes
@@ -309,7 +411,7 @@ public:
 		if (sync_types[file] == FILE_BCF) {
 			//Read genotypes [assuming buffer to be allocated!]
 			int32_t ndp = ind_number[file]*2;
-			int32_t rdp = bcf_get_genotypes(sync_reader->readers[file].header, sync_lines[sync_number], buffer, &ndp);
+			int32_t rdp = bcf_get_genotypes(sync_reader->readers[file].header, sync_lines[file], buffer, &ndp);
 			assert(rdp == (ind_number[file]*2));
 			return ndp * sizeof(int32_t);
 		}
@@ -369,17 +471,19 @@ public:
 	uint32_t bin_size;							//Amount of Binary records in bytes		//Integer 4 in INFO/SEEK field
 
 	//CONSTRUCTOR
-	xcf_writer(std::string fname, bool _hts_genotypes, uint32_t _nthreads) {
+	xcf_writer(std::string _hts_fname, bool _hts_genotypes, uint32_t _nthreads) {
 		std::string oformat;
-		hts_fname = fname;
+		hts_fname = _hts_fname;
 
 		if (hts_fname == "-") {
 			oformat = "wbu";		//Uncompressed BCF for stdout
-		} else {
+		} else if (hts_fname.size() > 3 && hts_fname.substr(hts_fname.size()-3) == "bcf") {
 			oformat = "wb";			//Compressed BCF for file
-			if (hts_fname.size() < 5) vrb.error("Filename too short");
-			if (hts_fname.substr(fname.size()-3) != "bcf") vrb.error("Filename extension should be *.bcf");
-		}
+		} else if (hts_fname.size() > 5 && hts_fname.substr(hts_fname.size()-5) == "vcf.gz") {
+			oformat = "wz";			//Compressed VCF for file
+		} else if (hts_fname.size() > 3 && hts_fname.substr(hts_fname.size()-5) == "vcf") {
+			oformat = "wv";			//Uncompressed VCF for file
+		} else vrb.error("Filename extension of [" + hts_fname + "] not recognized");
 
 		hts_genotypes = _hts_genotypes;
 		nthreads = _nthreads;
@@ -407,11 +511,11 @@ public:
 	}
 
 	//Write sample IDs
-	void writeHeader(std::vector < std::string > & samples, std::string contig) {
+	void writeHeader(std::vector < std::string > & samples, std::string contig, std::string source) {
 		//
 		hts_hdr = bcf_hdr_init("w");
 		bcf_hdr_append(hts_hdr, std::string("##fileDate="+tac.date()).c_str());
-		bcf_hdr_append(hts_hdr, std::string("##source=XCFtools").c_str());
+		bcf_hdr_append(hts_hdr, std::string("##source=" + source).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##contig=<ID="+ contig + ">").c_str());
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
@@ -432,14 +536,15 @@ public:
 			fd.close();
 		}
 		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) vrb.error("Failing to write VCF/header");
+		bcf_clear1(hts_record);
 	}
 
 	//Write sample IDs
-	void writeHeader(std::vector < std::string > & samples, std::vector < int > & fathers, std::vector < int > & mothers, std::string contig) {
+	void writeHeader(std::vector < std::string > & samples, std::vector < int > & fathers, std::vector < int > & mothers, std::string contig, std::string source) {
 		//
 		hts_hdr = bcf_hdr_init("w");
 		bcf_hdr_append(hts_hdr, std::string("##fileDate="+tac.date()).c_str());
-		bcf_hdr_append(hts_hdr, std::string("##source=XCFtools").c_str());
+		bcf_hdr_append(hts_hdr, std::string("##source=" + source).c_str());
 		bcf_hdr_append(hts_hdr, std::string("##contig=<ID="+ contig + ">").c_str());
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 		bcf_hdr_append(hts_hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
@@ -464,11 +569,11 @@ public:
 			fd.close();
 		}
 		if (bcf_hdr_write(hts_fd, hts_hdr) < 0) vrb.error("Failing to write VCF/header");
+		bcf_clear1(hts_record);
 	}
 
 	//Write variant information
 	void writeInfo(std::string chr, uint32_t pos, std::string ref, std::string alt, std::string rsid, uint32_t AC, uint32_t AN) {
-		bcf_clear1(hts_record);
 		hts_record->rid = bcf_hdr_name2id(hts_hdr, chr.c_str());
 		hts_record->pos = pos - 1;
 		bcf_update_id(hts_hdr, hts_record, rsid.c_str());
@@ -478,7 +583,7 @@ public:
 		bcf_update_info_int32(hts_hdr, hts_record, "AN", &AN, 1);
 	}
 
-	//Write genotypes
+	//Write genotypes / needs extension to write other HTS fields than GTs
 	void writeRecord(uint32_t type, char * buffer, uint32_t nbytes) {
 		if (hts_genotypes) {
 			bcf_update_genotypes(hts_hdr, hts_record, buffer, nbytes/sizeof(int32_t));
@@ -492,6 +597,7 @@ public:
 			bcf_update_info_int32(hts_hdr, hts_record, "SEEK", vsk, 4);
 		}
 		if (bcf_write1(hts_fd, hts_hdr, hts_record) < 0) vrb.error("Failing to write VCF/record for rare variants");
+		bcf_clear1(hts_record);
 	}
 
 	void close() {

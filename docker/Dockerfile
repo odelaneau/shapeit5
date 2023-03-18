@@ -45,6 +45,7 @@ ADD resources/SHAPEIT5_phase_common_static /bin/SHAPEIT5_phase_common_static
 ADD resources/SHAPEIT5_phase_rare_static /bin/SHAPEIT5_phase_rare_static
 ADD resources/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
 ADD resources/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
+ADD resources/SHAPEIT5_xcftools_static /bin/SHAPEIT5_xcftools_static
 
 RUN chmod +x /bin/SHAPEIT5*
 

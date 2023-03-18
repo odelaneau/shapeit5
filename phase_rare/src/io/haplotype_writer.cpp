@@ -42,11 +42,11 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
+void haplotype_writer::writeHaplotypes(string fname) {
 	// Init
 	tac.clock();
 	string file_format = "w";
-	unsigned int file_type = OFILE_VCFU;
+	uint32_t file_type = OFILE_VCFU;
 	if (fname.size() > 6 && fname.substr(fname.size()-6) == "vcf.gz") { file_format = "wz"; file_type = OFILE_VCFC; }
 	if (fname.size() > 3 && fname.substr(fname.size()-3) == "bcf") { file_format = "wb"; file_type = OFILE_BCFC; }
 	htsFile * fp = hts_open(fname.c_str(),file_format.c_str());
@@ -63,17 +63,17 @@ void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 	bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 
 	//Add samples
-	for (int i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
+	for (int32_t i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
 	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
 	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write VCF/header");
 
 	//Add records
-	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
+	int32_t * genotypes = (int32_t*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int32_t));
 	float * probabilities = (float*)malloc(bcf_hdr_nsamples(hdr)*1*sizeof(float));
 
-	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
+	for (int32_t vt = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
 
-		if (output_buffer || (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop)) {
+		if (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop) {
 
 			//Variant informations
 			bcf_clear1(rec);
@@ -84,17 +84,17 @@ void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 			bcf_update_alleles_str(hdr, rec, alleles.c_str());
 
 			//Genotypes
-			int count_alt = 0;
+			int32_t count_alt = 0;
 
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
 				bool major_allele = !V.vec_full[vt]->minor;
-				for (int i = 0 ; i < G.n_samples ; i++) {
+				for (int32_t i = 0 ; i < G.n_samples ; i++) {
 					genotypes[2*i+0] = bcf_gt_phased(major_allele);
 					genotypes[2*i+1] = bcf_gt_phased(major_allele);
 					bcf_float_set_missing(probabilities[i]);
 					count_alt += 2 * major_allele;
 				}
-				for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+				for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 					bool a0 = G.GRvar_genotypes[vr][i].al0;
 					bool a1 = G.GRvar_genotypes[vr][i].al1;
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
@@ -105,7 +105,7 @@ void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 				}
 				bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 			} else {
-				for (int i = 0 ; i < H.n_samples ; i++) {
+				for (int32_t i = 0 ; i < H.n_samples ; i++) {
 					bool a0 = H.Hvar.get(vs, 2*i+0);
 					bool a1 = H.Hvar.get(vs, 2*i+1);
 					genotypes[2*i+0] = bcf_gt_phased(a0);
@@ -124,7 +124,6 @@ void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 
 		switch (V.vec_full[vt]->type) {
 		case VARTYPE_SCAF :	vs++; break;
-		case VARTYPE_COMM :	vc++; break;
 		case VARTYPE_RARE :	vr++; break;
 		}
 
@@ -144,96 +143,3 @@ void haplotype_writer::writeHaplotypesPlain(string fname, bool output_buffer) {
 	vrb.bullet("Indexing ["+fname + "]");
 	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
-
-void haplotype_writer::writeHaplotypesSparse(string fname) {
-
-	// Init
-	tac.clock();
-
-	//Opening all sparse files
-	string file_rare_bcf = fname;
-	string file_rare_bin = stb.get_name_from_vcf(fname) + ".bin";
-	string file_rare_prb = stb.get_name_from_vcf(fname) + ".prb";
-	htsFile * fp_rare_bcf = hts_open(file_rare_bcf.c_str(), "wb");
-	if (!fp_rare_bcf) vrb.error("Cannot open " + file_rare_bcf + " for writing, check permissions");
-	ofstream fp_rare_bin (file_rare_bin, std::ios::out | std::ios::binary);
-	if (!fp_rare_bin) vrb.error("Cannot open " + file_rare_bin + " for writing, check permissions");
-	ofstream fp_rare_prb (file_rare_prb, std::ios::out | std::ios::binary);
-	if (!fp_rare_prb) vrb.error("Cannot open " + file_rare_bin + " for writing, check permissions");
-
-	//Create and write VCF header for rare BCF
-	bcf_hdr_t * hdr_rare_bcf = bcf_hdr_init("w");
-	bcf_hdr_append(hdr_rare_bcf, string("##source=shapeit5 convert v" + string(SCFTLS_VERSION)).c_str());
-	bcf_hdr_append(hdr_rare_bcf, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
-	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Allele Frequency\">");
-	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
-	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SGEN,Number=3,Type=Integer,Description=\"Index and number of sparse genotypes in sparse file\">");
-	bcf_hdr_append(hdr_rare_bcf, "##INFO=<ID=SPRB,Number=3,Type=Integer,Description=\"Index and number of sparse probabilities in sparse file\">");
-	bcf_hdr_add_sample(hdr_rare_bcf, NULL);
-	if (bcf_hdr_write(fp_rare_bcf, hdr_rare_bcf) < 0) vrb.error("Failing to write VCF/header for rare variants");
-
-	//
-	bcf1_t *rec = bcf_init1();
-	uint64_t seek = 0;
-	int nsk, rsk, *vsk = (int*)malloc(3*sizeof(int));
-	unsigned int * genotypes = (unsigned int *)malloc(G.n_samples*sizeof(unsigned int));
-	float * probabilities = (float*)malloc(G.n_samples*sizeof(float));
-
-	for (int vr = 0 ; vr < V.sizeRare() ; vr ++) {
-
-		//Variant informations
-		bcf_clear1(rec);
-		rec->rid = bcf_hdr_name2id(hdr_rare_bcf, V.vec_rare[vr]->chr.c_str());
-		rec->pos = V.vec_rare[vr]->bp - 1;
-		bcf_update_id(hdr_rare_bcf, rec, V.vec_rare[vr]->id.c_str());
-		string alleles = V.vec_rare[vr]->ref + "," + V.vec_rare[vr]->alt;
-		bcf_update_alleles_str(hdr_rare_bcf, rec, alleles.c_str());
-
-		//Seek information
-		vsk[0] = seek / MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
-		vsk[1] = seek % MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
-		vsk[2] = 0;
-
-		//Compact genotypes and probabilities
-		bool major_allele = !V.vec_rare[vr]->minor;
-		unsigned int count_alt = 2 * G.n_samples * major_allele;
-		for (int r = 0 ; r < G.GRvar_genotypes[vr].size() ; r ++) {
-			bool a0 = G.GRvar_genotypes[vr][r].al0;
-			bool a1 = G.GRvar_genotypes[vr][r].al1;
-			if (a0 != major_allele || a1 != major_allele) {
-				probabilities[r] = min(G.GRvar_genotypes[vr][r].prob, 1.0f);
-				rare_genotype rg_struct = rare_genotype(G.GRvar_genotypes[vr][r].idx, (a0!=a1), 0, a0, a1, 1);
-				genotypes[r] = rg_struct.get();
-				count_alt -= 2 * major_allele;
-				count_alt += a0+a1;
-				vsk[2] ++;
-				seek ++;
-			}
-		}
-
-		//Write genotypes and probabilities
-		fp_rare_bin.write(reinterpret_cast < char * > (genotypes), vsk[2] * sizeof(unsigned int));
-		fp_rare_prb.write(reinterpret_cast < char * > (probabilities), vsk[2] * sizeof(float));
-
-		//BCF INFO fields
-		bcf_update_info_int32(hdr_rare_bcf, rec, "AC", &count_alt, 1);
-		bcf_update_info_int32(hdr_rare_bcf, rec, "AN", &G.n_samples, 1);
-		bcf_update_info_int32(hdr_rare_bcf, rec, "SGEN", vsk, 3);
-		bcf_update_info_int32(hdr_rare_bcf, rec, "SPRB", vsk, 3);
-		if (bcf_write1(fp_rare_bcf, hdr_rare_bcf, rec) < 0) vrb.error("Failing to write VCF/record");
-
-		vrb.progress("  * VCF writing", (vr+1)*1.0/V.sizeRare());
-	}
-	free(vsk);
-	free(probabilities);
-	bcf_destroy1(rec);
-	bcf_hdr_destroy(hdr_rare_bcf);
-	if (hts_close(fp_rare_bcf)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
-	fp_rare_bin.close();
-	fp_rare_prb.close();
-	vrb.bullet("Sparse BCF writing [N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeRare()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
-
-	vrb.bullet("Indexing ["+file_rare_bcf + "]");
-	if (bcf_index_build3(file_rare_bcf.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
-}
-

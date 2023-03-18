@@ -30,11 +30,12 @@ genotype_reader::genotype_reader(haplotype_set & _H, genotype_set & _G, variant_
 	n_main_samples = 0;
 	n_ref_samples = 0;
 	region = "";
-	n_genotypes = vector < unsigned long > (5, 0);
+	n_genotypes = vector < uint64_t > (5, 0);
+	n_alleles = vector < uint64_t > (2, 0);
 	filter_min_maf = -1.0f;
 	filter_snp_only = false;
 	filenames = vector < string > (3, "");
-	panels = vector < char > (3, 0) ;
+	panels = vector < int8_t > (3, 0) ;
 }
 
 genotype_reader::~genotype_reader() {
@@ -43,11 +44,12 @@ genotype_reader::~genotype_reader() {
 	n_main_samples = 0;
 	n_ref_samples = 0;
 	region = "";
-	n_genotypes = vector < unsigned long > (5, 0);
+	n_genotypes = vector < uint64_t > (5, 0);
+	n_alleles = vector < uint64_t > (2, 0);
 	filter_min_maf = -1.0f;
 	filter_snp_only = false;
 	filenames = vector < string > (3, "");
-	panels = vector < char > (3, 0) ;
+	panels = vector < int8_t > (3, 0) ;
 }
 
 void genotype_reader::allocateGenotypes() {
@@ -66,7 +68,7 @@ void genotype_reader::addReferenceFilename(string file) { filenames[1] = file; p
 
 void genotype_reader::addScaffoldFilename(string file) { filenames[2] = file; panels[2] = 1; }
 
-void genotype_reader::setThreads(int _threads) { threads = _threads; }
+void genotype_reader::setThreads(int _nthreads) { nthreads = _nthreads; }
 
 void genotype_reader::setRegion(string _region) { region = _region; }
 

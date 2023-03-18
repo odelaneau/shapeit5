@@ -25,7 +25,7 @@
 #include <modes/binary2bcf.h>
 #include <utils/xcf.h>
 
-#include <objects/bitvector.h>
+#include <containers/bitvector.h>
 #include <objects/rare_genotype.h>
 
 using namespace std;
@@ -66,7 +66,7 @@ void binary2bcf::convert(string finput, string foutput) {
 	xcf_writer XW(foutput, true, nthreads);
 
 	//Write header
-	XW.writeHeader(samples, contig);
+	XW.writeHeader(samples, contig, string("XCFtools ") + string(XCFTLS_VERSION));
 
 	//Buffer for input/output
 	int32_t * input_buffer = (int32_t*)malloc(2 * nsamples * sizeof(int32_t));
