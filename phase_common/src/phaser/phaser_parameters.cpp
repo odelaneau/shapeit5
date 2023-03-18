@@ -68,8 +68,8 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
-			("output,O", bpo::value< string >(), "Phased haplotypes in VCF/BCF format")
-			("output-graph", bpo::value< string >(), "Phased haplotypes in BIN format [Useful to sample multiple likely haplotype configurations per sample]")
+			("output,O", bpo::value< string >(), "Phased haplotypes output file")
+			("output-format", bpo::value< string >()->default_value("bcf"), "Output file format")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_mcmc).add(opt_pbwt).add(opt_hmm).add(opt_filter).add(opt_output);
@@ -81,16 +81,16 @@ void phaser::parse_command_line(vector < string > & args) {
 		bpo::notify(options);
 	} catch ( const boost::program_options::error& e ) { cerr << "Error parsing command line arguments: " << string(e.what()) << endl; exit(0); }
 
-	if (options.count("help")) { cout << descriptions << endl; exit(0); }
-
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Phase1 (jointly phase multiple common markers)");
+	vrb.title("[SHAPEIT5] phase_common (jointly phase multiple common markers)");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : olivier.delaneau@gmail.com");
 	vrb.bullet("Version       : 5." + string(PHASE1_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
 	vrb.bullet("Run date      : " + tac.date());
+
+	if (args.size() == 0 || options.count("help")) { cout << descriptions << endl; exit(0); }
 }
 
 void phaser::check_options() {
@@ -121,18 +121,22 @@ void phaser::check_options() {
 	if (!options["pbwt-window"].defaulted() && (options["pbwt-window"].as < double > () < 0.5 || options["pbwt-window"].as < double > () > 10))
 		vrb.error("You must specify a PBWT window size comprised between 0.5 and 10 cM");
 
+	string oformat = options["output-format"].as < string > ();
+	if (oformat != "graph" && oformat != "bcf" && oformat != "bh")
+		vrb.error("Output format[" + oformat + "] unsupported, use [graph, bcf or bh] instead");
+
 	parse_iteration_scheme(options["mcmc-iterations"].as < string > ());
 }
 
 void phaser::verbose_files() {
 	vrb.title("Files:");
-	vrb.bullet("Input VCF     : [" + options["input"].as < string > () + "]");
-	if (options.count("reference")) vrb.bullet("Reference VCF : [" + options["reference"].as < string > () + "]");
-	if (options.count("scaffold")) vrb.bullet("Scaffold VCF  : [" + options["scaffold"].as < string > () + "]");
-	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
+	vrb.bullet("Input         : [" + options["input"].as < string > () + "]");
+	if (options.count("reference")) vrb.bullet("Reference     : [" + options["reference"].as < string > () + "]");
+	if (options.count("scaffold")) vrb.bullet("Scaffold      : [" + options["scaffold"].as < string > () + "]");
+	if (options.count("pedigree")) vrb.bullet("Pedigree      : [" + options["pedigree"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
-	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
-	if (options.count("bingraph")) vrb.bullet("Output BIN    : [" + options["bingraph"].as < string > () + "]");
+	vrb.bullet("Output        : [" + options["output"].as < string > () + "]");
+	vrb.bullet("Output format : [" + options["output-format"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 

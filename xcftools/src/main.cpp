@@ -23,13 +23,41 @@
 #define _DECLARE_TOOLBOX_HERE
 #include <converter/converter_header.h>
 
+#include "../../versions/versions.h"
+
 using namespace std;
 
 int main(int argc, char ** argv) {
 	vector < string > args;
 
-	for (int a = 1 ; a < argc ; a ++) args.push_back(string(argv[a]));
-	converter().convert(args);
+	string mode = (argc>1)?string(argv[1]):"";
+
+	if (argc == 1 || (mode != "view" && mode != "cat")) {
+
+		vrb.title("[XCFtools] Manage XCF files");
+		vrb.bullet("Authors       : Olivier DELANEAU, University of Lausanne");
+		vrb.bullet("Contact       : olivier.delaneau@gmail.com");
+		vrb.bullet("Version       : 5." + string(XCFTLS_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
+		vrb.bullet("Run date      : " + tac.date());
+
+		//List possible modes
+		vrb.title("Supported modes:");
+		vrb.bullet("[view]\t| Converts between XCF and BCF files");
+		vrb.bullet("[concat]\t| Concat multiple XCF files together");
+
+	} else {
+		//Get args
+		for (int a = 2 ; a < argc ; a ++) args.push_back(string(argv[a]));
+
+		//
+		string mode = string(argv[1]);
+
+		if (mode == "view") {
+			converter().convert(args);
+		} else if (mode == "cat") {
+			converter().convert(args);
+		}
+	}
 	return 0;
 }
 

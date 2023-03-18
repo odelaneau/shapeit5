@@ -45,10 +45,8 @@ public:
 	~haplotype_writer();
 	void setRegions(int _input_start, int _input_stop);
 
-
 	//IO
-	void writeHaplotypesPlain(std::string foutput, bool);
-	void writeHaplotypesSparse(std::string foutput);
+	void writeHaplotypes(std::string foutput);
 };
 
 #endif

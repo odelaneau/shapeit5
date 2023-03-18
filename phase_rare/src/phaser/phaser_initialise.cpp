@@ -48,18 +48,10 @@ void phaser::read_files_and_initialise() {
 	readerG.setRegions(options["scaffold-region"].as < string > (), input_start, input_stop);
 
 	//step3: Read the genotype data
-	if (options.count("input-plain")) {
-		readerG.setFilenames(options["input-plain"].as < string > (), options["scaffold"].as < string > ());
-		readerG.scanGenotypesPlain();
-		readerG.allocateGenotypes();
-		readerG.readGenotypesPlain();
-	}
-	else {
-		readerG.setFilenames(options["input-sparse"].as < string > (), options["scaffold"].as < string > ());
-		readerG.scanGenotypesSparse();
-		readerG.allocateGenotypes();
-		readerG.readGenotypesSparse();
-	}
+	readerG.setFilenames(options["input"].as < string > (), options["scaffold"].as < string > ());
+	readerG.scanGenotypes();
+	readerG.allocateGenotypes();
+	readerG.readGenotypes();
 
 	//step4: Read pedigrees and solve
 	if (options.count("pedigree")) G.phasePedigrees(options["pedigree"].as < string > ());

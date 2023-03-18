@@ -62,10 +62,14 @@ public:
 	void setRegions(std::string, int, int);
 
 	//IO
+	/*
 	void scanGenotypesPlain();
 	void readGenotypesPlain();
 	void scanGenotypesSparse();
 	void readGenotypesSparse();
+	*/
+	void scanGenotypes();
+	void readGenotypes();
 	void allocateGenotypes();
 
 	//PED
