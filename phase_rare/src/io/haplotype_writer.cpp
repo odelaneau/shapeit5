@@ -55,7 +55,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	bcf1_t *rec = bcf_init1();
 
 	// Create VCF header
-	bcf_hdr_append(hdr, string("##source=shapeit5 phase 2 v" + string(PHASE2_VERSION)).c_str());
+	bcf_hdr_append(hdr, string("##source=shapeit5 phase_rare v" + string(PHASE2_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
 	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");

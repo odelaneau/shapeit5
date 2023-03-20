@@ -598,12 +598,9 @@ public:
 	}
 
 	//Write genotypes
-	void writeRecord(uint32_t type, char * buffer, uint32_t nbytes, std::string tag = "GT") {
+	void writeRecord(uint32_t type, char * buffer, uint32_t nbytes) {
 		if (hts_genotypes) {
-			if (tag == "GT") bcf_update_genotypes(hts_hdr, hts_record, buffer, nbytes/sizeof(int32_t));
-			else if (tag == "PP") bcf_update_format_float(hts_hdr, hts_record, "PP", buffer, nbytes / sizeof(float));
-			else if (tag == "DS") bcf_update_format_float(hts_hdr, hts_record, "DS", buffer, nbytes / sizeof(float));
-			else if (tag == "GP") bcf_update_format_float(hts_hdr, hts_record, "GP", buffer, nbytes / sizeof(float));
+			bcf_update_genotypes(hts_hdr, hts_record, buffer, nbytes/sizeof(int32_t));
 		} else {
 			vsk[0] = type;
 			vsk[1] = bin_seek / MOD30BITS;		//Split addr in 2 30bits integer (max number of sparse genotypes ~1.152922e+18)
