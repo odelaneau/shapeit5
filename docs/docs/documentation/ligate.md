@@ -18,7 +18,7 @@ parent: Documentation
 ### Description
 Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 
-### Usage
+### Usages
 Simple run
 
 <div class="code-example" markdown="1">
