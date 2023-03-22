@@ -131,7 +131,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vrb.bullet2("#collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
-void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & G) {
+void conditioning_set::storeRare(vector < int > & R, vector < sparse_genotype > & G) {
 	vector < pair < int, int > > N;
 	for (int g = 0 ; g < G.size() ; g ++) {
 		if (!G[g].mis) {

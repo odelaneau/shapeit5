@@ -24,8 +24,8 @@
 
 using namespace std;
 
-float rare_genotype::ee = 0.9999f;
-float rare_genotype::ed = 0.0001f;
+float sparse_genotype::ee = 0.9999f;
+float sparse_genotype::ed = 0.0001f;
 
 genotype_set::genotype_set() {
 	clear();
@@ -73,8 +73,8 @@ void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned i
 	n_rare_variants = _n_rare_variants;
 	n_samples = _n_samples;
 
-	GRvar_genotypes = vector < vector < rare_genotype > > (n_rare_variants);
-	GRind_genotypes = vector < vector < rare_genotype > > (n_samples);
+	GRvar_genotypes = vector < vector < sparse_genotype > > (n_rare_variants);
+	GRind_genotypes = vector < vector < sparse_genotype > > (n_samples);
 	MAP_R2S = vector < unsigned int > (n_rare_variants);
 	major_alleles = vector < bool > (n_rare_variants, false);
 	for (int r = 0 ; r < V.sizeRare() ; r ++) major_alleles[r] = !V.vec_rare[r]->minor;

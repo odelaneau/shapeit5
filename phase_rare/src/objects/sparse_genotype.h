@@ -20,8 +20,8 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _RARE_GENOTYPE_H
-#define _RARE_GENOTYPE_H
+#ifndef _SPARSE_GENOTYPE_H
+#define _SPARSE_GENOTYPE_H
 
 #include <utils/otools.h>
 
@@ -30,7 +30,7 @@
 #define GETBIT(n,i)	(((n)>>(i))&1U);
 
 
-class rare_genotype {
+class sparse_genotype {
 public:
 
 	static float ee;
@@ -44,17 +44,17 @@ public:
 	unsigned int pha : 1;	//Is the genotype phased?
 	float prob;				//Probability
 
-	rare_genotype() {
+	sparse_genotype() {
 		idx = het = mis = al0 = al1 = pha = 0;
 		prob = -1.0f;
 	}
 
-	rare_genotype(unsigned int value) {
+	sparse_genotype(unsigned int value) {
 		set(value);
 		prob = pha?1.0f:-1.0f;
 	}
 
-	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) {
+	sparse_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) {
 		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
 
 		pha = _pha || (!het && !mis);
@@ -69,12 +69,12 @@ public:
 		}
 	}
 
-	~rare_genotype() {
+	~sparse_genotype() {
 		idx = het = mis = al0 = al1 = pha = 0;
 		prob = -1.0f;
 	}
 
-	bool operator < (const rare_genotype & rg) const {
+	bool operator < (const sparse_genotype & rg) const {
 		return idx < rg.idx;
 	}
 
