@@ -89,7 +89,7 @@ public:
 
 	//STATES PROCESSING
 	void storeCommon(std::vector < int > & A, std::vector < int > & M);
-	void storeRare(std::vector < int > & R, std::vector < rare_genotype > & G);
+	void storeRare(std::vector < int > & R, std::vector < sparse_genotype > & G);
 	void select(variant_map &, genotype_set & G);
 
 	//IBD2 scanning
