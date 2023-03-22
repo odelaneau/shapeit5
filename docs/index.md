@@ -23,12 +23,12 @@ permalink: /
 
 ## About
 
-SHAPEIT5 estimates haplotypes in large genotype datasets (WGS and SNP array). 
+SHAPEIT5 is a software package to estimate haplotypes in large genotype datasets (WGS and SNP array). 
 
 ## News
 
 {: .new }
-> **Version `1.0.0` is now available!**
+> **Version `1.0.1` is now available!**
 > See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 
@@ -52,7 +52,7 @@ SHAPEIT5 is composed of the following tools:
 - **ligate**. Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
-- **xcftools**. Program to convert between the various file format used by shapeit5.
+- **xcftools**. Program to convert between the various file formats used by shapeit5 [BCF from/to XCF].
 
 [phase_common]({{site.baseurl}}{% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
 [ligate]({{site.baseurl}}{% link docs/documentation/ligate.md %}){: .btn .btn-blue }
