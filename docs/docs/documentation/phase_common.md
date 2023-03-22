@@ -17,6 +17,7 @@ parent: Documentation
 
 ### Description
 Tool to phase common sites, typically SNP array data, or the first step of WES/WGS data.
+This is basically an improved version of [SHAPEIT4](https://odelaneau.github.io/shapeit4/) and serves as a replacement.
 
 ### Usage
 Simple run
@@ -45,11 +46,11 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 
 | Option name 	       | Argument| Default  | Description |
 |:---------------------|:--------|:---------|:-------------------------------------|
-| \-I \[\-\-input \]   | STRING  | NA       | Genotypes to be phased in VCF/BCF format |
-| \-H \[\-\-reference \]| STRING  | NA       | Reference panel of haplotypes in VCF/BCF format  |
-| \-S \[\-\-scaffold \]| STRING  | NA       | Scaffold of haplotypes in VCF/BCF format  |
+| \-I \[\-\-input \]   | STRING  | NA       | Genotypes to be phased in VCF/BCF/XCF format |
+| \-H \[\-\-reference \]| STRING  | NA       | Reference panel of haplotypes in VCF/BCF/XCF format  |
+| \-S \[\-\-scaffold \]| STRING  | NA       | Scaffold of haplotypes in VCF/BCF/XCF format  |
 | \-M \[\-\-map \]     | STRING  | NA       | Genetic map  |
-| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother) |
+| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother triplets) |
 | \-R \[\-\-region \]  | STRING  | NA       | Target region  |
 
 
@@ -58,7 +59,7 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 | Option name 	       | Argument| Default  | Description |
 |:---------------------|:--------|:---------|:-------------------------------------|
 | \-\-filter-snp       | NA      | NA       | If specified, the program only consider SNPs |
-| \-\-filter-maf       | FLOAT   | 0        | \[Expert option\] Only consider variants with MAF above the specifeed value. It requires AC/AN tags in VCF/BCF file. |
+| \-\-filter-maf       | FLOAT   | 0        | \[Expert option\] Only consider variants with MAF above the specifed value. It requires AC/AN tags in VCF/BCF file. |
 
 
 #### MCMC parameters
@@ -66,7 +67,7 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 | Option name 	      | Argument| Default              | Description |
 |:--------------------|:--------|:---------------------|:-------------------------------------|
 | \-\-mcmc-iterations | STRING  | 5b,1p,1b,1p,1b,1p,5m | Iteration scheme of the MCMC (burnin=b, pruning=p, main=m) |
-| \-\-mcmc-prune      | FLOAT   | 0.999                | Pruning threshold for genotype graphs  |
+| \-\-mcmc-prune      | FLOAT   | 0.999                | Pruning threshold for genotype graphs (internal memory structures)  |
 | \-\-mcmc-noinit     | NA      | NA                   | If specified, phasing initialization by PBWT sweep is disabled |
 
 #### PBWT parameters
@@ -90,6 +91,6 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 
 | Option name 	       | Argument| Default  | Description |
 |:---------------------|:--------|:---------|:-------------------------------------|
-| \-O \[\-\-output \]  | STRING  | NA       | Phased haplotypes in VCF/BCF format |
-| \-\-output-graph     | STRING  | NA       | Phased haplotypes in BIN format (Useful to sample multiple likely haplotype configurations per sample)  |
+| \-O \[\-\-output \]  | STRING  | NA       | Phased haplotypes in VCF/BCF/XCF format |
+| \-\-output-format     | STRING  | bcf       | File format for the output ([bcf] standard VCF/BCF format / [graph] graph format that intergrates phasing uncertainty / [bh] XCF binary format for fast loading in Impute5)  |
 | \-\-log              | STRING  | NA       | Log file  |
