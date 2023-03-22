@@ -7,7 +7,7 @@ permalink: /
 
 ---
 
-<img src="assets/images/branding/shapeit5_logo.png" align="right" alt="Shapeit5" style="height:150px">
+![plot](https://github.com/odelaneau/shapeit5/blob/main/docs/assets/images/branding/shapeit5_logo.png)
 
 <!---
 # SHAPEIT5
