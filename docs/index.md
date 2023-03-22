@@ -14,9 +14,7 @@ permalink: /
 
 ---
 
-<!---
 <img src="assets/images/branding/shapeit5_logo.png" align="right" alt="Shapeit5" style="height:150px">
--->
 
 # SHAPEIT5
 {: .fs-9 .fw-500 }
