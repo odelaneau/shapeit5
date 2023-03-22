@@ -15,7 +15,7 @@ permalink: /
 ---
 
 <!---
-<img src="assets/images/branding/shapeit_logo.png" align="right" alt="Shapeit5" style="height:150px">
+<img src="assets/images/branding/shapeit5_logo.png" align="right" alt="Shapeit5" style="height:150px">
 -->
 
 # SHAPEIT5
@@ -48,11 +48,13 @@ SHAPEIT5 is composed of the following tools:
 - **ligate**. Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
+- **xcftools**. Program to convert between the various file format used by shapeit5.
 
 [phase_common]({{site.baseurl}}{% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
 [ligate]({{site.baseurl}}{% link docs/documentation/ligate.md %}){: .btn .btn-blue }
 [phase_rare]({{site.baseurl}}{% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
 [switch]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
+[xcftools]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
 
 
 ---
