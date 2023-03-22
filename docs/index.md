@@ -4,27 +4,33 @@ title: Home
 nav_order: 1
 description: "SHAPEIT5 is a tool for haplotype phasing of high coverage sequencing data."
 permalink: /
+
 ---
+
+<img src="assets/images/branding/shapeit5_logo.png" align="right" alt="Shapeit5" style="height:150px">
+
+<!---
+# SHAPEIT5
+{: .fs-9 .fw-500 }
+-->
+
+<!---
+**S**egmented **HAP**lotype **E**stimation and **I**mputation **T**ools version **5**
+{: .fs-5 }
+-->
+
+---
+
+## About
+
+SHAPEIT5 estimates haplotypes in large genotype datasets (WGS and SNP array). 
+
 ## News
 
 {: .new }
 > **Version `1.0.0` is now available!**
 > See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
-
----
-
-<img src="assets/images/branding/shapeit5_logo.png" align="right" alt="Shapeit5" style="height:150px">
-
-# SHAPEIT5
-{: .fs-9 .fw-500 }
-
-**S**egmented **HAP**lotype **E**stimation and **I**mputation **T**ools version **5**
-{: .fs-5 }
-
-## About
-
-SHAPEIT5 estimates haplotypes in large datasets (WGS, WES, SNP array), with a special focus on rare variants. 
 
 ## Citation
 
