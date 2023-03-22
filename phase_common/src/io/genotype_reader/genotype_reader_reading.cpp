@@ -24,7 +24,6 @@
 
 #include <utils/xcf.h>
 #include <containers/bitvector.h>
-#include <objects/rare_genotype.h>
 
 void genotype_reader::readGenotypes() {
 	tac.clock();
