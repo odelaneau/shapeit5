@@ -15,3 +15,8 @@ clean:
 	rm -f docker/resources/*
 	rm -f docker/shapeit5*.tar.gz
 
+static_exe:
+	for dir in $(projects); do \
+	$(MAKE) $@ -C $$dir; \
+	done
+
