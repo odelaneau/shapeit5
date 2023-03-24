@@ -152,6 +152,30 @@ public:
 		}
 	}
 
+	void impute(float prb0, float prb1) {
+		if (mis) {
+			std::vector < double > gprobs = std::vector < double > (4, 0.0f);
+			float p01 = std::max(prb0, std::numeric_limits<float>::min());
+			float p00 = std::max(1.0f - prb0, std::numeric_limits<float>::min());
+			float p11 = std::max(prb1, std::numeric_limits<float>::min());
+			float p10 = std::max(1.0f - prb1, std::numeric_limits<float>::min());
+
+			gprobs[0] = (p00*ee + p01*ed) * (p10*ee + p11*ed);
+			gprobs[1] = 0.0f;
+			gprobs[2] = 0.0f;
+			gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
+
+			int maxg = alg.imax(gprobs);
+			switch (maxg) {
+			case 0:	al0 = 0; al1 = 0; break;
+			case 1:	al0 = 0; al1 = 1; break;
+			case 2:	al0 = 1; al1 = 0; break;
+			case 3:	al0 = 1; al1 = 1; break;
+			}
+			prob = gprobs[maxg] / (gprobs[0] + gprobs[1] + gprobs[2] + gprobs[3]);
+		}
+	}
+
 	std::string str() {
 		return std::string("[" + stb.str(idx) + "/" + stb.str(het) + "/" + stb.str(mis) + "/" + stb.str(al0) + "/" + stb.str(al1) + "/" + stb.str(pha) + "]");
 	}

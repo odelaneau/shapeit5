@@ -40,7 +40,8 @@ void phaser::declare_options() {
 			("scaffold", bpo::value< string >(), "Scaffold of haplotypes")
 			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
 			("map", bpo::value< string >(), "Genetic map")
-			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother");
+			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother")
+			("haploids", bpo::value < string >(), "List of haploid samples (e.g. chrX for males). One sample ID per line.");
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()

@@ -80,7 +80,7 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 		for (int k = 1; k < Kstates[w].size() ; k++) {
 			unsigned int ind0 = Kstates[w][k-1]/2;
 			unsigned int ind1 = Kstates[w][k]/2;
-			if (ind0 == ind1) {
+			if (ind0 == ind1 && !G.vecG[ind0]->haploid && !G.vecG[ind1]->haploid) {
 				float het_overlap = H.H_opt_hap.getMatchHets(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus);
 				if (het_overlap > 0.75) {
 					toBeRemoved.push_back(k-1);
@@ -91,7 +91,7 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 			}
 		}
 
-		//3.2. Replace potential IBD2 states from conditioning set with random ones
+		//3.2. Remove potential IBD2 states from conditioning set
 		if (toBeRemoved.size() > 0) {
 			vector < unsigned int > Ktmp;
 			Ktmp.reserve(Kstates[w].size() - toBeRemoved.size());
@@ -99,14 +99,6 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 				if (toBeRemoved[p] == k) p++;
 				else Ktmp.push_back(Kstates[w][k]);
 			}
-
-			/*
-			for (int r = 0 ; r < toBeRemoved.size() ; r ++) {
-				int random_state = Ordering[Oiterator];
-				if (random_state/2 != ind) Ktmp.push_back(random_state);
-				Oiterator=((Oiterator+1)==H.n_hap)?0:(Oiterator+1);
-			}
-			*/
 
 			sort(Ktmp.begin(), Ktmp.end());
 			Ktmp.erase(unique(Ktmp.begin(), Ktmp.end()), Ktmp.end());

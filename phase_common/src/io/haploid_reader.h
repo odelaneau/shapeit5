@@ -20,50 +20,22 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _COMPUTE_THREAD_H
-#define _COMPUTE_THREAD_H
+#ifndef _HAPLOID_READER_H
+#define _HAPLOID_READER_H
 
 #include <utils/otools.h>
 
-#include <containers/conditioning_set/conditioning_set_header.h>
-#include <containers/genotype_set.h>
-#include <containers/variant_map.h>
-#include <containers/window_set.h>
-
-class compute_job {
+class haploid_reader {
 public:
-
 	//DATA
-	variant_map & V;
-	genotype_set & G;
-	conditioning_set & H;
+	std::vector < std::string > samples;
 
-	//Probabilities
-	std::vector < double > T;
-	std::vector < float > M;
+	//CONSTRUCTOR/DESTRUCTOR
+	haploid_reader();
+	~haploid_reader();
 
-	//Windows
-	window_set Windows;
-
-	//States
-	std::vector < track > Kbanned;
-	std::vector < std::vector < unsigned int > > Kstates;
-
-	//Random states
-	std::vector < unsigned int > Ordering;
-	int Oiterator;
-
-	compute_job(variant_map & , genotype_set & , conditioning_set & , unsigned int n_max_transitions , unsigned int n_max_missing);
-	~compute_job();
-
-	void free();
-	void make(unsigned int, double);
-	unsigned int size();
+	//IO
+	void readHaploidFile(std::string);
 };
-
-inline
-unsigned int compute_job::size() {
-	 return Windows.size();
-}
 
 #endif

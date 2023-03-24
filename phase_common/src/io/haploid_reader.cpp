@@ -20,50 +20,23 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _COMPUTE_THREAD_H
-#define _COMPUTE_THREAD_H
+#include <io/haploid_reader.h>
 
-#include <utils/otools.h>
+using namespace std;
 
-#include <containers/conditioning_set/conditioning_set_header.h>
-#include <containers/genotype_set.h>
-#include <containers/variant_map.h>
-#include <containers/window_set.h>
-
-class compute_job {
-public:
-
-	//DATA
-	variant_map & V;
-	genotype_set & G;
-	conditioning_set & H;
-
-	//Probabilities
-	std::vector < double > T;
-	std::vector < float > M;
-
-	//Windows
-	window_set Windows;
-
-	//States
-	std::vector < track > Kbanned;
-	std::vector < std::vector < unsigned int > > Kstates;
-
-	//Random states
-	std::vector < unsigned int > Ordering;
-	int Oiterator;
-
-	compute_job(variant_map & , genotype_set & , conditioning_set & , unsigned int n_max_transitions , unsigned int n_max_missing);
-	~compute_job();
-
-	void free();
-	void make(unsigned int, double);
-	unsigned int size();
-};
-
-inline
-unsigned int compute_job::size() {
-	 return Windows.size();
+haploid_reader::haploid_reader() {
 }
 
-#endif
+haploid_reader::~haploid_reader() {
+	vector < string > ().swap(samples);
+}
+
+void haploid_reader::readHaploidFile(string fmales) {
+	tac.clock();
+	string buffer;
+	input_file fd_males(fmales);
+	if (fd_males.fail()) vrb.error("Cannot open haploid [e.g. chrX males] file");
+	while (getline(fd_males, buffer)) samples.push_back(buffer);
+	fd_males.close();
+	vrb.bullet("Haploid parsing [n=" + stb.str(samples.size()) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+}
