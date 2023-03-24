@@ -34,6 +34,7 @@ genotype::genotype(unsigned int _index) {
 	std::fill(curr_dipcodes, curr_dipcodes + 64, 0);
 	this->name = "";
 	double_precision = false;
+	haploid = false;
 }
 
 genotype::~genotype() {
@@ -55,10 +56,20 @@ void genotype::make(vector < unsigned char > & DipSampled, vector < float > & Cu
 		unsigned char hap1 = DIP_HAP1(DipSampled[s]);
 		for (unsigned int vrel = 0 ; vrel < Lengths[s] ; vrel++, vabs++) {
 			if (VAR_GET_MIS(MOD2(vabs), Variants[DIV2(vabs)])) {
-				(rng.getDouble()<=CurrentMissingProbabilities[m*HAP_NUMBER+hap0])?VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
-				(rng.getDouble()<=CurrentMissingProbabilities[m*HAP_NUMBER+hap1])?VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
-				//(CurrentMissingProbabilities[m*HAP_NUMBER+hap0]>0.5f)?VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
-				//(CurrentMissingProbabilities[m*HAP_NUMBER+hap1]>0.5f)?VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+				if (haploid) {
+					float p00 = (1.0f - CurrentMissingProbabilities[m*HAP_NUMBER+hap0]) * (1.0f - CurrentMissingProbabilities[m*HAP_NUMBER+hap1]);
+					float p11 = (CurrentMissingProbabilities[m*HAP_NUMBER+hap0]) * (CurrentMissingProbabilities[m*HAP_NUMBER+hap1]);
+					if (rng.getDouble()<= (p11/(p00+p11))) {
+						VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+						VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+					} else {
+						VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+						VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+					}
+				} else {
+					(rng.getDouble()<=CurrentMissingProbabilities[m*HAP_NUMBER+hap0])?VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+					(rng.getDouble()<=CurrentMissingProbabilities[m*HAP_NUMBER+hap1])?VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+				}
 				m++;
 			}
 			if (VAR_GET_AMB(MOD2(vabs), Variants[DIV2(vabs)])) {
@@ -76,8 +87,20 @@ void genotype::make(vector < unsigned char > & DipSampled) {
 		unsigned char hap1 = DIP_HAP1(DipSampled[s]);
 		for (unsigned int vrel = 0 ; vrel < Lengths[s] ; vrel++, vabs++) {
 			if (VAR_GET_MIS(MOD2(vabs), Variants[DIV2(vabs)])) {
-				(ProbMissing[m*HAP_NUMBER+hap0]>=(0.5f*n_storage_events))?VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
-				(ProbMissing[m*HAP_NUMBER+hap1]>=(0.5f*n_storage_events))?VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+				if (haploid) {
+					float p00 = (1.0f - ProbMissing[m*HAP_NUMBER+hap0] / n_storage_events) * (1.0f - ProbMissing[m*HAP_NUMBER+hap1] / n_storage_events);
+					float p11 = (ProbMissing[m*HAP_NUMBER+hap0] / n_storage_events) * (ProbMissing[m*HAP_NUMBER+hap1] / n_storage_events);
+					if (p11>p00) {
+						VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+						VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+					} else {
+						VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+						VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+					}
+				} else {
+					(ProbMissing[m*HAP_NUMBER+hap0]>=(0.5f*n_storage_events))?VAR_SET_HAP0(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP0(MOD2(vabs),Variants[DIV2(vabs)]);
+					(ProbMissing[m*HAP_NUMBER+hap1]>=(0.5f*n_storage_events))?VAR_SET_HAP1(MOD2(vabs),Variants[DIV2(vabs)]):VAR_CLR_HAP1(MOD2(vabs),Variants[DIV2(vabs)]);
+				}
 				m++;
 			}
 			if (VAR_GET_AMB(MOD2(vabs), Variants[DIV2(vabs)])) {

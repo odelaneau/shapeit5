@@ -40,6 +40,7 @@ void phaser::declare_options() {
 			("scaffold,S", bpo::value < string >(), "Scaffold of haplotypes in VCF/BCF format")
 			("map,M", bpo::value < string >(), "Genetic map")
 			("pedigree", bpo::value < string >(), "Pedigree information (kid father mother)")
+			("haploids", bpo::value < string >(), "List of haploid samples (e.g. chrX for males). One sample ID per line.")
 			("region,R", bpo::value < string >(), "Target region");
 
 	bpo::options_description opt_mcmc ("MCMC parameters");
@@ -134,6 +135,7 @@ void phaser::verbose_files() {
 	if (options.count("reference")) vrb.bullet("Reference     : [" + options["reference"].as < string > () + "]");
 	if (options.count("scaffold")) vrb.bullet("Scaffold      : [" + options["scaffold"].as < string > () + "]");
 	if (options.count("pedigree")) vrb.bullet("Pedigree      : [" + options["pedigree"].as < string > () + "]");
+	if (options.count("haploids")) vrb.bullet("Haploids      : [" + options["haploids"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
 	vrb.bullet("Output        : [" + options["output"].as < string > () + "]");
 	vrb.bullet("Output format : [" + options["output-format"].as < string > () + "]");

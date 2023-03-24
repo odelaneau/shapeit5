@@ -29,6 +29,11 @@ void genotype_reader::scanGenotypes() {
 	tac.clock();
 	vrb.wait("  * VCF/BCF scanning");
 
+	//File idx
+	int32_t idx_file_main = 0;
+	int32_t idx_file_ref = panels[1]?1:-1;
+	int32_t idx_file_scaf = panels[2]?(panels[1]+panels[2]):-1;
+
 	//Initialize VCF/BCF reader(s)
 	xcf_reader XR(region, nthreads);
 
@@ -43,16 +48,17 @@ void genotype_reader::scanGenotypes() {
 		else  vrb.error("Less than 50 samples is not enough to get reliable phasing, consider using a reference panel to increase sample size");
 	}
 
-	int n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
+	uint32_t n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
+	uint32_t n_variants_main_format = 0, n_variants_ref_format = 0, n_variants_scaf_format = 0;
 	while (XR.nextRecord()) {
 
 		//By defaults, we do not want the variants
 		variant_mask.push_back(false);
 
 		//See which file has a record
-		bool has_main = XR.hasRecord(0);
-		bool has_ref = (panels[1] && XR.hasRecord(1));
-		bool has_scaf = (panels[2] && XR.hasRecord(panels[1] + 1));
+		bool has_main = XR.hasRecord(idx_file_main);
+		bool has_ref = (panels[1] && XR.hasRecord(idx_file_ref));
+		bool has_scaf = (panels[2] && XR.hasRecord(idx_file_scaf));
 
 		//If non bi-allelic
 		if ((has_main+has_ref+has_scaf)==0) { n_variants_multi++; continue; }
@@ -65,6 +71,22 @@ void genotype_reader::scanGenotypes() {
 
 		//In scaffold, but not in main panel
 		if (panels[2] && !has_main && has_scaf) { n_variants_nscaf++; continue; }
+
+		//If main panel not in proper format
+		int32_t main_type = XR.typeRecord(idx_file_main);
+		if ((main_type != RECORD_BCFVCF_GENOTYPE) && (main_type != RECORD_BINARY_GENOTYPE)) { n_variants_main_format ++; continue; }
+
+		//If reference panel not in proper format
+		if (panels[1]) {
+			int32_t ref_type = XR.typeRecord(idx_file_ref);
+			if ((ref_type != RECORD_BCFVCF_GENOTYPE) && (ref_type != RECORD_BINARY_HAPLOTYPE) && (ref_type != RECORD_SPARSE_HAPLOTYPE)) { n_variants_ref_format ++; continue; }
+		}
+
+		//If scaffold panel not in proper format
+		if (panels[2]) {
+			int32_t scaf_type = XR.typeRecord(idx_file_scaf);
+			if ((scaf_type != RECORD_BCFVCF_GENOTYPE) && (scaf_type != RECORD_BINARY_HAPLOTYPE)) { n_variants_scaf_format ++; continue; }
+		}
 
 		//Keep SNPs only
 		if (filter_snp_only) {
@@ -98,6 +120,9 @@ void genotype_reader::scanGenotypes() {
 	if (n_variants_rare) vrb.bullet2(stb.str(n_variants_rare) + " sites removed in main panel [below MAF threshold]");
 	if (n_variants_nref) vrb.bullet2(stb.str(n_variants_nref) + " sites removed in reference panel [not in main panel]");
 	if (n_variants_nscaf) vrb.bullet2(stb.str(n_variants_nscaf) + " sites removed in scaffold panel [not in main panel]");
+	if (n_variants_main_format) vrb.bullet2(stb.str(n_variants_main_format) + " sites removed [record in main panel not in a supported format]");
+	if (n_variants_ref_format) vrb.bullet2(stb.str(n_variants_ref_format) + " sites removed [record in reference panel not in a supported format]");
+	if (n_variants_scaf_format) vrb.bullet2(stb.str(n_variants_scaf_format) + " sites removed [record in scaffold panel not in a supported format]");
 	if (n_variants == 0) vrb.error("No variants to be phased!");
 }
 

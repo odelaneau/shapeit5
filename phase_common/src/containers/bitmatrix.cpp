@@ -182,7 +182,7 @@ float bitmatrix::getMatchHets(unsigned int i0, unsigned int i1, unsigned int sta
 		interHet += nbit_set[i0_g1 ^ i1_g1];	// iHet != 0 when non matching hets in the block
 		unionHet += nbit_set[i0_g1 | i1_g1];	// uHet != 0 when hets are in the block
 	}
-	return (unionHet)? ((unionHet - interHet) * 1.0f / unionHet) : 1.0f;
+	return (unionHet)? ((unionHet - interHet) * 1.0f / unionHet) : 0.0f;
 }
 
 

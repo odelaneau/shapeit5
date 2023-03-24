@@ -48,10 +48,10 @@ public:
 
 	//Sample IDs
 	std::vector < std::string > names;
+	std::vector < bool > haploids;
 
 	//Trios/Duos
 	std::vector < int > mendel_error, mendel_ydone, mendel_ndone, mendel_imput;
-
 
 	//Mapping on scaffold
 	std::vector < unsigned int > MAP_R2S;
@@ -69,6 +69,7 @@ public:
 	void clear();
 	void allocate(variant_map &, unsigned int, unsigned int , unsigned int);
 	void mapUnphasedOntoScaffold(int ind, std::vector < std::vector < unsigned int > > & map);
+	void mapHaploidsAndResetHets(std::string fhap);
 
 	//TRANSPOSE
 	void fillup_by_transpose_V2I();

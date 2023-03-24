@@ -53,15 +53,18 @@ void phaser::read_files_and_initialise() {
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
 
-	//step4: Read pedigrees and solve
+	//step4: Read haploids
+	if (options.count("haploids")) G.mapHaploidsAndResetHets(options["haploids"].as < string > ());
+
+	//step5: Read pedigrees and solve
 	if (options.count("pedigree")) G.phasePedigrees(options["pedigree"].as < string > ());
 
-	//step5: Transpose genotypes and basic imputation
+	//step6: Transpose genotypes and basic imputation
 	vrb.title("Initializing sparse genotypes");
 	G.imputeMonomorphic();
 	G.fillup_by_transpose_V2I();
 
-	//step6: Read and initialise genetic map
+	//step7: Read and initialise genetic map
 	vrb.title("Setting up genetic map");
 	if (options.count("map")) {
 		gmap_reader readerGM;

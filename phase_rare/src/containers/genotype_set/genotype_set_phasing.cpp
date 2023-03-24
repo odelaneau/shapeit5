@@ -61,8 +61,8 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 			GRvar_genotypes[vr][tidx].prob = p[1] / (p[0] + p[1]);
 		} else {
 			assert(GRvar_genotypes[vr][tidx].prob >= 0.0f);
-			float pp = GRvar_genotypes[vr][tidx].prob;
-			GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
+			if (haploids[GRvar_genotypes[vr][tidx].idx]) GRvar_genotypes[vr][tidx].impute(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
+			else GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
 			assert(!isnan(GRvar_genotypes[vr][tidx].prob));
 			assert(!isinf(GRvar_genotypes[vr][tidx].prob));
 			if (GRvar_genotypes[vr][tidx].het && GRvar_genotypes[vr][tidx].prob < threshold) {
