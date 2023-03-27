@@ -78,10 +78,12 @@ using aligned_vector32 = std::vector<T, boost::alignment::aligned_allocator < T,
 #define RARE_VARIANT_FREQ	0.001f
 #define HAP_NUMBER			8
 #define MAX_AMB				22
+#define MOD30BITS			0x40000000
 
 //MACROS
-#define DIV2(v)	((v)>>1)
-#define MOD2(v)	((v)&1)
+#define DIV2(v)		((v)>>1)
+#define MOD2(v)		((v)&1)
+#define DIVU(v, d) 	(v+(d-1))/d
 
 //NAMESPACE
 namespace bio = boost::iostreams;

@@ -42,12 +42,11 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-
-void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
+void haplotype_writer::writeHaplotypes(string fname) {
 	// Init
 	tac.clock();
 	string file_format = "w";
-	unsigned int file_type = OFILE_VCFU;
+	uint32_t file_type = OFILE_VCFU;
 	if (fname.size() > 6 && fname.substr(fname.size()-6) == "vcf.gz") { file_format = "wz"; file_type = OFILE_VCFC; }
 	if (fname.size() > 3 && fname.substr(fname.size()-3) == "bcf") { file_format = "wb"; file_type = OFILE_BCFC; }
 	htsFile * fp = hts_open(fname.c_str(),file_format.c_str());
@@ -56,7 +55,7 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 	bcf1_t *rec = bcf_init1();
 
 	// Create VCF header
-	bcf_hdr_append(hdr, string("##source=shapeit5 phase 2 v" + string(PHASE2_VERSION)).c_str());
+	bcf_hdr_append(hdr, string("##source=shapeit5 phase_rare v" + string(PHASE2_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
 	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
@@ -64,17 +63,17 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 	bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 
 	//Add samples
-	for (int i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
+	for (int32_t i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
 	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
 	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write VCF/header");
 
 	//Add records
-	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
+	int32_t * genotypes = (int32_t*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int32_t));
 	float * probabilities = (float*)malloc(bcf_hdr_nsamples(hdr)*1*sizeof(float));
 
-	for (int vt = 0, vc = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
+	for (int32_t vt = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
 
-		if (output_buffer || (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop)) {
+		if (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop) {
 
 			//Variant informations
 			bcf_clear1(rec);
@@ -85,31 +84,30 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 			bcf_update_alleles_str(hdr, rec, alleles.c_str());
 
 			//Genotypes
-			int count_alt = 0;
+			int32_t count_alt = 0;
 
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
 				bool major_allele = !V.vec_full[vt]->minor;
-				for (int i = 0 ; i < G.n_samples ; i++) {
+				for (int32_t i = 0 ; i < G.n_samples ; i++) {
 					genotypes[2*i+0] = bcf_gt_phased(major_allele);
 					genotypes[2*i+1] = bcf_gt_phased(major_allele);
 					bcf_float_set_missing(probabilities[i]);
 					count_alt += 2 * major_allele;
 				}
-				for (int i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+				for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 					bool a0 = G.GRvar_genotypes[vr][i].al0;
 					bool a1 = G.GRvar_genotypes[vr][i].al1;
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
-					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(G.GRvar_genotypes[vr][i].prob * 1000.0) / 1000.0;
+					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(min(G.GRvar_genotypes[vr][i].prob, 1.0f) * 1000.0) / 1000.0;
 					count_alt -= 2 * major_allele;
 					count_alt += a0+a1;
 				}
 				bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 			} else {
-				for (int i = 0 ; i < H.n_samples ; i++) {
+				for (int32_t i = 0 ; i < H.n_samples ; i++) {
 					bool a0 = H.Hvar.get(vs, 2*i+0);
 					bool a1 = H.Hvar.get(vs, 2*i+1);
-					count_alt += a0+a1;
 					genotypes[2*i+0] = bcf_gt_phased(a0);
 					genotypes[2*i+1] = bcf_gt_phased(a1);
 					count_alt += a0+a1;
@@ -126,13 +124,13 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 
 		switch (V.vec_full[vt]->type) {
 		case VARTYPE_SCAF :	vs++; break;
-		case VARTYPE_COMM :	vc++; break;
 		case VARTYPE_RARE :	vr++; break;
 		}
 
 		vrb.progress("  * VCF writing", (vt+1)*1.0/V.sizeFull());
 	}
 	free(genotypes);
+	free(probabilities);
 	bcf_destroy1(rec);
 	bcf_hdr_destroy(hdr);
 	if (hts_close(fp)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
@@ -141,4 +139,7 @@ void haplotype_writer::writeHaplotypes(string fname, bool output_buffer) {
 	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
+
+	vrb.bullet("Indexing ["+fname + "]");
+	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }

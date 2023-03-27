@@ -75,6 +75,7 @@ void phaser::phase() {
 			options["pbwt-depth-common"].as < int > (),
 			options["pbwt-depth-rare"].as < int > (),
 			options["pbwt-mac"].as < int > ());
+	H.scanIBD2(V);
 	H.select(V, G);
 
 	//STEP2: HMM computations
@@ -94,4 +95,12 @@ void phaser::phase() {
 
 	//STEP3: MERGE BACK ALL TOGETHER
 	G.merge_by_transpose_I2V();
+
+	//VERBOSE
+	vrb.bullet("Solving summary:");
+	G.nmiss_total = G.nmiss_imputation + G.nmiss_families + G.nmiss_monomorphic;
+	G.nhets_total = G.nhets_families + G.nhets_imputation + G.nhets_coalescent;
+	vrb.bullet2("#Hets=" + stb.str(G.nhets_total) + " / Phased by HMM=" + stb.str(G.nhets_imputation) + ", PED=" + stb.str(G.nhets_families) + ", SING=" + stb.str(G.nhets_coalescent));
+	vrb.bullet2("#Miss=" + stb.str(G.nmiss_total) + " / Imputed by HMM=" + stb.str(G.nmiss_imputation) + ", PED=" + stb.str(G.nmiss_families) + ", MONO=" + stb.str(G.nmiss_monomorphic));
+
 }

@@ -1,37 +1,37 @@
 #Clean up
-rm ../static_bins/SHAPEIT5_*
-rm resources/SHAPEIT5_*
+rm ../static_bins/*
+rm resources/*
 
 
 #Compile phase 1
 cd ../phase_common/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_phase_common_static ../static_bins/.
+cp bin/phase_common_static ../static_bins/.
 
 #Compile phase 2
 cd ../phase_rare/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_phase_rare_static ../static_bins/.
+cp bin/phase_rare_static ../static_bins/.
 
 #Compile switch
 cd ../switch/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_switch_static ../static_bins/.
+cp bin/switch_static ../static_bins/.
 
 #Compile ligate
 cd ../ligate/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_ligate_static ../static_bins/.
+cp bin/ligate_static ../static_bins/.
 
-#Compile convert
-cd ../convert/
+#Compile xcftools
+cd ../xcftools/
 make clean
 make -j static_exe
-cp bin/SHAPEIT5_convert_static ../static_bins/.
+cp bin/xcftools_static ../static_bins/.
 
 #Buld docker image
 LAB=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HEAD)

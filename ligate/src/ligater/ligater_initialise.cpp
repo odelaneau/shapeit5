@@ -26,6 +26,7 @@
 using namespace std;
 
 void ligater::read_files_and_initialise() {
+
 	//step0: Initialize seed & other
 	rng.setSeed(options["seed"].as < int > ());
 
@@ -37,6 +38,23 @@ void ligater::read_files_and_initialise() {
 	while (getline(fd, buffer)) filenames.push_back(buffer);
 	vrb.bullet("#files = " + stb.str(filenames.size()));
 	if (filenames.size() == 0) vrb.error("No filenames in input file.");
-
 	nfiles = filenames.size();
+
+	//step2: read PED file
+	if (options.count("pedigree")) {
+		vrb.title("Read filenames in [" + filelist + "]");
+		string buffer;
+		vector < string > tokens;
+		input_file fd_ped(options["pedigree"].as < string > ());
+		if (fd_ped.fail()) vrb.error("Cannot open pedigree file");
+		while (getline(fd_ped, buffer)) {
+			stb.split(buffer, tokens);
+			if (tokens.size() < 3) vrb.error("Problem in pedigree file; line should have at least 3 columns");
+			kids.push_back(tokens[0]);
+			fathers.push_back(tokens[1]);
+			mothers.push_back(tokens[2]);
+		}
+		fd_ped.close();
+		vrb.bullet("PED file parsing [n=" + stb.str(kids.size()) + "]");
+	}
 }

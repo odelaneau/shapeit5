@@ -29,6 +29,9 @@
 #include <containers/genotype_set.h>
 #include <containers/variant_map.h>
 
+#include <io/pedigree_reader.h>
+
+
 class haplotype_set {
 public:
 	//Haplotype Data

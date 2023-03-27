@@ -30,8 +30,6 @@
 #include <containers/variant_map.h>
 #include <containers/window_set.h>
 
-
-
 class compute_job {
 public:
 
@@ -54,9 +52,6 @@ public:
 	//Random states
 	std::vector < unsigned int > Ordering;
 	int Oiterator;
-
-
-
 
 	compute_job(variant_map & , genotype_set & , conditioning_set & , unsigned int n_max_transitions , unsigned int n_max_missing);
 	~compute_job();

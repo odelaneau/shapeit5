@@ -25,8 +25,8 @@ OFILE=$(shell for file in `find src -name *.cpp`; do echo obj/$$(basename $$file
 VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); done)
 
 NAME=$(shell basename $(CURDIR))
-BFILE=bin/SHAPEIT5_$(NAME)
-EXEFILE=bin/SHAPEIT5_$(NAME)_static
+BFILE=bin/$(NAME)
+EXEFILE=bin/$(NAME)_static
 
 include ../settings.mk
 

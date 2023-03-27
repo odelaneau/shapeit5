@@ -26,6 +26,7 @@
 #include <io/haplotype_writer.h>
 #include <io/gmap_reader.h>
 #include <io/pedigree_reader.h>
+#include <io/haploid_reader.h>
 #include <modules/genotype_builder.h>
 
 using namespace std;
@@ -55,14 +56,21 @@ void phaser::read_files_and_initialise() {
 	readerG.allocateGenotypes();
 	readerG.readGenotypes();
 
-	//step3: Read pedigrees
+	//step3: Read haploid samples
+	if (options.count("haploids")) {
+		haploid_reader readerH;
+		readerH.readHaploidFile(options["haploids"].as < string > ());
+		G.resetHaploidHeterozgotes(readerH.samples);
+	}
+
+	//step4: Read pedigrees and scaffold diploid kids
 	if (options.count("pedigree")) {
 		pedigree_reader readerP;
 		readerP.readPedigreeFile(options["pedigree"].as < string > ());
 		G.scaffoldUsingPedigrees(readerP);
 	}
 
-	//step4: Read and initialise genetic map
+	//step5: Read and initialise genetic map
 	vrb.title("Setting up genetic map:");
 	if (options.count("map")) {
 		gmap_reader readerGM;
@@ -71,16 +79,16 @@ void phaser::read_files_and_initialise() {
 	} else V.setGeneticMap();
 	M.initialise(V, options["hmm-ne"].as < int > (), (readerG.n_main_samples+readerG.n_ref_samples)*2);
 
-	//step5: Initialize haplotype set
+	//step6: Initialize haplotype set
 	vrb.title("Initializing data structures:");
 	G.imputeMonomorphic(V);
 	H.updateHaplotypes(G, true);
 	H.transposeHaplotypes_H2V(true);
 
-	//step6: Initialize PBWT for selecting states
+	//step7: Initialize PBWT for selecting states
 	if (pbwt_auto) {
 		unsigned int cumulative_sample_size = readerG.n_main_samples + readerG.n_ref_samples;
-		pbwt_depth = max(min((int)round(10-log10(cumulative_sample_size)), 8), 2);
+		pbwt_depth = max(min((int)round(9-log10(cumulative_sample_size)), 8), 2);
 		pbwt_modulo = max(min((log(cumulative_sample_size) - log(50) + 1) * 0.01, 0.15), 0.005);
 		vrb.bullet("PBWT parameters auto setting : [modulo = " + stb.str(pbwt_modulo, 3) + " / depth = " + stb.str(pbwt_depth, 3) + "]");
 	} else {
@@ -97,10 +105,10 @@ void phaser::read_files_and_initialise() {
 
 	if (!options.count("pbwt-disable-init")) H.solve(&G);
 
-	//step6: Initialize genotype structures
+	//step8: Initialize genotype structures
 	genotype_builder(G, options["thread"].as < int > ()).build();
 
-	//step7: Allocate data structures for computations
+	//step9: Allocate data structures for computations
 	unsigned int max_number_transitions = G.largestNumberOfTransitions();
 	unsigned int max_number_missing = G.largestNumberOfMissings();
 	threadData = vector < compute_job >(options["thread"].as < int > (), compute_job(V, G, H, max_number_transitions, max_number_missing));

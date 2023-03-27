@@ -51,6 +51,7 @@ void phaser::phaseWindow(int id_worker, int id_job) {
 		if (options["thread"].as < int > () > 1) pthread_mutex_unlock(&mutex_workers);
 
 		int outcome = 0;
+
 		if (G.vecG[id_job]->double_precision) {
 			//Run using double precision as underflow happened previously
 			haplotype_segment_double HS(G.vecG[id_job], H.H_opt_hap, threadData[id_worker].Kstates[w], threadData[id_worker].Windows.W[w], M);
@@ -136,6 +137,7 @@ void phaser::phase() {
 			H.Kbanned.collapse();
 			//UPDATE H with new sampled haplotypes
 			H.updateHaplotypes(G);
+			//if (options.count("pedigree")) H.checkScaffoldPedigrees(G, options["pedigree"].as < string > ());
 			//TRANSPOSE H from Hfirst to Vfirst (for next PBWT compute)
 			H.transposeHaplotypes_H2V(false);
 			//UPDATE PS after prunning

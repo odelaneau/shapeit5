@@ -249,7 +249,6 @@ void mendel_solver::writeImbalance(string fout) {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
-
 void mendel_solver::writePedigree(string fout) {
 	vrb.title("Write used pedigrees"); tac.clock();
 	output_file fdo (fout);
@@ -259,6 +258,66 @@ void mendel_solver::writePedigree(string fout) {
 		if (fidx != -1 && midx != -1) fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\t" << H.vecSamples[midx] << endl;
 		if (fidx != -1 && midx == -1) fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\tNA" << endl;
 		if (fidx == -1 && midx != -1) fdo << H.vecSamples[i] << "\tNA " << H.vecSamples[midx] << endl;
+	}
+	fdo.close();
+	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
+}
+
+void mendel_solver::writeDistances(string fout) {
+	vrb.title("Write Distances between Haps"); tac.clock();
+	output_file fdo (fout);
+	for (int i = 0 ; i < H.vecSamples.size() ; i++) {
+		int fidx = H.Fathers[i];
+		int midx = H.Mothers[i];
+
+		if (fidx != -1 && midx != -1) {
+			/*
+			unsigned int d_f0_k0 = H.distance(2*fidx+0, 2*i+0);
+			unsigned int d_f1_k1 = H.distance(2*fidx+1, 2*i+1);
+			unsigned int d_f0_k1 = H.distance(2*fidx+0, 2*i+1);
+			unsigned int d_f1_k0 = H.distance(2*fidx+1, 2*i+0);
+			unsigned int d_m0_k0 = H.distance(2*midx+0, 2*i+0);
+			unsigned int d_m1_k1 = H.distance(2*midx+1, 2*i+1);
+			unsigned int d_m0_k1 = H.distance(2*midx+0, 2*i+1);
+			unsigned int d_m1_k0 = H.distance(2*midx+1, 2*i+0);
+			fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\t" << H.vecSamples[midx] << " "<< d_f0_k0 << " "<< d_f1_k1 << " "<< d_f0_k1 << " "<< d_f1_k0 << " "<< d_m0_k0 << " "<< d_m1_k1 << " "<< d_m0_k1 << " "<< d_m1_k0 << endl;
+			*/
+			unsigned int d_k00 = H.distance(2*i+0, 2*i+0);
+			unsigned int d_k01 = H.distance(2*i+1, 2*i+0);
+			unsigned int d_k10 = H.distance(2*i+0, 2*i+1);
+			unsigned int d_k11 = H.distance(2*i+1, 2*i+1);
+			fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\t" << H.vecSamples[midx] << " "<< d_k00 << " "<< d_k01 << " "<< d_k10 << " "<< d_k11 << endl;
+		}
+
+		if (fidx != -1 && midx == -1) {
+			/*
+			unsigned int d_f0_k0 = H.distance(2*fidx+0, 2*i+0);
+			unsigned int d_f1_k1 = H.distance(2*fidx+1, 2*i+1);
+			unsigned int d_f0_k1 = H.distance(2*fidx+0, 2*i+1);
+			unsigned int d_f1_k0 = H.distance(2*fidx+1, 2*i+0);
+			fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\tNA" << " "<< d_f0_k0 << " "<< d_f1_k1 << " "<< d_f0_k1 << " "<< d_f1_k0 << " NA NA NA NA" << endl;
+			*/
+			unsigned int d_k00 = H.distance(2*i+0, 2*i+0);
+			unsigned int d_k01 = H.distance(2*i+1, 2*i+0);
+			unsigned int d_k10 = H.distance(2*i+0, 2*i+1);
+			unsigned int d_k11 = H.distance(2*i+1, 2*i+1);
+			fdo << H.vecSamples[i] << "\t" << H.vecSamples[fidx] << "\tNA "<< d_k00 << " "<< d_k01 << " "<< d_k10 << " "<< d_k11 << endl;
+		}
+		if (fidx == -1 && midx != -1) {
+			/*
+			unsigned int d_m0_k0 = H.distance(2*midx+0, 2*i+0);
+			unsigned int d_m1_k1 = H.distance(2*midx+1, 2*i+1);
+			unsigned int d_m0_k1 = H.distance(2*midx+0, 2*i+1);
+			unsigned int d_m1_k0 = H.distance(2*midx+1, 2*i+0);
+			fdo << H.vecSamples[i] << "\tNA " << H.vecSamples[midx] << " NA NA NA NA "<< d_m0_k0 << " "<< d_m1_k1 << " "<< d_m0_k1 << " "<< d_m1_k0 << endl;
+			*/
+			unsigned int d_k00 = H.distance(2*i+0, 2*i+0);
+			unsigned int d_k01 = H.distance(2*i+1, 2*i+0);
+			unsigned int d_k10 = H.distance(2*i+0, 2*i+1);
+			unsigned int d_k11 = H.distance(2*i+1, 2*i+1);
+			fdo << H.vecSamples[i] << "\tNA\t" << H.vecSamples[midx] << " "<< d_k00 << " "<< d_k01 << " "<< d_k10 << " "<< d_k11 << endl;
+		}
+
 	}
 	fdo.close();
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");

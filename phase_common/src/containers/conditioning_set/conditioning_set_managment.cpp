@@ -117,7 +117,7 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 	}
 
 	//ALLOCATE
-	Kbanned.initialize(n_ind);
+	Kbanned.initialize(n_ind, V);
 	indexes_pbwt_neighbour = vector < int > ( (depth+1) * (sites_pbwt_grouping.back()+1) * n_ind * 2UL, -1);
 	vrb.bullet("PBWT initialization [#eval=" + stb.str(n_evaluated) + " / #select=" + stb.str(sites_pbwt_grouping.back() + 1) + " / #chunk=" + stb.str(sites_pbwt_mthreading.back() + 1) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

@@ -37,9 +37,11 @@ void phaser::write_files_and_finalise() {
 	H.transposeHaplotypes_H2V(false);
 
 	//step1: writing best guess haplotypes in VCF/BCF file
-	if (options.count("bingraph")) graph_writer(G, V).writeGraphs(options["bingraph"].as < std::string > ());
-	//if (options.count("output")) haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > (), options["filter-maf"].as < std::string > ());
-	if (options.count("output")) haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > ());
+	std::string oformat = options["output-format"].as < std::string > ();
+	if (oformat == "graph")
+		graph_writer(G, V).writeGraphs(options["bingraph"].as < std::string > ());
+	else
+		haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > (), oformat);
 
 	//step2: Measure overall running time
 	vrb.bullet("Total running time = " + stb.str(tac.abs_time()) + " seconds");

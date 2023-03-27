@@ -56,6 +56,7 @@ int bitmatrix::subset(bitmatrix & BM, vector < unsigned int > rows, unsigned int
 	return col_from % 8;
 }
 
+/*
 void bitmatrix::getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1) {
 	c1=m1=0;
 	unsigned long n_bytes_per_row = stop/8 - start/8 + 1;
@@ -84,37 +85,106 @@ void bitmatrix::getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned 
 	unsigned long offset_i1_h0 = (unsigned long)(2*i1+0)*(n_cols/8) + start/8;
 	unsigned long offset_i1_h1 = (unsigned long)(2*i1+1)*(n_cols/8) + start/8;
 
-	vector < bool > mismatches = vector < bool > (n_bytes_per_row, false);
+	int maxZeroCount = 0;
+	int maxStartIdx = -1;
+	int maxStopIdx = -1;
+	int currZeroCount = 0;
+	int currStartIdx = -1;
+	int currStopIdx = -1;
 
 	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
-
 		unsigned char i0_g1 = (bytes[offset_i0_h0+b]^bytes[offset_i0_h1+b]);
 		unsigned char i0_g2 = (bytes[offset_i0_h0+b]&bytes[offset_i0_h1+b]);
-
 		unsigned char i1_g1 = (bytes[offset_i1_h0+b]^bytes[offset_i1_h1+b]);
 		unsigned char i1_g2 = (bytes[offset_i1_h0+b]&bytes[offset_i1_h1+b]);
+		bool diff1 = ((i0_g1 ^ i1_g1) != 0);
+		bool diff2 = ((i0_g2 ^ i1_g2) != 0);
 
-		mismatches[b] = ((nbit_set[i0_g1 ^ i1_g1] == 0) && (nbit_set[i0_g2 ^ i1_g2] == 0));
-	}
-
-	int ibd2_length = 0, ibd2_start = 0, ibd2_stop = 0;
-	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
-		if (mismatches[b]) {
-			ibd2_start = b;
-			ibd2_stop = b;
-		} else {
-			if ((ibd2_stop - ibd2_start + 1) > ibd2_length) {
-				ibd2_length = ibd2_stop - ibd2_start + 1;
-				_ibd2_start = ibd2_start;
-				_ibd2_stop = ibd2_stop;
+		if (diff1 || diff2) currZeroCount = 0;
+		else {
+			if (currZeroCount == 0) {
+				currStartIdx = b;
+				currStopIdx = b;
+			} else currStopIdx++;
+			currZeroCount++;
+			if (currZeroCount > maxZeroCount) {
+				maxZeroCount = currZeroCount;
+				maxStartIdx = currStartIdx;
+				maxStopIdx = currStopIdx;
 			}
-			ibd2_stop ++;
 		}
 	}
 
-	_ibd2_start = max(_ibd2_start/8 + start, start);
-	_ibd2_stop = min(_ibd2_stop/8 + start, stop);
+	if (maxZeroCount > 0) {
+		_ibd2_start = max(maxStartIdx*8 + start, start);
+		_ibd2_stop = min(maxStopIdx*8 + start, stop);
+	} else {
+		_ibd2_start = -1;
+		_ibd2_stop = -1;
+	}
 }
+
+void bitmatrix::getMatchHets(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, float & fine_proportion, float & approx_proportion, float & transitionS2S, float & transitionS2D, float & transitionD2S, float & transitionD2D) {
+	unsigned long n_bytes_per_row = stop/8 - start/8 + 1;
+	unsigned long offset_i0_h0 = (unsigned long)(2*i0+0)*(n_cols/8) + start/8;
+	unsigned long offset_i0_h1 = (unsigned long)(2*i0+1)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h0 = (unsigned long)(2*i1+0)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h1 = (unsigned long)(2*i1+1)*(n_cols/8) + start/8;
+
+	bool lastSame = true;
+	unsigned int interHet = 0, unionHet = 0;
+	unsigned int interBloc = 0, unionBloc = 0;
+	unsigned int transS2S = 0, transD2S = 0, transS2D = 0, transD2D = 0;
+	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
+		unsigned char i0_g1 = (bytes[offset_i0_h0+b]^bytes[offset_i0_h1+b]);
+		unsigned char i1_g1 = (bytes[offset_i1_h0+b]^bytes[offset_i1_h1+b]);
+
+		unsigned int iHet = nbit_set[i0_g1 ^ i1_g1];	// iHet != 0 when non matching hets in the block
+		unsigned int uHet = nbit_set[i0_g1 | i1_g1];	// uHet != 0 when hets are in the block
+
+		interHet += iHet;
+		unionHet += uHet;
+
+		interBloc += (iHet>0);
+		unionBloc += (uHet>0);
+
+		if (uHet>0) {
+			transS2S += (lastSame && !iHet);
+			transS2D += (lastSame && iHet);
+			transD2S += (!lastSame && !iHet);
+			transD2D += (!lastSame && iHet);
+			lastSame = !iHet;
+		}
+	}
+
+	fine_proportion = (unionHet - interHet) * 1.0f / unionHet;
+	approx_proportion = (unionBloc - interBloc) * 1.0f / unionBloc;
+
+	float sum = transS2S + transD2S + transS2D + transD2D;
+	transitionS2S = transS2S * 1.0f / sum;
+	transitionS2D = transS2D * 1.0f / sum;
+	transitionD2S = transD2S * 1.0f / sum;
+	transitionD2D = transD2D * 1.0f / sum;
+}
+*/
+
+float bitmatrix::getMatchHets(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop) {
+	unsigned long n_bytes_per_row = stop/8 - start/8 + 1;
+	unsigned long offset_i0_h0 = (unsigned long)(2*i0+0)*(n_cols/8) + start/8;
+	unsigned long offset_i0_h1 = (unsigned long)(2*i0+1)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h0 = (unsigned long)(2*i1+0)*(n_cols/8) + start/8;
+	unsigned long offset_i1_h1 = (unsigned long)(2*i1+1)*(n_cols/8) + start/8;
+
+	unsigned int interHet = 0, unionHet = 0;
+	for (unsigned long b = 0 ; b < n_bytes_per_row ; b ++) {
+		unsigned char i0_g1 = (bytes[offset_i0_h0+b]^bytes[offset_i0_h1+b]);
+		unsigned char i1_g1 = (bytes[offset_i1_h0+b]^bytes[offset_i1_h1+b]);
+		interHet += nbit_set[i0_g1 ^ i1_g1];	// iHet != 0 when non matching hets in the block
+		unionHet += nbit_set[i0_g1 | i1_g1];	// uHet != 0 when hets are in the block
+	}
+	return (unionHet)? ((unionHet - interHet) * 1.0f / unionHet) : 0.0f;
+}
+
 
 void bitmatrix::allocate(unsigned int nrow, unsigned int ncol) {
 	n_rows = nrow + ((nrow%8)?(8-(nrow%8)):0);
