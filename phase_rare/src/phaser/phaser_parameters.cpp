@@ -35,14 +35,13 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
-			("input-plain", bpo::value< string >(), "Genotypes to be phased in plain VCF/BCF format")
-			("input-sparse", bpo::value< string >(), "Genotypes to be phased in sparse binary format")
-			("input-region", bpo::value< string >(), "Region to be considered in --input-sparse or --input-plain")
-			("input-maf", bpo::value< double >()->default_value(0.001), "Threshold for sparse genotype representation in --input-plain")
-			("scaffold", bpo::value< string >(), "Scaffold of haplotypes in VCF/BCF format")
+			("input", bpo::value< string >(), "Genotypes to be phased")
+			("input-region", bpo::value< string >(), "Region to be considered in --input")
+			("scaffold", bpo::value< string >(), "Scaffold of haplotypes")
 			("scaffold-region", bpo::value< string >(), "Region to be considered in --scaffold")
 			("map", bpo::value< string >(), "Genetic map")
-			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother");
+			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother")
+			("haploids", bpo::value < string >(), "List of haploid samples (e.g. chrX for males). One sample ID per line.");
 
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
@@ -58,8 +57,7 @@ void phaser::declare_options() {
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
-			("output,O", bpo::value< string >(), "Phased haplotypes in VCF/BCF format")
-			("output-buffer", "Write right and left buffers too in output")
+			("output", bpo::value< string >(), "Phased haplotypes (at common AND rare variants)")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_pbwt).add(opt_hmm).add(opt_output);
@@ -71,33 +69,29 @@ void phaser::parse_command_line(vector < string > & args) {
 		bpo::notify(options);
 	} catch ( const boost::program_options::error& e ) { cerr << "Error parsing command line arguments: " << string(e.what()) << endl; exit(0); }
 
-	if (options.count("help")) { cout << descriptions << endl; exit(0); }
-
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
-	vrb.title("[SHAPEIT5] Phase2 (phase rare variants onto a haplotype scaffold)");
+	vrb.title("[SHAPEIT5] Phase_rare (phase rare variants onto a haplotype scaffold)");
 	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");
 	vrb.bullet("Contact       : simone.rubinacci@unil.ch & olivier.delaneau@gmail.com");
 	vrb.bullet("Version       : 5." + string(PHASE2_VERSION) + " / commit = " + string(__COMMIT_ID__) + " / release = " + string (__COMMIT_DATE__));
 	vrb.bullet("Run date      : " + tac.date());
+
+	if (args.size() == 0 || options.count("help")) { cout << descriptions << endl; exit(0); }
+
 }
 
 void phaser::check_options() {
-	if (!options.count("input-plain") && !options.count("input-sparse"))
-		vrb.error("--input-[plain/sparse] missing");
+	if (!options.count("input")) vrb.error("--input missing");
 
-	if (!options.count("input-region"))
-		vrb.error("--input-region missing");
+	if (!options.count("input-region")) vrb.error("--input-region missing");
 
-	if (!options.count("scaffold"))
-		vrb.error("--scaffold missing");
+	if (!options.count("scaffold")) vrb.error("--scaffold missing");
 
-	if (!options.count("scaffold-region"))
-		vrb.error("--scaffold-region missing");
+	if (!options.count("scaffold-region")) vrb.error("--scaffold-region missing");
 
-	if (!options.count("output"))
-		vrb.error("You must specify a phased output file with --output");
+	if (!options.count("output")) vrb.error("--output missing");
 
 	if (options.count("seed") && options["seed"].as < int > () < 0)
 		vrb.error("Random number generator needs a positive seed value");
@@ -114,17 +108,11 @@ void phaser::check_options() {
 
 void phaser::verbose_files() {
 	vrb.title("Files:");
-	if (options.count("input-plain")) {
-		vrb.bullet("Plain [V/B]CF : [" + options["input-plain"].as < string > () + "]");
-	} else {
-		vrb.bullet("Sparse rareBCF: [" + options["input-sparse"].as < string > () + ".bcf]");
-		vrb.bullet("Sparse rareBIN: [" + options["input-sparse"].as < string > () + ".bin]");
-	}
-
-	vrb.bullet("Scaff [V/B]CF : [" + options["scaffold"].as < string > () + "]");
+	vrb.bullet("Unphased data : [" + options["input"].as < string > () + "]");
+	vrb.bullet("Scaffold data : [" + options["scaffold"].as < string > () + "]");
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
 	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
-	if (options.count("output")) vrb.bullet("Output VCF    : [" + options["output"].as < string > () + "]");
+	vrb.bullet("Output data   : [" + options["output"].as < string > () + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 

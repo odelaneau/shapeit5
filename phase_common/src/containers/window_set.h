@@ -67,6 +67,10 @@ public:
 	int lengthBP(variant_map & V) {
 		return V.vec_pos[stop_locus]->bp - V.vec_pos[start_locus]->bp;
 	}
+
+	float lengthCM(variant_map & V) {
+		return V.vec_pos[stop_locus]->cm - V.vec_pos[start_locus]->cm;
+	}
 };
 
 class window_set {

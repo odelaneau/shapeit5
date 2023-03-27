@@ -1,11 +1,12 @@
 FROM ubuntu:20.04
 
-LABEL org.opencontainers.image.created="2022-03-16"
+
+LABEL org.opencontainers.image.created="2023-03-11"
 LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.licences="MIT"
 LABEL org.opencontainers.image.title="shapeit5"
-LABEL org.opencontainers.image.authors="olivier.delaneau@unil.ch"
+LABEL org.opencontainers.image.authors="olivier.delaneau@gmail.com"
 
 # set the environment variables
 ENV HOME /root
@@ -39,11 +40,12 @@ RUN curl -SL https://github.com/samtools/bcftools/releases/download/${htslib_ver
     rm -rf bcftools-${htslib_version}.tar.bz2 && \
     rm -rf bcftools-${htslib_version}
 
-# get GLIMPSE v2.0.0 [binary]
-ADD resources/SHAPEIT5_phase_common_static /bin/SHAPEIT5_phase_common_static
-ADD resources/SHAPEIT5_phase_rare_static /bin/SHAPEIT5_phase_rare_static
-ADD resources/SHAPEIT5_switch_static /bin/SHAPEIT5_switch_static
-ADD resources/SHAPEIT5_ligate_static /bin/SHAPEIT5_ligate_static
+# get SHAPEIT5 binaries
+ADD resources/phase_common_static /bin/phase_common_static
+ADD resources/phase_rare_static /bin/phase_rare_static
+ADD resources/switch_static /bin/switch_static
+ADD resources/ligate_static /bin/ligate_static
+ADD resources/xcftools_static /bin/xcftools_static
 
 RUN chmod +x /bin/SHAPEIT5*
 

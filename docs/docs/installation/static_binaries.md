@@ -15,4 +15,4 @@ A complete installation from source is often non necessary as we provide static 
 
 The executable files only support a 64-bit operating system on the x86_64 CPU platform and require AVX2 support. The files are released under the MIT license.
 
-If your system does not support the provided binaries, please look at the [docker package provided with SHAPEIT5]({% link docs/installation/docker.md %})
+If your system does not support the provided binaries, please look at the [docker package provided with SHAPEIT5](https://odelaneau.github.io/shapeit5/docs/installation/docker)
