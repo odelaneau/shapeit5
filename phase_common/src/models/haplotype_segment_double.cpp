@@ -66,6 +66,7 @@ haplotype_segment_double::~haplotype_segment_double() {
 	ambiguous_last = 0;
 	transition_first = 0;
 	n_cond_haps = 0;
+	n_missing = 0;
 	curr_segment_index = 0;
 	curr_segment_locus = 0;
 	curr_abs_locus = 0;
@@ -79,6 +80,8 @@ haplotype_segment_double::~haplotype_segment_double() {
 	Alpha.clear();
 	AlphaSum.clear();
 	AlphaSumSum.clear();
+	AlphaMissing.clear();
+	AlphaSumMissing.clear();
 }
 
 void haplotype_segment_double::forward() {

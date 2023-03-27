@@ -30,6 +30,17 @@
 
 using namespace std;
 
+uint32_t genotype::setHetsAsMissing() {
+	uint32_t nreset = 0;
+	for (uint32_t v = 0 ; v < n_variants ; v++) {
+		if (VAR_GET_AMB(MOD2(v), Variants[DIV2(v)])) {
+			VAR_SET_MIS(MOD2(v), Variants[DIV2(v)]);
+			nreset ++;
+		}
+	}
+	return nreset;
+}
+
 void genotype::build() {
 	//1. Count number of segments
 	unsigned n_rel_unf = 0, n_rel_var = 0, n_rel_sca = 0, n_abs_seg = 0, n_abs_amb = 0, n_rel_amb = 0, n_abs_mis = 0;

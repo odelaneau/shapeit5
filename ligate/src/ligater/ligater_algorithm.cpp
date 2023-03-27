@@ -184,7 +184,8 @@ void ligater::scan_overlap(const int ifname, const char * seek_chr, int seek_pos
 	nswap[1]=0;
 	for (int i = 0 ; i < nsamples; i++)
 	{
-		swap_phase[1][i] = nmatch[i] < nmism[i];
+		if (scaffolded[i]) swap_phase[1][i] = false;
+		else swap_phase[1][i] = nmatch[i] < nmism[i];
 		nswap[1] += swap_phase[1][i];
 
 		stats_all.push(nmatch[i] + nmism[i]);
@@ -279,6 +280,48 @@ void ligater::ligate() {
     if ( nrm ) if (bcf_hdr_sync(out_hdr) < 0) vrb.error("Failed to update header");
     */
 	nsamples = bcf_hdr_nsamples(out_hdr);
+
+	//Olivier: Get samples Names + mapping to PED file
+	scaffolded = std::vector < bool > (nsamples, false);
+	if (options.count("pedigree")) {
+
+		//Collect sample IDs
+		std::map < std::string, int > mapS2I;
+		vector < int > fathers_idx, mothers_idx;
+		for (int i = 0 ; i < nsamples ; i ++) {
+			std::string name = std::string(out_hdr->samples[i]);
+			mapS2I.insert(pair < std::string, int > (name, i));
+		}
+
+		//Mapping sample IDs with PED structure and scaffold if kid
+		int n_trios = 0, n_duosF = 0, n_duosM = 0, nscaffolded = 0;;
+		for (int i = 0 ; i < kids.size() ; i ++) {
+			map < std::string, int >::iterator itK = mapS2I.find(kids[i]);
+			map < std::string, int >::iterator itF = mapS2I.find(fathers[i]);
+			map < std::string, int >::iterator itM = mapS2I.find(mothers[i]);
+			if (itK != mapS2I.end()) {
+				if (itF != mapS2I.end() && itM != mapS2I.end()) {
+					scaffolded[itK->second] = true;
+					nscaffolded++;
+					n_trios++;
+				}
+				if (itF != mapS2I.end() && itM == mapS2I.end()) {
+					scaffolded[itK->second] = true;
+					nscaffolded++;
+					n_duosF++;
+				}
+				if (itF == mapS2I.end() && itM != mapS2I.end()) {
+					scaffolded[itK->second] = true;
+					nscaffolded++;
+					n_duosM++;
+				}
+			}
+		}
+		vrb.bullet("#trios = " + stb.str(n_trios) + " / #paternal_duos = " +  stb.str(n_duosF) + " / #maternal_duos = " +  stb.str(n_duosM));
+		vrb.bullet("#scaffolded = " + stb.str(nscaffolded) + " / #unscaffolded = " +  stb.str(nsamples - nscaffolded));
+	}
+
+
 
 	nswap = {0,0};
 	swap_phase = {std::vector<bool>(nsamples, false), std::vector<bool>(nsamples, false)};

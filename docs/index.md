@@ -4,27 +4,33 @@ title: Home
 nav_order: 1
 description: "SHAPEIT5 is a tool for haplotype phasing of high coverage sequencing data."
 permalink: /
+
 ---
-{: .warning }
-Website under construction.<br>
-A full release of the software, docker images, tutorials and documentation is scheduled for <b>Monday the 19th of December 2022</b>.<br>
-Please contact olivier.delaneau@unil.ch if you have questions.
 
-
+![alt text](https://github.com/odelaneau/shapeit5/blob/main/docs/assets/images/branding/shapeit5_logo.png?raw=true)
 
 <!---
-<img src="assets/images/branding/shapeit_logo.png" align="right" alt="Shapeit5" style="height:150px">
--->
-
 # SHAPEIT5
 {: .fs-9 .fw-500 }
+-->
 
+<!---
 **S**egmented **HAP**lotype **E**stimation and **I**mputation **T**ools version **5**
 {: .fs-5 }
+-->
+
+---
 
 ## About
 
-SHAPEIT5 estimates haplotypes in large datasets (WGS, WES, SNP array), with a special focus on rare variants. 
+SHAPEIT5 is a software package to estimate haplotypes in large genotype datasets (WGS and SNP array). 
+
+## News
+
+{: .new }
+> **Version `1.0.1` is now available!**
+> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
+
 
 ## Citation
 
@@ -46,17 +52,14 @@ SHAPEIT5 is composed of the following tools:
 - **ligate**. Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.
+- **xcftools**. Program to convert between the various file formats used by shapeit5 [BCF from/to XCF].
 
 [phase_common]({{site.baseurl}}{% link docs/documentation/phase_common.md %}){: .btn .btn-blue }
 [ligate]({{site.baseurl}}{% link docs/documentation/ligate.md %}){: .btn .btn-blue }
 [phase_rare]({{site.baseurl}}{% link docs/documentation/phase_rare.md %}){: .btn .btn-blue }
 [switch]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
+[xcftools]({{site.baseurl}}{% link docs/documentation/switch.md %}){: .btn .btn-blue  }
 
-## News
-
-{: .new }
-> **Version `1.0.0` will be soon available!**
-> See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 ---
 

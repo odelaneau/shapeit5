@@ -25,7 +25,6 @@
 #include <io/genotype_reader/genotype_reader_header.h>
 #include <io/haplotype_writer.h>
 #include <io/gmap_reader.h>
-#include <io/pedigree_reader.h>
 
 using namespace std;
 
@@ -43,38 +42,31 @@ void phaser::read_files_and_initialise() {
 	buildCoordinates();
 
 	//step2: Set up the genotype reader
-	vrb.title("Reading genotype data:");
+	vrb.title("Reading genotype data");
 	genotype_reader readerG(H, G, V);
 	readerG.setThreads(options["thread"].as < int > ());
 	readerG.setRegions(options["scaffold-region"].as < string > (), input_start, input_stop);
-	readerG.setMAF(options["input-maf"].as < double > ());
 
 	//step3: Read the genotype data
-	if (options.count("input-plain")) {
-		readerG.setFilenames(options["input-plain"].as < string > (), options["input-plain"].as < string > (), options["scaffold"].as < string > (), options["output"].as < string > ());
-		readerG.scanGenotypesPlain();
-		readerG.allocateGenotypes();
-		readerG.readGenotypesPlain();
-	} else {
-		readerG.setFilenames(options["input-sparse"].as < string > () + ".bcf", options["input-sparse"].as < string > () + ".bin", options["scaffold"].as < string > (), options["output"].as < string > ());
-		readerG.scanGenotypesSparse();
-		readerG.allocateGenotypes();
-		readerG.readGenotypesSparse();
-	}
+	readerG.setFilenames(options["input"].as < string > (), options["scaffold"].as < string > ());
+	readerG.scanGenotypes();
+	readerG.allocateGenotypes();
+	readerG.readGenotypes();
 
+	//step4: Read haploids
+	if (options.count("haploids")) G.mapHaploidsAndResetHets(options["haploids"].as < string > ());
+	else G.haploids = std::vector < bool > (G.n_samples, false);
 
+	//step5: Read pedigrees and solve
+	if (options.count("pedigree")) G.phasePedigrees(options["pedigree"].as < string > ());
+
+	//step6: Transpose genotypes and basic imputation
+	vrb.title("Initializing sparse genotypes");
 	G.imputeMonomorphic();
 	G.fillup_by_transpose_V2I();
 
-	//step4: Read pedigrees
-	if (options.count("pedigree")) {
-		pedigree_reader readerP;
-		readerP.readPedigreeFile(options["pedigree"].as < string > ());
-		G.phaseUsingPedigrees(readerP);
-	}
-
-	//step5: Read and initialise genetic map
-	vrb.title("Setting up genetic map:");
+	//step7: Read and initialise genetic map
+	vrb.title("Setting up genetic map");
 	if (options.count("map")) {
 		gmap_reader readerGM;
 		readerGM.readGeneticMapFile(options["map"].as < string > ());

@@ -110,7 +110,8 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 	for (int i = 0 ; i < n_ind ; i ++) mapG.insert(pair < string, genotype * > (vecG[i]->name, vecG[i]));
 
 	//Mapping samples
-	unsigned int ntrios = 0, nduos = 0, nmendels = 0;
+	uint32_t ntrios = 0, nduosM = 0, nduosF = 0, nmendels = 0;
+	uint32_t nunscaffoldedhaploids = 0;
 	map < string, genotype * > :: iterator itK, itM, itF;
 	for (int i = 0 ; i < pr.kids.size() ; i ++) {
 		itK = mapG.find(pr.kids[i]);
@@ -119,24 +120,54 @@ void genotype_set::scaffoldUsingPedigrees(pedigree_reader & pr) {
 		genotype * gkid = (itK != mapG.end())?itK->second : NULL;
 		genotype * gfather = (itF != mapG.end())?itF->second : NULL;
 		genotype * gmother = (itM != mapG.end())?itM->second : NULL;
-		if (gkid) {
+		if (gkid && gkid->haploid && (gfather || gmother)) nunscaffoldedhaploids++;
+		if (gkid && !gkid->haploid) {
 			if (gfather && gmother) {
 				gkid->scaffoldTrio(gfather, gmother, counts);
 				ntrios++;
 			} else if (gfather) {
 				gkid->scaffoldDuoFather(gfather, counts);
-				nduos++;
+				nduosF++;
 			} else if (gmother) {
 				gkid->scaffoldDuoMother(gmother, counts);
-				nduos++;
+				nduosM++;
 			}
 		}
 	}
 
 	//Verbose
 	vrb.bullet("PED mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duos = " + stb.str(nduos));
+	vrb.bullet2("#trios = " + stb.str(ntrios) + " / #duosFat = " + stb.str(nduosF) + " / #duosMat = " + stb.str(nduosM));
+	if (nunscaffoldedhaploids) vrb.bullet2("Number of non-scaffolded haploid samples = " + stb.str(nunscaffoldedhaploids));
 	vrb.bullet2("%mendel_errors = " + stb.str(counts[0] *100.0 / counts[1], 2) + "% (n=" + stb.str(counts[0]) + ")");
 	vrb.bullet2("%hets_phased = " + stb.str(counts[2]*100.0 / (counts[2]+counts[3]), 2) + "% (n=" + stb.str(counts[2]) + ")");
+
 }
+
+void genotype_set::resetHaploidHeterozgotes(vector < string > & haploids) {
+	tac.clock();
+
+	// Build map
+	map < string, genotype * > mapG;
+	for (int i = 0 ; i < n_ind ; i ++) mapG.insert(pair < string, genotype * > (vecG[i]->name, vecG[i]));
+
+	//Mapping samples
+	uint32_t nhaploids = 0;
+	uint64_t nreset = 0, ntotal = 0;
+	map < string, genotype * > :: iterator itS;
+	for (int32_t i = 0 ; i < haploids.size() ; i ++) {
+		itS = mapG.find(haploids[i]);
+		genotype * g = (itS != mapG.end())?itS->second : NULL;
+		if (g) {
+			g->haploid = true;
+			nreset += g->setHetsAsMissing();
+			ntotal += g->n_variants;
+			nhaploids ++;
+		}
+	}
+	vrb.bullet("Haploid sample mapping (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet2("#haploids = " + stb.str(nhaploids) + " / #diploids = " + stb.str(n_ind - nhaploids));
+	vrb.bullet2("Hets set as missing: n=" + stb.str(nreset) + " (" + stb.str(nreset * 100.0 / ntotal, 3) + "%)");
+}
+
 

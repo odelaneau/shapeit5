@@ -47,30 +47,36 @@ public:
 	//PARAMETERS
 	std::string funphased;
 	std::string fphased;
-	std::string fbinary;
-	std::string foutput;//for reporting
 	std::string scaffold_region;
 	int input_start;
 	int input_stop;
 	int nthreads;
-	float minmaf;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	genotype_reader(haplotype_set &, genotype_set &, variant_map &);
 	~genotype_reader();
 
 	//PARAMS
-	void setFilenames(std::string, std::string, std::string, std::string);
+	void setFilenames(std::string, std::string);
 	void setThreads(int);
 	void setRegions(std::string, int, int);
-	void setMAF(float);
 
 	//IO
+	/*
 	void scanGenotypesPlain();
 	void readGenotypesPlain();
 	void scanGenotypesSparse();
 	void readGenotypesSparse();
+	*/
+	void scanGenotypes();
+	void readGenotypes();
 	void allocateGenotypes();
+
+	//PED
+	void readPedigreeFile(std::string);
+	void mapPedigrees();
+	void solvePedigrees(std::vector < bool > &, std::vector < bool > &, std::vector < bool > &, std::vector < bool > &);
+
 };
 
 
