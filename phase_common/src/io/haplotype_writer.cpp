@@ -21,77 +21,71 @@
  ******************************************************************************/
 
 #include "../../versions/versions.h"
+
 #include <io/haplotype_writer.h>
+#include <utils/xcf.h>
+#include <containers/bitvector.h>
 
 using namespace std;
 
-#define OFILE_VCFU	0
-#define OFILE_VCFC	1
-#define OFILE_BCFC	2
 
-haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, variant_map & _V, int _nthreads): H(_H), G(_G), V(_V) {
+haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, variant_map & _V, uint32_t _nthreads): H(_H), G(_G), V(_V) {
 	nthreads = _nthreads;
 }
 
 haplotype_writer::~haplotype_writer() {
 }
 
-void haplotype_writer::writeHaplotypes(string fname) {
-	// Init
+void haplotype_writer::writeHaplotypes(string fname, string fformat) {
 	tac.clock();
-	string file_format = "w";
-	unsigned int file_type = OFILE_VCFU;
-	if (fname.size() > 6 && fname.substr(fname.size()-6) == "vcf.gz") { file_format = "wz"; file_type = OFILE_VCFC; }
-	if (fname.size() > 3 && fname.substr(fname.size()-3) == "bcf") { file_format = "wb"; file_type = OFILE_BCFC; }
-	htsFile * fp = hts_open(fname.c_str(),file_format.c_str());
-	if (nthreads > 1) hts_set_threads(fp, nthreads);
-	bcf_hdr_t * hdr = bcf_hdr_init("w");
-	bcf1_t *rec = bcf_init1();
 
-	// Create VCF header
-	bcf_hdr_append(hdr, string("##fileDate="+tac.date()).c_str());
-	bcf_hdr_append(hdr, string("##source=shapeit5 phase 1 v" + string(PHASE1_VERSION)).c_str());
-	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_pos[0]->chr + ">").c_str());
-	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
-	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
-	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
-	//bcf_hdr_append(hdr, std::string("##SPARSE_MAF="+stb.str(filter_maf)).c_str());
+	//Open XCF writer
+	bool hts_genotypes = (fformat == "bcf");
+	xcf_writer XW(fname, hts_genotypes, nthreads);
 
-	//Add samples
-	for (int i = 0 ; i < G.n_ind ; i ++) bcf_hdr_add_sample(hdr, G.vecG[i]->name.c_str());
-	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
-	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write VCF/header");
+	//Write header
+	vector < string > snames;
+	for (int32_t i = 0 ; i < G.n_ind ; i ++) snames.push_back(G.vecG[i]->name.c_str());
+	XW.writeHeader(snames, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
 
-	//Add records
-	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
+	//Allocate buffers
+	int32_t * output_buffer = (int32_t *) malloc(G.n_ind * 2 * sizeof(int32_t));
+	bitvector output_bitvector (G.n_ind * 2);
+
+	//Write records
 	for (int l = 0 ; l < V.size() ; l ++) {
-		bcf_clear1(rec);
-		rec->rid = bcf_hdr_name2id(hdr, V.vec_pos[l]->chr.c_str());
-		rec->pos = V.vec_pos[l]->bp - 1;
-		bcf_update_id(hdr, rec, V.vec_pos[l]->id.c_str());
-		string alleles = V.vec_pos[l]->ref + "," + V.vec_pos[l]->alt;
-		bcf_update_alleles_str(hdr, rec, alleles.c_str());
-		int count_alt = 0, count_tot = H.n_hap;
-		for (int i = 0 ; i < G.n_ind ; i++) {
-			bool a0 = H.H_opt_var.get(l, 2*i+0);
-			bool a1 = H.H_opt_var.get(l, 2*i+1);
-			count_alt += a0+a1;
-			genotypes[2*i+0] = bcf_gt_phased(a0);
-			genotypes[2*i+1] = bcf_gt_phased(a1);
+
+		//Get AC/AN
+		int32_t vAC = 0, vAN = H.n_hap;
+		for (int32_t h = 0 ; h < 2*G.n_ind ; h++) vAC += H.H_opt_var.get(l, h);
+
+		//Variant information
+		XW.writeInfo(V.vec_pos[l]->chr, V.vec_pos[l]->bp, V.vec_pos[l]->ref, V.vec_pos[l]->alt, V.vec_pos[l]->id, vAC, vAN);
+
+		//Write haplotypes in BCF format
+		if (hts_genotypes) {
+			for (int32_t h = 0 ; h < 2*G.n_ind ; h++) output_buffer[h] = bcf_gt_phased(H.H_opt_var.get(l, h));
+			XW.writeRecord(RECORD_BCFVCF_GENOTYPE, reinterpret_cast<char*>(output_buffer), 2 * G.n_ind * sizeof(int32_t));
+		} else {
+			for (int32_t h = 0 ; h < 2*G.n_ind ; h++) output_bitvector.set(h, H.H_opt_var.get(l, h));
+			XW.writeRecord(RECORD_BINARY_HAPLOTYPE, reinterpret_cast<char*>(output_bitvector.bytes), output_bitvector.n_bytes);
 		}
-		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
-		bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
-		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
-		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
+
+		//Verbose progress
 		vrb.progress("  * VCF writing", (l+1)*1.0/V.size());
 	}
-	free(genotypes);
-	bcf_destroy1(rec);
-	bcf_hdr_destroy(hdr);
-	if (hts_close(fp)) vrb.error("Non zero status when closing VCF/BCF file descriptor");
-	switch (file_type) {
-	case OFILE_VCFU: vrb.bullet("VCF writing [Uncompressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
-	case OFILE_VCFC: vrb.bullet("VCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
-	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
-	}
+
+	//Close
+	free(output_buffer);
+	XW.close();
+
+	//Verbose writing
+	if (hts_genotypes)
+		vrb.bullet("VCF/BCF writing [N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
+	else
+		vrb.bullet("XCF writing [N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
+
+	//Indexing
+	vrb.bullet("Indexing files");
+	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }

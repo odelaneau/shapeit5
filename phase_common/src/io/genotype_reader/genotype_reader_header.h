@@ -31,22 +31,22 @@
 class genotype_reader {
 public:
 	//DATA
-	int nthreads;
+	int32_t nthreads;
 	haplotype_set & H;
 	genotype_set & G;
 	variant_map & V;
 
 	//COUNTS
-	unsigned long n_variants;
-	unsigned long n_main_samples;
-	unsigned long n_ref_samples;
-	std::vector < unsigned long > n_genotypes;
+	uint64_t n_variants;
+	uint64_t n_main_samples;
+	uint64_t n_ref_samples;
+	std::vector < uint64_t > n_genotypes;
+	std::vector < uint64_t > n_alleles;
 
 	//PARAMETERS
 	std::vector< std::string > filenames;
-	std::vector< char > panels;
+	std::vector< int8_t > panels;
 	std::string region;
-	int threads;
 	float filter_min_maf;
 	bool filter_snp_only;
 	std::vector < bool > variant_mask;

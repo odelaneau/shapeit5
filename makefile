@@ -1,4 +1,4 @@
-projects = phase_common phase_rare switch ligate
+projects = phase_common phase_rare switch ligate xcftools
 
 .PHONY: all $(projects) 
 
@@ -14,4 +14,9 @@ clean:
 	rm -f static_bins/*
 	rm -f docker/resources/*
 	rm -f docker/shapeit5*.tar.gz
+
+static_exe:
+	for dir in $(projects); do \
+	$(MAKE) $@ -C $$dir; \
+	done
 

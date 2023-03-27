@@ -35,7 +35,8 @@ void ligater::declare_options() {
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
-			("input", bpo::value < string >(), "Text file containing all VCF/BCF to ligate");
+			("input", bpo::value < string >(), "Text file containing all VCF/BCF to ligate")
+			("pedigree", bpo::value< string >(), "Pedigree file (kid father mother");
 
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()

@@ -41,6 +41,7 @@ void switcher::process() {
 		MP.writePerVariant(options["output"].as < string > () + ".variant.mendel.txt.gz");
 		MP.writeImbalance(options["output"].as < string > () + ".variant.imbalance.txt.gz");
 		MP.writePedigree(options["output"].as < string > () + ".sample.pedigree");
+		//MP.writeDistances(options["output"].as < string > () + ".sample.distance.txt.gz");
 	} else MP.set();
 
 	//

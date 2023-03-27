@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define MAX_OVERLAP_HETS 0.8f
+#define MAX_OVERLAP_HETS 0.75f
 #define N_RANDOM_HAPS 100
 
 compute_job::compute_job(variant_map & _V, genotype_set & _G, conditioning_set & _H, unsigned int n_max_transitions, unsigned int n_max_missing) : V(_V), G(_G), H(_H) {
@@ -77,38 +77,27 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 		vector < int > toBeRemoved;
 
 		//3.1. Identify potential IBD2 pairs
-		int count_het, match_het;
 		for (int k = 1; k < Kstates[w].size() ; k++) {
 			unsigned int ind0 = Kstates[w][k-1]/2;
 			unsigned int ind1 = Kstates[w][k]/2;
-			if (ind0 == ind1) {
-
-				H.H_opt_hap.getMatchHetCount(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus, count_het, match_het);
-				float perc_matching_hets = (count_het - match_het) * 1.0f / count_het;
-
-				if (perc_matching_hets > MAX_OVERLAP_HETS) {
-				//	cout << perc_matching_hets << " " << count_het << " " << match_het << " " << ind << " " << ind0 << endl;
+			if (ind0 == ind1 && !G.vecG[ind0]->haploid && !G.vecG[ind1]->haploid) {
+				float het_overlap = H.H_opt_hap.getMatchHets(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus);
+				if (het_overlap > 0.75) {
 					toBeRemoved.push_back(k-1);
 					toBeRemoved.push_back(k);
-					Kbanned.emplace_back(ind0, (Windows.W[w].start_locus*3)/2 - Windows.W[w].stop_locus/2, (Windows.W[w].stop_locus*3)/2 - Windows.W[w].start_locus/2);
+					Kbanned.emplace_back(ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus);
+					//cout << "IBD2 : " << G.vecG[ind]->name << " vs " << G.vecG[ind0]->name << " / P = " << stb.str(het_overlap*100.0, 2) << endl;
 				}
 			}
 		}
 
-		//3.2. Replace potential IBD2 states from conditioning set with random ones
+		//3.2. Remove potential IBD2 states from conditioning set
 		if (toBeRemoved.size() > 0) {
-			vector < unsigned int > Ktmp; Ktmp.reserve(Kstates[w].size() - toBeRemoved.size());
+			vector < unsigned int > Ktmp;
+			Ktmp.reserve(Kstates[w].size() - toBeRemoved.size());
 			for (int k = 0, p = 0; k < Kstates[w].size() ; k++) {
-				if (toBeRemoved[p] == k) {
-					Ktmp.push_back(Kstates[w][k]);
-					p++;
-				}
-			}
-
-			for (int r = 0 ; r < toBeRemoved.size() ; r ++) {
-				int random_state = Ordering[Oiterator];
-				if (random_state/2 != ind) Ktmp.push_back(random_state);
-				Oiterator=((Oiterator+1)==H.n_hap)?0:(Oiterator+1);
+				if (toBeRemoved[p] == k) p++;
+				else Ktmp.push_back(Kstates[w][k]);
 			}
 
 			sort(Ktmp.begin(), Ktmp.end());

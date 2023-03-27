@@ -135,8 +135,8 @@ void genotype::store(vector < double > & CurrentTransProbabilities, vector < flo
 	}
 	for (unsigned int t = 0, trel = 0 ; t < n_transitions ; t ++) {
 		if (ProbMask[t]) ProbStored[trel++] += CurrentTransProbabilities[t];
-		//if (!ProbMask[t] && CurrentTransProbabilities[t] > 0.01) cout << "Should be stored " << CurrentTransProbabilities[t] << endl;
 	}
 	for (unsigned int m = 0 ; m < (n_missing * HAP_NUMBER) ; m ++) ProbMissing[m] += CurrentMissingProbabilities[m];
 	n_storage_events ++;
 }
+
