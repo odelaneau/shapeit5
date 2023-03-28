@@ -47,6 +47,6 @@ ADD resources/switch_static /bin/switch_static
 ADD resources/ligate_static /bin/ligate_static
 ADD resources/xcftools_static /bin/xcftools_static
 
-RUN chmod +x /bin/SHAPEIT5*
+RUN chmod +x /bin/*_static
 
 WORKDIR $HOME
