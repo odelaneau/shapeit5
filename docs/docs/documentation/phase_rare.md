@@ -58,6 +58,7 @@ The obtained files can be quickly concatenated to generate chromosome-wide files
 | \-\-scaffold-region  | STRING  | NA       | Region to be considered in \-\-scaffold  |
 | \-\-map              | STRING  | NA       | Genetic map  |
 | \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother) |
+| \-\-haploids         | STRING  | NA       | List of samples that are haploid (e.g. males on chrX) |
 
 
 #### PBWT parameters

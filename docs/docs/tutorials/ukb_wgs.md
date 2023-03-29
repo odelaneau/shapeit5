@@ -20,7 +20,7 @@ parent: Tutorials
 ## Rationale
 SHAPEIT5 is a two-step approach that treats each chromosome independently and works as follows:
 
-1. Phase common variants (MAF >= 0.1%) of a chromosome using SHAPEIT5_phase_common. This can be done as a single job for SNP array or WES data, but it might be necessary to split the chromosome into large chunks (e.g. 20 cM) in the case of WGS data.
+1. Phase common variants (MAF >= 0.1%) of a chromosome using SHAPEIT5_phase_common. This can be done as a single job for SNP array or WES data, but it might be necessary to split the chromosome into large chunks (e.g. 20 cM) in the case of WGS data. Chunk coordinates for b38 are given in the resources folder.
 
 2. Ligate the phased common variants (MAF >= 0.1%) of a chromosome using SHAPEIT5_ligate, only if chunking was performed in step 1. The ligation step is computationally light and uses variants in the intersection of the chunks to provide chromosome-wide haplotypes. The result of this step (or the previous step if no chunking was used), is used as a haplotype scaffold for the next step.
 
