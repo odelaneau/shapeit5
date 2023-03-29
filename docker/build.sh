@@ -38,7 +38,7 @@ LAB=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HE
 
 cd ../docker/
 mkdir -p resources
-cp ../static_bins/SHAPEIT5* resources/.
+cp ../static_bins/* resources/.
 
 docker build -t $LAB -f Dockerfile .
 docker save $LAB | gzip -c > $LAB\.tar.gz

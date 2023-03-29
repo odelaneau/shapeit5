@@ -22,11 +22,9 @@
 #ifndef _VERSION_H
 #define _VERSION_H
 
-#define PHASE1_VERSION "0.2"
-#define PHASE2_VERSION "0.2"
-#define LIGATE_VERSION "0.2"
-#define SAMPLE_VERSION "0.2"
-#define SWITCH_VERSION "0.2"
-#define XCFTLS_VERSION "0.2"
+#define PHASE1_VERSION "1.0"
+#define PHASE2_VERSION "1.0"
+#define LIGATE_VERSION "1.0"
+#define SWITCH_VERSION "1.0"
 
 #endif
