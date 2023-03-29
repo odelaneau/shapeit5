@@ -1,4 +1,5 @@
 #Clean up
+mkdir -p ../static_bins/
 rm ../static_bins/*
 rm resources/*
 
@@ -38,7 +39,8 @@ LAB=shapeit5_$(git log -1 --format=%cd --date=short)\_$(git rev-parse --short HE
 
 cd ../docker/
 mkdir -p resources
-cp ../static_bins/* resources/.
+
+cp ../static_bins/*_static resources/.
 
 docker build -t $LAB -f Dockerfile .
 docker save $LAB | gzip -c > $LAB\.tar.gz
