@@ -28,7 +28,7 @@ SHAPEIT5 is a software package to estimate haplotypes in large genotype datasets
 ## News
 
 {: .new }
-> **Version `1.0.1` is now available!**
+> **Version `5.1.0` is now available!**
 > See [the CHANGELOG](https://github.com/odelaneau/shapeit5/blob/main/docs/CHANGELOG.md) for details.
 
 
