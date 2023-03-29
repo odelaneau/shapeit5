@@ -51,6 +51,7 @@ The program phases common variants (\-\-filter-maf 0.001) from the input file (\
 | \-S \[\-\-scaffold \]| STRING  | NA       | Scaffold of haplotypes in VCF/BCF/XCF format  |
 | \-M \[\-\-map \]     | STRING  | NA       | Genetic map  |
 | \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother triplets) |
+| \-\-haploids         | STRING  | NA       | List of samples that are haploids (e.g. males for chrX) |
 | \-R \[\-\-region \]  | STRING  | NA       | Target region  |
 
 

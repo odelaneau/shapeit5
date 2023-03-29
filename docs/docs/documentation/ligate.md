@@ -49,6 +49,7 @@ The program ligates together multiple phased files, listed in the input txt file
 | Option name 	       | Argument| Default  | Description |
 |:---------------------|:--------|:---------|:-------------------------------------|
 | \-I \[\-\-input \]   | STRING  | NA       | Text file containing all VCF/BCF to ligate, one file per line |
+| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother triplets). Really important to ensure that not switching occurs for scaffolded samples |
 
 #### Output files
 
