@@ -1,14 +1,8 @@
----
-title: CHANGELOG
-layout: default
----
-
 # CHANGELOG
 
 All notable changes to this project are documented in this file.
 
-{: .highlight }
-Version 5.1.0 is now available [here] (https://github.com/odelaneau/shapeit5/releases) as docker image (`shapeit5_2023-03-23_a4a1818.docker.tar.gz`) or static binaries. 
+Version 5.1.0 is now available [here](https://github.com/odelaneau/shapeit5/releases) as docker image (`shapeit5_2023-03-23_a4a1818.docker.tar.gz`) or static binaries. 
 
 
 ## v5.1.0

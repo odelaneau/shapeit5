@@ -18,6 +18,7 @@ parent: Documentation
 ### Description
 Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 
+
 ### Usage
 Simple run
 
@@ -26,11 +27,13 @@ Simple run
 #ls -1v in order to keep the order within the chromosome
 ls -1v chr1/*.phased.bcf > list_phased_files_chr1.txt
 
-SHAPEIT5_ligate --input list_phased_files_chr1.txt --output ligated_chr1.bcf --thread 2
+ligate --input list_phased_files_chr1.txt --output ligated_chr1.bcf --thread 2
 ```
 </div>
 
 The program ligates together multiple phased files, listed in the input txt file (\-\-input list_phased_files.txt) overlapping at buffer regions, using two threads (\-\-thread 2), and saves the ouput file (\-\-output ligated_chr1.bcf).
+
+If some samples in input have been phased using pedigree (trios/duos, option \-\-pedigree in phase_common), do not forget to use \-\-pedigree here too to make sure that these haplotypes are not switched when ligated. 
 
 ---
 
