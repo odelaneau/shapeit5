@@ -48,7 +48,7 @@ If you use SHAPEIT5 in your research work, please cite the following paper:
 
 SHAPEIT5 is composed of the following tools:
 
-- **phase_common**. Tool to phase common sites, typically SNP array data, or the first step of WES/WGS data.
+- **phase_common**. Tool to phase common sites, typically SNP array data, or the first step of WES/WGS data phasing pipeline. This tool replaces SHAPEIT4.
 - **ligate**. Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
 - **phase_rare**. Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
 - **switch**. Program to compute switch error rate and genotyping error rate given simulated or trio data.

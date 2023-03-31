@@ -18,17 +18,60 @@ parent: Documentation
 ### Description
 Tool to phase common sites, typically SNP array data, or the first step of WES/WGS data.
 This is basically an improved version of [SHAPEIT4](https://odelaneau.github.io/shapeit4/) and serves as a replacement.
+If you want to prephase your SNP array data for a GWAS, this is the tool yu're supposed to use.
 
-### Usage
-Simple run
+### Usage1: simple phasing run of common variants in simulated data
+Phasing simulated genotype data in test/10k.
 
 <div class="code-example" markdown="1">
 ```bash
-SHAPEIT5_phase_common --input test/10k/msprime.nodup.bcf --filter-maf 0.001  --output test/10k/msprime.common.phased.bcf --region 1 --thread 8
+phase_common --input test/10k/msprime.nodup.bcf --filter-maf 0.001  --output test/10k/msprime.common.phased.bcf --region 1 --thread 8
+```
+</div>
+The program phases common variants (\-\-filter-maf 0.001) from the input file (\-\-input test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the full chromosome 1 (\-\-region 1) and saves the results in the output file (\-\-output test/10k/msprime.common.phased.bcf).
+No genetic map is used, a recombination rate of 1 cM/Mb is assumed by default. 
+
+---
+
+### Usage2: simple phasing run of real data
+Phasing real genotype data in test/1000G.
+
+<div class="code-example" markdown="1">
+```bash
+phase_common --input test/1000G/unphased.bcf --map test/1000G/chr20.b37.gmap.gz --output test/1000G/phased.bcf --region 20 --thread 8
 ```
 </div>
 
-The program phases common variants (\-\-filter-maf 0.001) from the input file (\-\-input test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the full chromosome 1 (\-\-region 1) and saves the results in the output file (\-\-output test/10k/msprime.common.phased.bcf).
+The program phases all variants from the input file (\-\-input test/1000G/unphased.bcf) using 8 threads (\-\-thread 8) on the full chromosome 20 (\-\-region 20) using hapmap genetic map (\-\-map test/1000G/chr20.b37.gmap.gz) and saves the results in the output file (\-\-output test/1000G/phased.bcf).
+Of note, HapMap genetic maps for builds b37 and b38 of the genome can be found in the resources folder. 
+
+---
+
+### Usage3: advanced phasing run of real data
+Phasing real genotype data in test/1000G using a reference panel and a scaffold.
+
+<div class="code-example" markdown="1">
+```bash
+phase_common --input test/1000G/unphased.bcf --map test/1000G/chr20.b37.gmap.gz --reference test/1000G/reference.bcf --scaffold test/1000G/scaffold.bcf --output test/1000G/phased.bcf --region 20 --thread 8
+```
+</div>
+
+Same as run 2, using also a reference panel of haplotypes (\-\-reference test/1000G/reference.bcf) and a haplotype scaffold for some of the target samples (\-\-scaffold test/1000G/scaffold.bcf). 
+
+---
+
+### Usage4: advanced phasing run of real data using pedigree information
+Phasing real genotype data in test/1000G using pedigree information scaffold.
+
+<div class="code-example" markdown="1">
+```bash
+phase_common --input test/1000G/pedigree.bcf --pedigree test/1000G/pedigree.fam --map test/1000G/chr20.b37.gmap.gz --output test/1000G/phased.bcf --region 20 --thread 8
+```
+</div>
+
+Same as run 2, using pedigree information for data in input (\-\-pedigree test/1000G/pedigree.fam). 
+Kids will be automatically scaffolded at all sites that can be resolved using Mendel logic.
+Parents will be statistically phased without any constraints.  
 
 ---
 

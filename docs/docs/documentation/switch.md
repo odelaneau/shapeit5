@@ -23,7 +23,7 @@ Simple run
 
 <div class="code-example" markdown="1">
 ```bash
-SHAPEIT5_switch --validation 10k/msprime.nodup.bcf --estimation test/10k/msprime.rare.chunk1.bcf --region 1 --output test/10k/msprime.rare.chunk1
+switch --validation 10k/msprime.nodup.bcf --estimation test/10k/msprime.rare.chunk1.bcf --region 1 --output test/10k/msprime.rare.chunk1
 ```
 </div>
 

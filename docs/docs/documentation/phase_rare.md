@@ -16,22 +16,27 @@ parent: Documentation
 ---
 
 ### Description
-Tool to phase rare variants onto a scaffold of common variants (output of phase_common / ligate).
+Tool to phase rare variants onto a scaffold of common variants (output of phase_common + ligate).
 
-### Usage
-Simple run
+### Usage1: simple phasing run of rare variants in simulated data
+Phasing the rare variants of the simulated genotype data in test/10k.
+Phasing happens in chunks of 1Mb. 
 
 <div class="code-example" markdown="1">
 ```bash
-#chunk1
-SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk1.bcf --scaffold-region 1:1000000-3000000 --input-region 1:1500000-2500000 --thread 8
-
-#chunk2
-SHAPEIT5_phase_rare --input-plain 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk2.bcf --scaffold-region 1:2000000-4000000 --input-region 1:2500001-3500000 --thread 8
+phase_rare --input 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk1.bcf --scaffold-region 1:1000000-3000000 --input-region 1:1500001-2500000 --thread 8
+phase_rare --input 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk2.bcf --scaffold-region 1:2000000-4000000 --input-region 1:2500001-3500000 --thread 8
+phase_rare --input 10k/msprime.nodup.bcf --scaffold test/10k/msprime.common.truth.bcf --output test/10k/msprime.rare.chunk3.bcf --scaffold-region 1:3000000-5000000 --input-region 1:3500001-4500000 --thread 8
 ```
 </div>
 
-The first command phases rare variants from the input file (\-\-input-plain test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) on the region 1500000-2500000 of chromosome 1 (\-\-input-region 1:1500000-2500000) using a haplotype scaffold phased for the full chromosome 1 obtained from the phase_common program in the region 1000000-3000000 of chromosome 1 (\-\-scaffold-region 1:1000000-3000000) and saves the results in the output file (\-\-output test/10k/msprime.rare.chunk1.bcf).
+These commands phase rare variants found in the input file (\-\-input-plain test/10k/msprime.nodup.bcf) using 8 threads (\-\-thread 8) in chunks of 1Mb.
+For the first chunk, the scaffold data used is between 1Mb and 3Mb and the rare variant data is between 1.5Mb and 2.5Mb. The scaffold therefore includes 0.5Mb buffer on each side.
+Other remaining chunks of data are phased similarly, sliding the phasing window by 1Mb.
+Chunk coordinates can be easily made using the GLIMPSE chunking tool (https://github.com/odelaneau/GLIMPSE).
+
+
+ obtained from the phase_common program in the region 1000000-3000000 of chromosome 1 (\-\-scaffold-region 1:1000000-3000000) and saves the results in the output file (\-\-output test/10k/msprime.rare.chunk1.bcf).
 
 The obtained files can be quickly concatenated to generate chromosome-wide files using bcftools concat --naive.
 

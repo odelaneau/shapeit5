@@ -80,7 +80,7 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 		for (int k = 1; k < Kstates[w].size() ; k++) {
 			unsigned int ind0 = Kstates[w][k-1]/2;
 			unsigned int ind1 = Kstates[w][k]/2;
-			if (ind0 == ind1 && !G.vecG[ind0]->haploid && !G.vecG[ind1]->haploid) {
+			if (ind0 == ind1 && ind0 < G.n_ind && !G.vecG[ind0]->haploid) {
 				float het_overlap = H.H_opt_hap.getMatchHets(ind, ind0, Windows.W[w].start_locus, Windows.W[w].stop_locus);
 				if (het_overlap > 0.75) {
 					toBeRemoved.push_back(k-1);
