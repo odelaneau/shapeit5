@@ -26,14 +26,12 @@ SHAPEIT5_ligate --input $IN --output $OUT --thread $THREADS --index
 ```
 </div>
 
-
-
 ## Phase_rare
 This command phase rare variants onto the haplotype scaffold of common variants. Typically, the scaffold is the ligated chunks from **SHAPEIT5_ligate**.
 
 <div class="code-example" markdown="1">
 ```bash	
-SHAPEIT5_phase_rare --input-plain $IN --map $MAP --scaffold $SCAF --output $OUT --thread $THREADS --log $LOG --filter-maf 0.001 --region $REG
+SHAPEIT5_phase_rare --input $IN --map $MAP --scaffold $SCAF --output $OUT --thread $THREADS --log $LOG --input-region $IREG --scaffold-region $SREG
 ```
 </div>
 

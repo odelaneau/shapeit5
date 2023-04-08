@@ -45,6 +45,7 @@ ADD resources/phase_common_static /bin/phase_common_static
 ADD resources/phase_rare_static /bin/phase_rare_static
 ADD resources/switch_static /bin/switch_static
 ADD resources/ligate_static /bin/ligate_static
+ADD resources/simulate_static /bin/simulate_static
 ADD resources/xcftools_static /bin/xcftools_static
 
 RUN chmod +x /bin/*_static
