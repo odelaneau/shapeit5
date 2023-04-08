@@ -74,7 +74,7 @@ void genotype_reader::scanGenotypes() {
 	//Verbose
 	if (n_rare_variants == 0) vrb.error("No variants to be phased!");
 	vrb.bullet("BCF scanning (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet2("Variant sites: [#scaffold=" + stb.str(n_rare_variants) + " | #rare=" + stb.str(n_scaffold_variants) + " | #all=" + stb.str(n_total_variants) + "]");
+	vrb.bullet2("Variant sites: [#scaffold=" + stb.str(n_scaffold_variants) + " | #rare=" + stb.str(n_rare_variants) + " | #all=" + stb.str(n_total_variants) + "]");
 	if (n_buffer) vrb.bullet2(stb.str(n_buffer) + " rare variants in buffer regions excluded");
 	if (n_both) vrb.bullet2(stb.str(n_both) + " variants found in both files [priority to scaffold]");
 	if (n_multi) vrb.bullet2(stb.str(n_multi) + " multi-allelic variants excluded");

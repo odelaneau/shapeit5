@@ -57,8 +57,8 @@ void haplotype_writer::writeHaplotypes(string fname) {
 	// Create VCF header
 	bcf_hdr_append(hdr, string("##source=shapeit5 phase_rare v" + string(PHASE2_VERSION)).c_str());
 	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
-	bcf_hdr_append(hdr, "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">");
-	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=1,Type=Integer,Description=\"Allele count\">");
+	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
+	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 
@@ -85,6 +85,7 @@ void haplotype_writer::writeHaplotypes(string fname) {
 
 			//Genotypes
 			int32_t count_alt = 0;
+			int32_t count_tot = 0;
 
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
 				bool major_allele = !V.vec_full[vt]->minor;
@@ -114,8 +115,10 @@ void haplotype_writer::writeHaplotypes(string fname) {
 				}
 			}
 
+			count_tot = 2*G.n_samples;
+
 			bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
-			bcf_update_info_int32(hdr, rec, "AN", &G.n_samples, 1);
+			bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
 			bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
 			if (V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 

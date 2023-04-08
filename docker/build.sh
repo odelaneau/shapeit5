@@ -28,6 +28,12 @@ make clean
 make -j static_exe
 cp bin/ligate_static ../static_bins/.
 
+#Compile simulate
+cd ../simulate/
+make clean
+make -j static_exe
+cp bin/simulate_static ../static_bins/.
+
 #Compile xcftools
 cd ../xcftools/
 make clean

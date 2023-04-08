@@ -58,5 +58,4 @@ void switcher::process() {
 	HC.writeFlipSwitchErrorPerSample(options["output"].as < string > () + ".flipsAndSwitches.txt.gz");
 	HC.writeBlock(options["output"].as < string > () + ".block.switch.txt.gz");
 	HC.writeCalibration(options["output"].as < string > () + ".calibration.switch.txt.gz");
-
 }
