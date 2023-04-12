@@ -11,6 +11,7 @@ Version 5.1.0 is now available [here](https://github.com/odelaneau/shapeit5/rele
 	* Pedigree phasing support added in phase_[common/rare/ligate]
 	* Many small optimizations in phase_[common/rare]
 	* IBD2 protection improved in phase_common abd added in phase_rare
+	* Automatic indexing of VCF/BCF files	
 
 ## v5.0.0
 	* First release / Version used for the preprint. (https://doi.org/10.1101/2022.10.19.512867)
