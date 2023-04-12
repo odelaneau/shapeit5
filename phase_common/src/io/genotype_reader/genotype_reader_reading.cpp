@@ -60,7 +60,7 @@ void genotype_reader::readGenotypes() {
 			std::map < std::string, uint32_t > :: iterator it = map_names.find(scaf_names[i]);
 			if (it != map_names.end()) { mappingS2M[i] = it->second; n_with_scaffold++; }
 		}
-		vrb.bullet2(stb.str(n_with_scaffold) + " samples with scaffold");
+		vrb.bullet2(stb.str(n_with_scaffold) + " samples with scaffold data");
 	}
 
 	//BYTE BUFFER ALLOCATION
