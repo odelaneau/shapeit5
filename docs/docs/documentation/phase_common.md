@@ -1,6 +1,6 @@
 ---
 layout: default
-title: phase_common
+title: phase_common [formerly known as SHAPEIT4]
 nav_order: 1
 parent: Documentation
 ---
@@ -18,7 +18,7 @@ parent: Documentation
 ### Description
 Tool to phase common variant sites, typically SNP array data (i.e. prephasing).
 This tool is also used as the first step for phasing large WES/WGS datasets.
-This is an improved version of [SHAPEIT4](https://odelaneau.github.io/shapeit4/) and should serve as a replacement of SHAPEIT4.
+This is an improved version of [SHAPEIT4](https://odelaneau.github.io/shapeit4/) and should serve as a replacement.
 
 ### Usage1: phasing unrelated samples
 Go in the `test` folder and run:
@@ -29,11 +29,11 @@ phase_common --input array/target.unrelated.bcf --region 1 --map info/chr1.gmap.
 ```
 </div>
 
-The program phases data in the input (unphased) file (\-\-input array/target.unrelated.bcf):
+The program phases data in the input (unphased) file (\-\-input `array/target.unrelated.bcf`):
 - using 8 threads (\-\-thread 8)
 - data located on chromosome 1 (\-\-region 1) 
-- using a specific genetic map (\-\-input info/chr1.gmap.gz)
-- saving the phased haplotypes in output file (\-\-output target.phased.bcf).
+- using a specific genetic map (\-\-input `info/chr1.gmap.gz`)
+- saving the phased haplotypes in output file (\-\-output `target.phased.bcf`).
 
 If no genetic map is specified, a recombination rate of 1 cM/Mb is assumed by default.
 
