@@ -1,10 +1,10 @@
 ---
 layout: default
-title: phase_common [formerly known as SHAPEIT4]
+title: phase_common [SHAPEIT4]
 nav_order: 1
 parent: Documentation
 ---
-# phase_common
+# phase_common [formerly known as SHAPEIT4]
 {: .no_toc .text-center }
 
 ## Table of contents

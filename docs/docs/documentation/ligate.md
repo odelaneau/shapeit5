@@ -16,7 +16,7 @@ parent: Documentation
 ---
 
 ### Description
-Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically run to ligate multiple chunks of phased common variants.
+Ligate multiple phased BCF/VCF files into a single whole chromosome file. Typically used to ligate multiple chunks of phased common variants.
 
 ### Usage: Ligate two chunks of phased data
 Go in the `test` folder and run:
@@ -68,7 +68,7 @@ Two statistics are reported while during ligation:
 | Option name 	       | Argument| Default  | Description |
 |:---------------------|:--------|:---------|:-------------------------------------|
 | \-I \[\-\-input \]   | STRING  | NA       | Text file containing all VCF/BCF to ligate, one file per line |
-| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother triplets). Really important to ensure that not switching occurs for scaffolded samples |
+| \-\-pedigree         | STRING  | NA       | Pedigree information (offspring father mother triplets). Really important to make sure that scaffolded samples are not switched! |
 
 #### Output files
 
