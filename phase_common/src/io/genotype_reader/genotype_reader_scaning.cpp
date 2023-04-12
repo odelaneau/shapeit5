@@ -48,6 +48,7 @@ void genotype_reader::scanGenotypes() {
 		else  vrb.error("Less than 50 samples is not enough to get reliable phasing, consider using a reference panel to increase sample size");
 	}
 
+	uint32_t n_variants_with_scaffold = 0;
 	uint32_t n_variants_noverlap = 0, n_variants_multi = 0, n_variants_notsnp = 0, n_variants_rare = 0, n_variants_nscaf = 0, n_variants_nref = 0;
 	uint32_t n_variants_main_format = 0, n_variants_ref_format = 0, n_variants_scaf_format = 0;
 	while (XR.nextRecord()) {
@@ -83,9 +84,10 @@ void genotype_reader::scanGenotypes() {
 		}
 
 		//If scaffold panel not in proper format
-		if (panels[2]) {
+		if (panels[2] && has_scaf) {
 			int32_t scaf_type = XR.typeRecord(idx_file_scaf);
-			if ((scaf_type != RECORD_BCFVCF_GENOTYPE) && (scaf_type != RECORD_BINARY_HAPLOTYPE)) { n_variants_scaf_format ++; continue; }
+			if ((scaf_type != RECORD_BCFVCF_GENOTYPE) && (scaf_type != RECORD_BINARY_HAPLOTYPE)) { n_variants_scaf_format ++; }
+			else n_variants_with_scaffold++;
 		}
 
 		//Keep SNPs only
@@ -114,6 +116,7 @@ void genotype_reader::scanGenotypes() {
 
 	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 	vrb.bullet2("Samples [#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + " / #sites=" + stb.str(n_variants) + " / region=" + region + "]");
+	if (n_variants_with_scaffold) vrb.bullet2(stb.str(n_variants_with_scaffold) + " sites with scaffold data");
 	if (n_variants_noverlap) vrb.bullet2(stb.str(n_variants_noverlap) + " sites removed in main panel [not in reference panel]");
 	if (n_variants_multi) vrb.bullet2(stb.str(n_variants_multi) + " sites removed in main panel [multi-allelic]");
 	if (n_variants_notsnp) vrb.bullet2(stb.str(n_variants_notsnp) + " sites removed in main panel [not SNPs]");
