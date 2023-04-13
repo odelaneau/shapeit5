@@ -17,10 +17,10 @@ parent: Documentation
 
 ### Description
 Tool to phase rare variants onto a scaffold of common variants (output of phase_common + ligate).
-This program should only be used on datasets comprising more than 1000 samples.
-We recommend to use phase_rare when sample sizes exceeds 5,000. For smaller smaple sizes, phase_common would be enough.  
+We recommend to use phase_rare for datasets with a sample size greater than 2,000 samples.
+For smaller smaple sizes, phase_common could do the job.  
 
-### Usage1: phasing unrelated samples with WGS data
+### Usage1: phasing unrelated samples
 
 Phasing large sequencing datasets happens in multiple steps. 
 
@@ -64,6 +64,58 @@ bcftools index target.phased.bcf
 
 ---
 
+### Usage2: phasing related samples
+To take into account duo/trio information while phasing, just give a FAM file specifying the family structures to the --pedigree option.
+This file contains one line per sample having parent(s) in the dataset and three columns (kidID fatherID and motherID), separated by TABs for spaces.
+You must give the exact same file to the three programs: phase_common, ligate and phase_rare.
+
+To phase the WGS example dataset with family information, run:
+<div class="code-example" markdown="1">
+```bash
+phase_common --input wgs/target.family.bcf --filter-maf 0.001 --pedigree info/target.family.fam --region 1 --map info/chr1.gmap.gz --output tmp/target.scaffold.bcf --thread 8
+
+while read LINE; do
+	CHK=$(echo $LINE | awk '{ print $1; }')
+	SRG=$(echo $LINE | awk '{ print $3; }')
+	IRG=$(echo $LINE | awk '{ print $4; }')
+	phase_rare --input wgs/target.family.bcf --scaffold tmp/target.scaffold.bcf --pedigree info/target.family.fam --map info/chr1.gmap.gz --input-region $IRG --scaffold-region $SRG --output $OUT  --thread 8
+done < info/chunks.coordinates.txt
+
+for CHK in $(seq 0 3); do echo tmp/target.phased.chunk$CHK\.bcf >> tmp/chunks.files.txt; done
+
+bcftools concat -n -Ob -o target.phased.bcf -f tmp/chunks.files.txt
+bcftools index target.phased.bcf
+```
+</div>
+
+---
+
+### Usage3: phasing chromosome X data
+
+To phase chromosome X data assuming haploidy for males, run;
+
+<div class="code-example" markdown="1">
+```bash
+phase_common --input wgs/target.haploid.bcf --filter-maf 0.001 --haploids info/target.haploid.txt --region 1 --map info/chr1.gmap.gz --output tmp/target.scaffold.bcf --thread 8
+
+while read LINE; do
+	CHK=$(echo $LINE | awk '{ print $1; }')
+	SRG=$(echo $LINE | awk '{ print $3; }')
+	IRG=$(echo $LINE | awk '{ print $4; }')
+	phase_rare --input wgs/target.haploid.bcf --scaffold tmp/target.scaffold.bcf --haploids info/target.haploid.txt --map info/chr1.gmap.gz --input-region $IRG --scaffold-region $SRG --output $OUT  --thread 8
+done < info/chunks.coordinates.txt
+
+for CHK in $(seq 0 3); do echo tmp/target.phased.chunk$CHK\.bcf >> tmp/chunks.files.txt; done
+
+bcftools concat -n -Ob -o target.phased.bcf -f tmp/chunks.files.txt
+bcftools index target.phased.bcf
+```
+</div>
+
+The file `info/target.haploid.txt` contains the list of all the haploid samples (i.e. males).
+
+---
+ 
 ### Command line options
 
 #### Basic options
