@@ -49,7 +49,10 @@ Two statistics are reported while during ligation:
 - Switch rate: the percentage of samples for which haplotypes have been switched,
 - Avg phaseQ: the agreement of the phasing in the overlapping region between two successive chunks of data. We usually expect values above 0.8 or even 0.9.
 
-*IMPORTANT NOTE*: If some samples in input have been phased using pedigree information (trios/duos, option \-\-pedigree in phase_common), use \-\-pedigree here too to make sure that these haplotypes are not switched when ligated. 
+### Note: Ligate chunks with family information
+
+If some samples have been phased using pedigree information (trios/duos, option \-\-pedigree in phase_common), you must use \-\-pedigree here too, with the same ped file, to make sure that these haplotypes are not switched when ligated.
+If this is not done, haplotypes may be switched for offsprings which would make the paternal/maternal labels incorrects.
 
 ---
 
