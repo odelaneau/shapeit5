@@ -1,0 +1,9 @@
+Beagle5.4	FULL	24:45:25	mem3_ssd1_v2_x64	
+		
+SHAPEIT5	COMM	47:14:00	mem3_ssd1_v2_x32
+SHAPEIT5	LIGATE	X		mem3_ssd1_v2_x2
+SHAPEIT5	RARE	X		mem3_ssd1_v2_x32
+BCFTOOLS	CONCAT	X		mem3_ssd1_v2_x2
+
+
+
