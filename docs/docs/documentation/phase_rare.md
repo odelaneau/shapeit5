@@ -53,11 +53,8 @@ Notes:
 Finally, we can bring all chunks of data together by concatenating files using bcftools concat --naive:
 <div class="code-example" markdown="1">
 ```bash
-for CHK in $(seq 0 3); do 
-	echo tmp/target.phased.chunk$CHK\.bcf >> tmp/chunks.files.txt
-done
-
-bcftools concat -n -Ob -o target.phased.bcf -f tmp/chunks.files.txt
+ls -1v tmp/target.phased.chunk*.bcf > tmp/files.txt
+bcftools concat -n -Ob -o target.phased.bcf -f tmp/files.txt
 bcftools index target.phased.bcf
 ```
 </div>
