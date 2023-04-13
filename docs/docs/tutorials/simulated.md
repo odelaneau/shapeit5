@@ -26,13 +26,12 @@ SHAPEIT5 is a two-step approach that treats each chromosome independently and wo
 
 4. Concatenate the phased chunks generated in step 3 using **bcftools concat -n**. As in the previous step haplotypes have been phased onto a haplotype scaffold, there is no need to ligate the chunks, and the files can be concatenated without decompression and recompression. This makes this step almost instantaneous, even for large cohorts.
 
-## Before starting
 This pipeline should be applied on large sample sizes, usually exceeding N=2,000 samples. For smaller sample sizes, just run phase_common. 
 
-## Phasing of simulated data
+## Phasing simulated data
 For this tutorial, we work on a dense 10Mb region simulated with msprime for 20,000 European samples. The data is perfectly phased, therefore we will be able to perform haplotype phasing on a large cohort and also to verify the accuracy of the phasing process.
 
-### Phasing common variants
+### STEP1: Phasing common variants
 SHAPEIT5 phases common variants using the **phase_common** tool, which has been built upon SHAPEIT4. As an input, phase_common requires an unphased file (with AC and AN tags filled up), and automatically sub-sets the file to the desired MAF (e.g. 0.001).
 
 There are different strategies to phase common variants. The first, is to phase the whole chromosome in a single job. This is feasible for SNP array data, but it is usually not optimal for WGS data. Therefore we recommend to chunk the chromosome into large chunks (e.g. 20 cM) if using large WGS data. Of note, we provinde 20cM chunks for the b38 built in the resource folder. The chunking used in this tutorial is under optimal for real data, such as the UK Biobank dataset. For that please refer to the UKB tutorials for more advanced examples.
@@ -57,7 +56,7 @@ test/
 
 The simulated data that we use in this tutorial are located in `test/wgs`.
 
-#### Phasing all common variants in one chunk
+#### Option1: Phasing all common variants in one chunk
 SHAPEIT5 can phase common variants (MAF >= 0.001) for the the whole 10Mb region using the following command:
 
 <div class="code-example" markdown="1">
@@ -68,7 +67,7 @@ phase_common --input wgs/target.unrelated.bcf --filter-maf 0.001 --region 1 --ma
 
 As this is run on the entire region of the simulation, **no ligation step is required** here. On real data, a ligation step will usually be necessary.
 
-#### Phasing common variants in multiple chunks and ligate
+#### Option2: Phasing common variants in multiple chunks and ligate
 More realistically, when using WGS data on large sample size, it is good practice to run **phase_common** in different large regions of the chromosomes (e.g. 20cM). In the following, we perform phasing in two overlapping 6Mb windows to showcase ligation. The intersection of the two chunks is therefore 2Mb, that is large enough to have a good amount of heterozygous sites for the ligation step.
 
 <div class="code-example" markdown="1">
@@ -92,7 +91,7 @@ ligate --input tmp/files.txt --output tmp/target.scaffold.bcf --thread 8 --index
 
 At the end of this step, we have a chromosome-wide haplotype scaffold in the file `tmp/target.scaffold.bcf`.
 
-### Phase rare variants small region
+### STEP2: Phase rare variants small region
 We can now proceed with the second stage of the process: phasing rare variants iteratively on the scaffold. This is accomplished by the **phase_rare** program. This needs to be done in chunks, in order to maximise the parallelization of our jobs. In this example, we use ~2.5Mb chunks of data with 0.5Mb of scaffold data on each side. For simplicity, we provide chunks coordinates in the file `info/chunks.coordinates.txt`. The program requires two input files, one is the haplotype scaffold generated in the previous steps, and other input require is a file containing the whole unphased region, the same file provided to **phase_common**: SHAPEIT5 automatically discards common variants for this file, duplicated in the phased scaffold. To process the whole dataset, it's enough to loop over chunk and phase them each one at a time.
 
 <div class="code-example" markdown="1">
@@ -108,7 +107,7 @@ done < info/chunks.coordinates.txt
 
 All these jobs can be run in parallel. By default, **phase_rare** discards buffer regions and only outputs chunks that do not overlap with others. Therefore, at the end of this step, we can simply concatenate all the chunks together in a straightforward way.
 
-### Obtaining chromosome-wide phased data
+### STEP3: Obtaining chromosome-wide phased data
 Here, we can concatenate  all files without decompression/recompression. This is performed very quickly with [bcftools concat \-\-naive](https://samtools.github.io/bcftools/bcftools.html#concat). We again recommend naming the files in an appropriate way, so that a command such as `ls -1v` can directly produce the list of files in the right order.
 
 <div class="code-example" markdown="1">
