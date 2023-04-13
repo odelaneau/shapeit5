@@ -8,7 +8,7 @@ parent: Tutorials
 {: .no_toc }
 
 {: .warning }
-Website under construction: content not available yet!
+Website under construction: better version to come soon!
 
 ## Table of contents
 {: .no_toc .text-delta }
