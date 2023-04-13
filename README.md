@@ -9,6 +9,7 @@ SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare va
 - **phase_common**: phase common sites, typically SNP array data
 - **phase_rare**: phase rare variants onto a scaffold of common variants
 - **static_bins**: static binaries of all executables
+- **simulate**: simulate simple haplotype datasets
 - **switch**: compute switch error rate and genotyping error rate given simulated or trio data
 - **tasks**: scripts used to phase large datasets, good base to start pipelining
 - **test**: simulated data for first-step testing of the method
