@@ -1,8 +1,8 @@
-setwd('~/Dropbox/SHAPEIT5/Final_revision/Figures/Figure2/')
+setwd('~/Dropbox/SHAPEIT5/Final_revision/Figures/Scripts/Figure2/')
 
 library(RColorBrewer)
 
-pdf("Figure2.pdf", 15, 10)
+pdf("../../Main_figures/Figure2.pdf", 15, 10)
 par(mfrow=c(2,2), bg ="white")
 
 #########################################################################################
@@ -46,25 +46,25 @@ log10.axis <- function(side, at, ...) {
 #					SER in WGS vs MAC		 		#
 #########################################################################################
 
-load(file = "data.Rdata")
+load(file = "../../Source_data/Main_fig2/data.Rdata")
 
 
 COLpair = brewer.pal(12,"Paired")
 COLdiff = brewer.pal(8,"Set1")
 
-REG=read.table("../Source_data/chr20.size4Mb.txt", head=FALSE)
+REG=read.table("../../Source_data/Main_fig2/chr20.size4Mb.txt", head=FALSE)
 BIN=c(0,1,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000, 147754)
 lBIN=c("singleton","2-5","6-10","11-20","21-50","51-100","101-200","201-500","501-1k","1k-2k","2k-5k","5k-10k","10k-20k","20k-50k","50k-100k", "100k+")
 nREG=length(REG)
 nBIN=length(BIN)
 options(scipen=999)
 
-#LOAD SER BETWEEN ALL VARIANTS
-prefix="../Source_data/Beagle5.4/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.";
-suffix=".fqf.frequency.switch.txt.gz"
-
-prefix="../Source_data/Shapeit5/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.";
-suffix=".shapeit5.default.fqf.frequency.switch.txt.gz"
+# LOAD SER BETWEEN ALL VARIANTS
+# prefix="../../Source_data/Main_fig2/Beagle5.4/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.";
+# suffix=".fqf.frequency.switch.txt.gz"
+# 
+# prefix="../../Source_data/Main_fig2/Shapeit5/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.";
+# suffix=".shapeit5.default.fqf.frequency.switch.txt.gz"
 
 ser_bin=c(0.1, 0.2,0.5,1.0,2.0,5.0,10.0,20.0,50.0)
 plot(log10(BGLser0), type="n", pch=20, xlab="Minor Allele Count", ylab="", col="black", lwd=2, xaxt='n', yaxt='n', ylim=log10(c(0.2,45)), main="UKB WGS - Phasing accuracy")
@@ -99,11 +99,11 @@ nBIN=length(BIN)
 options(scipen=999)
 
 #LOAD SER BETWEEN ALL VARIANTS
-prefix="../Source_data/WES/Beagle5.4/SER.chr";
-suffix=".fq.frequency.switch.txt.gz"
-
-prefix="../Source_data/WES/Shapeit5/SER_v2.chr";
-suffix=".cut0.001.prob_0.5.fq.frequency.switch.txt.gz"
+# prefix="../Source_data/WES/Beagle5.4/SER.chr";
+# suffix=".fq.frequency.switch.txt.gz"
+# 
+# prefix="../Source_data/WES/Shapeit5/SER_v2.chr";
+# suffix=".cut0.001.prob_0.5.fq.frequency.switch.txt.gz"
 
 ser_bin=c(0.1, 0.2,0.5,1.0,2.0,5.0,10.0,20.0,50.0)
 plot(log10(BGLser1), type="n", pch=20, xlab="Minor Allele Count", ylab="", col="black", lwd=2, xaxt='n', yaxt='n', ylim=log10(c(0.2,45)), main="UKB WES - Phasing accuracy")
@@ -145,17 +145,17 @@ text(1:(nBIN-1), par("usr")[3], labels = lBIN, srt = 45, adj = c(1.1,1.1), xpd =
 #abline(h=seq(0, 1, 0.2), col="lightgrey", lty=3)
 #abline(v=1:(nBIN-1), col="lightgrey", lty=3)
 
-file=paste("../Source_data/imputation/imputed_1k_rp_hrc_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
+file=paste("../../Source_data/Main_fig2/imputed_1k_rp_hrc_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
 D = read.table(file, head=FALSE, stringsAsFactors=FALSE)
 points(1:(nBIN-1), D$V5, type="o", pch=20, col="gray", lwd=2)
 
 r=1
-file=paste("../Source_data/imputation/imputed_1k_rp_beagle5.4_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
+file=paste("../../Source_data/Main_fig2/imputed_1k_rp_beagle5.4_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
 D = read.table(file, head=FALSE, stringsAsFactors=FALSE)
 points(1:(nBIN-1), D$V5, type="o", pch=20, col=COLp[r], lwd=2)
 r2_wgs_b5 <- D$V5
 r=r+1
-file=paste("../Source_data/imputation/imputed_1k_rp_shapeit5_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
+file=paste("../../Source_data/Main_fig2/imputed_1k_rp_shapeit5_chr20_rp_af_binning2.rsquare.grp.txt.gz", sep="")
 D = read.table(file, head=FALSE, stringsAsFactors=FALSE)
 points(1:(nBIN-1), D$V5, type="o", pch=20, col=COLp[r], lwd=2)
 r2_wgs_s5 <- D$V5
@@ -185,12 +185,12 @@ text(1:(nBIN-1), par("usr")[3], labels = lBIN, srt = 45, adj = c(1.1,1.1), xpd =
 #abline(v=1:(nBIN-1), col="lightgrey", lty=3)
 
 r=1
-file=paste("../Source_data/imputation/imputed_1k_rp_beagle5.4_allchrs_rp_af_binning2.rsquare.grp.txt.gz", sep="")
+file=paste("../../Source_data/Main_fig2/imputed_1k_rp_beagle5.4_allchrs_rp_af_binning2.rsquare.grp.txt.gz", sep="")
 D = read.table(file, head=FALSE, stringsAsFactors=FALSE)
 points(1:(nBIN-1), D$V5, type="o", pch=20, col=COLp[r], lwd=2)
 r2_wes_b5 <- D$V5
 r=r+1
-file=paste("../Source_data/imputation/imputed_1k_rp_shapeit5_allchrs_rp_af_binning2.rsquare.grp.txt.gz", sep="")
+file=paste("../../Source_data/Main_fig2/imputed_1k_rp_shapeit5_allchrs_rp_af_binning2.rsquare.grp.txt.gz", sep="")
 D = read.table(file, head=FALSE, stringsAsFactors=FALSE)
 points(1:(nBIN-1), D$V5, type="o", pch=20, col=COLp[r], lwd=2)
 r2_wes_s5 <- D$V5

@@ -5,9 +5,9 @@ COLpair = brewer.pal(12,"Paired")
 COLdiff = brewer.pal(8,"Set1")
 COLlabel= c(rgb(0.3,0.9,0.4,0.6), rgb(0.3,0.5,0.4,0.6), rgb(0.3,0.1,0.4,0.6))
 
-Ntrio = read.table("../../Source_data/Singleton/dataWGS_trios.txt", head=FALSE)
-Nduo = read.table("../../Source_data/Singleton/dataWGS_duos.txt", head=FALSE)
-SER = read.table("../../Source_data/Singleton/dataWGS_ser.txt", head=FALSE)
+Ntrio = read.table("../../Source_data/Extended_fig3/dataWGS_trios.txt", head=FALSE)
+Nduo = read.table("../../Source_data/Extended_fig3/dataWGS_duos.txt", head=FALSE)
+SER = read.table("../../Source_data/Extended_fig3/dataWGS_ser.txt", head=FALSE)
 
 
 #pdf("figure.pdf", 8,8)

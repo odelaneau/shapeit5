@@ -10,15 +10,15 @@ library(ggsignif)
 
 pdf("../../Main_figures/Figure3.pdf", 11, 8)
 
-data1 = fread("../../Source_data/CH/lof.nosingle.results.txt")
-data2 = fread("../../Source_data/CH/lof.nosingle.cutoff0.99.results.txt")
-data3 = fread("../../Source_data/CH/lof.nosingle.rand.results.txt")
+data1 = fread("../../Source_data/Main_fig3/lof.nosingle.results.txt")
+data2 = fread("../../Source_data/Main_fig3/lof.nosingle.cutoff0.99.results.txt")
+data3 = fread("../../Source_data/Main_fig3/lof.nosingle.rand.results.txt")
 
-data <- fread("../../Source_data/CH/lof.enrichment.main.txt", stringsAsFactors = FALSE, header = TRUE, sep="\t")
+data <- fread("../../Source_data/Main_fig3/lof.enrichment.main.txt", stringsAsFactors = FALSE, header = TRUE, sep="\t")
 
-dataLoF = fread("../../Source_data/CH/lof.nosingle.results.txt")
-dataSyn = fread("../../Source_data/CH/synonymous.nosingle.results.txt")
-dataMis = fread("../../Source_data/CH/missense.nosingle.results.txt")
+dataLoF = fread("../../Source_data/Main_fig3/lof.nosingle.results.txt")
+dataSyn = fread("../../Source_data/Main_fig3/synonymous.nosingle.results.txt")
+dataMis = fread("../../Source_data/Main_fig3/missense.nosingle.results.txt")
 
 labels = c("Full data","High confidence","Random phasing")
 colors = c("#c6dbef","#2171b5","#fc9272")
@@ -43,7 +43,7 @@ g1 = ggplot(dt, aes(x = labels, y = CH, fill = cols)) +
   xlab("Dataset") +
   theme_minimal() +
   theme(text = element_text(size = 12), plot.title = element_text(hjust = 0.5), 
-        legend.position = "none",
+        legend.position = "none", plot.tag = element_text(margin = margin(b = -10, r = -10)),
         panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
         panel.background = element_rect(colour = "black", fill=NA, size = 1) )
 

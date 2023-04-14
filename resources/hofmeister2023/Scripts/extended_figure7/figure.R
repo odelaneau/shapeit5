@@ -7,9 +7,9 @@ library(ggplot2)
 
 jpeg("../../Extended_figures/Extended_figure7.jpeg", 1800, 1400, quality = 100, res=300)
 
-data1 = fread("../../Source_data/CH/lof.nosingle.results.txt")
-data2 = fread("../../Source_data/CH/lof.nosingle.cutoff0.99.results.txt")
-data3 = fread("../../Source_data/CH/lof.nosingle.rand.results.txt")
+data1 = fread("../../Source_data/Extended_fig7/lof.nosingle.results.txt")
+data2 = fread("../../Source_data/Extended_fig7/lof.nosingle.cutoff0.99.results.txt")
+data3 = fread("../../Source_data/Extended_fig7/lof.nosingle.rand.results.txt")
 
 labels = c("Full data","High confidence","Random phasing")
 colors = c("#c6dbef","#2171b5","#fc9272")
