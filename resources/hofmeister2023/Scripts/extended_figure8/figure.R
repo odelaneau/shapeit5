@@ -9,9 +9,9 @@ library(cowplot)
 
 jpeg("../../Extended_figures/Extended_figure8.jpeg", 3000, 2000, quality = 100, res=300)
 
-data1 = fread("../../Source_data/CH/lof.nosingle.results.txt")
-data2 = fread("../../Source_data/CH/lof.nosingle.results.beagle.txt")
-data3 = fread("../../Source_data/CH/lof.nosingle.rand.results.txt")
+data1 = fread("../../Source_data/Extended_fig8/lof.nosingle.results.txt")
+data2 = fread("../../Source_data/Extended_fig8/lof.nosingle.results.beagle.txt")
+data3 = fread("../../Source_data/Extended_fig8/lof.nosingle.rand.results.txt")
 
 labels = c("SHAPEIT5","Beagle5.4","Random phasing")
 colors = c("#c6dbef","#969696","#fc9272")

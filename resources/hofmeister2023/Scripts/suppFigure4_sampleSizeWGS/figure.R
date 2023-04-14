@@ -31,7 +31,7 @@ put.fig.letter <- function(label, location="topleft", x=NULL, y=NULL,
 #########################################################################################
 
 letters = c("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r")
-REG=read.table("../../Source_data/chr20.size4Mb.txt", head=FALSE)
+REG=read.table("../../Source_data/Supp_fig4/chr20.size4Mb.txt", head=FALSE)
 BIN=c(0,1,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000, 100000000)
 lBIN=c("singleton","2-5","6-10","11-20","21-50","51-100","101-200","201-500","501-1k","1k-2k","2k-5k","5k-10k","10k-20k","20k-50k","50k-100k", "100k+")
 nREG=length(REG)
@@ -67,7 +67,7 @@ freqSER_SHP <- function (n) {
 	C = 1:n
 	for (r in 1:nrow(REG)) {
 	  fname=paste("../../Source_data/WGS/Shapeit5/benchmark_ukb23352_c20_qc_v1.subset.N", n, ".fullchr.shapeit5.ligated.", REG$V4[r], ".fqf.frequency.switch.txt.gz", sep="")
-	  print(fname)
+	 # print(fname)
 	  DATA = read.table(fname, head=FALSE)
 		#cat (fname, "\n")		
 		for (l in 1:nrow(DATA)) {
@@ -97,13 +97,16 @@ nN = length(N)
 
 
 for (n in 1:nN) {
-	prefix=paste("../../Source_data/WGS/Beagle5.4/N", N[n], "/benchmark_ukb23352_c20_qc_v1.subset.N", N[n], ".fullchr.", sep="");
-	suffix=".fqf.frequency.switch.txt.gz"
-	BGLser=freqSER(prefix, suffix, N[n]);
-	
-	
-	SHPser=freqSER_SHP(N[n]);
-	
+	# prefix=paste("../../Source_data/WGS/Beagle5.4/N", N[n], "/benchmark_ukb23352_c20_qc_v1.subset.N", N[n], ".fullchr.", sep="");
+	# suffix=".fqf.frequency.switch.txt.gz"
+	# BGLser=freqSER(prefix, suffix, N[n]);
+	# SHPser=freqSER_SHP(N[n]);
+	# write.table(SHPser, paste0('../../Source_data/Supp_fig4/SHPser_N',N[n],'.txt'), quote=F, col.names=F, row.names=F, sep='\t')
+	# write.table(BGLser, paste0('../../Source_data/Supp_fig4/BGLser_N',N[n],'.txt'), quote=F, col.names=F, row.names=F, sep='\t')
+
+	SHPser<-read.table(paste0('../../Source_data/Supp_fig4/SHPser_N',N[n],'.txt'), hea=F)$V1
+	BGLser<-read.table(paste0('../../Source_data/Supp_fig4/BGLser_N',N[n],'.txt'), hea=F)$V1
+
 	X=1:(n+9)
 	ser_bin=c(0.1, 0.2,0.5,1.0,2.0,5.0,10.0,20.0,50.0)
 	
@@ -142,13 +145,16 @@ nN = length(N)
 
 
 for (n in 4:nN) {
-	prefix=paste("../../Source_data/WGS/Beagle5.4/N", N[n], "/benchmark_ukb23352_c20_qc_v1.subset.N", N[n], ".fullchr.", sep="");
-	suffix=".fqf.frequency.switch.txt.gz"
-	print(prefix)
+	# prefix=paste("../../Source_data/WGS/Beagle5.4/N", N[n], "/benchmark_ukb23352_c20_qc_v1.subset.N", N[n], ".fullchr.", sep="");
+	# suffix=".fqf.frequency.switch.txt.gz"
+	# BGLser=freqSER(prefix, suffix, N[n]);
+	# SHPser=freqSER_SHP(N[n]);
+	# write.table(SHPser, paste0('../../Source_data/Supp_fig4/SHPser_N',N[n],'.txt'), quote=F, col.names=F, row.names=F, sep='\t')
+	# write.table(BGLser, paste0('../../Source_data/Supp_fig4/BGLser_N',N[n],'.txt'), quote=F, col.names=F, row.names=F, sep='\t')
+	# 
+	SHPser<-read.table(paste0('../../Source_data/Supp_fig4/SHPser_N',N[n],'.txt'), hea=F)$V1
+	BGLser<-read.table(paste0('../../Source_data/Supp_fig4/BGLser_N',N[n],'.txt'), hea=F)$V1
 	
-	BGLser=freqSER(prefix, suffix, N[n]);
-
-	SHPser=freqSER_SHP(N[n]);
 
 	X=1:(n+9)
 	ser_bin=c(0.1, 0.2,0.5,1.0,2.0,5.0,10.0,20.0,50.0)

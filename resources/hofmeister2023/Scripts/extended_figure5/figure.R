@@ -38,8 +38,8 @@ log10.axis <- function(side, at, ...) {
 
 
 #PLOT1
-f2<-read.table('../../Source_data/WGS/Summary_data/Summary_WGS_f2.txt', hea=T)
-S<-read.table('../../Source_data/WGS/Summary_data/Summary_WGS_S.txt', hea=T)
+f2<-read.table('../../Source_data/Extended_fig5/Summary_WGS_f2.txt', hea=T)
+S<-read.table('../../Source_data/Extended_fig5/Summary_WGS_S.txt', hea=T)
 f2_copy<-f2
 jpeg("../../Extended_figures/Extended_figure5.jpeg", 3000, 3000, quality = 100, res=300)
 par(mfrow=c(2,2))
@@ -74,7 +74,7 @@ legend("topright", fill=CB[1:C], legend=c(probs[-length(probs)]), title="Filter"
 
 #PLOT2
 
-S<-read.table('../../Source_data/WGS/Summary_data/Summary_WGS_S.txt', hea=T)
+S<-read.table('../../Source_data/Extended_fig5/Summary_WGS_S.txt', hea=T)
 S<-S[S$bin>1,]
 X=1:(length(unique(S$bin)))
 plot(X, S$prop[S$prob==0.5]*100, type="n", pch=20, xlab="Minor Allele Count", ylab="", col="black",
@@ -94,8 +94,8 @@ legend("topright", fill=CB[1:C], legend=c(probs[-length(probs)]), title="Filter"
 
 
 #PLOT3
-f2<-read.table('../../Source_data/WES/Summary_data/Summary_WES_f2.txt', hea=T)
-S<-read.table('../../Source_data/WES/Summary_data/Summary_WES_S.txt', hea=T)
+f2<-read.table('../../Source_data/Extended_fig5/Summary_WES_f2.txt', hea=T)
+S<-read.table('../../Source_data/Extended_fig5/Summary_WES_S.txt', hea=T)
 f2_copy<-f2
 f2<-f2[f2$prob!=1,]
 f2<-f2[f2$bin<10,]
@@ -128,7 +128,7 @@ legend("topright", fill=CB[1:C], legend=c(probs[-length(probs)]), title="Filter"
 
 #PLOT4
 
-S<-read.table('../../Data/WES/Summary_data/Summary_WES_S.txt', hea=T)
+S<-read.table('../../Source_data/Extended_fig5/Summary_WES_S.txt', hea=T)
 S<-S[S$bin>1,]
 X=1:(length(unique(S$bin)))
 plot(X, S$prop[S$prob==0.5]*100, type="n", pch=20, xlab="Minor Allele Count", ylab="", col="black",

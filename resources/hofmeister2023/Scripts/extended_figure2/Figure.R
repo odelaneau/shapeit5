@@ -3,8 +3,9 @@ setwd('~/Dropbox/SHAPEIT5/Final_revision/Figures/Scripts/extended_figure2/')
 library(RColorBrewer)
 COL = brewer.pal(12,"Paired")
 
-D0<-read.table('../../Source_data/SER/S5_array.txt', hea=F)
-D1<-read.table('../../Source_data/SER/S5_wgs.txt', hea=F)
+D0<-read.table('../../Source_data/Extended_fig2/data0.txt', hea=F)
+D1<-read.table('../../Source_data/Extended_fig2/data1.txt', hea=F)
+
 SMPL = unique(D0$V1)
 nSMPL = length(SMPL)
 
@@ -32,5 +33,3 @@ for (i in 1:nSMPL) {
 }
 
 dev.off()
-
-

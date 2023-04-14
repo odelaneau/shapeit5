@@ -5,8 +5,8 @@ setwd('~/Dropbox/SHAPEIT5/Final_revision/Figures/Scripts/extended_figure6/')
 library(data.table)
 library(ggplot2)
 
-data = fread("../../Source_data/CH/lof.results.vars.txt.gz", header = T)
-indsData = fread("../../Source_data/CH/lof.results.inds.txt.gz", header = T)
+data = fread("../../Source_data/Extended_fig6/lof.results.vars.txt.gz", header = T)
+indsData = fread("../../Source_data/Extended_fig6/lof.results.inds.txt.gz", header = T)
 totalInds = 374826
 
 freq = data.table(table(data$gene))

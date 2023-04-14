@@ -16,7 +16,7 @@ SIZE=c(5000,10000,20000,50000,100000,200000,300000,400000,480853)
 lSIZE=c("5k","10k","20k","50k","100k","200k","300k","400k","480k")
 nSIZE=length(SIZE)
 options(scipen=999)
-D=read.table("../../Source_data/ARRAY/data.txt", head=TRUE, stringsAsFactors=FALSE)
+D=read.table("../../Source_data/Extended_fig1/", head=TRUE, stringsAsFactors=FALSE)
 
 
 

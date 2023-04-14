@@ -9,10 +9,10 @@ library(cowplot)
 
 jpeg("../../Extended_figures/Extended_figure9.jpeg", 3000, 2000, quality = 100, res=300)
 
-dataLoF = fread("../../Source_data/CH/lof.nosingle.results.txt")
-dataSyn = fread("../../Source_data/CH/synonymous.nosingle.results.txt")
-dataMis = fread("../../Source_data/CH/missense.nosingle.results.txt")
-data = fread("../../Source_data/CH/lof.enrichment.lof_mis_syn.txt", stringsAsFactors = FALSE, header = TRUE, sep="\t")
+dataLoF = fread("../../Source_data/Extended_fig9/lof.nosingle.results.txt")
+dataSyn = fread("../../Source_data/Extended_fig9/synonymous.nosingle.results.txt")
+dataMis = fread("../../Source_data/Extended_fig9/missense.nosingle.results.txt")
+data = fread("../../Source_data/Extended_fig9/lof.enrichment.lof_mis_syn.txt", stringsAsFactors = FALSE, header = TRUE, sep="\t")
 
 #############
 # Panel a

@@ -33,7 +33,7 @@ put.fig.letter <- function(label, location="topleft", x=NULL, y=NULL,
 #		LOAD DATA FOR FIGURE 2A							#
 #########################################################################################
 
-REG=read.table("../../Source_data/chr20.size4Mb.txt", head=FALSE)
+REG=read.table("../../Source_data/Supp_fig3/chr20.size4Mb.txt", head=FALSE)
 BIN=c(0,1,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000, 100000000)
 lBIN=c("singleton","2-5","6-10","11-20","21-50","51-100","101-200","201-500","501-1k","1k-2k","2k-5k","5k-10k","10k-20k","20k-50k","50k-100k", "100k+")
 nREG=length(REG)
@@ -62,13 +62,19 @@ freqSER0 <- function (prefix, suffix, n) {
 }
 
 #LOAD SER BETWEEN ALL VARIANTS [ALWAYS *.fqt.* files here!!!!]
-prefix="../../Source_data/WGS/Beagle5.4/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.fullchr.";
-suffix=".fqt.frequency.switch.txt.gz"
-BGLser0=freqSER0(prefix, suffix, 147754);
+# prefix="../../Source_data/WGS/Beagle5.4/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.fullchr.";
+# suffix=".fqt.frequency.switch.txt.gz"
+# BGLser0=freqSER0(prefix, suffix, 147754);
+# write.table(BGLser0, '../../Source_data/Supp_fig3/BLGser0.txt', quote=F, col.names=F, row.names=F, sep='\t')
 
-prefix="../../Source_data/WGS/Shapeit5/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.fullchr.shapeit5.ligated.";
-suffix=".fqt.frequency.switch.txt.gz"
-SHPser0=freqSER0(prefix, suffix, 147754);
+BGLser0<-read.table('../../Source_data/Supp_fig3/BLGser0.txt', hea=F)$V1
+
+# prefix="../../Source_data/WGS/Shapeit5/N147754/benchmark_ukb23352_c20_qc_v1.subset.N147754.fullchr.shapeit5.ligated.";
+# suffix=".fqt.frequency.switch.txt.gz"
+# SHPser0=freqSER0(prefix, suffix, 147754);
+# write.table(SHPser0, '../../Source_data/Supp_fig3/SHPser0.txt', quote=F, col.names=F, row.names=F, sep='\t')
+
+SHPser0<-read.table('../../Source_data/Supp_fig3/SHPser0.txt', hea=F)$V1
 
 
 jpeg("../../Supplementary_Information/Supplementary_figure3.jpeg", 3500, 1700, quality = 100, res=300)

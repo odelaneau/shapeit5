@@ -43,7 +43,7 @@ lBIN=c("singleton","2-5","6-10","11-20","21-50","51-100","101-200","201-500","50
 nBIN=length(BIN)
 options(scipen=999)
 
-file=paste("../../Source_data//imputation/wgs_nrd.txt", sep="")
+file=paste("../../Source_data/Extended_fig4/wgs_nrd.txt", sep="")
 D = read.table(file, head=TRUE, stringsAsFactors=FALSE)
 transpose(D)
 D2 = df = subset(D, select = -c(bin) )	
@@ -70,7 +70,7 @@ lBIN=c("singleton","2-5","6-10","11-20","21-50","51-100","101-200","201-500","50
 nBIN=length(BIN)
 options(scipen=999)
 
-file=paste("../../Source_data//imputation/wes_nrd.txt", sep="")
+file=paste("../../Source_data/Extended_fig4/wes_nrd.txt", sep="")
 D = read.table(file, head=TRUE, stringsAsFactors=FALSE)
 transpose(D)
 D2 = df = subset(D, select = -c(bin) )	
