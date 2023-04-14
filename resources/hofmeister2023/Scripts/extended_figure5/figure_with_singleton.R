@@ -57,8 +57,8 @@ plot(rep(X, length(unique(f2$prob))), log10(f2$ser), type="n", pch=20, xlab="Min
      main="WGS - accuracy using phasing probability filter\n(N=147,754)", xlim=c(1, s ), ylim=log10(c(1,50)))
 put.fig.letter(label="a", cex=2)
 mtext("Switch Error Rate (%)", side=2, line=2.2, cex=0.8)
-abline(h=log10(ser_bin), col="lightgrey", lty=3)
-abline(v=X, col="lightgrey", lty=3)
+# abline(h=log10(ser_bin), col="lightgrey", lty=3)
+# abline(v=X, col="lightgrey", lty=3)
 text(X, par("usr")[3], labels = lBIN[X], srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=0.75)
 axis(2, at=log10(ser_bin), label=ser_bin, las=2)
 log10.axis(2, at=seq(-1, 2)) ##REMOVE
@@ -84,8 +84,8 @@ plot(X, S$prop[S$prob==0.5]*100, type="n", pch=20, xlab="Minor Allele Count", yl
      xlim=c(1, 9 ), ylim=c(0,100)) #, xlim=c(min(X), max(X)), ylim=c(min(S$prop*100), max(S$prob*100)))
 put.fig.letter(label="b", cex=2)
 mtext("Heterozygous sites removed after filtering (%)", side=2, line=2.2, cex=0.8)
-abline(h=seq(0,100,5), col="lightgrey", lty=3)
-abline(v=X, col="lightgrey", lty=3)
+# abline(h=seq(0,100,5), col="lightgrey", lty=3)
+# abline(v=X, col="lightgrey", lty=3)
 text(X, par("usr")[3], labels = lBIN[X], srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=0.75)
 axis(2, at=seq(0,100,5), label=seq(0,100,5), las=2)
 C=0
@@ -115,8 +115,8 @@ plot(rep(X, length(unique(f2$prob))), log10(f2$ser), type="n", pch=20, xlab="Min
      main="WES - accuracy using phasing probability filter\n(N=447,470)", xlim=c(1, s ), ylim=log10(c(0.5,50)))
 put.fig.letter(label="c", cex=2)
 mtext("Switch Error Rate (%)", side=2, line=2.2, cex=0.8)
-abline(h=log10(ser_bin), col="lightgrey", lty=3)
-abline(v=X, col="lightgrey", lty=3)
+# abline(h=log10(ser_bin), col="lightgrey", lty=3)
+# abline(v=X, col="lightgrey", lty=3)
 text(X, par("usr")[3], labels = lBIN[X], srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=0.75)
 axis(2, at=log10(ser_bin), label=ser_bin, las=2)
 log10.axis(2, at=seq(-1, 2)) ##REMOVE
@@ -143,8 +143,8 @@ plot(X, S$prop[S$prob==0.5]*100, type="n", pch=20, xlab="Minor Allele Count", yl
      xlim=c(1, 9 ), ylim=c(0,100)) #, xlim=c(min(X), max(X)), ylim=c(min(S$prop*100), max(S$prob*100)))
 put.fig.letter(label="d", cex=2)
 mtext("Heterozygous sites removed after filtering (%)", side=2, line=2.2, cex=0.8)
-abline(h=seq(0,100,5), col="lightgrey", lty=3)
-abline(v=X, col="lightgrey", lty=3)
+# abline(h=seq(0,100,5), col="lightgrey", lty=3)
+# abline(v=X, col="lightgrey", lty=3)
 text(X, par("usr")[3], labels = lBIN[X], srt = 45, adj = c(1.1,1.1), xpd = TRUE, cex=0.75)
 axis(2, at=seq(0,100,5), label=seq(0,100,5), las=2)
 C=0
