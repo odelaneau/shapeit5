@@ -278,6 +278,9 @@ public:
 		return (sync_number-1);
 	}
 
+
+
+
 	//GET SAMPLES
 	int32_t getSamples(uint32_t file, std::vector < std::string > & samples) {
 		samples.clear();
@@ -302,6 +305,8 @@ public:
 	uint32_t getAN() { return std::accumulate(AN.begin(), AN.end(), 0); }
 	float getAF(uint32_t file) { return AC[file]*1.0f/AN[file]; }
 	float getAF() { return std::accumulate(AC.begin(), AC.end(), 0)*1.0f/std::accumulate(AN.begin(), AN.end(), 0); }
+
+
 
 	//SET SYNCHRONIZED READER TO NEXT RECORD
 	int32_t nextRecord() {
@@ -441,6 +446,7 @@ public:
 	void close() {
 		free(vSK); free(vAC); free(vAN);
 		for (uint32_t r = 0 ; r < sync_number ; r++) if (sync_types[r]>=2) bin_fds[r].close();
+		for (uint32_t r = 0 ; r < sync_number ; r ++) bcf_destroy(sync_lines[r]);
 		bcf_sr_destroy(sync_reader);
 	}
 };
