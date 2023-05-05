@@ -1,0 +1,3 @@
+[submodule "xcftools"]
+	path = xcftools
+	url = https://github.com/odelaneau/xcftools.git
