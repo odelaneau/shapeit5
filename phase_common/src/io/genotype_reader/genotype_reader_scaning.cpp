@@ -115,17 +115,18 @@ void genotype_reader::scanGenotypes() {
 	XR.close();
 
 	vrb.bullet("VCF/BCF scanning done (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
-	vrb.bullet2("Samples [#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + " / #sites=" + stb.str(n_variants) + " / region=" + region + "]");
-	if (n_variants_with_scaffold) vrb.bullet2(stb.str(n_variants_with_scaffold) + " sites with scaffold data");
-	if (n_variants_noverlap) vrb.bullet2(stb.str(n_variants_noverlap) + " sites removed in main panel [not in reference panel]");
-	if (n_variants_multi) vrb.bullet2(stb.str(n_variants_multi) + " sites removed in main panel [multi-allelic]");
-	if (n_variants_notsnp) vrb.bullet2(stb.str(n_variants_notsnp) + " sites removed in main panel [not SNPs]");
-	if (n_variants_rare) vrb.bullet2(stb.str(n_variants_rare) + " sites removed in main panel [below MAF threshold]");
-	if (n_variants_nref) vrb.bullet2(stb.str(n_variants_nref) + " sites removed in reference panel [not in main panel]");
-	if (n_variants_nscaf) vrb.bullet2(stb.str(n_variants_nscaf) + " sites removed in scaffold panel [not in main panel]");
-	if (n_variants_main_format) vrb.bullet2(stb.str(n_variants_main_format) + " sites removed [record in main panel not in a supported format]");
-	if (n_variants_ref_format) vrb.bullet2(stb.str(n_variants_ref_format) + " sites removed [record in reference panel not in a supported format]");
-	if (n_variants_scaf_format) vrb.bullet2(stb.str(n_variants_scaf_format) + " sites removed [record in scaffold panel not in a supported format]");
+	vrb.bullet2("Variants [#sites=" + stb.str(n_variants) + " / region=" + region + "]");
+	if (n_variants_with_scaffold) vrb.bullet3(stb.str(n_variants_with_scaffold) + " sites with scaffold data");
+	if (n_variants_noverlap) vrb.bullet3(stb.str(n_variants_noverlap) + " sites removed in main panel [not in reference panel]");
+	if (n_variants_multi) vrb.bullet3(stb.str(n_variants_multi) + " sites removed in main panel [multi-allelic]");
+	if (n_variants_notsnp) vrb.bullet3(stb.str(n_variants_notsnp) + " sites removed in main panel [not SNPs]");
+	if (n_variants_rare) vrb.bullet3(stb.str(n_variants_rare) + " sites removed in main panel [below MAF threshold]");
+	if (n_variants_nref) vrb.bullet3(stb.str(n_variants_nref) + " sites removed in reference panel [not in main panel]");
+	if (n_variants_nscaf) vrb.bullet3(stb.str(n_variants_nscaf) + " sites removed in scaffold panel [not in main panel]");
+	if (n_variants_main_format) vrb.bullet3(stb.str(n_variants_main_format) + " sites removed [record in main panel not in a supported format]");
+	if (n_variants_ref_format) vrb.bullet3(stb.str(n_variants_ref_format) + " sites removed [record in reference panel not in a supported format]");
+	if (n_variants_scaf_format) vrb.bullet3(stb.str(n_variants_scaf_format) + " sites removed [record in scaffold panel not in a supported format]");
 	if (n_variants == 0) vrb.error("No variants to be phased!");
+	vrb.bullet2("Samples [#target=" + stb.str(n_main_samples) + " / #reference=" + stb.str(n_ref_samples) + "]");
 }
 

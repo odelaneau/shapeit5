@@ -47,7 +47,7 @@ ligate --input chunks.txt --output target.phased.bcf --thread 2
 The ligate program uses two threads (\-\-thread 2) and saves the ligated haplotypes in the output file (\-\-output `target.phased.bcf`).
 Two statistics are reported while during ligation:
 - Switch rate: the percentage of samples for which haplotypes have been switched,
-- Avg phaseQ: the agreement of the phasing in the overlapping region between two successive chunks of data. We usually expect values above 0.8 or even 0.9.
+- Avg phaseQ: the agreement of the phasing in the overlapping region between two successive chunks of data. We usually expect values above 80 or 90.
 
 ### Note: Ligate chunks with family information
 

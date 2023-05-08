@@ -60,7 +60,7 @@ void genotype_reader::readGenotypes() {
 			std::map < std::string, uint32_t > :: iterator it = map_names.find(scaf_names[i]);
 			if (it != map_names.end()) { mappingS2M[i] = it->second; n_with_scaffold++; }
 		}
-		vrb.bullet2(stb.str(n_with_scaffold) + " samples with scaffold data");
+		vrb.bullet3(stb.str(n_with_scaffold) + " samples with scaffold data");
 	}
 
 	//BYTE BUFFER ALLOCATION
@@ -251,6 +251,6 @@ void genotype_reader::readGenotypes() {
 		uint64_t n_alleles_total = n_alleles[0] + n_alleles[1];
 		str0 = "0=" + stb.str(n_alleles[0]*100.0/n_alleles_total, 3) + "%";
 		str1 = "1=" + stb.str(n_alleles[1]*100.0/n_alleles_total, 3) + "%";
-		vrb.bullet2("Haplotypes ["+str0+", "+str1+"]");
+		vrb.bullet2("Reference haplotypes ["+str0+", "+str1+"]");
 	}
 }
