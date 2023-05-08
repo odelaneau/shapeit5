@@ -16,6 +16,10 @@ SHAPEIT5 estimates haplotypes in large datasets, with a special focus on rare va
 - **versions**: versioning
 - **xcftools**: tools to handle XCF files [experimental]
 
+## Download
+
+It is strongly advised to prioritize the use of the latest released version (see released section on the right hand side) instead of cloning the latest version of the source code, as doing so is at your own risk.
+
 ## Citation
 If you use SHAPEIT5 in your research work, please cite the following paper:
 
