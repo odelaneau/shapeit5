@@ -31,7 +31,8 @@ void phaser::declare_options() {
 	opt_base.add_options()
 			("help", "Produce help message")
 			("seed", bpo::value < int >()->default_value(15052011), "Seed of the random number generator")
-			("thread,T", bpo::value < int >()->default_value(1), "Number of thread used");
+			("thread,T", bpo::value < int >()->default_value(1), "Number of thread used")
+			("progress", "Verbose progress percentages on screen for longer tasks");
 
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
@@ -84,6 +85,8 @@ void phaser::parse_command_line(vector < string > & args) {
 
 	if (options.count("log") && !vrb.open_log(options["log"].as < string > ()))
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
+
+	if (options.count("progress")) vrb.show_progress();
 
 	vrb.title("[SHAPEIT5] phase_common (jointly phase multiple common markers)");
 	vrb.bullet("Author        : Olivier DELANEAU, University of Lausanne");

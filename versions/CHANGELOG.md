@@ -8,8 +8,12 @@ layout: default
 All notable changes to this project are documented in this file.
 
 {: .highlight }
-Version 5.1.0 is now available [here] (https://github.com/odelaneau/shapeit5/releases) as docker image (`shapeit5_2023-03-23_a4a1818.docker.tar.gz`) or static binaries. 
+Version 5.1.1 is now available [here] (https://github.com/odelaneau/shapeit5/releases) as docker image or static binaries. 
 
+
+## v5.1.1
+	* Bugfix of a nasty segfault, thanks to Ami Williams (23andMe). 
+	* Bugfixes when reading multiple input files data	
 
 ## v5.1.0
 	* Second release / Version used for phasing UKB WGS 200k data

@@ -119,12 +119,17 @@ public:
 /*****************			HOMOZYGOUS GENOTYPE			************************/
 /*******************************************************************************/
 
+
 inline
 void haplotype_segment_single::INIT_HOM() {
 	bool ag = VAR_GET_HAP0(MOD2(curr_abs_locus), G->Variants[DIV2(curr_abs_locus)]);
 	__m256 _sum = _mm256_set1_ps(0.0f);
 	for(int k = 0, i = 0 ; k != n_cond_haps ; ++k, i += HAP_NUMBER) {
 		bool ah = Hvar.get(curr_rel_locus+curr_rel_locus_offset, k);
+
+		//std::cout << curr_rel_locus << " " << curr_rel_locus_offset << " " << k << " " << n_cond_haps << std::endl;
+
+
 		__m256 _prob = _mm256_set1_ps((ag==ah)?1.0f:M.ed/M.ee);
 		_sum = _mm256_add_ps(_sum, _prob);
 		_mm256_store_ps(&prob[i], _prob);

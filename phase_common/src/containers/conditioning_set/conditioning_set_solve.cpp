@@ -118,14 +118,17 @@ void conditioning_set::solve(int chunk, genotype_set * GS) {
 
 			//3. PHASING SECOND PASS
 			if (nh || nm) {
-				for (int i = 0, h = 0 ; i < n_ind ; ++i, h += 2) {
+				for (int i = 0, h = 0 ; i < n_ind ; i++, h += 2) {
 					if (Amb[i]) {
 						if (Het[i]) {
 							s = 0.0;
 							if (R[h+0]>0) s += G[A[R[h+0]-1]] * scoreBit[l - C[R[h+0]] + 1];
 							if (R[h+0]<(n_hap-1)) s += G[A[R[h+0]+1]] * scoreBit[l - C[R[h+0]+1]+1];
 							if (R[h+1]>0) s -= G[A[R[h+1]-1]] * scoreBit[l - C[R[h+1]] + 1];
-							if (R[h+1]<(n_hap-1)) s -= G[A[R[h+1]+1]] * scoreBit[l - C[R[h+1]+1] + 1];
+							if (R[h+1]<(n_hap-1)) {
+								//cout << l << " " << h << " " << n_hap << " " << n_ind << " " << l - C[R[h+1]+1] + 1 << " " << scoreBit.size() << endl;
+								s -= G[A[R[h+1]+1]] * scoreBit[l - C[R[h+1]+1] + 1];
+							}
 							if (s > 0) { G[h+0] = 1 ; G[h+1] = -1 ; }
 							else { G[h+0] = -1 ; G[h+1] = 1 ; }
 						}
@@ -184,8 +187,8 @@ void conditioning_set::solve(genotype_set * GS) {
 	i_worker = 0; i_job = 0, d_job = 0;
 
 	//
-	scoreBit = vector < float > (n_site, 0.0);
-	for (int l = 0 ; l < n_site ; ++l) scoreBit[l] = log (l + 1.0);
+	scoreBit = vector < float > (n_site + 1, 0.0);
+	for (int l = 0 ; l < n_site+1 ; ++l) scoreBit[l] = log (l + 1.0);
 
 	//Perform multi-threaded selection
 

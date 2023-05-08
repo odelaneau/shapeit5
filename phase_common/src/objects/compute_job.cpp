@@ -96,7 +96,7 @@ void compute_job::make(unsigned int ind, double min_window_size) {
 			vector < unsigned int > Ktmp;
 			Ktmp.reserve(Kstates[w].size() - toBeRemoved.size());
 			for (int k = 0, p = 0; k < Kstates[w].size() ; k++) {
-				if (toBeRemoved[p] == k) p++;
+				if (p < toBeRemoved.size() && toBeRemoved[p] == k) p++;
 				else Ktmp.push_back(Kstates[w][k]);
 			}
 

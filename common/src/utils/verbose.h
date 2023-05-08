@@ -34,12 +34,14 @@ protected:
 	std::ofstream log;
 	bool verbose_on_screen;
 	bool verbose_on_log;
+	bool verbose_progress;
 	int prev_percent;
 
 public:
 	verbose() {
 		verbose_on_screen = true;
 		verbose_on_log = false;
+		verbose_progress = false;
 		prev_percent = -1;
 	}
 
@@ -59,6 +61,10 @@ public:
 
 	void set_silent() {
 		verbose_on_screen = false;
+	}
+
+	void show_progress (){
+		verbose_progress = true;
 	}
 
 	void print(std::string s) {
@@ -86,6 +92,11 @@ public:
 		if (verbose_on_log) log << "      + " << s << std::endl;
 	}
 
+	void bullet3(std::string s) {
+		if (verbose_on_screen) std::cout << "         - " << s << std::endl;
+		if (verbose_on_log) log << "         - " << s << std::endl;
+	}
+
 	void warning(std::string s) {
 		if (verbose_on_screen) std::cout << std::endl << "\x1B[33m" << "WARNING: " <<  "\033[0m" << s << std::endl;
 		if (verbose_on_log) log << std::endl << "WARNING: " << s << std::endl;
@@ -110,14 +121,14 @@ public:
 	}
 
 	void wait(std::string s) {
-		if (verbose_on_screen) {
+		if (verbose_on_screen && verbose_progress) {
 			std::cout << s << " ...\r";
 			std::cout.flush();
 		}
 	}
 
 	void progress(std::string prefix, float percent) {
-		if (verbose_on_screen) {
+		if (verbose_on_screen && verbose_progress) {
 			int curr_percent = int(percent * 100.0);
 			if (prev_percent > curr_percent) prev_percent = -1;
 			if (curr_percent > prev_percent) {
