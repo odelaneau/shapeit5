@@ -1,0 +1,14 @@
+These files provides two possible chunking of the human genome b38.
+The 20cM and 4cM lengths are designed for phase_common and phase_rare, respectively.
+This chunking has been used to phase the UK Biobank interim release of 200k WGS.
+
+Each file contains 4 columns:
+1. Chunk index
+2. Chromosome/contig ID
+3. Chunk coordinates including right and left buffers. These overlap with flanking chunks. 
+4. Chunk coordinates NOT including right and left buffers. These do NOT overlap with flanking chunks.
+
+Notes:
+* Feed --region of phase_common with (3)
+* Feed --scaffold-region of phase_rare with (3) 
+* Feed --input-region of phase_rare with (4)
