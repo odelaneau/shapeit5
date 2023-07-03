@@ -56,7 +56,10 @@ To quality control the SNP array data, proceed as follows, which will produce th
 dx run app-swiss-army-knife -iin="/Bulk/Genotype Results/Genotype calls/ukb_snp_qc.txt" --folder="/Phasing/PhasingSNParray/step1_dataqc/" -icmd="cat ukb_snp_qc.txt | awk '{ print \$1, \$159; }' > SNPlist.unfiltered.txt && cat SNPlist.unfiltered.txt | sed '1d' | awk '{ if (\$2 == 1) print \$1; }' > SNPlist.filtered.QC.txt" --instance-type mem1_ssd1_v2_x2 --name qc_snp --priority normal -y
 
 #Get sample lists
-dx run app-swiss-army-knife -iin="/Phasing/PhasingSNParray/step1_dataqc/INDlist.unfiltered.txt" -iin="/Phasing/PhasingSNParray/step1_dataqc/samples.parents.txt" -iin="/Phasing/PhasingSNParray/step1_dataqc/samples.related.txt" --folder="/Phasing/PhasingSNParray/step1_dataqc/" -icmd="cat INDlist.unfiltered.txt | sed '1d' | awk '{ if (\$2 == 1) print \$1, \$1; }' > INDlist.filtered.QC.txt && cat INDlist.filtered.QC.txt | grep -vf samples.parents.txt > INDlist.filtered.noparents.txt && cat INDlist.filtered.QC.txt | grep -f samples.related.txt > INDlist.filtered.related.txt" --instance-type mem1_ssd1_v2_x2 --name qc_sample --priority normal -y
+
+
+dx run app-swiss-army-knife --folder="/Phasing/PhasingSNParray/step1_dataqc/" -iin="Bulk/Genotype\ Results/Genotype\ calls/ukb_sqc_v2.txt" -iin="Bulk/Genotype\ Results/Genotype\ calls/ukb22418_c1_b0_v2.fam" -icmd="cat ukb_sqc_v2.txt | cut -d ' ' -f 66 > in_phasing.txt && cat ukb22418_c1_b0_v2.fam | cut -d ' ' -f 1 > samples.tmp.txt && paste samples.tmp.txt in_phasing.txt > INDlist.unfiltered.txt && cat INDlist.unfiltered.txt | sed '1d' | awk '{ if (\$2 == 1) print \$1, \$1; }' > INDlist.filtered.QC.txt && rm samples.tmp.txt && rm in_phasing.txt" --instance-type mem1_ssd1_v2_x4 --priority normal --name qc_sample -y
+
 
 #Filter each chromosome
 for CHR in $(seq 1 22); do
