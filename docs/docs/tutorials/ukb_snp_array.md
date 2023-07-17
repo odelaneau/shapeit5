@@ -7,10 +7,6 @@ parent: Tutorials
 # UK Biobank SNP array data
 {: .no_toc }
 
-{: .warning }
-Website under construction: better version to come soon!
-
-
 ## Table of contents
 {: .no_toc .text-delta }
 
