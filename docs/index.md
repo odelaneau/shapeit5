@@ -36,7 +36,7 @@ SHAPEIT5 is a software package to estimate haplotypes in large genotype datasets
 
 If you use SHAPEIT5 in your research work, please cite the following paper:
 
-[Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank. <br>BioRxiv (2022) doi: https://doi.org/10.1101/2022.10.19.512867 ](https://www.biorxiv.org/content/10.1101/2022.10.19.512867v1)
+Hofmeister RJ, Ribeiro DM, Rubinacci S., Delaneau O. [Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank. <br>Nature Genetics (2023) doi: https://doi.org/10.1038/s41588-023-01415-w ](https://www.nature.com/articles/s41588-023-01415-w)
 
 ---
 
