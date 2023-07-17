@@ -17,7 +17,8 @@ Website under construction: better version to come soon!
 {:toc}
 
 ---
-
+**For any question on this pipeline, please contact [Robin J. Hofmeister](robin.hofmeister@unil.ch)** 
+---
 
 ## Rationale
 SHAPEIT5 is a two-step approach that treats each chromosome independently and works as follows:

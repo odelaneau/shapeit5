@@ -17,8 +17,8 @@ Website under construction: better version to come soon!
 {:toc}
 
 ---
-
-
+**For any question on this pipeline, please contact [Robin J. Hofmeister](robin.hofmeister@unil.ch)** 
+---
 ## Rationale
 Similar to the WGS data, the WES data can be phased in two steps, separating common and rare markers. However, the specificity of the WES phasing is that we first merged it with the SNP array data to increase the density of common markers, in particular in between genes.
 <br>
