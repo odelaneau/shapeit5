@@ -7,10 +7,6 @@ parent: Tutorials
 # Imputation using the UK Biobank as a reference panel
 {: .no_toc }
 
-{: .warning }
-Website under construction: better version to come soon!
-
-
 1. TOC
 {:toc}
 
