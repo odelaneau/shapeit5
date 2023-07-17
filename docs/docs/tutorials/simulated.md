@@ -15,6 +15,10 @@ parent: Tutorials
 
 ---
 
+**For any question on imputation, please contact [Simone Rubinacci](https://srubinacci.github.io/).** 
+
+---
+
 ## Rationale
 SHAPEIT5 is a two-step approach that treats each chromosome independently and works as follows:
 

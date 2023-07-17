@@ -18,7 +18,7 @@ Website under construction: better version to come soon!
 
 ---
 
-**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR).**
+**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR) and [Olivier Delaneau](https://github.com/odelaneau).** 
  
 ---
 
