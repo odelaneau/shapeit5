@@ -18,8 +18,11 @@ Website under construction: better version to come soon!
 {:toc}
 
 ---
-**For any question on this pipeline, please contact [Robin J. Hofmeister](robin.hofmeister@unil.ch)** 
+
+**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR).** 
+
 ---
+
 **IMPORTANT: For this tutorial, we work on the UK Biobank Research Analysis Platform (RAP).**
 
 ## Rationale

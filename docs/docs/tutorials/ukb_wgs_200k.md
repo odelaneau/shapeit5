@@ -15,8 +15,11 @@ parent: Tutorials
 {:toc}
 
 ---
-**For any question on this pipeline, please contact [Robin J. Hofmeister](robin.hofmeister@unil.ch) and [Diogo M. Ribeiro](diogo.ribeiro@unil.ch).** 
+
+**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR) and [Diogo M. Ribeiro](https://diogomribeiro.github.io/).** 
+
 ---
+
 ## Rationale
 This tutorial provides a brief explanation of the scripts that were used to estimate the haplotype of the newest release of the UK Biobank WGS data, interim release of 200,031 individuals. A phasing report documenting the quality control steps, a more detailed rationale and the validation of the phasing is available [here](https://docs.google.com/document/d/1EJmh-JcR8HBvu3rjBtREw_50kDIW-sOW2EcC6zweuTc/edit?usp=sharing).
 

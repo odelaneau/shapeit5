@@ -17,7 +17,9 @@ Website under construction: better version to come soon!
 {:toc}
 
 ---
-**For any question on this pipeline, please contact [Robin J. Hofmeister](robin.hofmeister@unil.ch)** 
+
+**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR) and [Diogo M. Ribeiro](https://diogomribeiro.github.io/).** 
+
 ---
 
 ## Rationale
