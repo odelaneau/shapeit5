@@ -23,7 +23,7 @@ It is strongly advised to prioritize the use of the latest released version (see
 ## Citation
 If you use SHAPEIT5 in your research work, please cite the following paper:
 
-Hofmeister RJ, Ribeiro DM, Rubinacci S., Delaneau O. [Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank](https://www.biorxiv.org/content/10.1101/2022.10.19.512867v1). BiorXiv (2022)
+Hofmeister RJ, Ribeiro DM, Rubinacci S., Delaneau O. [Accurate rare variant phasing of whole-genome and whole-exome sequencing data in the UK Biobank](https://www.nature.com/articles/s41588-023-01415-w). Nature Genetics (2023)
 
 ## Documentation
 
