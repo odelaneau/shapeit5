@@ -79,8 +79,8 @@ This step relies on two additional codes (`swaprefalt_0.0.1.tar.gz` and `liftove
 <div class="code-example" markdown="1">
 ```bash
 # download required docker images from our github repository
-wget https://github.com/odelaneau/shapeit5/releases/download/v1.0.0-beta/swaprefalt_0.0.1.tar.gz
-wget https://github.com/odelaneau/shapeit5/releases/download/v1.0.0-beta/liftovervcf_0.0.1.tar.gz
+wget https://github.com/odelaneau/shapeit5/releases/download/v1.0.0/swaprefalt_0.0.1.tar.gz
+wget https://github.com/odelaneau/shapeit5/releases/download/v1.0.0/liftovervcf_0.0.1.tar.gz
 
 # upload the docker images on the UKB RAP
 dx mkdir -p docker/
