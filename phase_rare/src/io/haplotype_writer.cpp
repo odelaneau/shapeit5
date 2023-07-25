@@ -42,7 +42,7 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-void haplotype_writer::writeHaplotypes(string fname) {
+void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 	// Init
 	tac.clock();
 	string file_format = "w";
@@ -56,7 +56,24 @@ void haplotype_writer::writeHaplotypes(string fname) {
 
 	// Create VCF header
 	bcf_hdr_append(hdr, string("##source=shapeit5 phase_rare v" + string(PHASE2_VERSION)).c_str());
-	bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
+	try
+	{
+	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
+	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
+	    bcf_idpair_t *ctg = hdr_tar->id[BCF_DT_CTG];
+	    for (int idx_ctg = 0; idx_ctg < hdr_tar->n[BCF_DT_CTG]; ++idx_ctg)
+	    {
+	    	std::string length = "";
+	    	if (ctg[idx_ctg].val->info[0] > 0) length = ",length=" + std::to_string(ctg[idx_ctg].val->info[0]);
+	    	bcf_hdr_append(hdr, std::string("##contig=<ID="+ std::string(ctg[idx_ctg].key) + length + ">").c_str());
+	    }
+	    bcf_hdr_destroy(hdr_tar);
+	    bcf_close(fp_tar);
+	}
+	catch (std::exception& e)
+	{
+		bcf_hdr_append(hdr, string("##contig=<ID="+ V.vec_full[0]->chr + ">").c_str());
+	}
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
