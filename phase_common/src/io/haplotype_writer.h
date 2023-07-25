@@ -43,7 +43,7 @@ public:
 	~haplotype_writer();
 
 	//IO
-	void writeHaplotypes(std::string, std::string);
+	void writeHaplotypes(std::string, std::string, std::string);
 };
 
 #endif
