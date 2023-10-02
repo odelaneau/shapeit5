@@ -87,7 +87,7 @@ public:
 	//IMPUTE
 	void imputeMonomorphic();
 	void phaseLiAndStephens(unsigned int, unsigned int, aligned_vector32 < float > &, aligned_vector32 < float > &, std::vector < unsigned int > &, float);
-	void phaseCoalescentViterbi(unsigned int, std::vector < int > &, std::vector < int > &, hmm_parameters &);
+	void phaseCoalescentViterbi(unsigned int, std::vector < int > &, std::vector < int > &, hmm_parameters &, bool);
 	void phasePedigrees(std::string fped);
 
 };

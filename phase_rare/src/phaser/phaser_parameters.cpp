@@ -59,6 +59,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output", bpo::value< string >(), "Phased haplotypes (at common AND rare variants)")
+			("score-singletons", "Score singleton phasing between 0.5 and 1.0 (experimental)");
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_pbwt).add(opt_hmm).add(opt_output);
@@ -126,4 +127,5 @@ void phaser::verbose_options() {
 	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth-common"].as < int > ()) + "," + stb.str(options["pbwt-depth-rare"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
 	if (options.count("map")) vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Recombination rates given by genetic map]");
 	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
+	if (options.count("score-singletons")) vrb.bullet("HMM     : [Score singleton phasing]");
 }

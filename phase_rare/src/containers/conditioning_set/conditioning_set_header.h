@@ -82,6 +82,9 @@ public:
 	//IBD2 protection
 	std::vector < std::vector < unsigned int > > IBD2;
 
+	//Haploids
+	std::vector < bool > haploids;
+
 	//CONSTRUCTOR/DESTRUCTOR
 	conditioning_set();
 	~conditioning_set();
