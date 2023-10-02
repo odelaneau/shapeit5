@@ -64,7 +64,7 @@ void phaser::hmmcompute(int id_job, int id_thread) {
 	thread_hmms[id_thread]->backward(cevents, path1);
 
 	//Phase remaining unphased using viterbi [singletons, etc ...]
-	G.phaseCoalescentViterbi(id_job, path0, path1, M);
+	G.phaseCoalescentViterbi(id_job, path0, path1, M, options.count("score-singletons"));
 }
 
 void phaser::phase() {

@@ -70,7 +70,7 @@ void conditioning_set::scanIBD2(variant_map & V) {
 						//int disc = 0;
 						//for (int hh = div ; hh <= l ; hh ++) disc += ((Hvar.get(hh, 2*ind1+0)+Hvar.get(hh, 2*ind1+1)) - (Hvar.get(hh, 2*ind0+0)+Hvar.get(hh, 2*ind0+1)));
 						//cout << "IBD2: " << ind0 << " " << ind1 << " " << lengthMatchCM << " " << lengthMatchBP << " " << lengthMatchCT << " " << disc << endl;
-						IBD2[min(ind0, ind1)].push_back(max(ind0, ind1));
+						if (!haploids[ind0] && !haploids[ind1]) IBD2[min(ind0, ind1)].push_back(max(ind0, ind1));
 					}
 				} else break;
 			}

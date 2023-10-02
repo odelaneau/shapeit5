@@ -56,6 +56,7 @@ void phaser::read_files_and_initialise() {
 	//step4: Read haploids
 	if (options.count("haploids")) G.mapHaploidsAndResetHets(options["haploids"].as < string > ());
 	else G.haploids = std::vector < bool > (G.n_samples, false);
+	H.haploids = G.haploids;
 
 	//step5: Read pedigrees and solve
 	if (options.count("pedigree")) G.phasePedigrees(options["pedigree"].as < string > ());

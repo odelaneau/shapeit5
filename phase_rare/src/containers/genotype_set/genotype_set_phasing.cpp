@@ -73,7 +73,7 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 	}
 }
 
-void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pathH0, vector < int > & pathH1, hmm_parameters & M) {
+void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pathH0, vector < int > & pathH1, hmm_parameters & M, bool score_singletons) {
 	 //
 	 vector < int > starts0, ends0, starts1, ends1;
 	 starts0.push_back(0);
@@ -130,7 +130,8 @@ void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pat
 			}
 
 			//GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
-			GRind_genotypes[ind][vr].prob = 0.5f;
+			if (score_singletons) GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
+			else GRind_genotypes[ind][vr].prob = 0.5f;
 		}
 	}
 }
