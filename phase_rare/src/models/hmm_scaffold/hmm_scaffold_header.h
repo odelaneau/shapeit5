@@ -29,7 +29,10 @@
 #include <objects/hmm_parameters.h>
 #include <containers/state_set.h>
 
+#define SIMDE_ENABLE_NATIVE_ALIASES
+#include <simde/x86/avx.h>
 #include <simde/x86/avx2.h>
+#include <simde/x86/fma.h>
 
 inline
 float horizontal_add (const __m256& a) {

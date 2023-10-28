@@ -59,7 +59,7 @@ public:
 
 private:
 	std::random_device random_device;
-    std::mt19937 random_generator;
+	std::mt19937 random_generator;
 };
 
 #endif
