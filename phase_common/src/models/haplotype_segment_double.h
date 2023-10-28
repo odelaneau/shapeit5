@@ -27,7 +27,11 @@
 #include <objects/compute_job.h>
 #include <objects/hmm_parameters.h>
 
+#define SIMDE_ENABLE_NATIVE_ALIASES
+#include <simde/x86/avx.h>
 #include <simde/x86/avx2.h>
+#include <simde/x86/fma.h>
+
 #include <boost/align/aligned_allocator.hpp>
 
 template <typename T>

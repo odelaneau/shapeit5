@@ -56,6 +56,10 @@ public:
 	//IO
 	void writeValidation(std::string);
 	void writeEstimation(std::string);
+
+private:
+	std::random_device random_device;
+    std::mt19937 random_generator;
 };
 
 #endif
