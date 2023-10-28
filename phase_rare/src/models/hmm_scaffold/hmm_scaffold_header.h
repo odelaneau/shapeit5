@@ -29,7 +29,7 @@
 #include <objects/hmm_parameters.h>
 #include <containers/state_set.h>
 
-#include <immintrin.h>
+#include <simde/x86/avx2.h>
 
 inline
 float horizontal_add (const __m256& a) {

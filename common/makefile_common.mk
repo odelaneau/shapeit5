@@ -29,6 +29,7 @@ VPATH=$(shell for file in `find src -name *.cpp`; do echo $$(dirname $$file); do
 NAME=$(shell basename $(CURDIR))
 BFILE=bin/$(NAME)
 EXEFILE=bin/$(NAME)_static
+MACFILE=bin/$(NAME)_mac
 
 # Only search for libraries if goals != clean
 ifeq (,$(filter clean,$(MAKECMDGOALS)))
@@ -159,6 +160,19 @@ static_exe_robin_desktop: BOOST_LIB_IO=$(HTSSRC)/boost/lib/libboost_iostreams.a
 static_exe_robin_desktop: BOOST_LIB_PO=$(HTSSRC)/boost/lib/libboost_program_options.a
 static_exe_robin_desktop: $(EXEFILE)
 
+mac_apple_silicon: CXXFLAG=-O3 -mcpu=apple-m1 -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+mac_apple_silicon: LDFLAG=-O3
+mac_apple_silicon: HTSLIB_LIB=-lhts
+mac_apple_silicon: BOOST_LIB_IO=-lboost_iostreams
+mac_apple_silicon: BOOST_LIB_PO=-lboost_program_options
+mac_apple_silicon: $(MACFILE)
+
+mac_apple_silicon_static: CXXFLAG=-O3 -mcpu=apple-m1 -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+mac_apple_silicon_static: LDFLAG=-O3
+mac_apple_silicon_static: HTSLIB_LIB=/opt/homebrew/opt/htslib/lib/libhts.a
+mac_apple_silicon_static: BOOST_LIB_IO=/opt/homebrew/opt/boost/lib/libboost_iostreams.a
+mac_apple_silicon_static: BOOST_LIB_PO=/opt/homebrew/opt/boost/lib/libboost_program_options.a
+mac_apple_silicon_static: $(MACFILE)
 
 #COMPILATION RULES
 all: desktop
@@ -168,6 +182,9 @@ $(BFILE): $(OFILE)
 
 $(EXEFILE): $(OFILE)
 	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
+
+$(MACFILE): $(OFILE)
+	$(CXX) $(LDFLAG) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -o $@
 
 obj/%.o: %.cpp $(HFILE)
 	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I$(HTSLIB_INC) -I$(BOOST_INC)

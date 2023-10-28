@@ -27,7 +27,7 @@
 #include <objects/compute_job.h>
 #include <objects/hmm_parameters.h>
 
-#include <immintrin.h>
+#include <simde/x86/avx2.h>
 #include <boost/align/aligned_allocator.hpp>
 
 template <typename T>
