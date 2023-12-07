@@ -1,0 +1,50 @@
+diff --git a/phase_common/makefile b/phase_common/makefile
+index e2a051c..cc9f552 100644
+--- a/phase_common/makefile
++++ b/phase_common/makefile
+@@ -17,7 +17,7 @@ CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
+ CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+ 
+ #DYNAMIC LIBRARIES
+-DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
++DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lgcrypt
+ 
+ HFILE=$(shell find src -name *.h)
+ CFILE=$(shell find src -name *.cpp)
+@@ -29,22 +29,22 @@ BFILE=bin/$(NAME)
+ EXEFILE=bin/$(NAME)_static
+ 
+ #CONDITIONAL PATH DEFINITON
+-system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
+-system: HTSSRC=/usr/local
+-system: HTSLIB_INC=$(HTSSRC)/include/htslib
+-system: HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
+-system: BOOST_INC=/usr/include
+-system: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+-system: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+-system: BOOST_LIB_SE=/usr/lib/x86_64-linux-gnu/libboost_serialization.a
++system: DYN_LIBS=-lz -lpthread -lbz2 -llzma -lboost_iostreams -lboost_program_options -lboost_serialization -lcurl -lgcrypt -lhts
++#system: HTSSRC=/usr/local
++#system: HTSLIB_INC=$(HTSSRC)/include/htslib
++#system: HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
++#system: BOOST_INC=/usr/include
++#system: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
++#system: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
++#system: BOOST_LIB_SE=/usr/lib/x86_64-linux-gnu/libboost_serialization.a
+ system: $(BFILE)
+ 
+-desktop: HTSSRC=../..
+-desktop: HTSLIB_INC=$(HTSSRC)/htslib
+-desktop: HTSLIB_LIB=$(HTSSRC)/htslib/libhts.a
+-desktop: BOOST_INC=/usr/include
+-desktop: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
+-desktop: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
++#desktop: HTSSRC=../..
++#desktop: HTSLIB_INC=$(HTSSRC)/htslib
++#desktop: HTSLIB_LIB=$(HTSSRC)/htslib/libhts.a
++#desktop: BOOST_INC=/usr/include
++#desktop: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
++#desktop: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
+ desktop: $(BFILE)
+ 
+ olivier: HTSSRC=$(HOME)/Tools
