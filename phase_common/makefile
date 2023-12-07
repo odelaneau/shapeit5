@@ -65,8 +65,6 @@ laptop: $(BFILE)
 
 debug: CXXFLAG=-g -mavx2 -mfma
 debug: LDFLAG=-g
-debug: CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
-debug: CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 debug: HTSSRC=$(HOME)/Tools
 debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
 debug: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
