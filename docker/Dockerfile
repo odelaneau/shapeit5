@@ -1,5 +1,4 @@
-FROM ubuntu:20.04
-
+FROM ubuntu:24.04
 
 LABEL org.opencontainers.image.created="2023-03-11"
 LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
@@ -9,45 +8,46 @@ LABEL org.opencontainers.image.title="shapeit5"
 LABEL org.opencontainers.image.authors="olivier.delaneau@gmail.com"
 
 # set the environment variables
-ENV HOME /root
 
-ENV htslib_version 1.15
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+RUN chsh -s /bin/bash
 # run update and install necessary tools from package manager
 WORKDIR /tmp
-RUN apt-get update && apt-get -y upgrade && apt-get install -y \
-	apt-utils time curl gnupg gcc g++ make autoconf && \
-	apt-get clean && apt-get purge && \
+RUN apt -y update && apt -y -y upgrade && apt -y install -y \
+	apt-utils bash time gnupg gcc g++ make autoconf \
+	git zlib1g-dev bzip2 libbz2-dev liblzma-dev \
+	build-essential git wget \
+        libcurl4-gnutls-dev libgcrypt20-dev \
+        libboost-all-dev libboost-iostreams-dev libhts-dev libhts3 && \
+	apt -y clean && apt -y purge && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN apt-get update && apt-get -y upgrade && apt-get install -y \
-	git zlib1g-dev bzip2 libbz2-dev liblzma-dev && \
-	apt-get clean && apt-get purge && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+WORKDIR /user/src
+COPY . shapeit5
 
-# bcftools
-RUN curl -SL https://github.com/samtools/bcftools/releases/download/${htslib_version}/bcftools-${htslib_version}.tar.bz2 \
-    > bcftools-${htslib_version}.tar.bz2 && \
-    tar -xjvf bcftools-${htslib_version}.tar.bz2 && \
-    cd /tmp/bcftools-${htslib_version} && \
-    ./configure && \
-    make && \
-    make install && \
-    rm -rf bcftools-${htslib_version}.tar.bz2 && \
-    rm -rf bcftools-${htslib_version}
+WORKDIR /user/src/shapeit5
 
-# get SHAPEIT5 binaries
-ADD resources/phase_common_static /bin/phase_common_static
-ADD resources/phase_rare_static /bin/phase_rare_static
-ADD resources/switch_static /bin/switch_static
-ADD resources/ligate_static /bin/ligate_static
-ADD resources/simulate_static /bin/simulate_static
-ADD resources/xcftools_static /bin/xcftools_static
+#Compile phase 1
+RUN cd phase_common && make -j system && cp bin/phase_common ../static_bins/. && cd ..
 
-RUN chmod +x /bin/*_static
+#Compile phase 2
+RUN cd phase_rare && make -j system && cp bin/phase_rare ../static_bins/. && cd ..
 
-WORKDIR $HOME
+#Compile switch
+RUN cd switch && make -j system && cp bin/switch ../static_bins/. && cd ..
+
+#Compile ligate
+RUN cd ligate && make -j system && cp bin/ligate ../static_bins/. && cd ..
+
+#Compile simulate
+RUN cd simulate && make -j system && cp bin/simulate ../static_bins/. && cd ..
+
+#Compile xcftools
+RUN cd xcftools && make -j system && cp bin/xcftools ../static_bins/.  && cd ..
+
+RUN chmod +x /bin/*
+
