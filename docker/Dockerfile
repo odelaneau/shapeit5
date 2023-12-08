@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 LABEL org.opencontainers.image.created="2023-03-11"
 LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
-LABEL org.opencontainers.image.version="5.1.0"
+LABEL org.opencontainers.image.version="5.1.1"
 LABEL org.opencontainers.image.licences="MIT"
 LABEL org.opencontainers.image.title="shapeit5"
 LABEL org.opencontainers.image.authors="olivier.delaneau@gmail.com"
