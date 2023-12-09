@@ -29,6 +29,12 @@ BFILE=bin/$(NAME)
 EXEFILE=bin/$(NAME)_static
 
 #CONDITIONAL PATH DEFINITONS
+docker: CXXFLAG+=
+docker: EXEFILE=bin/$(NAME)
+docker: DYN_LIBS=-lbz2 -lcurl -lboost_iostreams -lboost_program_options \
+		-lboost_serialization -lbz2 -lgcrypt -lhts -llzma -lpthread -lz
+docker: $(BFILE)
+
 system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
 system: HTSSRC=/usr/local
 system: HTSLIB_INC=$(HTSSRC)/include/htslib
