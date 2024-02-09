@@ -41,7 +41,6 @@ void ligater::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output,O", bpo::value< string >(), "Output ligated file in VCF/BCF format")
-			("index", "Whether to index the ligated output (csi format)")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_output);
@@ -85,7 +84,6 @@ void ligater::verbose_files() {
 	vrb.title("Files:");
 	vrb.bullet("Input LIST     : [" + options["input"].as < string > () + "]");
 	vrb.bullet("Output VCF     : [" + options["output"].as < string > () + "]");
-	vrb.bullet("Index output   : [" + no_yes[options.count("index")] + "]");
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 
