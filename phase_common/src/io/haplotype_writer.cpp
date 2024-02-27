@@ -36,7 +36,7 @@ haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, varian
 haplotype_writer::~haplotype_writer() {
 }
 
-void haplotype_writer::writeHaplotypes(string fname, string fformat) {
+void haplotype_writer::writeHaplotypes(string fname, string fformat, string ifile) {
 	tac.clock();
 
 	//Open XCF writer
@@ -46,8 +46,18 @@ void haplotype_writer::writeHaplotypes(string fname, string fformat) {
 	//Write header
 	vector < string > snames;
 	for (int32_t i = 0 ; i < G.n_ind ; i ++) snames.push_back(G.vecG[i]->name.c_str());
-	XW.writeHeader(snames, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
-
+	try
+	{
+	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
+	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
+	    XW.writeHeader(hdr_tar, snames, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
+	    bcf_hdr_destroy(hdr_tar);
+	    bcf_close(fp_tar);
+	}
+	catch (std::exception& e)
+	{
+		XW.writeHeader(snames, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
+	}
 	//Allocate buffers
 	int32_t * output_buffer = (int32_t *) malloc(G.n_ind * 2 * sizeof(int32_t));
 	bitvector output_bitvector (G.n_ind * 2);

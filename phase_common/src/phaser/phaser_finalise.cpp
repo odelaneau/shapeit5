@@ -41,7 +41,7 @@ void phaser::write_files_and_finalise() {
 	if (oformat == "graph")
 		graph_writer(G, V).writeGraphs(options["bingraph"].as < std::string > ());
 	else
-		haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > (), oformat);
+		haplotype_writer(H, G, V, options["thread"].as < int > ()).writeHaplotypes(options["output"].as < std::string > (), oformat , options["input"].as < std::string > ());
 
 	//step2: Measure overall running time
 	vrb.bullet("Total running time = " + stb.str(tac.abs_time()) + " seconds");
