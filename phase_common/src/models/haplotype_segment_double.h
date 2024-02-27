@@ -400,7 +400,7 @@ bool haplotype_segment_double::TRANS_HAP() {
 		_mm256_store_pd(&HProbs[h1*HAP_NUMBER+4], _sum1);
 		sumHProbs += HProbs[h1*HAP_NUMBER+0]+HProbs[h1*HAP_NUMBER+1]+HProbs[h1*HAP_NUMBER+2]+HProbs[h1*HAP_NUMBER+3]+HProbs[h1*HAP_NUMBER+4]+HProbs[h1*HAP_NUMBER+5]+HProbs[h1*HAP_NUMBER+6]+HProbs[h1*HAP_NUMBER+7];
 	}
-	return (isnan(sumHProbs) || isinf(sumHProbs) || sumHProbs < std::numeric_limits<double>::min());
+	return (std::isnan(sumHProbs) || std::isinf(sumHProbs) || sumHProbs < std::numeric_limits<double>::min());
 }
 
 inline
@@ -418,7 +418,7 @@ bool haplotype_segment_double::TRANS_DIP_MULT() {
 			}
 		}
 	}
-	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
+	return (std::isnan(sumDProbs) || std::isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
 }
 
 inline
@@ -436,7 +436,7 @@ bool haplotype_segment_double::TRANS_DIP_ADD() {
 			}
 		}
 	}
-	return (isnan(sumDProbs) || isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
+	return (std::isnan(sumDProbs) || std::isinf(sumDProbs) || sumDProbs < std::numeric_limits<double>::min());
 }
 
 inline
