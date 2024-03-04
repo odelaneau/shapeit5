@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: GPL-2.0
+FROM ubuntu:24.04 as base
+
+ARG BDATE
+ARG BVERSION
+
+LABEL org.opencontainers.image.authors="thebigcorporation@gmail.com"
+LABEL org.opencontainers.image.created="${BDATE}"
+LABEL org.opencontainers.description="shapeit5 base image for development"
+LABEL org.opencontainers.image.licences="GPL v2.0"
+LABEL org.opencontainers.image.title="shapeit5 container base"
+LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
+LABEL org.opencontainers.image.version="${BVERSION}"
+
+# OS updates and runtime dependencies for shapeit5
+RUN DEBIAN_FRONTEND=noninteractive apt -y update && apt -y upgrade && \
+	apt -y install \
+	bash ca-certificates curl \
+	gnupg \
+	libboost-iostreams1.74.0 libboost-program-options1.74.0 \
+	libboost-serialization1.74.0 \
+	libbz2-1.0 \
+	libcurl4 \
+	libgcrypt20 \
+	libhts3 \
+	liblzma5 \
+	time \
+	zlib1g
+
+FROM base as builder
+
+LABEL org.opencontainers.image.authors="thebigcorporation@gmail.com"
+LABEL org.opencontainers.image.created="${BDATE}"
+LABEL org.opencontainers.description="shapeit5 build environment"
+LABEL org.opencontainers.image.licences="GPL v2.0"
+LABEL org.opencontainers.image.title="shapeit5 builder and dev container"
+LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
+LABEL org.opencontainers.image.version="${BVERSION}"
+
+RUN DEBIAN_FRONTEND=noninteractive apt -y install \
+	apt-utils build-essential time gcc g++ make autoconf \
+	git zlib1g-dev libbz2-dev liblzma-dev \
+	build-essential \
+	libcurl4-gnutls-dev libgcrypt20-dev \
+	libboost-all-dev libboost-serialization-dev \
+	libhts-dev
+
+FROM builder as source
+
+COPY --link . /shapeit5
+
+FROM source as build
+
+ARG PROJECT 
+
+# For development, we want to be able to edit in the source tree that
+# we are going to build. This approach also allows editing the container
+# build instructions themselves, without having to commit things until
+# they work properly.
+# A proper release build should instead clone the git repo at some tag.
+
+RUN echo "Building: ${PROJECT}"
+
+WORKDIR /shapeit5/${PROJECT}
+
+RUN make -j docker && cp bin/${PROJECT} /usr/local/bin/
+
+FROM base as release
+
+ARG PROJECT 
+
+RUN echo "Release ${PROJECT}"
+
+LABEL org.opencontainers.image.authors="thebigcorporation@gmail.com"
+LABEL org.opencontainers.image.created="${BDATE}"
+LABEL org.opencontainers.description="Runtime for shapeit5 ${PROJECT}"
+LABEL org.opencontainers.image.licences="GPL v2.0"
+LABEL org.opencontainers.image.title="shapeit5 builder and dev container"
+LABEL org.opencontainers.image.url="https://github.com/odelaneau/shapeit5"
+LABEL org.opencontainers.image.version="${BVERSION}"
+
+COPY --from=build --link /usr/local/bin/${PROJECT} /usr/local/bin/
+
+ARG ENTRY="/entrypoint.sh"
+RUN echo "#!/bin/bash\n${PROJECT} \$@" > ${ENTRY} && chmod ugo+rx ${ENTRY}
+RUN cat /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
