@@ -33,7 +33,7 @@ void phaser::declare_options() {
 			("seed", bpo::value<int>()->default_value(15052011), "Seed of the random number generator")
 			("thread", bpo::value<int>()->default_value(1), "Number of thread used")
 			("progress", "Verbose progress percentages on screen for longer tasks");
-
+			
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
 			("input", bpo::value< string >(), "Genotypes to be phased")
