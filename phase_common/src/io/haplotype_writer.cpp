@@ -56,7 +56,9 @@ void haplotype_writer::writeHaplotypes(string fname, string fformat, string ifil
 	}
 	catch (std::exception& e)
 	{
-		XW.writeHeader(snames, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
+		std::vector<int> fath (snames.size(),-1);
+		std::vector<int> moth (snames.size(),-1);
+		XW.writeHeader(snames, fath, moth, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
 	}
 	//Allocate buffers
 	int32_t * output_buffer = (int32_t *) malloc(G.n_ind * 2 * sizeof(int32_t));
