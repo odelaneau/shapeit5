@@ -16,8 +16,10 @@ COMMIT_DATE=$(shell git log -1 --format=%cd --date=short)
 CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
 CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 
-#DYNAMIC LIBRARIES
-DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
+# DYNAMIC LIBRARIES # Standard libraries are still dynamic in static exe
+DYN_LIBS_FOR_STATIC=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
+# Non static exe links with all libraries
+DYN_LIBS=$(DYN_LIBS_FOR_STATIC) -lboost_iostreams -lboost_program_options -lboost_serialization -lhts
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -28,22 +30,65 @@ NAME=$(shell basename $(CURDIR))
 BFILE=bin/$(NAME)
 EXEFILE=bin/$(NAME)_static
 
-#CONDITIONAL PATH DEFINITON
-system: HTSSRC=/usr/local
-system: HTSLIB_INC=$(HTSSRC)/include/htslib
-system: HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
-system: BOOST_INC=/usr/include
-system: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
-system: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
-system: BOOST_LIB_SE=/usr/lib/x86_64-linux-gnu/libboost_serialization.a
-system: $(BFILE)
+# Only search for libraries if goals != clean
+ifeq (,$(filter clean,$(MAKECMDGOALS)))
 
-desktop: HTSSRC=../..
-desktop: HTSLIB_INC=$(HTSSRC)/htslib
-desktop: HTSLIB_LIB=$(HTSSRC)/htslib/libhts.a
-desktop: BOOST_INC=/usr/include
-desktop: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
-desktop: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
+#################################
+# HTSLIB for static compilation #
+#################################
+# These are the default paths when installing htslib from source
+HTSSRC=/usr/local
+HTSLIB_INC=$(HTSSRC)/include/htslib
+HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
+
+##########################################
+# Boost libraries for static compilation #
+##########################################
+BOOST_INC=/usr/include
+
+# If not set by user command, search for it
+BOOST_LIB_IO?=$(shell whereis libboost_iostreams | grep -o '\S*\.a\b')
+ifneq ($(suffix $(BOOST_LIB_IO)),.a)
+    # If not found check default path
+    ifeq ($(wildcard /usr/local/lib/libboost_iostreams.a),)
+        # File does not exist
+        $(warning libboost_iostreams.a not found, you can specify it with "make BOOST_LIB_IO=/path/to/lib...")
+    else
+        # File exists, set the variable
+        BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
+    endif
+endif
+
+# If not set by user command, search for it
+BOOST_LIB_PO?=$(shell whereis libboost_program_options | grep -o '\S*\.a\b')
+ifneq ($(suffix $(BOOST_LIB_PO)),.a)
+    # If not found check default path
+    ifeq ($(wildcard /usr/local/lib/libboost_program_options.a),)
+        # File does not exist
+        $(warning libboost_program_options.a not found, you can specify it with "make BOOST_LIB_PO=/path/to/lib...")
+    else
+        # File exists, set the variable
+        BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
+    endif
+endif
+
+# If not set by user command, search for it
+BOOST_LIB_SE?=$(shell whereis libboost_serialization | grep -o '\S*\.a\b')
+ifneq ($(suffix $(BOOST_LIB_SE)),.a)
+    # If not found check default path
+    ifeq ($(wildcard /usr/local/lib/libboost_serialization.a),)
+        # File does not exist
+        $(warning libboost_serialization.a not found, you can specify it with "make BOOST_LIB_SE=/path/to/lib...")
+    else
+        # File exists, set the variable
+        BOOST_LIB_SE=/usr/local/lib/libboost_serialization.a
+    endif
+endif
+
+# Endif makefile goals != clean
+endif
+
+#CONDITIONAL PATH DEFINITON
 desktop: $(BFILE)
 
 olivier: HTSSRC=$(HOME)/Tools
@@ -101,12 +146,6 @@ wally: $(BFILE)
 
 static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
-static_exe: HTSSRC=../..
-static_exe: HTSLIB_INC=$(HTSSRC)/htslib_minimal
-static_exe: HTSLIB_LIB=$(HTSSRC)/htslib_minimal/libhts.a
-static_exe: BOOST_INC=/usr/include
-static_exe: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
-static_exe: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 static_exe: $(EXEFILE)
 
 # static desktop Robin
@@ -125,10 +164,10 @@ static_exe_robin_desktop: $(EXEFILE)
 all: desktop
 
 $(BFILE): $(OFILE)
-	$(CXX) $(LDFLAG) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -o $@ $(DYN_LIBS)
+	$(CXX) $(LDFLAG) $^ -o $@ $(DYN_LIBS)
 
 $(EXEFILE): $(OFILE)
-	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS)
+	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
 
 obj/%.o: %.cpp $(HFILE)
 	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I$(HTSLIB_INC) -I$(BOOST_INC)
