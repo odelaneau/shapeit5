@@ -21,7 +21,7 @@
  ******************************************************************************/
 
 #include <utils/xcf.h>
-#include <containers/bitvector.h>
+#include <utils/bitvector.h>
 #include <io/genotype_reader/genotype_reader_header.h>
 
 void genotype_reader::readGenotypes() {

@@ -23,7 +23,10 @@
 #include <io/genotype_reader/genotype_reader_header.h>
 
 #include <utils/xcf.h>
-#include <containers/bitvector.h>
+#include <utils/sparse_genotype.h>
+#include <utils/bitvector.h>
+
+
 
 void genotype_reader::readGenotypes() {
 	tac.clock();
@@ -116,6 +119,38 @@ void genotype_reader::readGenotypes() {
 					if (he) VAR_SET_HET(MOD2(i_variant_kept), G.vecG[DIV2(i)]->Variants[DIV2(i_variant_kept)]);
 					if (mi) { V.vec_pos[i_variant_kept]->cmis++; n_genotypes[3] ++; }
 					else { V.vec_pos[i_variant_kept]->cref += (1-a0)+(1-a1); V.vec_pos[i_variant_kept]->calt += a0+a1; n_genotypes[a0+a1] ++; }
+				}
+			}
+
+			// ... in sparse genotype format
+			else if (main_type == RECORD_SPARSE_GENOTYPE) {
+				int32_t n_elements = XR.readRecord(idx_file_main, reinterpret_cast< char** > (&main_buffer)) / sizeof(int32_t);
+				
+				//Set all genotypes as major
+				bool majorA = XR.getAF()>0.5f;
+				if (majorA) {
+					for(int32_t i = 0 ; i < 2 * n_main_samples ; i += 2) {
+						VAR_SET_HAP0(MOD2(i_variant_kept), G.vecG[DIV2(i)]->Variants[DIV2(i_variant_kept)]);
+						VAR_SET_HAP1(MOD2(i_variant_kept), G.vecG[DIV2(i)]->Variants[DIV2(i_variant_kept)]);
+					}
+				}
+				n_genotypes[2*majorA] = n_main_samples;
+
+				//Loop over sparse genotypes
+				for(uint32_t r = 0 ; r < n_elements ; r++) {
+					sparse_genotype rg;
+					rg.set(main_buffer[r]);
+					bool a0 = rg.al0;
+					bool a1 = rg.al1;
+					bool mi = rg.mis;
+					bool he = !mi && a0 != a1;
+					bool ho = !mi && a0 == a1;					
+					if (a0) VAR_SET_HAP0(MOD2(i_variant_kept), G.vecG[rg.idx]->Variants[DIV2(i_variant_kept)]);
+					if (a1) VAR_SET_HAP1(MOD2(i_variant_kept), G.vecG[rg.idx]->Variants[DIV2(i_variant_kept)]);
+					if (mi) { VAR_SET_MIS(MOD2(i_variant_kept), G.vecG[rg.idx]->Variants[DIV2(i_variant_kept)]); n_genotypes[3] ++; }
+					if (he) { VAR_SET_HET(MOD2(i_variant_kept), G.vecG[rg.idx]->Variants[DIV2(i_variant_kept)]); n_genotypes[1] ++; }
+					if (ho) { n_genotypes[majorA] ++; }
+					n_genotypes[2*majorA] --;
 				}
 			}
 

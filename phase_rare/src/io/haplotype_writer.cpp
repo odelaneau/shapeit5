@@ -21,6 +21,11 @@
  ******************************************************************************/
 
 #include "../../versions/versions.h"
+
+#include <utils/xcf.h>
+#include <utils/sparse_genotype.h>
+#include <utils/bitvector.h>
+
 #include <io/haplotype_writer.h>
 
 using namespace std;
@@ -42,14 +47,14 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-void haplotype_writer::writeHaplotypes(string fname, string ifile) {
+void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string ifile, bool addPP) {
 	// Init
 	tac.clock();
 	string file_format = "w";
 	uint32_t file_type = OFILE_VCFU;
-	if (fname.size() > 6 && fname.substr(fname.size()-6) == "vcf.gz") { file_format = "wz"; file_type = OFILE_VCFC; }
-	if (fname.size() > 3 && fname.substr(fname.size()-3) == "bcf") { file_format = "wb"; file_type = OFILE_BCFC; }
-	htsFile * fp = hts_open(fname.c_str(),file_format.c_str());
+	if (foutput.size() > 6 && foutput.substr(foutput.size()-6) == "vcf.gz") { file_format = "wz"; file_type = OFILE_VCFC; }
+	if (foutput.size() > 3 && foutput.substr(foutput.size()-3) == "bcf") { file_format = "wb"; file_type = OFILE_BCFC; }
+	htsFile * fp = hts_open(foutput.c_str(),file_format.c_str());
 	if (nthreads > 1) hts_set_threads(fp, nthreads);
 	bcf_hdr_t * hdr = bcf_hdr_init("w");
 	bcf1_t *rec = bcf_init1();
@@ -77,7 +82,7 @@ void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 	bcf_hdr_append(hdr, "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"ALT allele count\">");
 	bcf_hdr_append(hdr, "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Number of alleles\">");
 	bcf_hdr_append(hdr, "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Phased genotypes\">");
-	bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
+	if (addPP) bcf_hdr_append(hdr, "##FORMAT=<ID=PP,Number=1,Type=Float,Description=\"Phasing confidence\">");
 
 	//Add samples
 	for (int32_t i = 0 ; i < G.n_samples ; i ++) bcf_hdr_add_sample(hdr, G.names[i].c_str());
@@ -109,7 +114,7 @@ void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 				for (int32_t i = 0 ; i < G.n_samples ; i++) {
 					genotypes[2*i+0] = bcf_gt_phased(major_allele);
 					genotypes[2*i+1] = bcf_gt_phased(major_allele);
-					bcf_float_set_missing(probabilities[i]);
+					if (addPP) bcf_float_set_missing(probabilities[i]);
 					count_alt += 2 * major_allele;
 				}
 				for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
@@ -117,7 +122,7 @@ void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 					bool a1 = G.GRvar_genotypes[vr][i].al1;
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+0] = bcf_gt_phased(a0);
 					genotypes[2*G.GRvar_genotypes[vr][i].idx+1] = bcf_gt_phased(a1);
-					probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(min(G.GRvar_genotypes[vr][i].prob, 1.0f) * 1000.0) / 1000.0;
+					if (addPP) probabilities[G.GRvar_genotypes[vr][i].idx] = roundf(min(G.GRvar_genotypes[vr][i].prob, 1.0f) * 1000.0) / 1000.0;
 					count_alt -= 2 * major_allele;
 					count_alt += a0+a1;
 				}
@@ -137,7 +142,7 @@ void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 			bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 			bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
 			bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
-			if (V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
+			if (addPP && V.vec_full[vt]->type == VARTYPE_RARE) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 
 			if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write VCF/record");
 		}
@@ -160,6 +165,104 @@ void haplotype_writer::writeHaplotypes(string fname, string ifile) {
 	case OFILE_BCFC: vrb.bullet("BCF writing [Compressed / N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)"); break;
 	}
 
-	vrb.bullet("Indexing ["+fname + "]");
-	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
+	vrb.bullet("Indexing ["+foutput + "]");
+	if (bcf_index_build3(foutput.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
+
+
+void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string ifile, std::string format) {
+	tac.clock();
+
+	//Open XCF writer
+	xcf_writer XW(foutput, false, nthreads);
+	
+	//Write header
+	try
+	{
+	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
+	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
+	    XW.writeHeader(hdr_tar, G.names, string("SHAPEIT5 phase_rare ") + string(PHASE2_VERSION));
+	    bcf_hdr_destroy(hdr_tar);
+	    bcf_close(fp_tar);
+	}
+	catch (std::exception& e)
+	{
+		std::vector<int> fath (G.names.size(),-1);
+		std::vector<int> moth (G.names.size(),-1);
+		XW.writeHeader(G.names, fath, moth, V.vec_full[0]->chr, string("SHAPEIT5 phase_rare ") + string(PHASE2_VERSION));
+	}
+	//Allocate buffers
+	int32_t * output_buffer = (int32_t *) malloc(G.n_samples * 2 * sizeof(int32_t));
+	bitvector output_bitvector (G.n_samples * 2);
+
+	//Write records
+	uint32_t count_alt = 0, count_tot = 0, n_sparse = 0;
+	for (int32_t vt = 0, vs = 0, vr = 0 ; vt < V.sizeFull() ; vt ++) {
+		if (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop) {
+
+			// Fill-up buffers
+			count_tot = 2*G.n_samples;
+
+			if (V.vec_full[vt]->type == VARTYPE_RARE) {
+				n_sparse = 0;
+				bool major_allele = !V.vec_full[vt]->minor;
+				count_alt = 2 * G.n_samples * major_allele;
+
+				if (format == "pp") {
+					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+						output_buffer[n_sparse++] = G.GRvar_genotypes[vr][i].get();
+						output_buffer[n_sparse++] = bit_cast<uint32_t> (G.GRvar_genotypes[vr][i].prob);
+					}
+				} else if (format == "sh") {
+					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+						if (G.GRvar_genotypes[vr][i].al0 != major_allele) output_buffer[n_sparse++] = 2 * G.GRvar_genotypes[vr][i].idx+0;
+						if (G.GRvar_genotypes[vr][i].al1 != major_allele) output_buffer[n_sparse++] = 2 * G.GRvar_genotypes[vr][i].idx+1;
+					}
+				} else vrb.error("Unrecognized format!");
+				
+				for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+					count_alt -= 2 * major_allele;
+					count_alt += G.GRvar_genotypes[vr][i].al0+G.GRvar_genotypes[vr][i].al1;
+				}
+			} else {
+				for (int32_t h = 0 ; h < 2*H.n_samples ; h++) {
+					bool al = H.Hvar.get(vs, h);
+					output_bitvector.set(h, al);
+					count_alt += al;
+				}
+			}
+
+			// Fill-up variant information
+			XW.writeInfo(V.vec_full[vt]->chr, V.vec_full[vt]->bp, V.vec_full[vt]->ref, V.vec_full[vt]->alt, V.vec_full[vt]->id, count_alt, count_tot);
+
+			// Write record
+			if (V.vec_full[vt]->type == VARTYPE_RARE) {
+				if (format == "pp") XW.writeRecord(RECORD_SPARSE_PHASEPROBS, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
+				if (format == "sh") XW.writeRecord(RECORD_SPARSE_HAPLOTYPE, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
+			} else XW.writeRecord(RECORD_BINARY_HAPLOTYPE, reinterpret_cast<char*>(output_bitvector.bytes), output_bitvector.n_bytes);
+		}
+
+		//
+		switch (V.vec_full[vt]->type) {
+		case VARTYPE_SCAF :	vs++; break;
+		case VARTYPE_RARE :	vr++; break;
+		}
+
+		//Verbose progress
+		vrb.progress("  * VCF writing", (vt+1)*1.0/V.sizeFull());
+	}
+
+	//Close
+	free(output_buffer);
+	XW.close();
+
+	//Verbose writing
+	vrb.bullet("XCF writing [N=" + stb.str(G.n_samples) + " / L=" + stb.str(V.sizeFull()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
+
+	//Indexing
+	vrb.bullet("Indexing files");
+	if (bcf_index_build3(foutput.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
+
+}
+
+

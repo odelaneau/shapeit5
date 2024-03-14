@@ -71,7 +71,7 @@ void phaser::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output,O", bpo::value< string >(), "Phased haplotypes output file")
-			("output-format", bpo::value< string >()->default_value("bcf"), "Output file format")
+			("output-format", bpo::value< string >()->default_value("vcf"), "Output file format, one of [vcf | graph | bh]")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_mcmc).add(opt_pbwt).add(opt_hmm).add(opt_filter).add(opt_output);
@@ -126,8 +126,8 @@ void phaser::check_options() {
 		vrb.error("You must specify a PBWT window size comprised between 0.5 and 10 cM");
 
 	string oformat = options["output-format"].as < string > ();
-	if (oformat != "graph" && oformat != "bcf" && oformat != "bh")
-		vrb.error("Output format[" + oformat + "] unsupported, use [graph, bcf or bh] instead");
+	if (oformat != "graph" && oformat != "vcf" && oformat != "bh")
+		vrb.error("Output format[" + oformat + "] unsupported, use [graph, vcf or bh] instead");
 
 	parse_iteration_scheme(options["mcmc-iterations"].as < string > ());
 }

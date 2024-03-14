@@ -20,3 +20,8 @@ static_exe:
 	$(MAKE) $@ -C $$dir; \
 	done
 
+rgc:
+	for dir in $(projects); do \
+	$(MAKE) $@ -C $$dir; \
+	done
+

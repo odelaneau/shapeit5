@@ -20,105 +20,42 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#ifndef _SPARSE_GENOTYPE_H
-#define _SPARSE_GENOTYPE_H
+#ifndef _RARE_GENOTYPE_H
+#define _RARE_GENOTYPE_H
 
 #include <utils/otools.h>
+#include <utils/sparse_genotype.h>
 
 #define SETBIT(n,i)	(n)|=(1U<<(i));
 #define CLRBIT(n,i)	(n)&=~(1U<<i);
 #define GETBIT(n,i)	(((n)>>(i))&1U);
 
 
-class sparse_genotype {
+class rare_genotype : public sparse_genotype {
 public:
 
 	static float ee;
 	static float ed;
 
-	unsigned int idx : 27;	//Index of the non Major/Major genotype
-	unsigned int het : 1;	//Is it het?
-	unsigned int mis : 1;	//Is it missing?	If none of the two, it is then Minor/Minor
-	unsigned int al0 : 1;	//What's the allele on haplotype 0?
-	unsigned int al1 : 1;	//What's the allele on haplotype 1?
-	unsigned int pha : 1;	//Is the genotype phased?
-	float prob;				//Probability
-
-	sparse_genotype() {
-		idx = het = mis = al0 = al1 = pha = 0;
-		prob = -1.0f;
-	}
-
-	sparse_genotype(unsigned int value) {
-		set(value);
-		prob = pha?1.0f:-1.0f;
-	}
-
-	sparse_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) {
-		idx = _idx; het = _het; mis = _mis; al0 = _al0; al1 = _al1;
-
-		pha = _pha || (!het && !mis);
-
-		if (pha) prob = 1.0f;
-		else {
-			prob = -1.0f;
-			if (al0 != al1) {
-				if (rng.flipCoin()) { al0 = 0; al1 = 1; }
-				else { al0 = 1; al1 = 0; }
-			}
+	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) : sparse_genotype(_idx, _het,  _mis, _al0, _al1, _pha) {
+		if (!pha && al0 != al1) {
+			if (rng.flipCoin()) { al0 = 0; al1 = 1; }
+			else { al0 = 1; al1 = 0; }
 		}
 	}
 
-	~sparse_genotype() {
-		idx = het = mis = al0 = al1 = pha = 0;
-		prob = -1.0f;
-	}
-
-	bool operator < (const sparse_genotype & rg) const {
-		return idx < rg.idx;
-	}
-
-	int get(bool majorA) {
-		if (mis) return -1;
-		if (het) return 1;
-		return 2-majorA;
-	}
-
-	unsigned int get() {
-		unsigned int value = (idx << 5);
-		if (het) SETBIT(value, 4);
-		if (mis) SETBIT(value, 3);
-		if (al0) SETBIT(value, 2);
-		if (al1) SETBIT(value, 1);
-		if (pha) SETBIT(value, 0);
-		return value;
-	}
-
-	void set(unsigned int value) {
-		idx = (value >> 5);
-		het = GETBIT(value, 4);
-		mis = GETBIT(value, 3);
-		al0 = GETBIT(value, 2);
-		al1 = GETBIT(value, 1);
-		pha = GETBIT(value, 0);
+	rare_genotype(unsigned int _val) : sparse_genotype(_val) {
+	}	
+	
+	void randomize() {
+		if (!pha) {
+			if (het) sparse_genotype::phase(rng.getInt(2) + 1);
+			if (mis) sparse_genotype::phase(rng.getInt(4));
+		}
 	}
 
 	void phase(unsigned int g) {
-		if (!pha) {
-			switch (g) {
-			case 0:	al0 = 0; al1 = 0; break;
-			case 1:	al0 = 0; al1 = 1; break;
-			case 2:	al0 = 1; al1 = 0; break;
-			case 3:	al0 = 1; al1 = 1; break;
-			}
-		}
-	}
-
-	void randomize() {
-		if (!pha) {
-			if (het) phase(rng.getInt(2) + 1);
-			if (mis) phase(rng.getInt(4));
-		}
+		sparse_genotype::phase(g);
 	}
 
 	void phase(float prb0, float prb1) {
