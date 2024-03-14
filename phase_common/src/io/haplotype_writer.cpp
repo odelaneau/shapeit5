@@ -24,7 +24,7 @@
 
 #include <io/haplotype_writer.h>
 #include <utils/xcf.h>
-#include <containers/bitvector.h>
+#include <utils/bitvector.h>
 
 using namespace std;
 
@@ -40,7 +40,7 @@ void haplotype_writer::writeHaplotypes(string fname, string fformat, string ifil
 	tac.clock();
 
 	//Open XCF writer
-	bool hts_genotypes = (fformat == "bcf");
+	bool hts_genotypes = (fformat == "vcf");
 	xcf_writer XW(fname, hts_genotypes, nthreads);
 
 	//Write header

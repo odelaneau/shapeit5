@@ -59,7 +59,9 @@ void phaser::declare_options() {
 	bpo::options_description opt_output ("Output files");
 	opt_output.add_options()
 			("output", bpo::value< string >(), "Phased haplotypes (at common AND rare variants)")
-			("score-singletons", "Score singleton phasing between 0.5 and 1.0 (experimental)");
+			("output-format", bpo::value< string >()->default_value("vcf"), "Output file format (vcf, sh or pp)")
+			("output-noPP", "Do not output PP field in VCF/BCF files")
+			("score-singletons", "Score singleton phasing between 0.5 and 1.0 (experimental)")
 			("log", bpo::value< string >(), "Log file");
 
 	descriptions.add(opt_base).add(opt_input).add(opt_pbwt).add(opt_hmm).add(opt_output);
@@ -97,6 +99,9 @@ void phaser::check_options() {
 
 	if (!options.count("output")) vrb.error("--output missing");
 
+	string output_fmt = options["output-format"].as < string > ();
+	if (output_fmt != "vcf" && output_fmt != "sh" && output_fmt != "pp") vrb.error("--output-format should be one of [vcf|sh|pp]");
+
 	if (options.count("seed") && options["seed"].as < int > () < 0)
 		vrb.error("Random number generator needs a positive seed value");
 
@@ -117,6 +122,12 @@ void phaser::verbose_files() {
 	if (options.count("map")) vrb.bullet("Genetic Map   : [" + options["map"].as < string > () + "]");
 	if (options.count("pedigree")) vrb.bullet("Pedigree file : [" + options["pedigree"].as < string > () + "]");
 	vrb.bullet("Output data   : [" + options["output"].as < string > () + "]");
+
+	string lfmt = "VCF/BCF";
+	if (options.count("output-noPP")) lfmt += " without PP field";
+	if (options["output-format"].as < string > () == "sh") lfmt = "Sparse haplotype [sh]";
+	if (options["output-format"].as < string > () == "pp") lfmt = "Sparse phased genotype + phase probs [pp]";
+	vrb.bullet("Output fmt    : " + lfmt);
 	if (options.count("log")) vrb.bullet("Output LOG    : [" + options["log"].as < string > () + "]");
 }
 

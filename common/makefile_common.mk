@@ -1,5 +1,5 @@
 #COMPILER MODE C++17
-CXX=g++ -std=c++17
+CXX=g++ -std=c++20
 
 
 #create folders
@@ -98,6 +98,14 @@ olivier: BOOST_INC=/usr/include
 olivier: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 olivier: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 olivier: $(BFILE)
+
+rgc: HTSSRC=/mnt/efs_v2/agds_methods/users/olivier.delaneau/LIBS
+rgc: HTSLIB_INC=$(HTSSRC)/htslib-1.18
+rgc: HTSLIB_LIB=$(HTSSRC)/htslib-1.18/libhts.a
+rgc: BOOST_INC=/usr/include
+rgc: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+rgc: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+rgc: $(BFILE)
 
 laptop: HTSSRC=$(HOME)/Tools
 laptop: HTSLIB_INC=$(HTSSRC)/htslib-1.10

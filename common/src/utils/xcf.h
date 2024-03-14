@@ -1,1 +1,1 @@
-../../../xcftools/common/src/utils/xcf.h
+../../../xcftools/src/utils/xcf.h

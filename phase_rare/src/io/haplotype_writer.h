@@ -46,7 +46,8 @@ public:
 	void setRegions(int _input_start, int _input_stop);
 
 	//IO
-	void writeHaplotypes(std::string foutput, std::string ifile);
+	void writeHaplotypesVCF(std::string foutput, std::string ifile, bool addPP);
+	void writeHaplotypesXCF(std::string foutput, std::string ifile, std::string format);
 };
 
 #endif

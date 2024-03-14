@@ -147,11 +147,11 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 
 			if (v > thresh) {
 				C[h0] = 1.0; C[h1] = -1.0;
-				G.GRvar_genotypes[vr][*s].phase(2);
+				G.GRvar_genotypes[vr][*s].phase(2U);
 				s = S.erase(s);
 			} else if (v < -thresh) {
 				C[h0] = -1.0; C[h1] = 1.0;
-				G.GRvar_genotypes[vr][*s].phase(1);
+				G.GRvar_genotypes[vr][*s].phase(1U);
 				s = S.erase(s);
 			} else s++;
 		}

@@ -27,7 +27,7 @@ void genotype_set::writeValidation(std::string fname) {
 	//Add samples
 	for (int i = 0 ; i < SID.size() ; i ++) bcf_hdr_add_sample(hdr, SID[i].c_str());
 	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
-	bcf_hdr_write(fp, hdr);
+	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write BCF/header");
 
 	//Add records
 	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
@@ -48,7 +48,7 @@ void genotype_set::writeValidation(std::string fname) {
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 		bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
-		bcf_write1(fp, hdr, rec);
+		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write BCF/record");
 		vrb.progress("  * VCF writing", (l+1)*1.0/H.n_var);
 	}
 	free(genotypes);
@@ -85,7 +85,7 @@ void genotype_set::writeEstimation(std::string fname) {
 	//Add samples
 	for (int i = 0 ; i < SID.size() ; i ++) bcf_hdr_add_sample(hdr, SID[i].c_str());
 	bcf_hdr_add_sample(hdr, NULL);      // to update internal structures
-	bcf_hdr_write(fp, hdr);
+	if (bcf_hdr_write(fp, hdr) < 0) vrb.error("Failing to write BCF/header");
 
 	//Add records
 	int * genotypes = (int*)malloc(bcf_hdr_nsamples(hdr)*2*sizeof(int));
@@ -116,7 +116,7 @@ void genotype_set::writeEstimation(std::string fname) {
 		bcf_update_info_int32(hdr, rec, "AC", &count_alt, 1);
 		bcf_update_info_int32(hdr, rec, "AN", &count_tot, 1);
 		bcf_update_genotypes(hdr, rec, genotypes, bcf_hdr_nsamples(hdr)*2);
-		bcf_write1(fp, hdr, rec);
+		if (bcf_write1(fp, hdr, rec) < 0) vrb.error("Failing to write BCF/record");
 		vrb.progress("  * VCF writing", (l+1)*1.0/H.n_var);
 	}
 	free(genotypes);
