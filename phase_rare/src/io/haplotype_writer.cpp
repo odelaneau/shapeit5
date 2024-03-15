@@ -47,7 +47,7 @@ void haplotype_writer::setRegions(int _input_start, int _input_stop) {
 	input_stop = _input_stop;
 }
 
-void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string ifile, bool addPP) {
+void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string finput, bool addPP) {
 	// Init
 	tac.clock();
 	string file_format = "w";
@@ -63,7 +63,7 @@ void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string ifile
 	bcf_hdr_append(hdr, string("##source=shapeit5 phase_rare v" + string(PHASE2_VERSION)).c_str());
 	try
 	{
-	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
+	    htsFile *fp_tar = bcf_open(finput.c_str(), "r");
 	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
 	    bcf_idpair_t *ctg = hdr_tar->id[BCF_DT_CTG];
 	    for (int idx_ctg = 0; idx_ctg < hdr_tar->n[BCF_DT_CTG]; ++idx_ctg)
@@ -170,27 +170,16 @@ void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string ifile
 }
 
 
-void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string ifile, std::string format) {
+void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string finput, std::string fformat) {
 	tac.clock();
 
 	//Open XCF writer
-	xcf_writer XW(foutput, false, nthreads);
+	bool hts_genotypes = (fformat == "vcf");
+	xcf_writer XW(foutput, hts_genotypes, nthreads);
 	
 	//Write header
-	try
-	{
-	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
-	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
-	    XW.writeHeader(hdr_tar, G.names, string("SHAPEIT5 phase_rare ") + string(PHASE2_VERSION));
-	    bcf_hdr_destroy(hdr_tar);
-	    bcf_close(fp_tar);
-	}
-	catch (std::exception& e)
-	{
-		std::vector<int> fath (G.names.size(),-1);
-		std::vector<int> moth (G.names.size(),-1);
-		XW.writeHeader(G.names, fath, moth, V.vec_full[0]->chr, string("SHAPEIT5 phase_rare ") + string(PHASE2_VERSION));
-	}
+	XW.writeHeader(finput, string("SHAPEIT5 phase_rare ") + string(PHASE2_VERSION), false);
+
 	//Allocate buffers
 	int32_t * output_buffer = (int32_t *) malloc(G.n_samples * 2 * sizeof(int32_t));
 	bitvector output_bitvector (G.n_samples * 2);
@@ -208,12 +197,12 @@ void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string ifile
 				bool major_allele = !V.vec_full[vt]->minor;
 				count_alt = 2 * G.n_samples * major_allele;
 
-				if (format == "pp") {
+				if (fformat == "pp") {
 					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 						output_buffer[n_sparse++] = G.GRvar_genotypes[vr][i].get();
 						output_buffer[n_sparse++] = bit_cast<uint32_t> (G.GRvar_genotypes[vr][i].prob);
 					}
-				} else if (format == "sh") {
+				} else if (fformat == "sh") {
 					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 						if (G.GRvar_genotypes[vr][i].al0 != major_allele) output_buffer[n_sparse++] = 2 * G.GRvar_genotypes[vr][i].idx+0;
 						if (G.GRvar_genotypes[vr][i].al1 != major_allele) output_buffer[n_sparse++] = 2 * G.GRvar_genotypes[vr][i].idx+1;
@@ -237,8 +226,8 @@ void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string ifile
 
 			// Write record
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
-				if (format == "pp") XW.writeRecord(RECORD_SPARSE_PHASEPROBS, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
-				if (format == "sh") XW.writeRecord(RECORD_SPARSE_HAPLOTYPE, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
+				if (fformat == "pp") XW.writeRecord(RECORD_SPARSE_PHASEPROBS, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
+				if (fformat == "sh") XW.writeRecord(RECORD_SPARSE_HAPLOTYPE, reinterpret_cast<char*>(output_buffer), n_sparse * sizeof(int32_t));
 			} else XW.writeRecord(RECORD_BINARY_HAPLOTYPE, reinterpret_cast<char*>(output_bitvector.bytes), output_bitvector.n_bytes);
 		}
 

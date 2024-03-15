@@ -36,30 +36,16 @@ haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, varian
 haplotype_writer::~haplotype_writer() {
 }
 
-void haplotype_writer::writeHaplotypes(string fname, string fformat, string ifile) {
+void haplotype_writer::writeHaplotypes(string foutput, string finput, string fformat) {
 	tac.clock();
 
 	//Open XCF writer
 	bool hts_genotypes = (fformat == "vcf");
-	xcf_writer XW(fname, hts_genotypes, nthreads);
+	xcf_writer XW(foutput, hts_genotypes, nthreads);
 
 	//Write header
-	vector < string > snames;
-	for (int32_t i = 0 ; i < G.n_ind ; i ++) snames.push_back(G.vecG[i]->name.c_str());
-	try
-	{
-	    htsFile *fp_tar = bcf_open(ifile.c_str(), "r");
-	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
-	    XW.writeHeader(hdr_tar, snames, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
-	    bcf_hdr_destroy(hdr_tar);
-	    bcf_close(fp_tar);
-	}
-	catch (std::exception& e)
-	{
-		std::vector<int> fath (snames.size(),-1);
-		std::vector<int> moth (snames.size(),-1);
-		XW.writeHeader(snames, fath, moth, V.vec_pos[0]->chr, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION));
-	}
+	XW.writeHeader(finput, string("SHAPEIT5 phase_common ") + string(PHASE1_VERSION), false);
+	
 	//Allocate buffers
 	int32_t * output_buffer = (int32_t *) malloc(G.n_ind * 2 * sizeof(int32_t));
 	bitvector output_bitvector (G.n_ind * 2);
@@ -98,6 +84,6 @@ void haplotype_writer::writeHaplotypes(string fname, string fformat, string ifil
 		vrb.bullet("XCF writing [N=" + stb.str(G.n_ind) + " / L=" + stb.str(V.size()) + "] (" + stb.str(tac.rel_time()*0.001, 2) + "s)");
 
 	//Indexing
-	vrb.bullet("Indexing files");
-	if (bcf_index_build3(fname.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
+	//vrb.bullet("Indexing files");
+	//if (bcf_index_build3(foutput.c_str(), NULL, 14, nthreads) < 0) vrb.error("Fail to index file");
 }
