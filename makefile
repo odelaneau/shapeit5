@@ -7,6 +7,11 @@ all: $(projects)
 $(projects):
 	$(MAKE) -C $@
 
+mac:
+	for dir in $(projects); do \
+	$(MAKE) -C $$dir mac_apple_silicon; \
+	done
+
 clean:
 	for dir in $(projects); do \
 	$(MAKE) $@ -C $$dir; \
