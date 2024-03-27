@@ -7,8 +7,13 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3 -mavx2 -mfma
+CXXFLAG=-O3
 LDFLAG=-O3
+
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_M),x86_64)
+    CXXFLAG+= -march=x86-64-v3 -mtune=skylake-avx512
+endif
 
 #COMMIT TRACING
 COMMIT_VERS=$(shell git rev-parse --short HEAD)
@@ -24,7 +29,6 @@ DYN_LIBS=$(DYN_LIBS_FOR_STATIC) -lboost_iostreams -lboost_program_options -lboos
 # If we are on Mac OS, build for Apple Silicon. Dynamically link libs.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    CXXFLAG=-O3 -mcpu=apple-m1 -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
     DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts
 endif
 
