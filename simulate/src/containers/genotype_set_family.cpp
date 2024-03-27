@@ -1,8 +1,10 @@
 #include <containers/genotype_set.h>
 
 
-genotype_set::genotype_set(haplotype_set & _H) : H(_H) {
-}
+genotype_set::genotype_set(haplotype_set & _H) : H(_H),
+random_device{},
+random_generator{random_device()}
+{}
 
 
 genotype_set::~genotype_set() {
@@ -41,7 +43,7 @@ void genotype_set::includeFamily(int n_twins, int n_obs_fam, int n_obs_fam_off, 
 	vrb.title("Simulate phased family samples");
 	std::vector < int > O;
 	for (int h = 0 ; h < H.n_hap ; h ++) O.push_back(h);
-	random_shuffle(O.begin(), O.end());
+	shuffle(O.begin(), O.end(), random_generator);
 
 	//twins
 	for (int n = 0 ; n < n_twins ; n ++) {

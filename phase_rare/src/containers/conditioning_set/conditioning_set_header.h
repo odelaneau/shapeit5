@@ -107,6 +107,10 @@ public:
 	void solveRareForward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
 	void solveRareBackward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
 	void solve(variant_map &, genotype_set &);
+
+private:
+	std::random_device random_device;
+	std::mt19937 random_generator;
 };
 
 inline

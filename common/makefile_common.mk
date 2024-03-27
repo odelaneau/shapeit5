@@ -7,8 +7,13 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3 -mavx2 -mfma
+CXXFLAG=-O3
 LDFLAG=-O3
+
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_M),x86_64)
+    CXXFLAG+= -march=x86-64-v3 -mtune=skylake-avx512
+endif
 
 #COMMIT TRACING
 COMMIT_VERS=$(shell git rev-parse --short HEAD)
@@ -20,6 +25,12 @@ CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 DYN_LIBS_FOR_STATIC=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
 # Non static exe links with all libraries
 DYN_LIBS=$(DYN_LIBS_FOR_STATIC) -lboost_iostreams -lboost_program_options -lboost_serialization -lhts
+
+# If we are on Mac OS, build for Apple Silicon. Dynamically link libs.
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts
+endif
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -159,7 +170,6 @@ static_exe_robin_desktop: BOOST_LIB_IO=$(HTSSRC)/boost/lib/libboost_iostreams.a
 static_exe_robin_desktop: BOOST_LIB_PO=$(HTSSRC)/boost/lib/libboost_program_options.a
 static_exe_robin_desktop: $(EXEFILE)
 
-
 #COMPILATION RULES
 all: desktop
 
@@ -170,7 +180,7 @@ $(EXEFILE): $(OFILE)
 	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
 
 obj/%.o: %.cpp $(HFILE)
-	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I$(HTSLIB_INC) -I$(BOOST_INC)
+	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I../simde -I$(HTSLIB_INC) -I$(BOOST_INC)
 
 clean:
 	rm -f obj/*.o $(BFILE) $(EXEFILE)

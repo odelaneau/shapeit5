@@ -35,7 +35,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vector < int > R = vector < int > (n_haplotypes, 0);
 	vector < int > M = vector < int > (depth_common * n_haplotypes, -1);
 	iota(A.begin(), A.end(), 0);
-	random_shuffle(A.begin(), A.end());
+	shuffle(A.begin(), A.end(), random_generator);
 
 	//Select new sites at which to trigger storage
 	vector < vector < int > > candidates = vector < vector < int > > (sites_pbwt_grouping.back() + 1);
