@@ -10,9 +10,11 @@ dummy_build_folder_obj := $(shell mkdir -p obj)
 CXXFLAG=-O3
 LDFLAG=-O3
 
+# Test if on x86 and target Haswell & newer.
+# Disable this if building on x86 CPUs without AVX2 support.
 UNAME_M := $(shell uname -m)
 ifeq ($(UNAME_M),x86_64)
-    CXXFLAG+= -march=x86-64-v3 -mtune=skylake-avx512
+    CXXFLAG+= -march=x86-64-v3
 endif
 
 #COMMIT TRACING
@@ -24,13 +26,7 @@ CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 # DYNAMIC LIBRARIES # Standard libraries are still dynamic in static exe
 DYN_LIBS_FOR_STATIC=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
 # Non static exe links with all libraries
-DYN_LIBS=$(DYN_LIBS_FOR_STATIC) -lboost_iostreams -lboost_program_options -lboost_serialization -lhts
-
-# If we are on Mac OS, build for Apple Silicon. Dynamically link libs.
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-    DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts
-endif
+DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -80,19 +76,6 @@ ifneq ($(suffix $(BOOST_LIB_PO)),.a)
     else
         # File exists, set the variable
         BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
-    endif
-endif
-
-# If not set by user command, search for it
-BOOST_LIB_SE?=$(shell whereis libboost_serialization | grep -o '\S*\.a\b')
-ifneq ($(suffix $(BOOST_LIB_SE)),.a)
-    # If not found check default path
-    ifeq ($(wildcard /usr/local/lib/libboost_serialization.a),)
-        # File does not exist
-        $(warning libboost_serialization.a not found, you can specify it with "make BOOST_LIB_SE=/path/to/lib...")
-    else
-        # File exists, set the variable
-        BOOST_LIB_SE=/usr/local/lib/libboost_serialization.a
     endif
 endif
 
