@@ -7,26 +7,26 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAG=-O3
+CXXFLAGS+= -O3
 LDFLAG=-O3
 
 # Test if on x86 and target Haswell & newer.
 # Disable this if building on x86 CPUs without AVX2 support.
 UNAME_M := $(shell uname -m)
 ifeq ($(UNAME_M),x86_64)
-    CXXFLAG+= -march=x86-64-v3
+    CXXFLAGS+= -march=x86-64-v3
 endif
 
 #COMMIT TRACING
 COMMIT_VERS=$(shell git rev-parse --short HEAD)
 COMMIT_DATE=$(shell git log -1 --format=%cd --date=short)
-CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
-CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+CXXFLAGS+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
+CXXFLAGS+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 
 # DYNAMIC LIBRARIES # Standard libraries are still dynamic in static exe
 DYN_LIBS_FOR_STATIC=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
 # Non static exe links with all libraries
-DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts
+DYN_LIBS=-lboost_iostreams -lboost_program_options -lhts -lpthread
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -101,10 +101,10 @@ laptop: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 laptop: $(BFILE)
 
-debug: CXXFLAG=-g -mavx2 -mfma
+debug: CXXFLAGS=-g -mavx2 -mfma
 debug: LDFLAG=-g
-debug: CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
-debug: CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+debug: CXXFLAGS+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
+debug: CXXFLAGS+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 debug: HTSSRC=$(HOME)/Tools
 debug: HTSLIB_INC=$(HTSSRC)/htslib-1.15
 debug: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
@@ -138,12 +138,12 @@ wally: BOOST_LIB_IO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/libboost_program_options.a
 wally: $(BFILE)
 
-static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+static_exe: CXXFLAGS=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
 static_exe: $(EXEFILE)
 
 # static desktop Robin
-static_exe_robin_desktop: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
+static_exe_robin_desktop: CXXFLAGS=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe_robin_desktop: LDFLAG=-O2
 static_exe_robin_desktop: HTSSRC=/home/robin/Dropbox/LIB
 static_exe_robin_desktop: HTSLIB_INC=$(HTSSRC)/htslib_minimal
@@ -163,7 +163,7 @@ $(EXEFILE): $(OFILE)
 	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
 
 obj/%.o: %.cpp $(HFILE)
-	$(CXX) $(CXXFLAG) -c $< -o $@ -Isrc -I../simde -I$(HTSLIB_INC) -I$(BOOST_INC)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -Isrc -I../simde -I$(HTSLIB_INC) -I$(BOOST_INC)
 
 clean:
 	rm -f obj/*.o $(BFILE) $(EXEFILE)
