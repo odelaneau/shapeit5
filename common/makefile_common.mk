@@ -7,8 +7,8 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAGS+= -O3
-LDFLAG=-O3
+CXXFLAGS+= -O3 -flto
+LDFLAGS+= -O3 -flto
 
 # Test if on x86 and target Haswell & newer.
 # Disable this if building on x86 CPUs without AVX2 support.
@@ -102,7 +102,7 @@ laptop: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
 laptop: $(BFILE)
 
 debug: CXXFLAGS=-g -mavx2 -mfma
-debug: LDFLAG=-g
+debug: LDFLAGS=-g
 debug: CXXFLAGS+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
 debug: CXXFLAGS+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 debug: HTSSRC=$(HOME)/Tools
@@ -139,12 +139,12 @@ wally: BOOST_LIB_PO=/scratch/wally/FAC/FBM/DBC/odelanea/default/libs/boost/lib/l
 wally: $(BFILE)
 
 static_exe: CXXFLAGS=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
-static_exe: LDFLAG=-O2
+static_exe: LDFLAGS=-O2
 static_exe: $(EXEFILE)
 
 # static desktop Robin
 static_exe_robin_desktop: CXXFLAGS=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
-static_exe_robin_desktop: LDFLAG=-O2
+static_exe_robin_desktop: LDFLAGS=-O2
 static_exe_robin_desktop: HTSSRC=/home/robin/Dropbox/LIB
 static_exe_robin_desktop: HTSLIB_INC=$(HTSSRC)/htslib_minimal
 static_exe_robin_desktop: HTSLIB_LIB=$(HTSSRC)/htslib_minimal/libhts.a
@@ -157,10 +157,10 @@ static_exe_robin_desktop: $(EXEFILE)
 all: desktop
 
 $(BFILE): $(OFILE)
-	$(CXX) $(LDFLAG) $^ -o $@ $(DYN_LIBS)
+	$(CXX) $(LDFLAGS) $^ -o $@ $(DYN_LIBS)
 
 $(EXEFILE): $(OFILE)
-	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
+	$(CXX) $(LDFLAGS) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
 
 obj/%.o: %.cpp $(HFILE)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -Isrc -I../simde -I$(HTSLIB_INC) -I$(BOOST_INC)
