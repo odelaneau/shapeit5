@@ -7,8 +7,8 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
-CXXFLAGS+= -O3 -flto
-LDFLAGS+= -O3 -flto
+CXXFLAGS+= -O3
+LDFLAGS+= -O3
 
 # Test if on x86 and target Haswell & newer.
 # Disable this if building on x86 CPUs without AVX2 support.
