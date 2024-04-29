@@ -126,7 +126,7 @@ void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string finpu
 					count_alt -= 2 * major_allele;
 					count_alt += a0+a1;
 				}
-				bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
+				if (addPP) bcf_update_format_float(hdr, rec, "PP", probabilities, bcf_hdr_nsamples(hdr)*1);
 			} else {
 				for (int32_t i = 0 ; i < H.n_samples ; i++) {
 					bool a0 = H.Hvar.get(vs, 2*i+0);

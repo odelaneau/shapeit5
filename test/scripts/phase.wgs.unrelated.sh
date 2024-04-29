@@ -17,7 +17,9 @@ while read LINE; do
 	../phase_rare/bin/phase_rare --input wgs/target.unrelated.bcf --scaffold tmp/target.scaffold.bcf --map info/chr1.gmap.gz --input-region $IRG --scaffold-region $SRG --output $OUT  --thread 8
 
 	echo $OUT >> $LST
-done < $CRD
+done < <(cat $CRD | head -n5 | tail -1)
+#done < $CRD
+
 bcftools concat -n -Ob -o target.phased.bcf -f $LST
 bcftools index target.phased.bcf
 
