@@ -1,0 +1,31 @@
+name: Build on Apple Silicon
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Use Brew to install boost & htslib
+      run: brew install boost htslib
+
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
+    - name: Set up brew include and link
+      run: |
+        echo "BREW_LIBRARY_PATH=$(brew --prefix)/lib:$LIBRARY_PATH" >> "$GITHUB_ENV"
+        echo "BREW_CPATH=$(brew --prefix)/include:$CPATH" >> "$GITHUB_ENV"
+
+    - name: Build shapeit5
+      run: make -j$(nproc)
+      env:
+        LIBRARY_PATH: ${{ env.BREW_LIBRARY_PATH }}
+        CPATH: ${{ env.BREW_CPATH }}
