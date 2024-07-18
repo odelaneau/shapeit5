@@ -35,7 +35,7 @@ void genotype_set::includeHaploid(int n_haploids, int n_diploids) {
 	vrb.title("Simulate phased haploid / diploid samples");
 	std::vector < int > O;
 	for (int h = 0 ; h < H.n_hap ; h ++) O.push_back(h);
-	random_shuffle(O.begin(), O.end());
+	shuffle(O.begin(), O.end(), random_generator);
 
 	vrb.bullet("Pool of haplotypes = " + stb.str(O.size()));
 

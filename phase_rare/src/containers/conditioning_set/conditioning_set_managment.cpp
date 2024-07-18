@@ -24,7 +24,9 @@
 
 using namespace std;
 
-conditioning_set::conditioning_set() {
+conditioning_set::conditioning_set() : random_device{}, 
+	random_generator{random_device()}
+{
 	depth_common = 0;
 	depth_rare = 0;
 }
