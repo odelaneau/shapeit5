@@ -105,25 +105,45 @@ void haplotype_checker::writePerSample(string fout) {
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
+
 void haplotype_checker::writeFlipSwitchErrorPerSample(string fout) {
 	tac.clock();
 	vrb.title("Writing phasing flip and switch errors per sample in [" + fout + "]");
 	output_file fdo (fout);
+
+	int whole_study_true_errors = 0, whole_study_errors = 0, whole_study_checked = 0;
 	for (int i = 0 ; i < H.IDXesti.size() ; i++) {
 		vector < int > HET;
 		for (int l = 0 ; l < H.n_variants ; l ++) if (Checked[i][l]) HET.push_back(l);
 
-		int n_flips = 0, n_switches = 0, n_correct = 0;
-		for (int h = 2 ; h < HET.size() ; h ++) {
-			int n_errors = Errors[i][HET[h-1]] + Errors[i][HET[h]];
-			n_correct += (n_errors == 0);
-			n_switches += (n_errors == 1);
-			n_flips += (n_errors == 2);
+		int n_flips = 0, n_all_switches = 0, n_correct = 0, n_consecutive_flips = 0, prior_prior_error = 0, prior_error = 0;
+		for (int h = 0 ; h < HET.size() ; h ++) {
+			if ( h > 0 ){
+				prior_error = Errors[i][HET[h-1]];
+			}
+			if ( h > 1) {
+				prior_prior_error = Errors[i][HET[h-2]];
+			}
+			int current_error = Errors[i][HET[h]];
+			n_correct += (current_error == 0);
+			n_all_switches += (current_error == 1);
+			n_flips += ((prior_error + current_error) == 2);
+			n_consecutive_flips += ((prior_error + prior_prior_error + current_error) == 3);
 		}
-		int total = n_switches + n_flips + n_correct;
-		fdo << H.vecSamples[H.IDXesti[i]] << " " << n_switches << " " << n_flips << " " << n_correct << " " << stb.str(n_switches * 100.0f / total, 2) << " " << stb.str(n_flips * 100.0f / total, 2) << " " << stb.str(n_correct * 100.0f / total, 2) << endl;
+
+		n_flips -= n_consecutive_flips;
+		int total = n_all_switches + n_flips + n_correct + n_consecutive_flips;
+		int n_pure_switches = n_all_switches - (n_flips*2 + n_consecutive_flips);
+		whole_study_errors += n_all_switches;
+		whole_study_true_errors += n_pure_switches;
+		whole_study_checked += total;
+		
+		fdo << H.vecSamples[H.IDXesti[i]] << " " << n_all_switches << " " << n_flips << " " << n_consecutive_flips << " " << n_pure_switches << " " << n_correct << " " << total << " " << stb.str(n_all_switches * 100.0f / total, 2) << " " << stb.str((n_flips*2 + n_consecutive_flips) * 100.0f / total, 2) << " " << stb.str(n_pure_switches * 100.0f / total, 4) << " " << stb.str(n_correct * 100.0f / total, 2) << endl;
 	}
 	fdo.close();
+	vrb.bullet("#Overall switch error rate = " + stb.str(whole_study_errors * 100.0f / whole_study_checked, 5));
+	vrb.bullet("#Overall pure switch error rate = " + stb.str(whole_study_true_errors * 100.0f / whole_study_checked, 5));
+
 	vrb.bullet("Timing: " + stb.str(tac.rel_time()*1.0/1000, 2) + "s");
 }
 
