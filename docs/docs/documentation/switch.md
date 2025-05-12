@@ -40,7 +40,7 @@ bcftools view -H array/target.unrelated.bcf | cut -f1-20 | head
 ```
 </div>
 
-Then, run thw switch program to compare the true haplotypes to those estimated by phase_common:
+Then, run the switch program to compare the true haplotypes to those estimated by phase_common:
  
 <div class="code-example" markdown="1">
 ```bash
