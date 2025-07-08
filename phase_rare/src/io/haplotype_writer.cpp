@@ -173,6 +173,11 @@ void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string finpu
 void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string finput, std::string fformat) {
 	tac.clock();
 
+	//
+	if (fformat == "pp" && sizeof(float) != sizeof(uint32_t)) {
+		vrb.error("PP format requires float to be 4 bytes long, which is not the case on this platform");
+	}
+
 	//Open XCF writer
 	bool hts_genotypes = (fformat == "vcf");
 	xcf_writer XW(foutput, hts_genotypes, nthreads);
@@ -190,6 +195,7 @@ void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string finpu
 		if (V.vec_full[vt]->bp >= input_start && V.vec_full[vt]->bp <= input_stop) {
 
 			// Fill-up buffers
+			count_alt = 0;
 			count_tot = 2*G.n_samples;
 
 			if (V.vec_full[vt]->type == VARTYPE_RARE) {
@@ -199,7 +205,10 @@ void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string finpu
 
 				if (fformat == "pp") {
 					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
+						
 						output_buffer[n_sparse++] = G.GRvar_genotypes[vr][i].get();
+					}
+					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 						output_buffer[n_sparse++] = bit_cast<uint32_t> (G.GRvar_genotypes[vr][i].prob);
 					}
 				} else if (fformat == "sh") {

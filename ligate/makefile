@@ -7,6 +7,8 @@ dummy_build_folder_bin := $(shell mkdir -p bin)
 dummy_build_folder_obj := $(shell mkdir -p obj)
 
 #COMPILER & LINKER FLAGS
+#CXXFLAG=-O3 -mavx2 -mfma
+#LDFLAG=-O3
 CXXFLAG=-O3 -mavx2 -mfma
 LDFLAG=-O3
 
@@ -17,7 +19,7 @@ CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
 CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 
 #DYNAMIC LIBRARIES
-DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto
+DYN_LIBS=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -29,7 +31,6 @@ BFILE=bin/$(NAME)
 EXEFILE=bin/$(NAME)_static
 
 #CONDITIONAL PATH DEFINITON
-system: DYN_LIBS=-lz -lpthread -lbz2 -llzma
 system: HTSSRC=/usr/local
 system: HTSLIB_INC=$(HTSSRC)/include/htslib
 system: HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
@@ -46,6 +47,13 @@ desktop: BOOST_INC=/usr/include
 desktop: BOOST_LIB_IO=/usr/local/lib/libboost_iostreams.a
 desktop: BOOST_LIB_PO=/usr/local/lib/libboost_program_options.a
 desktop: $(BFILE)
+
+aws: HTSLIB_INC=/mnt/efs_v2/agds_methods/users/olivier.delaneau/LIBS/htslib-1.20
+aws: HTSLIB_LIB=/mnt/efs_v2/agds_methods/users/olivier.delaneau/LIBS/htslib-1.20/libhts.a
+aws: BOOST_INC=/usr/include
+aws: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
+aws: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a
+aws: $(BFILE)
 
 olivier: HTSSRC=$(HOME)/Tools
 olivier: HTSLIB_INC=$(HTSSRC)/htslib-1.15
@@ -102,9 +110,8 @@ wally: $(BFILE)
 
 static_exe: CXXFLAG=-O2 -mavx2 -mfma -D__COMMIT_ID__=\"$(COMMIT_VERS)\" -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 static_exe: LDFLAG=-O2
-static_exe: HTSSRC=$(HOME)/Tools
-static_exe: HTSLIB_INC=$(HTSSRC)/htslib-1.15
-static_exe: HTSLIB_LIB=$(HTSSRC)/htslib-1.15/libhts.a
+static_exe: HTSLIB_INC=/mnt/efs_v2/agds_methods/users/olivier.delaneau/LIBS/htslib-1.20
+static_exe: HTSLIB_LIB=/mnt/efs_v2/agds_methods/users/olivier.delaneau/LIBS/htslib-1.20/libhts.a
 static_exe: BOOST_INC=/usr/include
 static_exe: BOOST_LIB_IO=/usr/lib/x86_64-linux-gnu/libboost_iostreams.a
 static_exe: BOOST_LIB_PO=/usr/lib/x86_64-linux-gnu/libboost_program_options.a

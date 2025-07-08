@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.authors="olivier.delaneau@gmail.com"
 # set the environment variables
 ENV HOME /root
 
-ENV htslib_version 1.15
+ENV htslib_version 1.20
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 

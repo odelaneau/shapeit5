@@ -26,8 +26,6 @@
 #include <utils/sparse_genotype.h>
 #include <utils/bitvector.h>
 
-
-
 void genotype_reader::readGenotypes() {
 	tac.clock();
 	vrb.wait("  * VCF/BCF parsing");
@@ -44,6 +42,7 @@ void genotype_reader::readGenotypes() {
 	for (int32_t f = 0 ; f < 3 ; f ++) if (panels[f]) XR.addFile(filenames[f]);
 
 	//Main sample IDs processing
+	//std::cout << "ok1" << std::endl;
 	std::vector < std::string > main_names;
 	std::map < std::string, uint32_t > map_names;
 	XR.getSamples(idx_file_main, main_names);
@@ -53,6 +52,7 @@ void genotype_reader::readGenotypes() {
 	}
 
 	//Scaffold sample IDs processing
+	//std::cout << "ok2" << std::endl;
 	int32_t n_scaf_samples = 0, n_with_scaffold = 0;
 	std::vector < uint32_t > mappingS2M;
 	if (panels[2]) {
@@ -67,6 +67,7 @@ void genotype_reader::readGenotypes() {
 	}
 
 	//BYTE BUFFER ALLOCATION
+	//std::cout << "ok3" << std::endl;
 	int32_t * main_buffer = NULL, * ref_buffer = NULL, * scaf_buffer = NULL;
 	main_buffer = (int32_t*) malloc(2 * n_main_samples * sizeof(int32_t));
 	if (n_ref_samples) ref_buffer = (int32_t*) malloc(2 * n_ref_samples * sizeof(int32_t));
@@ -81,13 +82,15 @@ void genotype_reader::readGenotypes() {
 	//Parsing VCF/BCF
 	uint32_t i_variant_total = 0, i_variant_kept = 0;
 	while (XR.nextRecord()) {
+		//std::cout << "ok4.1" << std::endl;
 		if (variant_mask[i_variant_total]) {
-
+			//std::cout << "ok4.2" << std::endl;
 			// ====== Retrieve MAIN data ============== //
 			int32_t main_type = XR.typeRecord(idx_file_main);
-
+			//std::cout << "ok4.3" << std::endl;
 			// ... in BCF format
 			if (main_type == RECORD_BCFVCF_GENOTYPE) {
+				//std::cout << "ok4.4" << std::endl;
 				XR.readRecord(idx_file_main, reinterpret_cast< char** > (&main_buffer));
 				for(int32_t i = 0 ; i < 2 * n_main_samples ; i += 2) {
 					bool a0 = (bcf_gt_allele(main_buffer[i+0])==1);
@@ -106,6 +109,7 @@ void genotype_reader::readGenotypes() {
 
 			// ... in binary genotype format
 			else if (main_type == RECORD_BINARY_GENOTYPE) {
+				//std::cout << "ok4.5" << std::endl;
 				XR.readRecord(idx_file_main, reinterpret_cast< char** > (&main_bitvector.bytes));
 				for(int32_t i = 0 ; i < 2 * n_main_samples ; i += 2) {
 					bool a0 = main_bitvector.get(i+0);
@@ -124,6 +128,7 @@ void genotype_reader::readGenotypes() {
 
 			// ... in sparse genotype format
 			else if (main_type == RECORD_SPARSE_GENOTYPE) {
+				//std::cout << "ok4.6" << std::endl;
 				int32_t n_elements = XR.readRecord(idx_file_main, reinterpret_cast< char** > (&main_buffer)) / sizeof(int32_t);
 				
 				//Set all genotypes as major
@@ -157,7 +162,7 @@ void genotype_reader::readGenotypes() {
 			// ... format is unsupported
 			else vrb.error("Unsupported record format [" + stb.str(main_type) + "] in [" + filenames[0] + "]");
 
-
+			//std::cout << "ok4.7" << std::endl;
 			// ====== Retrieve REFERENCE data ============== //
 			if (panels[1]) {
 				int32_t ref_type = XR.typeRecord(idx_file_ref);
@@ -214,7 +219,7 @@ void genotype_reader::readGenotypes() {
 				// ... format is unsupported
 				else vrb.error("Unsupported record format [" + stb.str(main_type) + "] in [" + filenames[0] + "]");
 			}
-
+//std::cout << "ok4.8" << std::endl;
 			// ====== Retrieve SCAFFOLD data ============== //
 			if (panels[2] && XR.hasRecord(idx_file_scaf)) {
 				int32_t scaf_type = XR.typeRecord(idx_file_scaf);
@@ -262,10 +267,13 @@ void genotype_reader::readGenotypes() {
 
 			}
 			vrb.progress("  * VCF/BCF parsing", i_variant_kept * 1.0 / n_variants);
+			//std::cout << "ok4.9" << std::endl;
 			i_variant_kept ++;
 		}
 		i_variant_total++;
+		//std::cout << "ok4.10 " << i_variant_total << " " << i_variant_kept << std::endl;
 	}
+	//std::cout << "ok4.11" << std::endl;
 	free(main_buffer);
 	if (panels[1]) free(ref_buffer);
 	if (panels[2]) free(scaf_buffer);
