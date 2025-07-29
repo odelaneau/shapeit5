@@ -37,20 +37,20 @@ public:
 	variant_map & V;
 
 	//COUNTS
-	unsigned int n_total_variants;
-	unsigned int n_scaffold_variants;
-	unsigned int n_rare_variants;
-	unsigned int n_samples;
-	std::vector < unsigned long > n_scaffold_genotypes;
-	std::vector < unsigned long > n_rare_genotypes;
+	uint32_t n_total_variants;
+	uint32_t n_scaffold_variants;
+	uint32_t n_rare_variants;
+	uint32_t n_samples;
+	std::vector < uint64_t > n_scaffold_genotypes;
+	std::vector < uint64_t > n_rare_genotypes;
 
 	//PARAMETERS
 	std::string funphased;
 	std::string fphased;
 	std::string scaffold_region;
-	int input_start;
-	int input_stop;
-	int nthreads;
+	int32_t input_start;
+	int32_t input_stop;
+	int32_t nthreads;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	genotype_reader(haplotype_set &, genotype_set &, variant_map &);

@@ -47,9 +47,9 @@ void phaser::declare_options() {
 	bpo::options_description opt_pbwt ("PBWT parameters");
 	opt_pbwt.add_options()
 			("pbwt-modulo", bpo::value< double >()->default_value(0.1), "Storage frequency of PBWT indexes in cM")
-			("pbwt-depth-common", bpo::value< int >()->default_value(2), "Depth of PBWT indexes at common sites to condition on")
-			("pbwt-depth-rare", bpo::value< int >()->default_value(2), "Depth of PBWT indexes at rare hets to condition on")
-			("pbwt-mac", bpo::value< int >()->default_value(2), "Minimal Minor Allele Count at which PBWT is evaluated")
+			("pbwt-depth-common", bpo::value< int32_t >()->default_value(2), "Depth of PBWT indexes at common sites to condition on")
+			("pbwt-depth-rare", bpo::value< int32_t >()->default_value(2), "Depth of PBWT indexes at rare hets to condition on")
+			("pbwt-mac", bpo::value< int32_t >()->default_value(2), "Minimal Minor Allele Count at which PBWT is evaluated")
 			("pbwt-mdr", bpo::value < double >()->default_value(0.10), "Maximal Missing Data Rate at which PBWT is evaluated");
 	
 	bpo::options_description opt_hmm ("HMM parameters");
@@ -102,16 +102,16 @@ void phaser::check_options() {
 	string output_fmt = options["output-format"].as < string > ();
 	if (output_fmt != "vcf" && output_fmt != "sh" && output_fmt != "pp") vrb.error("--output-format should be one of [vcf|sh|pp]");
 
-	if (options.count("seed") && options["seed"].as < int > () < 0)
+	if (options.count("seed") && options["seed"].as < int32_t > () < 0)
 		vrb.error("Random number generator needs a positive seed value");
 
-	if (options.count("thread") && options["thread"].as < int > () < 1)
+	if (options.count("thread") && options["thread"].as < int32_t > () < 1)
 		vrb.error("You must use at least 1 thread");
 
 	if (!options["thread"].defaulted() && !options["seed"].defaulted())
 		vrb.warning("Using multi-threading prevents reproducing a run by specifying --seed");
 
-	if (!options["effective-size"].defaulted() && options["effective-size"].as < int > () < 1)
+	if (!options["effective-size"].defaulted() && options["effective-size"].as < int32_t > () < 1)
 		vrb.error("You must specify a positive effective size");
 }
 
@@ -133,10 +133,10 @@ void phaser::verbose_files() {
 
 void phaser::verbose_options() {
 	vrb.title("Parameters:");
-	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int > ()));
-	vrb.bullet("Threads : " + stb.str(options["thread"].as < int > ()) + " threads");
-	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth-common"].as < int > ()) + "," + stb.str(options["pbwt-depth-rare"].as < int > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
-	if (options.count("map")) vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Recombination rates given by genetic map]");
-	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int > ()) + " / Constant recombination rate of 1cM per Mb]");
+	vrb.bullet("Seed    : " + stb.str(options["seed"].as < int32_t > ()));
+	vrb.bullet("Threads : " + stb.str(options["thread"].as < int32_t > ()) + " threads");
+	vrb.bullet("PBWT    : [depth = " + stb.str(options["pbwt-depth-common"].as < int32_t > ()) + "," + stb.str(options["pbwt-depth-rare"].as < int32_t > ()) + " / modulo = " + stb.str(options["pbwt-modulo"].as < double > ()) + " / mac = " + stb.str(options["pbwt-mac"].as < int32_t > ()) + " / mdr = " + stb.str(options["pbwt-mdr"].as < double > ()) + "]");
+	if (options.count("map")) vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int32_t > ()) + " / Recombination rates given by genetic map]");
+	else vrb.bullet("HMM     : [Ne = " + stb.str(options["effective-size"].as < int32_t > ()) + " / Constant recombination rate of 1cM per Mb]");
 	if (options.count("score-singletons")) vrb.bullet("HMM     : [Score singleton phasing]");
 }

@@ -29,7 +29,7 @@
 class hmm_parameters {
 public :
 	//DATA
-	unsigned int Neff, Nhap;
+	uint32_t Neff, Nhap;
 	std::vector < float > t, nt, cm;
 	float ee, ed;
 

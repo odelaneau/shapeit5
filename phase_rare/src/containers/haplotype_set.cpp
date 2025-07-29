@@ -36,7 +36,7 @@ void haplotype_set::clear() {
 	n_samples = 0.0;
 }
 
-void haplotype_set::allocate(unsigned int _n_samples, unsigned int _n_scaffold_variants) {
+void haplotype_set::allocate(uint32_t _n_samples, uint32_t _n_scaffold_variants) {
 	tac.clock();
 
 	n_scaffold_variants = _n_scaffold_variants;

@@ -27,13 +27,13 @@
 
 class cstate {
 public:
-	unsigned int id0;
-	unsigned int id1;
-	unsigned int kst : 16;
-	unsigned int lpb : 8;
-	unsigned int rpb : 8;
+	uint32_t id0;
+	uint32_t id1;
+	uint32_t kst : 16;
+	uint32_t lpb : 8;
+	uint32_t rpb : 8;
 
-	cstate(unsigned int _id0, unsigned int _id1, unsigned int _kst, unsigned char _lpb, unsigned char _rpb) {
+	cstate(uint32_t _id0, uint32_t _id1, uint32_t _kst, unsigned char _lpb, unsigned char _rpb) {
 		id0 = _id0; id1 = _id1; kst = _kst; lpb = _lpb; rpb = _rpb;
 	}
 
@@ -45,21 +45,21 @@ public:
 	}
 
 	void swap() {
-		unsigned int tmp = id1; id1 = id0; id0 = tmp;
+		uint32_t tmp = id1; id1 = id0; id0 = tmp;
 	}
 };
 
 class state_set {
 public:
 	std::vector < cstate > Pstates;
-	std::vector < long int > Pmapping;
+	std::vector < int64_t > Pmapping;
 
 	//
 	state_set();
 	~state_set();
 	void clear();
 	void transpose();
-	void mapping(unsigned int);
+	void mapping(uint32_t);
 };
 
 #endif

@@ -28,32 +28,32 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 	tac.clock();
 
 	//
-	vector < int > A = vector < int > (n_haplotypes, 0);
-	vector < int > B = vector < int > (n_haplotypes, 0);
-	vector < int > C = vector < int > (n_haplotypes, 0);
-	vector < int > D = vector < int > (n_haplotypes, 0);
-	vector < int > R = vector < int > (n_haplotypes, 0);
+	vector < int32_t > A = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > B = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > C = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > D = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > R = vector < int32_t > (n_haplotypes, 0);
 	iota(A.begin(), A.end(), 0);
 	shuffle(A.begin(), A.end(), rng.getEngine());
 
 	//Get cM positions of the scaffold sites
 	vector < float > vs_cm = vector < float > (n_scaffold_variants, 0.0);
-	for (int l = 0 ; l < n_scaffold_variants ; ++l) vs_cm[l] = V.vec_scaffold[l]->cm;
+	for (int32_t l = 0 ; l < n_scaffold_variants ; ++l) vs_cm[l] = V.vec_scaffold[l]->cm;
 
 	//PBWT forward sweep
 	tac.clock();
-	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
-		int vc = V.vec_full[vt]->idx_common;
-		int vr = V.vec_full[vt]->idx_rare;
-		int vs = V.vec_full[vt]->idx_scaffold;
+	for (int32_t vt = 0 ; vt < V.sizeFull() ; vt ++) {
+		int32_t vc = V.vec_full[vt]->idx_common;
+		int32_t vr = V.vec_full[vt]->idx_rare;
+		int32_t vs = V.vec_full[vt]->idx_scaffold;
 
 		if (vs >= 0) {
 			bool eval = sites_pbwt_evaluation[vs];
 			bool selc = sites_pbwt_selection[vs];
 			if (eval) {
-				int u = 0, v = 0, p = vs, q = vs;
-				for (int h = 0 ; h < n_haplotypes ; h ++) {
-					int alookup = A[h], dlookup = C[h];
+				int32_t u = 0, v = 0, p = vs, q = vs;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) {
+					int32_t alookup = A[h], dlookup = C[h];
 					if (dlookup > p) p = dlookup;
 					if (dlookup > q) q = dlookup;
 					if (!Hvar.get(vs, alookup)) {
@@ -70,7 +70,7 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 				}
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
 				std::copy(D.begin(), D.begin()+v, C.begin()+u);
-				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 			}
 		} else if (vr >= 0) solveRareForward(A, C, R, G, vr, V.vec_rare[vr]->cm, vs_cm);
 		vrb.progress("  * PBWT forward pass", vt * 1.0 / V.sizeFull());
@@ -80,18 +80,18 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 	//PBWT backward sweep
 	tac.clock();
 	fill(C.begin(), C.end(), V.sizeScaffold() - 1);
-	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
-		int vc = V.vec_full[vt]->idx_common;
-		int vr = V.vec_full[vt]->idx_rare;
-		int vs = V.vec_full[vt]->idx_scaffold;
+	for (int32_t vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
+		int32_t vc = V.vec_full[vt]->idx_common;
+		int32_t vr = V.vec_full[vt]->idx_rare;
+		int32_t vs = V.vec_full[vt]->idx_scaffold;
 
 		if (vs >= 0) {
 			bool eval = sites_pbwt_evaluation[vs];
 			bool selc = sites_pbwt_selection[vs];
 			if (eval) {
-				int u = 0, v = 0, p = vs, q = vs;
-				for (int h = 0 ; h < n_haplotypes ; h ++) {
-					int alookup = A[h], dlookup = C[h];
+				int32_t u = 0, v = 0, p = vs, q = vs;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) {
+					int32_t alookup = A[h], dlookup = C[h];
 					if (dlookup < p) p = dlookup;
 					if (dlookup < q) q = dlookup;
 					if (!Hvar.get(vs, alookup)) {
@@ -108,7 +108,7 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 				}
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
 				std::copy(D.begin(), D.begin()+v, C.begin()+u);
-				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 			}
 		} else if (vr >= 0) solveRareBackward(A, C, R, G, vr, V.vec_rare[vr]->cm, vs_cm);
 		vrb.progress("  * PBWT backward pass", (V.sizeFull() - vt) * 1.0 / V.sizeFull());
@@ -118,9 +118,9 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 	assert(!CF.size());
 }
 
-void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm) {
-	vector < int > S, C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
-	for (int g = 0 ; g < G.GRvar_genotypes[vr].size() ; g ++) {
+void conditioning_set::solveRareForward(vector < int32_t > & A, vector < int32_t > & D, vector < int32_t > & R, genotype_set & G, uint32_t vr, float vr_cm, vector < float > & vs_cm) {
+	vector < int32_t > S, C = vector < int32_t > (n_haplotypes, G.major_alleles[vr]?1:-1);
+	for (int32_t g = 0 ; g < G.GRvar_genotypes[vr].size() ; g ++) {
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
 			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
@@ -134,10 +134,10 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 	//PHASING FIRST PASS
 	float thresh = 2.5, v, v0, v1;
 	while (S.size() && thresh > 1.0) {
-		unsigned int sizeS = S.size();
-		for (vector < int > :: iterator s = S.begin() ; s != S.end() ; ) {
-			int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
-			int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+		uint32_t sizeS = S.size();
+		for (vector < int32_t > :: iterator s = S.begin() ; s != S.end() ; ) {
+			int32_t h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+			int32_t h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
 			if (R[h0]>0) v0 = C[A[R[h0]-1]];
 			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
@@ -159,9 +159,9 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 	}
 
 	//PHASING SECOND PASS
-	for (vector < int > :: iterator s = S.begin() ; s != S.end() ; s++) {
-		int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
-		int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+	for (vector < int32_t > :: iterator s = S.begin() ; s != S.end() ; s++) {
+		int32_t h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+		int32_t h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
 		v0 = v1 = 0;
 		if (R[h0]>0) v0 += C[A[R[h0]-1]] * abs(vr_cm - vs_cm[D[R[h0]]]);
@@ -181,9 +181,9 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 }
 
 
-void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm) {
-	vector < int > S, C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
-	for (int g = G.GRvar_genotypes[vr].size()-1 ; g >= 0 ; g --) {
+void conditioning_set::solveRareBackward(vector < int32_t > & A, vector < int32_t > & D, vector < int32_t > & R, genotype_set & G, uint32_t vr, float vr_cm, vector < float > & vs_cm) {
+	vector < int32_t > S, C = vector < int32_t > (n_haplotypes, G.major_alleles[vr]?1:-1);
+	for (int32_t g = G.GRvar_genotypes[vr].size()-1 ; g >= 0 ; g --) {
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
 			C[2*G.GRvar_genotypes[vr][g].idx+1] = G.GRvar_genotypes[vr][g].al1?1:-1;
@@ -195,13 +195,13 @@ void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D,
 	}
 
 	//PHASING FIRST PASS
-	vector < int > Stmp = S;
+	vector < int32_t > Stmp = S;
 	float thresh = 2.5, v, v0, v1;
 	while (Stmp.size() && thresh > 1.0) {
-		unsigned int sizeS = Stmp.size();
-		for (vector < int > :: iterator s = Stmp.begin() ; s != Stmp.end() ; ) {
-			int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
-			int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+		uint32_t sizeS = Stmp.size();
+		for (vector < int32_t > :: iterator s = Stmp.begin() ; s != Stmp.end() ; ) {
+			int32_t h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+			int32_t h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
 			if (R[h0]>0) v0 = C[A[R[h0]-1]];
 			if (R[h0]<(n_haplotypes-1)) v0 += C[A[R[h0]+1]];
@@ -224,9 +224,9 @@ void conditioning_set::solveRareBackward(vector < int > & A, vector < int > & D,
 
 	//PHASING SECOND PASS
 	cflip ctmp;
-	for (vector < int > :: iterator s = S.begin() ; s != S.end() ; s++) {
-		int h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
-		int h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
+	for (vector < int32_t > :: iterator s = S.begin() ; s != S.end() ; s++) {
+		int32_t h0 = G.GRvar_genotypes[vr][*s].idx*2+0;
+		int32_t h1 = G.GRvar_genotypes[vr][*s].idx*2+1;
 
 		if (find(Stmp.begin(), Stmp.end(), *s)!=Stmp.end()) {
 			v0 = v1 = 0;

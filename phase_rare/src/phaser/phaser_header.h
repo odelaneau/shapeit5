@@ -48,26 +48,26 @@ public:
 	state_set P;
 
 	//MULTI-THREADING
-	int i_jobs, i_threads, nthreads;
+	int32_t i_jobs, i_threads, nthreads;
 	std::vector < pthread_t > id_workers;
 	pthread_mutex_t mutex_workers;
 	std::vector < std::vector < std::pair < int, float > > > thread_data;
 	std::vector < hmm_scaffold * > thread_hmms;
 
 	//STATS
-	int totalSite, doneSite;
-	unsigned long int n_common_yphased;
-	unsigned long int n_common_nphased;
-	unsigned long int n_rare_yphased;
-	unsigned long int n_rare_nphased;
+	int32_t totalSite, doneSite;
+	uint64_t n_common_yphased;
+	uint64_t n_common_nphased;
+	uint64_t n_rare_yphased;
+	uint64_t n_rare_nphased;
 	stats1D statCS;
 
 	//GENOMIC REGION
 	std::string chrid;
-	int input_start;
-	int input_stop;
-	int scaffold_start;
-	int scaffold_stop;
+	int32_t input_start;
+	int32_t input_stop;
+	int32_t scaffold_start;
+	int32_t scaffold_stop;
 	std::string input_gregion;
 	std::string scaffold_gregion;
 

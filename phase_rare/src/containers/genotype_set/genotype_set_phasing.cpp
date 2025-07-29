@@ -24,14 +24,14 @@
 
 using namespace std;
 
-void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned_vector32 < float > & alphaXbeta_prev, aligned_vector32 < float > & alphaXbeta_curr, vector < unsigned int > & H, float threshold) {
+void genotype_set::phaseLiAndStephens(uint32_t vr, uint32_t hap, aligned_vector32 < float > & alphaXbeta_prev, aligned_vector32 < float > & alphaXbeta_curr, vector < uint32_t > & H, float threshold) {
 	float p[2] = { 0.0f };
 
-	int tidx = -1;
-	for (int k = 0, r = 0; (k<H.size()) || (r<GRvar_genotypes[vr].size()) ;) {
-		int tind = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].idx:-1;
-		int tmis = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].mis:-1;
-		int cind = (k<H.size())?H[k]/2:-1;
+	int32_t tidx = -1;
+	for (int32_t k = 0, r = 0; (k<H.size()) || (r<GRvar_genotypes[vr].size()) ;) {
+		int32_t tind = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].idx:-1;
+		int32_t tmis = (r<GRvar_genotypes[vr].size())?GRvar_genotypes[vr][r].mis:-1;
+		int32_t cind = (k<H.size())?H[k]/2:-1;
 
 		if (tind == hap/2) {
 			tidx = r;
@@ -73,12 +73,12 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 	}
 }
 
-void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pathH0, vector < int > & pathH1, hmm_parameters & M, bool score_singletons) {
+void genotype_set::phaseCoalescentViterbi(uint32_t ind, vector < int32_t > & pathH0, vector < int32_t > & pathH1, hmm_parameters & M, bool score_singletons) {
 	 //
-	 vector < int > starts0, ends0, starts1, ends1;
+	 vector < int32_t > starts0, ends0, starts1, ends1;
 	 starts0.push_back(0);
 	 starts1.push_back(0);
-	 for (int l = 1 ; l < pathH0.size() ; l ++) {
+	 for (int32_t l = 1 ; l < pathH0.size() ; l ++) {
 		 if (pathH0[l-1] != pathH0[l]) {
 			 ends0.push_back(l-1);
 			 starts0.push_back(l);
@@ -94,20 +94,20 @@ void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pat
 	 //
 	 vector < float > pathM0 = vector < float > (pathH0.size(), 0.0f);
 	 vector < float > pathM1 = vector < float > (pathH1.size(), 0.0f);
-	 for (int e = 0 ; e < starts0.size() ; e ++) {
+	 for (int32_t e = 0 ; e < starts0.size() ; e ++) {
 		 float lengthCM = M.cm[ends0[e]] - M.cm[starts0[e]];
-		 for (int l = starts0[e] ; l <= ends0[e] ; l++) pathM0[l] = lengthCM;
+		 for (int32_t l = starts0[e] ; l <= ends0[e] ; l++) pathM0[l] = lengthCM;
 	 }
-	 for (int e = 0 ; e < starts1.size() ; e ++) {
+	 for (int32_t e = 0 ; e < starts1.size() ; e ++) {
 		 float lengthCM = M.cm[ends1[e]] - M.cm[starts1[e]];
-		 for (int l = starts1[e] ; l <= ends1[e] ; l++) pathM1[l] = lengthCM;
+		 for (int32_t l = starts1[e] ; l <= ends1[e] ; l++) pathM1[l] = lengthCM;
 	 }
 
 	 //
-	for (int vr = 0 ; vr < GRind_genotypes[ind].size() ; vr ++) {
-		unsigned int idx = GRind_genotypes[ind][vr].idx;
+	for (int32_t vr = 0 ; vr < GRind_genotypes[ind].size() ; vr ++) {
+		uint32_t idx = GRind_genotypes[ind][vr].idx;
 		if (!GRind_genotypes[ind][vr].pha) {
-			int index = MAP_R2S[idx];
+			int32_t index = MAP_R2S[idx];
 
 			float w0, w1;
 			if (index == 0) {

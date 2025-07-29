@@ -41,24 +41,24 @@ public :
 	~variant_map();
 
 	//METHODS
-	unsigned int sizeFull();
-	unsigned int sizeScaffold();
-	unsigned int sizeCommon();
-	unsigned int sizeRare();
+	uint32_t sizeFull();
+	uint32_t sizeScaffold();
+	uint32_t sizeCommon();
+	uint32_t sizeRare();
 
 	std::vector < variant * > getByPos(int);
 	void push(variant *);
 
 	void setGeneticMap(gmap_reader&);
 	void setGeneticMap();
-	int setCentiMorgan(std::vector < int > & pos_bp, std::vector < double > & pos_cM);
-	int interpolateCentiMorgan(std::vector < int > & pos_bp, std::vector < double > & pos_cM);
+	int32_t setCentiMorgan(std::vector < int32_t > & pos_bp, std::vector < double > & pos_cM);
+	int32_t interpolateCentiMorgan(std::vector < int32_t > & pos_bp, std::vector < double > & pos_cM);
 
-	void getCommonVariants(unsigned int vs0, unsigned int vs1, std::vector < unsigned int > & VC);
-	void getRareVariants(unsigned int vs0, unsigned int vs1, std::vector < unsigned int > & VR);
+	void getCommonVariants(uint32_t vs0, uint32_t vs1, std::vector < uint32_t > & VC);
+	void getRareVariants(uint32_t vs0, uint32_t vs1, std::vector < uint32_t > & VR);
 
 
-	unsigned int lengthBP();
+	uint32_t lengthBP();
 	double lengthcM();
 };
 

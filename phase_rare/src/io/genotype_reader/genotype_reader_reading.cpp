@@ -53,7 +53,7 @@ void genotype_reader::readGenotypes() {
 			//... in BCF format
 			if (scaf_type == RECORD_BCFVCF_GENOTYPE) {
 				XR.readRecord(idx_scaffold, reinterpret_cast< char** > (&input_buffer));
-				for(int i = 0 ; i < 2 * n_samples ; i += 2) {
+				for(int32_t i = 0 ; i < 2 * n_samples ; i += 2) {
 					bool a0 = (bcf_gt_allele(input_buffer[i+0])==1);
 					bool a1 = (bcf_gt_allele(input_buffer[i+1])==1);
 					if (input_buffer[i+0] == bcf_gt_missing || input_buffer[i+1] == bcf_gt_missing) vrb.error("Missing data is not allowed in scaffold");
@@ -69,7 +69,7 @@ void genotype_reader::readGenotypes() {
 			//... in Binary format
 			else if (scaf_type == RECORD_BINARY_HAPLOTYPE) {
 				XR.readRecord(idx_scaffold, reinterpret_cast< char** > (&input_bitvector.bytes));
-				for(int i = 0 ; i < 2 * n_samples ; i += 2) {
+				for(int32_t i = 0 ; i < 2 * n_samples ; i += 2) {
 					bool a0 = input_bitvector.get(i+0);
 					bool a1 = input_bitvector.get(i+1);
 					V.vec_full[vt]->cref += 2-(a0+a1);
@@ -96,7 +96,7 @@ void genotype_reader::readGenotypes() {
 			// ... in BCF format
 			if (unph_type == RECORD_BCFVCF_GENOTYPE) {
 				XR.readRecord(idx_unphased, reinterpret_cast< char** > (&input_buffer));
-				for(int i = 0 ; i < 2 * n_samples ; i += 2) {
+				for(int32_t i = 0 ; i < 2 * n_samples ; i += 2) {
 					bool a0 = (bcf_gt_allele(input_buffer[i+0])==1);
 					bool a1 = (bcf_gt_allele(input_buffer[i+1])==1);
 					bool mi = (input_buffer[i+0] == bcf_gt_missing || input_buffer[i+1] == bcf_gt_missing);
@@ -120,7 +120,7 @@ void genotype_reader::readGenotypes() {
 			// ... in Binary format
 			else if (unph_type == RECORD_BINARY_GENOTYPE) {
 				XR.readRecord(idx_unphased, reinterpret_cast< char** > (&input_bitvector.bytes));
-				for(int i = 0 ; i < 2 * n_samples ; i += 2) {
+				for(int32_t i = 0 ; i < 2 * n_samples ; i += 2) {
 					bool a0 = input_bitvector.get(i+0);
 					bool a1 = input_bitvector.get(i+1);
 					bool mi = a0 && !a1;
@@ -145,7 +145,7 @@ void genotype_reader::readGenotypes() {
 				//Standard version, involves decoding/encoding of sparse data. Could be improve by direct copy, but not sure it would drastically speed up things 				//G.GRvar_genotypes[vr].reserve(XR.sizeRecord(idx_unphased) / sizeof(int32_t));		//XR.readRecord(idx_unphased, reinterpret_cast< char** > (&G.GRvar_genotypes[vr].data()));
 				int32_t n_elements = XR.readRecord(idx_unphased, reinterpret_cast< char** > (&input_buffer)) / sizeof(int32_t);
 				G.GRvar_genotypes[vr].reserve(n_elements);
-				for(int r = 0 ; r < n_elements ; r++) n_rare_genotypes[G.pushRare(vr, input_buffer[r])] ++;
+				for(int32_t r = 0 ; r < n_elements ; r++) n_rare_genotypes[G.pushRare(vr, input_buffer[r])] ++;
 				vr++; vt ++;
 			}
 

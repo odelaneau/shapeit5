@@ -34,7 +34,7 @@ using namespace std;
 #define OFILE_VCFC	1
 #define OFILE_BCFC	2
 
-haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, variant_map & _V, int _nthreads): H(_H), G(_G), V(_V) {
+haplotype_writer::haplotype_writer(haplotype_set & _H, genotype_set & _G, variant_map & _V, int32_t _nthreads): H(_H), G(_G), V(_V) {
 	nthreads = _nthreads;
 }
 
@@ -42,7 +42,7 @@ haplotype_writer::~haplotype_writer() {
 }
 
 
-void haplotype_writer::setRegions(int _input_start, int _input_stop) {
+void haplotype_writer::setRegions(int32_t _input_start, int32_t _input_stop) {
 	input_start = _input_start;
 	input_stop = _input_stop;
 }
@@ -66,7 +66,7 @@ void haplotype_writer::writeHaplotypesVCF(std::string foutput, std::string finpu
 	    htsFile *fp_tar = bcf_open(finput.c_str(), "r");
 	    bcf_hdr_t *hdr_tar = bcf_hdr_read(fp_tar);
 	    bcf_idpair_t *ctg = hdr_tar->id[BCF_DT_CTG];
-	    for (int idx_ctg = 0; idx_ctg < hdr_tar->n[BCF_DT_CTG]; ++idx_ctg)
+	    for (int32_t idx_ctg = 0; idx_ctg < hdr_tar->n[BCF_DT_CTG]; ++idx_ctg)
 	    {
 	    	std::string length = "";
 	    	if (ctg[idx_ctg].val->info[0] > 0) length = ",length=" + std::to_string(ctg[idx_ctg].val->info[0]);

@@ -35,7 +35,7 @@ conditioning_set::~conditioning_set() {
 	sites_pbwt_evaluation.clear();
 	sites_pbwt_selection.clear();
 	sites_pbwt_grouping.clear();
-	for (int h = 0 ; h < indexes_pbwt_neighbour.size() ; h ++) {
+	for (int32_t h = 0 ; h < indexes_pbwt_neighbour.size() ; h ++) {
 		indexes_pbwt_neighbour[h].clear();
 		indexes_pbwt_neighbour[h].shrink_to_fit();
 	}
@@ -43,7 +43,7 @@ conditioning_set::~conditioning_set() {
 	indexes_pbwt_neighbour.shrink_to_fit();
 }
 
-void conditioning_set::initialize(variant_map & V, float _modulo_selection, float _mdr, int _depth_common, int _depth_rare, int _mac) {
+void conditioning_set::initialize(variant_map & V, float _modulo_selection, float _mdr, int32_t _depth_common, int32_t _depth_rare, int32_t _mac) {
 	tac.clock();
 
 	//SETTING PARAMETERS
@@ -51,25 +51,25 @@ void conditioning_set::initialize(variant_map & V, float _modulo_selection, floa
 	depth_rare = _depth_rare;
 
 	//MAPPING EVAL+GRP
-	int n_evaluated = 0;
+	int32_t n_evaluated = 0;
 	sites_pbwt_evaluation = vector < bool > (V.sizeScaffold(), false);
-	sites_pbwt_grouping = vector < int > (V.sizeScaffold(), -1);
-	for (int l = 0 ; l < V.sizeScaffold() ; l ++) {
+	sites_pbwt_grouping = vector < int32_t > (V.sizeScaffold(), -1);
+	for (int32_t l = 0 ; l < V.sizeScaffold() ; l ++) {
 		sites_pbwt_evaluation[l] = (V.vec_scaffold[l]->getMAC() >= _mac && V.vec_scaffold[l]->getMDR() <= _mdr);
-		sites_pbwt_grouping[l] = (int)round(V.vec_scaffold[l]->cm / _modulo_selection);
+		sites_pbwt_grouping[l] = (int32_t)round(V.vec_scaffold[l]->cm / _modulo_selection);
 		n_evaluated += sites_pbwt_evaluation[l];
 	}
-	for (int l = 0, src = -1, tar = -1 ; l < V.sizeScaffold() ; l ++) {
+	for (int32_t l = 0, src = -1, tar = -1 ; l < V.sizeScaffold() ; l ++) {
 		if (src == sites_pbwt_grouping[l]) sites_pbwt_grouping[l] = tar;
 		else { src = sites_pbwt_grouping[l]; sites_pbwt_grouping[l] = ++tar; }
 	}
 	sites_pbwt_ngroups = sites_pbwt_grouping.back() + 1;
 
 	//ALLOCATE
-	indexes_pbwt_neighbour = vector < vector < unsigned int > > (n_haplotypes);
-	IBD2 = vector < vector < unsigned int > > (n_haplotypes / 2);
+	indexes_pbwt_neighbour = vector < vector < uint32_t > > (n_haplotypes);
+	IBD2 = vector < vector < uint32_t > > (n_haplotypes / 2);
 	shuffledI = 0;
-	shuffledO = vector < unsigned int > (n_haplotypes);
+	shuffledO = vector < uint32_t > (n_haplotypes);
 	iota(shuffledO.begin(), shuffledO.end(), 0);
 	vrb.bullet("PBWT initialization [#eval=" + stb.str(n_evaluated) + " / #select=" + stb.str(sites_pbwt_grouping.back() + 1) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }

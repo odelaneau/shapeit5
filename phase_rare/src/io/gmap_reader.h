@@ -28,7 +28,7 @@
 class gmap_reader {
 public:
 	//DATA
-	std::vector < int > pos_bp;
+	std::vector < int32_t > pos_bp;
 	std::vector < double > pos_cm;
 
 	//CONSTRUCTOR/DESTRUCTOR

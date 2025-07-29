@@ -29,9 +29,9 @@
 class haplotype_set {
 public:
 	//Counts
-	unsigned int n_scaffold_variants;			//#variants in scaffold
-	unsigned int n_haplotypes;					//#haplotypes
-	unsigned int n_samples;						//#samples
+	uint32_t n_scaffold_variants;			//#variants in scaffold
+	uint32_t n_haplotypes;					//#haplotypes
+	uint32_t n_samples;						//#samples
 
 	//Scaffold data
 	bitmatrix Hvar;							//Bit matrix of haplotypes (variant first).

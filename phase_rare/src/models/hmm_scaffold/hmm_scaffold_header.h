@@ -52,9 +52,9 @@ public:
 	hmm_parameters & M;
 
 	//CONSTANT
-	unsigned int hap;
+	uint32_t hap;
 	float match_prob[2];
-	unsigned int nstates;
+	uint32_t nstates;
 
 	//
 	bitmatrix Hvar;
@@ -69,10 +69,10 @@ public:
 	hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set & _C, hmm_parameters & _M);
 	~hmm_scaffold();
 
-	void setup(unsigned int _hap);
+	void setup(uint32_t _hap);
 	double forward();
-	void backward(std::vector < std::vector < unsigned int > > & cevents, std::vector < int > & vpath);
-	void viterbi(std::vector < int > & path);
+	void backward(std::vector < std::vector < uint32_t > > & cevents, std::vector < int32_t > & vpath);
+	void viterbi(std::vector < int32_t > & path);
 
 };
 

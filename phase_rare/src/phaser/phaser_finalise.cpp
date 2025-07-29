@@ -28,10 +28,10 @@ void phaser::write_files_and_finalise() {
 	vrb.title("Finalization:");
 
 	//step0: multi-threading
-	if (options["thread"].as < int > () > 1) pthread_mutex_destroy(&mutex_workers);
+	if (options["thread"].as < int32_t > () > 1) pthread_mutex_destroy(&mutex_workers);
 
 	//step1: writing best guess haplotypes in VCF/BCF file
-	haplotype_writer writerH (H, G, V, options["thread"].as < int > ());
+	haplotype_writer writerH (H, G, V, options["thread"].as < int32_t > ());
 	writerH.setRegions(input_start, input_stop);
 	if (options["output-format"].as < std::string > () == "vcf") {
 		writerH.writeHaplotypesVCF(options["output"].as < std::string > (), options["input"].as < std::string > (), !options.count("output-noPP"));

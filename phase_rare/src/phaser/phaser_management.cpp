@@ -48,8 +48,8 @@ void phaser::buildCoordinates() {
         vrb.title("Parsing specified genomic regions");
         vector < string > scaffold_t1, scaffold_t2;
         vector < string > input_t1, input_t2;
-        int scaffold_ret = stb.split(scaffold_region, scaffold_t1, ":");
-        int input_ret = stb.split(input_region, input_t1, ":");
+        int32_t scaffold_ret = stb.split(scaffold_region, scaffold_t1, ":");
+        int32_t input_ret = stb.split(input_region, input_t1, ":");
         if (scaffold_ret != 2) vrb.error("Input region needs to be specificied as chrX:Y-Z (chromosome ID cannot be extracted)");
         if (input_ret != 2) vrb.error("Scaffold region needs to be specificied as chrX:Y-Z (chromosome ID cannot be extracted)");
         chrid = scaffold_t1[0];

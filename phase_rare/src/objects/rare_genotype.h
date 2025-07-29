@@ -37,14 +37,14 @@ public:
 	static float ee;
 	static float ed;
 
-	rare_genotype(unsigned int _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) : sparse_genotype(_idx, _het,  _mis, _al0, _al1, _pha) {
+	rare_genotype(uint32_t _idx, bool _het, bool _mis, bool _al0, bool _al1, bool _pha) : sparse_genotype(_idx, _het,  _mis, _al0, _al1, _pha) {
 		if (!pha && al0 != al1) {
 			if (rng.flipCoin()) { al0 = 0; al1 = 1; }
 			else { al0 = 1; al1 = 0; }
 		}
 	}
 
-	rare_genotype(unsigned int _val) : sparse_genotype(_val) {
+	rare_genotype(uint32_t _val) : sparse_genotype(_val) {
 	}	
 	
 	void randomize() {
@@ -54,7 +54,7 @@ public:
 		}
 	}
 
-	void phase(unsigned int g) {
+	void phase(uint32_t g) {
 		sparse_genotype::phase(g);
 	}
 
@@ -78,7 +78,7 @@ public:
 				gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
 			}
 
-			int maxg = alg.imax(gprobs);
+			int32_t maxg = alg.imax(gprobs);
 			switch (maxg) {
 			case 0:	al0 = 0; al1 = 0; break;
 			case 1:	al0 = 0; al1 = 1; break;
@@ -102,7 +102,7 @@ public:
 			gprobs[2] = 0.0f;
 			gprobs[3] = (p00*ed + p01*ee) * (p10*ed + p11*ee);
 
-			int maxg = alg.imax(gprobs);
+			int32_t maxg = alg.imax(gprobs);
 			switch (maxg) {
 			case 0:	al0 = 0; al1 = 0; break;
 			case 1:	al0 = 0; al1 = 1; break;

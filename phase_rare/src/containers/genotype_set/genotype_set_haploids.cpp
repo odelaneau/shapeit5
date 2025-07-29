@@ -33,9 +33,9 @@ void genotype_set::mapHaploidsAndResetHets(string fhap) {
 	//Reading file
 	uint32_t nlines = 0;
 	string buffer;
-	map < string, int > samples_str2idx;
-	map < string, int > :: iterator itS;
-	for (int i = 0 ; i < n_samples ; i ++) samples_str2idx.insert(pair < string, int > (names[i], i));
+	map < string, int32_t > samples_str2idx;
+	map < string, int32_t > :: iterator itS;
+	for (int32_t i = 0 ; i < n_samples ; i ++) samples_str2idx.insert(pair < string, int32_t > (names[i], i));
 	haploids = std::vector < bool > (n_samples, false);
 	input_file fd_hap(fhap);
 	if (fd_hap.fail()) vrb.error("Cannot open pedigree file");
@@ -49,7 +49,7 @@ void genotype_set::mapHaploidsAndResetHets(string fhap) {
 
 	//Counting haploids / diploids
 	uint32_t n_diploids = 0, n_haploids = 0;
-	for (int i = 0 ; i < n_samples ; i ++) {
+	for (int32_t i = 0 ; i < n_samples ; i ++) {
 		n_diploids += !haploids[i];
 		n_haploids += haploids[i];
 	}
@@ -57,9 +57,9 @@ void genotype_set::mapHaploidsAndResetHets(string fhap) {
 
 	//Zero out hets in Haploid samples
 	uint64_t n_het = 0, n_hom = 0;
-	for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
-		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
-			unsigned int idx = GRvar_genotypes[vr][r].idx;
+	for (int32_t vr = 0 ; vr < n_rare_variants ; vr ++) {
+		for (int32_t r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
+			uint32_t idx = GRvar_genotypes[vr][r].idx;
 			if (haploids[idx]) {
 				if (GRvar_genotypes[vr][r].het) {
 					GRvar_genotypes[vr][r].het = 0;

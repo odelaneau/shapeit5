@@ -28,47 +28,47 @@ void conditioning_set::scanIBD2(variant_map & V) {
 	tac.clock();
 
 	//
-	int M = 3, n_ind = n_haplotypes / 2;
-	vector < int > U = vector < int > (M, 0);
-	vector < int > P = vector < int > (M, 0);
-	vector < int > G = vector < int > (n_ind, 0);
-	vector < vector < int > > A = vector < vector < int > > (M, vector < int > (n_ind, 0));
-	vector < vector < int > > D = vector < vector < int > > (M, vector < int > (n_ind, 0));
+	int32_t M = 3, n_ind = n_haplotypes / 2;
+	vector < int32_t > U = vector < int32_t > (M, 0);
+	vector < int32_t > P = vector < int32_t > (M, 0);
+	vector < int32_t > G = vector < int32_t > (n_ind, 0);
+	vector < vector < int32_t > > A = vector < vector < int32_t > > (M, vector < int32_t > (n_ind, 0));
+	vector < vector < int32_t > > D = vector < vector < int32_t > > (M, vector < int32_t > (n_ind, 0));
 
 	//
-	for (int l = 0 ; l < n_scaffold_variants ; l ++) {
+	for (int32_t l = 0 ; l < n_scaffold_variants ; l ++) {
 		fill(U.begin(), U.end(), 0);
 		fill(P.begin(), P.end(), l);
-		for (int i = 0 ; i < n_ind ; i ++) {
-			int alookup = l?A[0][i]:i;
-			int dlookup = l?D[0][i]:0;
-			for (int g = 0 ; g < M ; g++) if (dlookup > P[g]) P[g] = dlookup;
+		for (int32_t i = 0 ; i < n_ind ; i ++) {
+			int32_t alookup = l?A[0][i]:i;
+			int32_t dlookup = l?D[0][i]:0;
+			for (int32_t g = 0 ; g < M ; g++) if (dlookup > P[g]) P[g] = dlookup;
 			G[i] = Hvar.get(l, 2*alookup+0) + Hvar.get(l, 2*alookup+1);
 			A[G[i]][U[G[i]]] = alookup;
 			D[G[i]][U[G[i]]] = P[G[i]];
 			P[G[i]] = 0;
 			U[G[i]]++;
 		}
-		for (int g = 1, offset = U[0] ; g < M ; g++) {
+		for (int32_t g = 1, offset = U[0] ; g < M ; g++) {
 			copy(A[g].begin(), A[g].begin()+U[g], A[0].begin() + offset);
 			copy(D[g].begin(), D[g].begin()+U[g], D[0].begin() + offset);
 			offset += U[g];
 		}
-		for (int i = 1 ; i < n_ind ; i ++) {
-			int ind0 = A[0][i];
-			int ng0 = (l<(n_scaffold_variants-1))?(Hvar.get(l+1, 2*ind0+0)+Hvar.get(l+1, 2*ind0+1)):-1;
-			for (int ip = i-1, div = -1 ; ip >= 0 ; ip --) {
+		for (int32_t i = 1 ; i < n_ind ; i ++) {
+			int32_t ind0 = A[0][i];
+			int32_t ng0 = (l<(n_scaffold_variants-1))?(Hvar.get(l+1, 2*ind0+0)+Hvar.get(l+1, 2*ind0+1)):-1;
+			for (int32_t ip = i-1, div = -1 ; ip >= 0 ; ip --) {
 				if (G[ip] != G[i]) break;
 				div = max(div, D[0][ip+1]);
 				double lengthMatchCM = V.vec_scaffold[l]->cm - V.vec_scaffold[div]->cm;
 				double lengthMatchBP = V.vec_scaffold[l]->bp - V.vec_scaffold[div]->bp;
 				double lengthMatchCT = l - div + 1;
 				if ((lengthMatchCT == n_scaffold_variants) || (lengthMatchCM >= 2.5f && lengthMatchBP >= 1e6 && lengthMatchCT >= 100)) {
-					int ind1 = A[0][ip];
-					int ng1 = (l<(n_scaffold_variants-1))?(Hvar.get(l+1, 2*ind1+0)+Hvar.get(l+1, 2*ind1+1)):-1;
+					int32_t ind1 = A[0][ip];
+					int32_t ng1 = (l<(n_scaffold_variants-1))?(Hvar.get(l+1, 2*ind1+0)+Hvar.get(l+1, 2*ind1+1)):-1;
 					if (ng0 < 0 || ng0 != ng1) {
-						//int disc = 0;
-						//for (int hh = div ; hh <= l ; hh ++) disc += ((Hvar.get(hh, 2*ind1+0)+Hvar.get(hh, 2*ind1+1)) - (Hvar.get(hh, 2*ind0+0)+Hvar.get(hh, 2*ind0+1)));
+						//int32_t disc = 0;
+						//for (int32_t hh = div ; hh <= l ; hh ++) disc += ((Hvar.get(hh, 2*ind1+0)+Hvar.get(hh, 2*ind1+1)) - (Hvar.get(hh, 2*ind0+0)+Hvar.get(hh, 2*ind0+1)));
 						//cout << "IBD2: " << ind0 << " " << ind1 << " " << lengthMatchCM << " " << lengthMatchBP << " " << lengthMatchCT << " " << disc << endl;
 						if (!haploids[ind0] && !haploids[ind1]) IBD2[min(ind0, ind1)].push_back(max(ind0, ind1));
 					}
@@ -78,8 +78,8 @@ void conditioning_set::scanIBD2(variant_map & V) {
 		vrb.progress("  * IBD2 constraints ", (l+1)*1.0/n_scaffold_variants);
 	}
 
-	unsigned long npairstot = 0, npairsind = 0;
-	for (int i = 0 ; i < n_ind ; i ++) {
+	uint64_t npairstot = 0, npairsind = 0;
+	for (int32_t i = 0 ; i < n_ind ; i ++) {
 		sort(IBD2[i].begin(), IBD2[i].end());
 		IBD2[i].erase(unique(IBD2[i].begin(), IBD2[i].end()), IBD2[i].end());
 		npairstot += IBD2[i].size();

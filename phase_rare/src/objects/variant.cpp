@@ -25,7 +25,7 @@
 
 using std::string;
 
-variant::variant(string & chr, int bp, string & id, string & ref, string & alt, bool _minor, char _type) {
+variant::variant(string & chr, int32_t bp, string & id, string & ref, string & alt, bool _minor, char _type) {
 	this->chr = chr;
 	this->bp = bp;
 	this->id = id;
@@ -46,7 +46,7 @@ variant::variant(string & chr, int bp, string & id, string & ref, string & alt, 
 variant::~variant() {
 }
 
-unsigned int variant::getMAC() {
+uint32_t variant::getMAC() {
 	return std::min(cref, calt);
 }
 

@@ -33,28 +33,28 @@ class genotype_set {
 public:
 
 	//Counts
-	unsigned int n_scaffold_variants;			//#variants rare to be phased
-	unsigned int n_rare_variants;				//#variants rare to be phased
-	unsigned int n_samples;						//#samples
+	uint32_t n_scaffold_variants;			//#variants rare to be phased
+	uint32_t n_rare_variants;				//#variants rare to be phased
+	uint32_t n_samples;						//#samples
 
-	unsigned int nmiss_total;
-	unsigned int nmiss_imputation;
-	unsigned int nmiss_families;
-	unsigned int nmiss_monomorphic;
-	unsigned int nhets_total;
-	unsigned int nhets_families;
-	unsigned int nhets_imputation;
-	unsigned int nhets_coalescent;
+	uint64_t nmiss_total;
+	uint64_t nmiss_imputation;
+	uint64_t nmiss_families;
+	uint64_t nmiss_monomorphic;
+	uint64_t nhets_total;
+	uint64_t nhets_families;
+	uint64_t nhets_imputation;
+	uint64_t nhets_coalescent;
 
 	//Sample IDs
 	std::vector < std::string > names;
 	std::vector < bool > haploids;
 
 	//Trios/Duos
-	std::vector < int > mendel_error, mendel_ydone, mendel_ndone, mendel_imput;
+	std::vector < int32_t > mendel_error, mendel_ydone, mendel_ndone, mendel_imput;
 
 	//Mapping on scaffold
-	std::vector < unsigned int > MAP_R2S;
+	std::vector < uint32_t > MAP_R2S;
 
 	//Genotypes at rare unphased variants
 	std::vector < bool > major_alleles;
@@ -67,53 +67,53 @@ public:
 
 	//BASIC
 	void clear();
-	void allocate(variant_map &, unsigned int, unsigned int , unsigned int);
-	void mapUnphasedOntoScaffold(int ind, std::vector < std::vector < unsigned int > > & map);
+	void allocate(variant_map &, uint32_t, uint32_t , uint32_t);
+	void mapUnphasedOntoScaffold(int32_t ind, std::vector < std::vector < uint32_t > > & map);
 	void mapHaploidsAndResetHets(std::string fhap);
 
 	//TRANSPOSE
 	void fillup_by_transpose_V2I();
 	void merge_by_transpose_I2V();
-	unsigned int countHet();
-	unsigned int countUnphased();
+	uint64_t countHet();
+	uint64_t countUnphased();
 
 	//PUSH
-	void pushRareMissing(unsigned int vr, unsigned int i, bool major);
-	void pushRareUnphasedHet(unsigned int vr, unsigned int i);
-	void pushRarePhasedHet(unsigned int vr, unsigned int i, bool, bool);
-	void pushRareHom(unsigned int vr, unsigned int i, bool major);
-	int pushRare(unsigned int vr, unsigned int v);
+	void pushRareMissing(uint32_t vr, uint32_t i, bool major);
+	void pushRareUnphasedHet(uint32_t vr, uint32_t i);
+	void pushRarePhasedHet(uint32_t vr, uint32_t i, bool, bool);
+	void pushRareHom(uint32_t vr, uint32_t i, bool major);
+	int32_t pushRare(uint32_t vr, uint32_t v);
 
 	//IMPUTE
 	void imputeMonomorphic();
-	void phaseLiAndStephens(unsigned int, unsigned int, aligned_vector32 < float > &, aligned_vector32 < float > &, std::vector < unsigned int > &, float);
-	void phaseCoalescentViterbi(unsigned int, std::vector < int > &, std::vector < int > &, hmm_parameters &, bool);
+	void phaseLiAndStephens(uint32_t, uint32_t, aligned_vector32 < float > &, aligned_vector32 < float > &, std::vector < uint32_t > &, float);
+	void phaseCoalescentViterbi(uint32_t, std::vector < int32_t > &, std::vector < int32_t > &, hmm_parameters &, bool);
 	void phasePedigrees(std::string fped);
 
 };
 
 inline
-void genotype_set::pushRareMissing(unsigned int vr, unsigned int i, bool major) {
+void genotype_set::pushRareMissing(uint32_t vr, uint32_t i, bool major) {
 	GRvar_genotypes[vr].emplace_back(i, 0, 1, major, major, 0);
 }
 
 inline
-void genotype_set::pushRareUnphasedHet(unsigned int vr, unsigned int i) {
+void genotype_set::pushRareUnphasedHet(uint32_t vr, uint32_t i) {
 	GRvar_genotypes[vr].emplace_back(i, 1, 0, 0, 1, 0);
 }
 
 inline
-void genotype_set::pushRarePhasedHet(unsigned int vr, unsigned int i, bool a0, bool a1) {
+void genotype_set::pushRarePhasedHet(uint32_t vr, uint32_t i, bool a0, bool a1) {
 	GRvar_genotypes[vr].emplace_back(i, 1, 0, a0, a1, 1);
 }
 
 inline
-void genotype_set::pushRareHom(unsigned int vr, unsigned int i, bool major) {
+void genotype_set::pushRareHom(uint32_t vr, uint32_t i, bool major) {
 	GRvar_genotypes[vr].emplace_back(i, 0, 0, !major, !major, 1);
 }
 
 inline
-int genotype_set::pushRare(unsigned int vr, unsigned int value) {
+int32_t genotype_set::pushRare(uint32_t vr, uint32_t value) {
 	GRvar_genotypes[vr].emplace_back(value);
 	if (GRvar_genotypes[vr].back().mis) return 3;
 	else if (GRvar_genotypes[vr].back().het) return 1;

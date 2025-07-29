@@ -41,15 +41,15 @@ void state_set::clear() {
 
 void state_set::transpose() {
 	tac.clock();
-	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) Pstates[e].swap();
+	for (uint64_t e = 0 ; e < Pstates.size() ; e ++) Pstates[e].swap();
 	sort(Pstates.begin(), Pstates.end());
 	vrb.bullet("Transpose compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
-void state_set::mapping(unsigned int n_scaffold_variants) {
+void state_set::mapping(uint32_t n_scaffold_variants) {
 	tac.clock();
-	Pmapping = vector < long int > (n_scaffold_variants+1, -1);
-	for (unsigned long int e = 0 ; e < Pstates.size() ; e ++) {
+	Pmapping = vector < int64_t > (n_scaffold_variants+1, -1);
+	for (uint64_t e = 0 ; e < Pstates.size() ; e ++) {
 		if (Pmapping[Pstates[e].id0] < 0) Pmapping[Pstates[e].id0] = e;
 	}
 	vrb.bullet("Map compressed probabilities (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");

@@ -26,7 +26,7 @@ using namespace std;
 
 void * hmmcompute_callback(void * ptr) {
 	phaser * S = static_cast< phaser * >( ptr );
-	int id_job, id_thread;
+	int32_t id_job, id_thread;
 
 	pthread_mutex_lock(&S->mutex_workers);
 	id_thread = S->i_threads ++;
@@ -42,13 +42,13 @@ void * hmmcompute_callback(void * ptr) {
 	}
 }
 
-void phaser::hmmcompute(int id_job, int id_thread) {
+void phaser::hmmcompute(int32_t id_job, int32_t id_thread) {
 	//Mapping storage events
-	vector < vector < unsigned int > > cevents;
+	vector < vector < uint32_t > > cevents;
 	G.mapUnphasedOntoScaffold(id_job, cevents);
 
 	//Viterbi paths
-	vector < int > path0, path1;
+	vector < int32_t > path0, path1;
 
 	//Forward-Backward-Viterbi passes for hap0
 	thread_hmms[id_thread]->setup(2*id_job+0);
@@ -72,25 +72,25 @@ void phaser::phase() {
 	vrb.title("PBWT pass");
 	H.initialize(V,	options["pbwt-modulo"].as < double > (),
 			options["pbwt-mdr"].as < double > (),
-			options["pbwt-depth-common"].as < int > (),
-			options["pbwt-depth-rare"].as < int > (),
-			options["pbwt-mac"].as < int > ());
+			options["pbwt-depth-common"].as < int32_t > (),
+			options["pbwt-depth-rare"].as < int32_t > (),
+			options["pbwt-mac"].as < int32_t > ());
 	H.scanIBD2(V);
 	H.select(V, G);
 
 	//STEP2: HMM computations
 	vrb.title("HMM computations");
 	thread_hmms = vector < hmm_scaffold * > (nthreads);
-	for(int t = 0; t < nthreads ; t ++) thread_hmms[t] = new hmm_scaffold(V, G, H, M);
+	for(int32_t t = 0; t < nthreads ; t ++) thread_hmms[t] = new hmm_scaffold(V, G, H, M);
 	if (nthreads > 1) {
 		i_jobs = i_threads = 0;
-		for (int t = 0 ; t < nthreads ; t++) pthread_create( &id_workers[t] , NULL, hmmcompute_callback, static_cast<void *>(this));
-		for (int t = 0 ; t < nthreads ; t++) pthread_join( id_workers[t] , NULL);
-	} else for (int i = 0 ; i < G.n_samples ; i ++) {
+		for (int32_t t = 0 ; t < nthreads ; t++) pthread_create( &id_workers[t] , NULL, hmmcompute_callback, static_cast<void *>(this));
+		for (int32_t t = 0 ; t < nthreads ; t++) pthread_join( id_workers[t] , NULL);
+	} else for (int32_t i = 0 ; i < G.n_samples ; i ++) {
 		hmmcompute(i, 0);
 		vrb.progress("  * Processing", (i+1)*1.0/G.n_samples);
 	}
-	for(int t = 0; t < nthreads ; t ++) delete thread_hmms[t];
+	for(int32_t t = 0; t < nthreads ; t ++) delete thread_hmms[t];
 	vrb.bullet("Processing (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 
 	//STEP3: MERGE BACK ALL TOGETHER

@@ -33,17 +33,17 @@
 class haplotype_writer {
 public:
 	//DATA
-	int nthreads;
+	int32_t nthreads;
 	haplotype_set & H;
 	genotype_set & G;
 	variant_map & V;
-	int input_start;
-	int input_stop;
+	int32_t input_start;
+	int32_t input_stop;
 
 	//CONSTRUCTORS/DESCTRUCTORS
 	haplotype_writer(haplotype_set &, genotype_set &, variant_map &, int);
 	~haplotype_writer();
-	void setRegions(int _input_start, int _input_stop);
+	void setRegions(int32_t _input_start, int32_t _input_stop);
 
 	//IO
 	void writeHaplotypesVCF(std::string foutput, std::string ifile, bool addPP);

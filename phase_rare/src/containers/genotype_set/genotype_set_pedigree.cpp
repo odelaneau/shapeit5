@@ -27,10 +27,10 @@ using namespace std;
 void genotype_set::phasePedigrees(string fped) {
 	//DATA
 
-	mendel_error = vector < int > (n_samples, 0);
-	mendel_ydone = vector < int > (n_samples, 0);
-	mendel_imput = vector < int > (n_samples, 0);
-	mendel_ndone = vector < int > (n_samples, 0);
+	mendel_error = vector < int32_t > (n_samples, 0);
+	mendel_ydone = vector < int32_t > (n_samples, 0);
+	mendel_imput = vector < int32_t > (n_samples, 0);
+	mendel_ndone = vector < int32_t > (n_samples, 0);
 
 	tac.clock();
 	vrb.title("Trio/Duo pre-phasing");
@@ -51,16 +51,16 @@ void genotype_set::phasePedigrees(string fped) {
 	vrb.bullet("PED file parsing [n=" + stb.str(samples_ped.size()) + "]");
 
 	//Build map
-	map < string, int > samples_str2idx;
-	vector < int > fathers_idx, mothers_idx;
-	for (int i = 0 ; i < n_samples ; i ++) samples_str2idx.insert(pair < string, int > (names[i], i));
-	int n_trios = 0, n_duosF = 0, n_duosM = 0;
-	fathers_idx = vector < int > (n_samples, -1);
-	mothers_idx = vector < int > (n_samples, -1);
-	for (int i = 0 ; i < samples_ped.size() ; i ++) {
-		map < string, int >::iterator itK = samples_str2idx.find(samples_ped[i]);
-		map < string, int >::iterator itF = samples_str2idx.find(fathers_ped[i]);
-		map < string, int >::iterator itM = samples_str2idx.find(mothers_ped[i]);
+	map < string, int32_t > samples_str2idx;
+	vector < int32_t > fathers_idx, mothers_idx;
+	for (int32_t i = 0 ; i < n_samples ; i ++) samples_str2idx.insert(pair < string, int32_t > (names[i], i));
+	int32_t n_trios = 0, n_duosF = 0, n_duosM = 0;
+	fathers_idx = vector < int32_t > (n_samples, -1);
+	mothers_idx = vector < int32_t > (n_samples, -1);
+	for (int32_t i = 0 ; i < samples_ped.size() ; i ++) {
+		map < string, int32_t >::iterator itK = samples_str2idx.find(samples_ped[i]);
+		map < string, int32_t >::iterator itF = samples_str2idx.find(fathers_ped[i]);
+		map < string, int32_t >::iterator itM = samples_str2idx.find(mothers_ped[i]);
 		if (itK != samples_str2idx.end()) {
 			fathers_idx[itK->second] = (itF != samples_str2idx.end()) ? (itF->second) : (-1) ;
 			mothers_idx[itK->second] = (itM != samples_str2idx.end()) ? (itM->second) : (-1) ;
@@ -72,28 +72,28 @@ void genotype_set::phasePedigrees(string fped) {
 	vrb.bullet("#trios = " + stb.str(n_trios) + " / #paternal_duos = " +  stb.str(n_duosF) + " / #maternal_duos = " +  stb.str(n_duosM));
 
 	//Solving
-	vector < int > mappingPlain2Sparse = vector < int >(n_samples);
-	for (int vr = 0 ; vr < n_rare_variants ; vr ++) {
+	vector < int32_t > mappingPlain2Sparse = vector < int32_t >(n_samples);
+	for (int32_t vr = 0 ; vr < n_rare_variants ; vr ++) {
 
 		//Who has data and where?
 		fill(mappingPlain2Sparse.begin(), mappingPlain2Sparse.end(), -1);
-		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) mappingPlain2Sparse[GRvar_genotypes[vr][r].idx] = r;
+		for (int32_t r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) mappingPlain2Sparse[GRvar_genotypes[vr][r].idx] = r;
 
 		//Loop over samples
-		for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
+		for (int32_t r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) {
 
-			unsigned int child_idx = GRvar_genotypes[vr][r].idx;
+			uint32_t child_idx = GRvar_genotypes[vr][r].idx;
 			char gen_father = -1, gen_mother = -1;
 
 			//Is there paternal data for this sample?
 			if (fathers_idx[child_idx] >= 0) {
-				int father_sparse_idx = mappingPlain2Sparse[fathers_idx[child_idx]];
+				int32_t father_sparse_idx = mappingPlain2Sparse[fathers_idx[child_idx]];
 				gen_father = (father_sparse_idx>=0)?GRvar_genotypes[vr][father_sparse_idx].get(major_alleles[vr]):(2*major_alleles[vr]);
 			}
 
 			//Is there maternal data for this sample?
 			if (mothers_idx[child_idx] >= 0) {
-				int mother_sparse_idx = mappingPlain2Sparse[mothers_idx[child_idx]];
+				int32_t mother_sparse_idx = mappingPlain2Sparse[mothers_idx[child_idx]];
 				gen_mother = (mother_sparse_idx>=0)?GRvar_genotypes[vr][mother_sparse_idx].get(major_alleles[vr]):(2*major_alleles[vr]);
 			}
 

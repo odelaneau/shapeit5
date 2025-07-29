@@ -30,18 +30,18 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	npushes = 0;
 	ncollisions = 0;
 
-	vector < int > A = vector < int > (n_haplotypes, 0);
-	vector < int > B = vector < int > (n_haplotypes, 0);
-	vector < int > R = vector < int > (n_haplotypes, 0);
-	vector < int > M = vector < int > (depth_common * n_haplotypes, -1);
+	vector < int32_t > A = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > B = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > R = vector < int32_t > (n_haplotypes, 0);
+	vector < int32_t > M = vector < int32_t > (depth_common * n_haplotypes, -1);
 	iota(A.begin(), A.end(), 0);
 	random_shuffle(A.begin(), A.end());
 
 	//Select new sites at which to trigger storage
-	vector < vector < int > > candidates = vector < vector < int > > (sites_pbwt_grouping.back() + 1);
-	for (int l = 0 ; l < n_scaffold_variants ; l++) if (sites_pbwt_evaluation[l]) candidates[sites_pbwt_grouping[l]].push_back(l);
+	vector < vector < int32_t > > candidates = vector < vector < int32_t > > (sites_pbwt_grouping.back() + 1);
+	for (int32_t l = 0 ; l < n_scaffold_variants ; l++) if (sites_pbwt_evaluation[l]) candidates[sites_pbwt_grouping[l]].push_back(l);
 	sites_pbwt_selection = vector < bool > (n_scaffold_variants , false);
-	for (int g = 0 ; g < candidates.size() ; g++) {
+	for (int32_t g = 0 ; g < candidates.size() ; g++) {
 		if (candidates[g].size() > 0) {
 			sites_pbwt_selection[candidates[g][rng.getInt(candidates[g].size())]] = true;
 		}
@@ -49,22 +49,22 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 
 	//PBWT forward sweep
 	tac.clock();
-	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
-		int vc = V.vec_full[vt]->idx_common;
-		int vr = V.vec_full[vt]->idx_rare;
-		int vs = V.vec_full[vt]->idx_scaffold;
+	for (int32_t vt = 0 ; vt < V.sizeFull() ; vt ++) {
+		int32_t vc = V.vec_full[vt]->idx_common;
+		int32_t vr = V.vec_full[vt]->idx_rare;
+		int32_t vs = V.vec_full[vt]->idx_scaffold;
 
 		if (vs >= 0) {
 			bool eval = sites_pbwt_evaluation[vs];
 			bool selc = sites_pbwt_selection[vs];
 			if (eval) {
-				int u = 0, v = 0;
-				for (int h = 0 ; h < n_haplotypes ; h ++) {
+				int32_t u = 0, v = 0;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) {
 					if (!Hvar.get(vs, A[h])) A[u++] = A[h];
 					else B[v++] = A[h];
 				}
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
-				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 				if (selc) storeCommon(A, M);
 			}
 		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
@@ -76,22 +76,22 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 
 	//PBWT backward sweep
 	tac.clock();
-	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
-		int vc = V.vec_full[vt]->idx_common;
-		int vr = V.vec_full[vt]->idx_rare;
-		int vs = V.vec_full[vt]->idx_scaffold;
+	for (int32_t vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
+		int32_t vc = V.vec_full[vt]->idx_common;
+		int32_t vr = V.vec_full[vt]->idx_rare;
+		int32_t vs = V.vec_full[vt]->idx_scaffold;
 
 		if (vs >= 0) {
 			bool eval = sites_pbwt_evaluation[vs];
 			bool selc = sites_pbwt_selection[vs];
 			if (eval) {
-				int u = 0, v = 0;
-				for (int h = 0 ; h < n_haplotypes ; h ++) {
+				int32_t u = 0, v = 0;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) {
 					if (!Hvar.get(vs, A[h])) A[u++] = A[h];
 					else B[v++] = A[h];
 				}
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
-				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
+				for (int32_t h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 				if (selc) storeCommon(A, M);
 			}
 		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
@@ -102,8 +102,8 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vrb.bullet("PBWT backward selection (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 
 	stats1D statK;
-	for (long int h = 0, e = 0 ; h < n_haplotypes ; h ++) {
-		vector < unsigned int > buffer;
+	for (int64_t h = 0, e = 0 ; h < n_haplotypes ; h ++) {
+		vector < uint32_t > buffer;
 		while (indexes_pbwt_neighbour_serialized[e].first == h) {
 			buffer.push_back(indexes_pbwt_neighbour_serialized[e].second);
 			e++;
@@ -131,27 +131,27 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vrb.bullet2("#collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
-void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & G) {
-	vector < pair < int, int > > N;
-	for (int g = 0 ; g < G.size() ; g ++) {
+void conditioning_set::storeRare(vector < int32_t > & R, vector < rare_genotype > & G) {
+	vector < pair < int32_t, int32_t > > N;
+	for (int32_t g = 0 ; g < G.size() ; g ++) {
 		if (!G[g].mis) {
-			unsigned int hap0 = 2*G[g].idx+0;
-			unsigned int hap1 = 2*G[g].idx+1;
-			N.push_back( pair < int, int > (R[hap0], hap0));
-			N.push_back( pair < int, int > (R[hap1], hap1));
+			uint32_t hap0 = 2*G[g].idx+0;
+			uint32_t hap1 = 2*G[g].idx+1;
+			N.push_back( pair < int32_t, int32_t > (R[hap0], hap0));
+			N.push_back( pair < int32_t, int32_t > (R[hap1], hap1));
 		}
 	}
 	sort(N.begin(), N.end());
 
-	for (int h = 0 ; h < N.size() ; h ++) {
-		int target_hap = N[h].second;
-		int nstored = 0, offset = 1, done = 0;
+	for (int32_t h = 0 ; h < N.size() ; h ++) {
+		int32_t target_hap = N[h].second;
+		int32_t nstored = 0, offset = 1, done = 0;
 		while (nstored < (2*depth_rare) && !done) {
 			done = 1;
 			if (h-offset >= 0) {
 				//if (N[h-offset].second/2 != target_hap/2) {
 				if (!checkIBD2(N[h-offset].second, target_hap)) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h-offset].second));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (target_hap, N[h-offset].second));
 					nstored ++;
 				}
 				done = 0;
@@ -159,7 +159,7 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 			if (h+offset < N.size()) {
 				//if (N[h+offset].second/2 != target_hap/2) {
 				if (!checkIBD2(N[h+offset].second, target_hap)) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h+offset].second));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (target_hap, N[h+offset].second));
 					nstored ++;
 				}
 				done = 0;
@@ -169,10 +169,10 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 	}
 }
 
-void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
-	for (int h = 0 ; h < n_haplotypes ; h ++) {
-		int chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1;
-		for (int n_added = 0 ; n_added < depth_common ; ) {
+void conditioning_set::storeCommon(vector < int32_t > & A, vector < int32_t > & M) {
+	for (int32_t h = 0 ; h < n_haplotypes ; h ++) {
+		int32_t chap = A[h], add_guess0 = 0, add_guess1 = 0, offset0 = 1, offset1 = 1, hap_guess0 = -1, hap_guess1 = -1;
+		for (int32_t n_added = 0 ; n_added < depth_common ; ) {
 			if ((h-offset0)>=0) {
 				hap_guess0 = A[h-offset0];
 				//add_guess0 = (hap_guess0/2 != chap/2);
@@ -185,27 +185,27 @@ void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 			} else add_guess1 = 0;
 			if (add_guess0 && add_guess1) {
 				if (hap_guess0 != M[chap * depth_common + n_added]) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (chap, hap_guess0));
 					M[chap * depth_common + n_added] = hap_guess0;
 					npushes++;
 				} else ncollisions++;
 				offset0++; n_added++;
 				if (hap_guess1 != M[chap * depth_common + n_added]) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (chap, hap_guess1));
 					M[chap * depth_common + n_added] = hap_guess1;
 					npushes++;
 				} else ncollisions++;
 				offset1++; n_added++;
 			} else if (add_guess0) {
 				if (hap_guess0 != M[chap * depth_common + n_added]) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess0));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (chap, hap_guess0));
 					M[chap * depth_common + n_added] = hap_guess0;
 					npushes++;
 				} else ncollisions++;
 				offset0++; n_added++;
 			} else if (add_guess1) {
 				if (hap_guess1 != M[chap * depth_common + n_added]) {
-					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (chap, hap_guess1));
+					indexes_pbwt_neighbour_serialized.push_back(pair < uint32_t, uint32_t > (chap, hap_guess1));
 					M[chap * depth_common + n_added] = hap_guess1;
 					npushes++;
 				} else ncollisions++;

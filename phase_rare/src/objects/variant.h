@@ -33,31 +33,31 @@ class variant {
 public :
 	//DATA
 	std::string chr;
-	int bp;
+	int32_t bp;
 	std::string id;
 	std::string ref;
 	std::string alt;
 	bool minor;
 	double cm;
-	unsigned int cref;
-	unsigned int calt;
-	unsigned int cmis;
+	uint32_t cref;
+	uint32_t calt;
+	uint32_t cmis;
 	//NEW DATA FIELDS
 	char type;
-	int idx_full;
-	int idx_scaffold;
-	int idx_common;
-	int idx_rare;
+	int32_t idx_full;
+	int32_t idx_scaffold;
+	int32_t idx_common;
+	int32_t idx_rare;
 
 
 	//CONSTRUCTOR/DESTRUCTOR
-	variant(std::string & chr, int bp, std::string & id, std::string & ref, std::string & alt, bool, char);
+	variant(std::string & chr, int32_t bp, std::string & id, std::string & ref, std::string & alt, bool, char);
 	~variant();
 
 	bool isSingleton();
 	bool isMonomorphic();
 	bool isSNP();
-	unsigned int getMAC();
+	uint32_t getMAC();
 	double getMDR();
 	double getMAF();
 	double getAF();

@@ -28,7 +28,7 @@ hmm_scaffold::hmm_scaffold(variant_map & _V, genotype_set & _G, conditioning_set
 	match_prob[0] = 1.0f; match_prob[1] = M.ed/M.ee;
 
 	unsigned max_nstates = 0;
-	for (int h = 0 ; h < C.n_haplotypes ; h ++) if (C.indexes_pbwt_neighbour[h].size() > max_nstates) max_nstates = C.indexes_pbwt_neighbour[h].size();
+	for (int32_t h = 0 ; h < C.n_haplotypes ; h ++) if (C.indexes_pbwt_neighbour[h].size() > max_nstates) max_nstates = C.indexes_pbwt_neighbour[h].size();
 	alpha = vector < aligned_vector32 < float > > (C.n_scaffold_variants, aligned_vector32 < float > (max_nstates, 0.0f));
 	beta = aligned_vector32 < float > (max_nstates, 1.0f);
 	Hvar.allocate(C.n_scaffold_variants, max_nstates);
@@ -40,7 +40,7 @@ hmm_scaffold::~hmm_scaffold() {
 	beta.clear();
 }
 
-void hmm_scaffold::setup(unsigned int _hap) {
+void hmm_scaffold::setup(uint32_t _hap) {
 	hap = _hap;
 	nstates = C.indexes_pbwt_neighbour[hap].size();
 
@@ -54,9 +54,9 @@ void hmm_scaffold::setup(unsigned int _hap) {
 double hmm_scaffold::forward() {
 	float sum;
 	double loglik = 0.0;
-	const unsigned int nstatesMD8 = (nstates / 8) * 8;
+	const uint32_t nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
-	for (int vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
+	for (int32_t vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
 		const std::array<float,2> emit = {match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)]};
 		const __m256 _emit0 = _mm256_set1_ps(emit[0]);
 		const __m256 _emit1 = _mm256_set1_ps(emit[1]);
@@ -65,9 +65,9 @@ double hmm_scaffold::forward() {
 			const float f0 = 1.0f / nstates;
 			const __m256 _f0 = _mm256_set1_ps(f0);
 			__m256 _sum = _mm256_set1_ps(0.0f);
-			int offset = 0;
-			for (int k = 0 ; k < nstatesMD8 ; k += 8) {
-				const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((unsigned int )Hvar.getByte(vs, k)), _vshift_count);
+			int32_t offset = 0;
+			for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
+				const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((uint32_t )Hvar.getByte(vs, k)), _vshift_count);
 				const __m256 _emiss = _mm256_blendv_ps (_emit0, _emit1, _mm256_castsi256_ps(_mask));
 				const __m256 _prob_curr = _mm256_mul_ps(_emiss, _f0);
 				_sum = _mm256_add_ps(_sum, _prob_curr);
@@ -86,9 +86,9 @@ double hmm_scaffold::forward() {
 			const __m256 _f0 = _mm256_set1_ps(f0);
 			const __m256 _f1 = _mm256_set1_ps(f1);
 			__m256 _sum = _mm256_set1_ps(0.0f);
-			int offset = 0;
-			for (int k = 0 ; k < nstatesMD8 ; k += 8) {
-				const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((unsigned int )Hvar.getByte(vs, k)), _vshift_count);
+			int32_t offset = 0;
+			for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
+				const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((uint32_t )Hvar.getByte(vs, k)), _vshift_count);
 				const __m256 _emiss = _mm256_blendv_ps (_emit0, _emit1, _mm256_castsi256_ps(_mask));
 				const __m256 _prob_prev = _mm256_load_ps(&alpha[vs-1][k]);
 				const __m256 _prob_temp = _mm256_fmadd_ps(_prob_prev, _f1, _f0);
@@ -108,16 +108,16 @@ double hmm_scaffold::forward() {
 	return loglik;
 }
 
-void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector < int > & vpath) {
+void hmm_scaffold::backward(vector < vector < uint32_t > > & cevents, vector < int32_t > & vpath) {
 	float sum = 0.0f, scale = 0.0f;
-	const unsigned int nstatesMD8 = (nstates / 8) * 8;
+	const uint32_t nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
 	aligned_vector32 < float > alphaXbeta_curr = aligned_vector32 < float >(nstates, 0.0f);
 	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
 
-	//vpath = vector < int > (C.n_scaffold_variants, -1);
+	//vpath = vector < int32_t > (C.n_scaffold_variants, -1);
 
-	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
+	for (int32_t vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
 
 		//
 		const std::array<float,2> emit = {match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)]};
@@ -131,8 +131,8 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 			const float f1 = M.nt[vs] / sum;
 			const __m256 _f0 = _mm256_set1_ps(f0);
 			const __m256 _f1 = _mm256_set1_ps(f1);
-			int offset = 0;
-			for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+			int32_t offset = 0;
+			for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
 				const __m256 _prob_prev = _mm256_load_ps(&beta[k]);
 				const __m256 _prob_curr = _mm256_fmadd_ps(_prob_prev, _f1, _f0);
 				_mm256_store_ps(&beta[k], _prob_curr);
@@ -143,8 +143,8 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 
 		//Products
 		__m256 _scale = _mm256_set1_ps(0.0f);
-		int offset = 0;
-		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+		int32_t offset = 0;
+		for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alpha[vs][k]), _mm256_load_ps(&beta[k]));
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			_scale = _mm256_add_ps(_scale, _prob_temp);
@@ -158,7 +158,7 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 		scale = 1.0f / scale;
 		_scale = _mm256_set1_ps(scale);
 		offset = 0;
-		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
+		for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
 			const __m256 _prob_temp = _mm256_mul_ps(_mm256_load_ps(&alphaXbeta_curr[k]), _scale);
 			_mm256_store_ps(&alphaXbeta_curr[k], _prob_temp);
 			offset += 8;
@@ -168,8 +168,8 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 		//Emission
 		__m256 _sum = _mm256_set1_ps(0.0f);
 		offset = 0;
-		for (int k = 0 ; k < nstatesMD8 ; k += 8) {
-			const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((unsigned int )Hvar.getByte(vs, k)), _vshift_count);
+		for (int32_t k = 0 ; k < nstatesMD8 ; k += 8) {
+			const __m256i _mask = _mm256_sllv_epi32(_mm256_set1_epi32((uint32_t )Hvar.getByte(vs, k)), _vshift_count);
 			const __m256 _emiss = _mm256_blendv_ps (_emit0, _emit1, _mm256_castsi256_ps(_mask));
 			const __m256 _prob_prev = _mm256_load_ps(&beta[k]);
 			const __m256 _prob_curr = _mm256_mul_ps(_prob_prev, _emiss);
@@ -190,7 +190,7 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 			if (vs == C.n_scaffold_variants-1) copy(alphaXbeta_curr.begin(), alphaXbeta_curr.begin() + nstates, alphaXbeta_prev.begin());
 
 			//Impute from full conditioning set
-			for (int vr = 0 ; vr < cevents[vs+1].size() ; vr ++) {
+			for (int32_t vr = 0 ; vr < cevents[vs+1].size() ; vr ++) {
 				G.phaseLiAndStephens(cevents[vs+1][vr], hap, alphaXbeta_prev, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.5001f);
 			}
 		}
@@ -202,26 +202,26 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 	if (cevents[0].size()) {
 
 		//Impute from full conditioning set
-		for (int vr = 0 ; vr < cevents[0].size() ; vr ++) {
+		for (int32_t vr = 0 ; vr < cevents[0].size() ; vr ++) {
 			G.phaseLiAndStephens(cevents[0][vr], hap, alphaXbeta_curr, alphaXbeta_curr, C.indexes_pbwt_neighbour[hap], 0.5001f);
 		}
 	}
 }
 
-void hmm_scaffold::viterbi(vector < int > & path) {
+void hmm_scaffold::viterbi(vector < int32_t > & path) {
 	float sum, scale, maxv_prev, maxv_curr;
-	int maxi_curr, maxi_prev;
-	vector < vector < int > > _viterbi_paths = vector < vector < int > > (C.n_scaffold_variants, vector < int > (nstates, 0));
+	int32_t maxi_curr, maxi_prev;
+	vector < vector < int32_t > > _viterbi_paths = vector < vector < int32_t > > (C.n_scaffold_variants, vector < int32_t > (nstates, 0));
 	vector < float > _viterbi_probs = vector < float > (nstates, 0.0f);
 
 	//FORWARD PASS
-	for (int vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
+	for (int32_t vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
 		const std::array < float, 2 > emit = { match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)] };
 
 		if (!vs) {
 			maxi_curr = -1;
 			sum = maxv_curr = 0.0f;
-			for (int k = 0; k < nstates ; k ++) {
+			for (int32_t k = 0; k < nstates ; k ++) {
 				_viterbi_probs[k] = emit[Hvar.get(vs, k)];
 				if (_viterbi_probs[k] > maxv_curr) {
 					maxv_curr = _viterbi_probs[k];
@@ -234,7 +234,7 @@ void hmm_scaffold::viterbi(vector < int > & path) {
 			scale = 1.0f / sum;
 			sum = maxv_curr = 0.0f;
 
-			for (int k = 0 ; k < nstates ; k ++) {
+			for (int32_t k = 0 ; k < nstates ; k ++) {
 
 				float prob_yrecomb = M.t[vs-1] * maxv_prev * scale;
 				float prob_nrecomb = M.nt[vs-1] * _viterbi_probs[k] * scale;
@@ -263,7 +263,7 @@ void hmm_scaffold::viterbi(vector < int > & path) {
 	}
 
 	//BACKTRACKING PASS
-	path = vector < int > (C.n_scaffold_variants, maxi_curr);
-	for (int vs = C.n_scaffold_variants - 1 ; vs > 0; vs --)
+	path = vector < int32_t > (C.n_scaffold_variants, maxi_curr);
+	for (int32_t vs = C.n_scaffold_variants - 1 ; vs > 0; vs --)
 		path[vs-1] = _viterbi_paths[vs][path[vs]];
 }

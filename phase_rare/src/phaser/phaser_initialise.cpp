@@ -30,11 +30,11 @@ using namespace std;
 
 void phaser::read_files_and_initialise() {
 	//step0: Initialize seed
-	rng.setSeed(options["seed"].as < int > ());
-	nthreads = options["thread"].as < int > ();
+	rng.setSeed(options["seed"].as < int32_t > ());
+	nthreads = options["thread"].as < int32_t > ();
 	if (nthreads > 1) {
 		i_jobs = 0;
-		id_workers = vector < pthread_t > (options["thread"].as < int > ());
+		id_workers = vector < pthread_t > (options["thread"].as < int32_t > ());
 		pthread_mutex_init(&mutex_workers, NULL);
 	}
 
@@ -44,7 +44,7 @@ void phaser::read_files_and_initialise() {
 	//step2: Set up the genotype reader
 	vrb.title("Reading genotype data");
 	genotype_reader readerG(H, G, V);
-	readerG.setThreads(options["thread"].as < int > ());
+	readerG.setThreads(options["thread"].as < int32_t > ());
 	readerG.setRegions(options["scaffold-region"].as < string > (), input_start, input_stop);
 
 	//step3: Read the genotype data
@@ -73,7 +73,7 @@ void phaser::read_files_and_initialise() {
 		readerGM.readGeneticMapFile(options["map"].as < string > ());
 		V.setGeneticMap(readerGM);
 	} else V.setGeneticMap();
-	M.initialise(V, options["effective-size"].as < int > (), readerG.n_samples*2);
+	M.initialise(V, options["effective-size"].as < int32_t > (), readerG.n_samples*2);
 	/*
 	double theta = 1.0f / (log(readerG.n_samples*2) + 0.5);
 	rare_genotype::ed = theta / (2*( readerG.n_samples*2 + theta ));

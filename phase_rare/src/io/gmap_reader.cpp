@@ -28,7 +28,7 @@ gmap_reader::gmap_reader() {
 }
 
 gmap_reader::~gmap_reader() {
-	vector < int > ().swap(pos_bp);
+	vector < int32_t > ().swap(pos_bp);
 	vector < double > ().swap(pos_cm);
 }
 
@@ -36,15 +36,15 @@ void gmap_reader::readGeneticMapFile(string fmap) {
 	tac.clock();
 	string buffer;
 	vector < string > tokens;
-	int line = 0;
+	int32_t line = 0;
 	input_file fd_gmap(fmap);
 	if (fd_gmap.fail()) vrb.error("Cannot open genetic map file");
 	getline(fd_gmap, buffer, '\n');
-	int prev_bp = 0;
+	int32_t prev_bp = 0;
 	double prev_cm = 0;
 	while (getline(fd_gmap, buffer, '\n')) {
 		if (stb.split(buffer, tokens) == 3) {
-			int curr_bp = atoi(tokens[0].c_str());
+			int32_t curr_bp = atoi(tokens[0].c_str());
 			double curr_cm = atof(tokens[2].c_str());
 			if (curr_bp < prev_bp || curr_cm < prev_cm)
 				vrb.error("Wrong order in your genetic map file " + stb.str(prev_bp) + "bp / " + stb.str(prev_cm,5) + "cM > " + stb.str(curr_bp) + "bp / " + stb.str(curr_cm,5) + "cM");

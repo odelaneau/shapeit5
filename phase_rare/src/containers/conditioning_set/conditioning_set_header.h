@@ -31,7 +31,7 @@
 
 class cflip {
 public:
-	unsigned int pgenotype;
+	uint32_t pgenotype;
 	float support;
 
 	cflip() {
@@ -39,12 +39,12 @@ public:
 		support = 0.0f;
 	}
 
-	cflip(unsigned int _pgenotype, float _support) {
+	cflip(uint32_t _pgenotype, float _support) {
 		pgenotype = _pgenotype;
 		support = _support;
 	}
 
-	void set(unsigned int _pgenotype, float _support) {
+	void set(uint32_t _pgenotype, float _support) {
 		pgenotype = _pgenotype;
 		support = _support;
 	}
@@ -61,26 +61,26 @@ public:
 	//VARIANT INDEXING
 	std::vector < bool > sites_pbwt_evaluation;
 	std::vector < bool > sites_pbwt_selection;
-	std::vector < int > sites_pbwt_grouping;
-	unsigned int sites_pbwt_ngroups;
-	unsigned long int ncollisions;
-	unsigned long int npushes;
+	std::vector < int32_t > sites_pbwt_grouping;
+	uint32_t sites_pbwt_ngroups;
+	uint64_t ncollisions;
+	uint64_t npushes;
 
 	//PARAMETERS FOR PBWT
-	int depth_common;
-	int depth_rare;
+	int32_t depth_common;
+	int32_t depth_rare;
 
 	//PHASE DATA
 	std::vector < cflip > CF;
 
 	//STATE DATA
-	unsigned int shuffledI;
-	std::vector < unsigned int > shuffledO;
-	std::vector < std::pair < unsigned int, unsigned int > > indexes_pbwt_neighbour_serialized;
-	std::vector < std::vector < unsigned int > > indexes_pbwt_neighbour;
+	uint32_t shuffledI;
+	std::vector < uint32_t > shuffledO;
+	std::vector < std::pair < uint32_t, uint32_t > > indexes_pbwt_neighbour_serialized;
+	std::vector < std::vector < uint32_t > > indexes_pbwt_neighbour;
 
 	//IBD2 protection
-	std::vector < std::vector < unsigned int > > IBD2;
+	std::vector < std::vector < uint32_t > > IBD2;
 
 	//Haploids
 	std::vector < bool > haploids;
@@ -91,30 +91,30 @@ public:
 	void initialize(variant_map &, float, float, int, int, int);
 
 	//STATES PROCESSING
-	void storeCommon(std::vector < int > & A, std::vector < int > & M);
-	void storeRare(std::vector < int > & R, std::vector < rare_genotype > & G);
+	void storeCommon(std::vector < int32_t > & A, std::vector < int32_t > & M);
+	void storeRare(std::vector < int32_t > & R, std::vector < rare_genotype > & G);
 	void select(variant_map &, genotype_set & G);
 
 	//IBD2 scanning
 	void scanIBD2(variant_map &);
-	bool checkIBD2(unsigned int, unsigned int);
+	bool checkIBD2(uint32_t, uint32_t);
 
 	//SOLVING
 	/*
-	void solveRare1(std::vector < int > &, std::vector < int > &, genotype_set &, unsigned int);
-	void solveRare2(std::vector < int > &, std::vector < int > &, std::vector < int > &, genotype_set &, unsigned int, unsigned int, std::vector < float > &);
+	void solveRare1(std::vector < int32_t > &, std::vector < int32_t > &, genotype_set &, uint32_t);
+	void solveRare2(std::vector < int32_t > &, std::vector < int32_t > &, std::vector < int32_t > &, genotype_set &, uint32_t, uint32_t, std::vector < float > &);
 	*/
-	void solveRareForward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
-	void solveRareBackward(std::vector < int > & A, std::vector < int > & C, std::vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, std::vector < float > & vs_cm);
+	void solveRareForward(std::vector < int32_t > & A, std::vector < int32_t > & C, std::vector < int32_t > & R, genotype_set & G, uint32_t vr, float vr_cm, std::vector < float > & vs_cm);
+	void solveRareBackward(std::vector < int32_t > & A, std::vector < int32_t > & C, std::vector < int32_t > & R, genotype_set & G, uint32_t vr, float vr_cm, std::vector < float > & vs_cm);
 	void solve(variant_map &, genotype_set &);
 };
 
 inline
-bool conditioning_set::checkIBD2(unsigned int h1, unsigned int h2) {
-	int i1 = std::min(h1/2, h2/2);
-	int i2 = std::max(h1/2, h2/2);
+bool conditioning_set::checkIBD2(uint32_t h1, uint32_t h2) {
+	int32_t i1 = std::min(h1/2, h2/2);
+	int32_t i2 = std::max(h1/2, h2/2);
 	if (i1 == i2) return true;
-	for (int i  = 0 ; i < IBD2[i1].size() ; i ++) if (IBD2[i1][i] == i2) return true;
+	for (int32_t i  = 0 ; i < IBD2[i1].size() ; i ++) if (IBD2[i1][i] == i2) return true;
 	return false;
 }
 
