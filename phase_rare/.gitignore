@@ -1,0 +1,4 @@
+*.xml
+*.project
+*.cproject
+.settings/

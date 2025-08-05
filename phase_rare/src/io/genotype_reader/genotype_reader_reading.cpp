@@ -139,16 +139,15 @@ void genotype_reader::readGenotypes() {
 				}
 				vr++; vt ++;
 			}
-
 			// ... in Sparse format
-			else if (unph_type == RECORD_SPARSE_GENOTYPE) {
-				//Standard version, involves decoding/encoding of sparse data. Could be improve by direct copy, but not sure it would drastically speed up things 				//G.GRvar_genotypes[vr].reserve(XR.sizeRecord(idx_unphased) / sizeof(int32_t));		//XR.readRecord(idx_unphased, reinterpret_cast< char** > (&G.GRvar_genotypes[vr].data()));
+			else if (unph_type == RECORD_SPARSE_GENOTYPE)
+			{
 				int32_t n_elements = XR.readRecord(idx_unphased, reinterpret_cast< char** > (&input_buffer)) / sizeof(int32_t);
 				G.GRvar_genotypes[vr].reserve(n_elements);
 				for(int32_t r = 0 ; r < n_elements ; r++) n_rare_genotypes[G.pushRare(vr, input_buffer[r])] ++;
+				n_rare_genotypes[2*(!minor)] += (n_samples - n_elements);
 				vr++; vt ++;
 			}
-
 			//... unsupported format for scaffold
 			else vrb.error("Record format [" + stb.str(unph_type) + "] is not supported for unphased data");
 		}
