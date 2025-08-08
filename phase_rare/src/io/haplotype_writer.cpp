@@ -205,8 +205,10 @@ void haplotype_writer::writeHaplotypesXCF(std::string foutput, std::string finpu
 
 				if (fformat == "pp") {
 					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
-						
-						output_buffer[n_sparse++] = G.GRvar_genotypes[vr][i].get();
+						sparse_genotype sg;
+						sg.set(G.GRvar_genotypes[vr][i].get());
+						sg.mis = false;
+						output_buffer[n_sparse++] = sg.get();
 					}
 					for (int32_t i = 0 ; i < G.GRvar_genotypes[vr].size() ; i++) {
 						output_buffer[n_sparse++] = bit_cast<uint32_t> (G.GRvar_genotypes[vr][i].prob);
