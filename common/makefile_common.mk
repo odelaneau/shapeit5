@@ -13,13 +13,16 @@ LDFLAG=-O3
 #COMMIT TRACING
 COMMIT_VERS=$(shell git rev-parse --short HEAD)
 COMMIT_DATE=$(shell git log -1 --format=%cd --date=short)
+#COMMIT_VERS="3e175d9"
+#COMMIT_DATE="08082025"
+
 CXXFLAG+= -D__COMMIT_ID__=\"$(COMMIT_VERS)\"
 CXXFLAG+= -D__COMMIT_DATE__=\"$(COMMIT_DATE)\"
 
 # DYNAMIC LIBRARIES # Standard libraries are still dynamic in static exe
 DYN_LIBS_FOR_STATIC=-lz -lpthread -lbz2 -llzma -lcurl -lcrypto -ldeflate
 # Non static exe links with all libraries
-DYN_LIBS=$(DYN_LIBS_FOR_STATIC) -lboost_iostreams -lboost_program_options -lboost_serialization -lhts
+DYN_LIBS=$(DYN_LIBS_FOR_STATIC)
 
 HFILE=$(shell find src -name *.h)
 CFILE=$(shell find src -name *.cpp)
@@ -37,9 +40,9 @@ ifeq (,$(filter clean,$(MAKECMDGOALS)))
 # HTSLIB for static compilation #
 #################################
 # These are the default paths when installing htslib from source
-HTSSRC=/usr/local
-HTSLIB_INC=$(HTSSRC)/include/htslib
-HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
+#HTSSRC=/usr/local
+#HTSLIB_INC=$(HTSSRC)/include/htslib
+#HTSLIB_LIB=$(HTSSRC)/lib/libhts.a
 
 ##########################################
 # Boost libraries for static compilation #
@@ -158,7 +161,7 @@ dnanexus: $(BFILE)
 all: desktop
 
 $(BFILE): $(OFILE)
-	$(CXX) $(LDFLAG) $^ -o $@ $(DYN_LIBS)
+	$(CXX) $(LDFLAG) $^ -o $@ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) $(DYN_LIBS)
 
 $(EXEFILE): $(OFILE)
 	$(CXX) $(LDFLAG) -static -static-libgcc -static-libstdc++ -pthread -o $(EXEFILE) $^ $(HTSLIB_LIB) $(BOOST_LIB_IO) $(BOOST_LIB_PO) -Wl,-Bstatic $(DYN_LIBS_FOR_STATIC)
