@@ -11,7 +11,8 @@ source "$SCRIPT_DIR/lib/test_utils.sh"
 tmp_dir=$(mktemp -d)
 trap 'rm -rf "$tmp_dir"' EXIT
 
-region="${TEST_REGION:-1:5000000-6000000}"
+scaffold_region="${TEST_SCAFFOLD_REGION:-1:4500000-8000000}"
+comparison_region="${TEST_REGION:-1:5000000-6000000}"
 chunk_file="${TEST_CHUNK_FILE:-info/chunks.coordinates.small.txt}"
 if [[ ! -f "$chunk_file" ]]; then
   chunk_file="info/chunks.coordinates.txt"
@@ -26,7 +27,7 @@ scaffold_bcf="$tmp_dir/target.scaffold.bcf"
   --input wgs/target.family.bcf \
   --filter-maf 0.001 \
   --pedigree "$FAM" \
-  --region "$region" \
+  --region "$scaffold_region" \
   --map info/chr1.gmap.gz \
   --output "$scaffold_bcf" \
   --thread 8
@@ -46,9 +47,14 @@ while read -r CHK CHR SRG IRG; do
       --thread 8 >"$log_file" 2>&1; then
     if [[ -f "$OUT" ]]; then
       echo "$OUT" >>"$list_file"
+    else
+      echo "phase_rare chunk ${CHK} produced no output file; see ${log_file}" >&2
+      cat "$log_file" >&2
+      exit 1
     fi
   else
     if grep -q "No variants to be phased" "$log_file"; then
+      echo "Skipping chunk ${CHK}: no rare variants found in ${IRG}" >&2
       continue
     fi
     cat "$log_file" >&2
@@ -57,12 +63,16 @@ while read -r CHK CHR SRG IRG; do
 done <"$chunk_file"
 
 output_bcf="$tmp_dir/target.phased.bcf"
-if [[ -s "$list_file" ]]; then
-  SSH_AUTH_SOCK= bcftools concat -n -Ob -o "$output_bcf" -f "$list_file"
-  SSH_AUTH_SOCK= bcftools index "$output_bcf"
-else
+if [[ ! -s "$list_file" ]]; then
+  echo "No rare chunks generated; falling back to scaffold output for region ${comparison_region}." >&2
   cp "$scaffold_bcf" "$output_bcf"
   cp "${scaffold_bcf}.csi" "${output_bcf}.csi"
+else
+  SSH_AUTH_SOCK= bcftools concat -n -Ob -o "$output_bcf" -f "$list_file"
+  SSH_AUTH_SOCK= bcftools index "$output_bcf"
 fi
 
-assert_same_variants "$output_bcf" "$SCRIPT_DIR/expected/phase.wgs.family.vcf"
+filtered_bcf="$tmp_dir/target.phased.filtered.bcf"
+SSH_AUTH_SOCK= bcftools view -Ob -o "$filtered_bcf" -r "$comparison_region" "$output_bcf"
+
+assert_same_variants "$filtered_bcf" "$SCRIPT_DIR/expected/phase.wgs.family.vcf"
