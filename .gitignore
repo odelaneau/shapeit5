@@ -3,6 +3,8 @@ test/scripts/expected/phase.wgs.family.vcf
 test/scripts/expected/phase.wgs.haploid.vcf
 test/scripts/expected/phase.wgs.unrelated.vcf
 test/array/reference.bcf
-test/wgs/target.family.bcf
-test/wgs/target.haploid.bcf
-test/wgs/target.unrelated.bcf
+test/wgs/*.bcf*
+**tmp**
+*bcf.csi
+*log
+*txt

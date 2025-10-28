@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Prevent committing very large files to this repository.
+# Blocks any staged file over MAX_GIT_FILE_SIZE_MB (default 50 MB).
+# To override temporarily: MAX_GIT_FILE_SIZE_MB=100 git commit -m "..."
+
+set -euo pipefail
+
+threshold_mb="${MAX_GIT_FILE_SIZE_MB:-50}"
+# Ensure threshold_mb is an integer > 0
+if ! [[ "$threshold_mb" =~ ^[0-9]+$ ]] || [ "$threshold_mb" -le 0 ]; then
+  echo "pre-commit: invalid MAX_GIT_FILE_SIZE_MB='$threshold_mb' (must be positive integer)" >&2
+  exit 2
+fi
+
+# Bytes threshold
+threshold_bytes=$((threshold_mb * 1024 * 1024))
+
+# Collect staged files (Added/Modified/Renamed with new content, Type changed)
+# Use NUL separators to correctly handle spaces/newlines.
+mapfile -d '' staged < <(git diff --cached --name-only -z --diff-filter=AMRT)
+
+# Nothing staged
+if [ ${#staged[@]} -eq 0 ]; then
+  exit 0
+fi
+
+too_big_files=()
+
+# Helper: get size in bytes (Linux and macOS compatible)
+get_size_bytes() {
+  local f="$1"
+  # Prefer GNU stat; fallback to BSD stat; final fallback to wc -c
+  if size=$(stat -c%s -- "$f" 2>/dev/null); then
+    printf '%s' "$size"
+  elif size=$(stat -f%z -- "$f" 2>/dev/null); then
+    printf '%s' "$size"
+  else
+    wc -c < "$f" | tr -d '[:space:]'
+  fi
+}
+
+human_size() {
+  local bytes="$1"
+  if command -v numfmt >/dev/null 2>&1; then
+    numfmt --to=iec --suffix=B --format="%9.1f" "$bytes"
+  else
+    echo "${bytes}B"
+  fi
+}
+
+for f in "${staged[@]}"; do
+  # Skip if file was removed or no longer exists in working tree
+  if [ ! -e "$f" ]; then
+    continue
+  fi
+  sz=$(get_size_bytes "$f")
+  # Guard: non-numeric sizes shouldn't break the hook
+  if ! [[ "$sz" =~ ^[0-9]+$ ]]; then
+    continue
+  fi
+  if [ "$sz" -gt "$threshold_bytes" ]; then
+    too_big_files+=("$f:::${sz}")
+  fi
+done
+
+if [ ${#too_big_files[@]} -eq 0 ]; then
+  exit 0
+fi
+
+printf '\nCommit blocked: file size limit is %s MB. The following files exceed the limit:\n' "$threshold_mb" >&2
+for entry in "${too_big_files[@]}"; do
+  file="${entry%%:::*}"
+  bytes="${entry##*:::}"
+  printf '  - %s (%s)\n' "$file" "$(human_size "$bytes")" >&2
+done
+
+cat >&2 <<'EOF'
+
+Options:
+  • Add patterns to .gitignore if files are generated.
+  • Use Git LFS for large binaries, e.g. BCF/VCF: https://git-lfs.com/
+    - git lfs install
+    - git lfs track "*.bcf" "*.bcf.csi" "*.vcf" "*.vcf.gz" "*.csi"
+    - git add .gitattributes
+  • If you really need to bypass for a one-off (discouraged):
+    MAX_GIT_FILE_SIZE_MB=999 git commit -m "..."
+EOF
+
+exit 1
