@@ -8,3 +8,5 @@ test/wgs/*.bcf*
 *bcf.csi
 *log
 *txt
+tests/bin/
+tests/obj/
