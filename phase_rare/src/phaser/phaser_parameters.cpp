@@ -32,7 +32,8 @@ void phaser::declare_options() {
 			("help", "Produce help message")
 			("seed", bpo::value<int>()->default_value(15052011), "Seed of the random number generator")
 			("thread", bpo::value<int>()->default_value(1), "Number of thread used")
-			("progress", "Verbose progress percentages on screen for longer tasks");
+			("progress", "Verbose progress percentages on screen for longer tasks")
+			("verbose-debug", "Enable detailed verbose logging of HMM and PBWT internal states for debugging");
 			
 	bpo::options_description opt_input ("Input files");
 	opt_input.add_options()
@@ -75,6 +76,8 @@ void phaser::parse_command_line(vector < string > & args) {
 		vrb.error("Impossible to create log file [" + options["log"].as < string > () +"]");
 
 	if (options.count("progress")) vrb.show_progress();
+	
+	if (options.count("verbose-debug")) vrb.enable_debug();
 
 	vrb.title("[SHAPEIT5] Phase_rare (phase rare variants onto a haplotype scaffold)");
 	vrb.bullet("Authors       : Simone RUBINACCI & Olivier DELANEAU, University of Lausanne");

@@ -35,6 +35,7 @@ protected:
 	bool verbose_on_screen;
 	bool verbose_on_log;
 	bool verbose_progress;
+	bool verbose_debug;
 	int prev_percent;
 
 public:
@@ -42,6 +43,7 @@ public:
 		verbose_on_screen = true;
 		verbose_on_log = false;
 		verbose_progress = false;
+		verbose_debug = false;
 		prev_percent = -1;
 	}
 
@@ -65,6 +67,21 @@ public:
 
 	void show_progress (){
 		verbose_progress = true;
+	}
+
+	void enable_debug() {
+		verbose_debug = true;
+	}
+
+	bool is_debug() {
+		return verbose_debug;
+	}
+
+	void debug(std::string s) {
+		if (verbose_debug) {
+			if (verbose_on_screen) std::cout << "[DEBUG] " << s << std::endl;
+			if (verbose_on_log) log << "[DEBUG] " << s << std::endl;
+		}
 	}
 
 	void print(std::string s) {

@@ -120,6 +120,11 @@ void conditioning_set::solve(variant_map & V, genotype_set & G) {
 
 void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, vector < int > & R, genotype_set & G, unsigned int vr, float vr_cm, vector < float > & vs_cm) {
 	vector < int > S, C = vector < int > (n_haplotypes, G.major_alleles[vr]?1:-1);
+	
+	if (vrb.is_debug() && vr < 5) {
+		vrb.debug("SolveRareForward vr=" + stb.str(vr) + " cm=" + stb.str(vr_cm,6) + " genotypes=" + stb.str(G.GRvar_genotypes[vr].size()) + " major_allele=" + stb.str(G.major_alleles[vr]));
+	}
+	
 	for (int g = 0 ; g < G.GRvar_genotypes[vr].size() ; g ++) {
 		if (G.GRvar_genotypes[vr][g].pha) {
 			C[2*G.GRvar_genotypes[vr][g].idx+0] = G.GRvar_genotypes[vr][g].al0?1:-1;
@@ -176,6 +181,10 @@ void conditioning_set::solveRareForward(vector < int > & A, vector < int > & D, 
 		} else {
 			C[h0] = -1; C[h1] = 1;
 			CF.emplace_back(1, v);
+		}
+		
+		if (vrb.is_debug() && vr < 5) {
+			vrb.debug("SolveRareForward vr=" + stb.str(vr) + " genotype=" + stb.str(*s) + " v0=" + stb.str(v0,6) + " v1=" + stb.str(v1,6) + " v=" + stb.str(v,6) + " phase=" + stb.str(v > 0 ? 2 : 1));
 		}
 	}
 }

@@ -49,6 +49,9 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 
 	//PBWT forward sweep
 	tac.clock();
+	if (vrb.is_debug()) {
+		vrb.debug("PBWT Selection Forward sweep: n_haplotypes=" + stb.str(n_haplotypes) + " n_scaffold_variants=" + stb.str(n_scaffold_variants));
+	}
 	for (int vt = 0 ; vt < V.sizeFull() ; vt ++) {
 		int vc = V.vec_full[vt]->idx_common;
 		int vr = V.vec_full[vt]->idx_rare;
@@ -66,6 +69,10 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
 				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 				if (selc) storeCommon(A, M);
+				
+				if (vrb.is_debug() && vs < 5) {
+					vrb.debug("PBWT Selection Forward vs=" + stb.str(vs) + " vt=" + stb.str(vt) + " eval=" + stb.str(eval) + " selc=" + stb.str(selc) + " u=" + stb.str(u) + " v=" + stb.str(v));
+				}
 			}
 		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
 		vrb.progress("  * PBWT forward selection", vt * 1.0 / V.sizeFull());
@@ -76,6 +83,9 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 
 	//PBWT backward sweep
 	tac.clock();
+	if (vrb.is_debug()) {
+		vrb.debug("PBWT Selection Backward sweep starting");
+	}
 	for (int vt = V.sizeFull()-1 ; vt >= 0 ; vt --) {
 		int vc = V.vec_full[vt]->idx_common;
 		int vr = V.vec_full[vt]->idx_rare;
@@ -93,6 +103,10 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 				std::copy(B.begin(), B.begin()+v, A.begin()+u);
 				for (int h = 0 ; h < n_haplotypes ; h ++) R[A[h]] = h;
 				if (selc) storeCommon(A, M);
+				
+				if (vrb.is_debug() && (vs >= n_scaffold_variants - 5)) {
+					vrb.debug("PBWT Selection Backward vs=" + stb.str(vs) + " vt=" + stb.str(vt) + " eval=" + stb.str(eval) + " selc=" + stb.str(selc) + " u=" + stb.str(u) + " v=" + stb.str(v));
+				}
 			}
 		} else if (vr >= 0 && G.GRvar_genotypes[vr].size() > 1) storeRare(R, G.GRvar_genotypes[vr]);
 		vrb.progress("  * PBWT backward selection", (V.sizeFull()-vt) * 1.0 / V.sizeFull());
