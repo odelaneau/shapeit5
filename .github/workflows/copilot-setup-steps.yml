@@ -1,0 +1,113 @@
+# Tailored setup for shapeit5: install runtime/linker deps and build
+name: Copilot setup steps (shapeit5 tailored)
+
+# Automatically run the setup steps when they are changed to allow for easy validation, and
+# allow manual testing through the repository's "Actions" tab
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Set the permissions to the lowest permissions possible needed for your steps.
+    # Copilot will be given its own token for its operations.
+    permissions:
+      # If you want to clone the repository as part of your setup steps, for example to install dependencies, you'll need the `contents: read` permission. If you don't clone the repository in your setup steps, Copilot will do this for you automatically after the steps complete.
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install runtime/linker dependencies (shapeit5)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            # Core compression and crypto stacks used by htslib and I/O
+            zlib1g-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libzstd-dev \
+            libdeflate-dev \
+            libssl-dev \
+            libcurl4-openssl-dev \
+            # Math and C++ dependencies
+            libgsl-dev \
+            libboost-program-options-dev \
+            libboost-iostreams-dev \
+            libboost-serialization-dev \
+            libboost-filesystem-dev \
+            libboost-system-dev \
+            # HTSlib headers/libs
+            libhts-dev \
+            # Misc essentials
+            ca-certificates git bcftools
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+
+    #   - name: Cache build directory
+    #     uses: actions/cache@v4
+    #     with:
+    #       path: |
+    #         build
+    #         .ccache
+    #       key: ${{ runner.os }}-shapeit5-${{ hashFiles('**/CMakeLists.txt', '**/Makefile') }}
+    #       restore-keys: |
+    #         ${{ runner.os }}-shapeit5-
+
+    #   - name: Configure and build
+    #     env:
+    #       CC: gcc
+    #       CXX: g++
+    #     run: |
+    #       set -euo pipefail
+    #       make -j$(nproc)
+
+    #   - name: Run unit tests
+    #     run: |
+    #       make -C tests test-run || true
+
+    #   - name: Run integration/regression tests
+    #     run: |
+    #       set -euo pipefail
+    #       for script in test/scripts/phase*.sh; do
+    #         echo "Running ${script}"
+    #         bash "${script}" || true
+    #       done
+
+    #   - name: Verify dynamic links of produced binaries
+    #     if: always()
+    #     run: |
+    #       set -euo pipefail
+    #       shopt -s nullglob
+    #       bins=()
+    #       while IFS= read -r -d '' f; do bins+=("$f"); done < <(find . -maxdepth 3 -type f -executable -name 'shapeit*' -print0)
+    #       while IFS= read -r -d '' f; do bins+=("$f"); done < <(find . -maxdepth 3 -path './tests/*' -type f -executable -print0)
+    #       for b in "${bins[@]}"; do
+    #         echo "ldd $b"
+    #         ldd "$b" || true
+    #         echo "-----"
+    #       done
+
+    #   - name: Upload build artifacts
+    #     if: always()
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: shapeit5-build
+    #       path: |
+    #         */bin/**
+    #         static_bins/**
+    #         shapeit*

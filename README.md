@@ -36,3 +36,28 @@ Documentation, installation instructions and tutorials can be found at:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## Guard against large files (50MB) and Git LFS
+
+This repository includes a pre-commit hook that blocks committing files larger than 50 MB by default. The hook lives in `.githooks/pre-commit` and is versioned with the code.
+
+Enable it locally once per clone:
+
+```
+bash scripts/setup-git-hooks.sh
+```
+
+You can temporarily change the limit for a single commit (discouraged):
+
+```
+MAX_GIT_FILE_SIZE_MB=100 git commit -m "Allow up to 100MB"
+```
+
+For large binary assets (e.g., BCF/VCF), use Git LFS to avoid oversized commits and bloating clone sizes. The repository provides default patterns in `.gitattributes` for common genomics formats. To initialize LFS locally:
+
+```
+git lfs install
+# patterns are already in .gitattributes; adjust as needed
+```
+
+If you see the pre-commit hook block a commit due to file size, consider whether the file should be ignored, generated, or tracked with Git LFS.

@@ -1,0 +1,7 @@
+# Track large genomics files with Git LFS
+*.bcf filter=lfs diff=lfs merge=lfs -text
+*.bcf.csi filter=lfs diff=lfs merge=lfs -text
+*.csi filter=lfs diff=lfs merge=lfs -text
+*.vcf filter=lfs diff=lfs merge=lfs -text
+*.vcf.gz filter=lfs diff=lfs merge=lfs -text
+*.vcf.bgz filter=lfs diff=lfs merge=lfs -text

@@ -56,6 +56,11 @@ double hmm_scaffold::forward() {
 	double loglik = 0.0;
 	const unsigned int nstatesMD8 = (nstates / 8) * 8;
 	const __m256i _vshift_count = _mm256_set_epi32(31,30,29,28,27,26,25,24);
+	
+	if (vrb.is_debug()) {
+		vrb.debug("HMM Forward: haplotype=" + stb.str(hap) + " nstates=" + stb.str(nstates) + " n_scaffold_variants=" + stb.str(C.n_scaffold_variants));
+	}
+	
 	for (int vs = 0 ; vs < C.n_scaffold_variants ; vs ++) {
 		const std::array<float,2> emit = {match_prob[C.Hhap.get(hap, vs)], match_prob[1-C.Hhap.get(hap, vs)]};
 		const __m256 _emit0 = _mm256_set1_ps(emit[0]);
@@ -80,6 +85,10 @@ double hmm_scaffold::forward() {
 				sum += alpha[vs][offset];
 			}
 			loglik += log(sum);
+			
+			if (vrb.is_debug() && vs < 5) {
+				vrb.debug("HMM Forward vs=" + stb.str(vs) + " (init): emit=[" + stb.str(emit[0],6) + "," + stb.str(emit[1],6) + "] f0=" + stb.str(f0,6) + " sum=" + stb.str(sum,6) + " loglik=" + stb.str(loglik,6));
+			}
 		} else {
 			const float f0 = M.t[vs-1] / nstates;
 			const float f1 = M.nt[vs-1] / sum;
@@ -103,8 +112,17 @@ double hmm_scaffold::forward() {
 				sum += alpha[vs][offset];
 			}
 			loglik += log(sum);
+			
+			if (vrb.is_debug() && vs < 5) {
+				vrb.debug("HMM Forward vs=" + stb.str(vs) + ": emit=[" + stb.str(emit[0],6) + "," + stb.str(emit[1],6) + "] t=" + stb.str(M.t[vs-1],6) + " nt=" + stb.str(M.nt[vs-1],6) + " f0=" + stb.str(f0,6) + " f1=" + stb.str(f1,6) + " sum=" + stb.str(sum,6) + " loglik=" + stb.str(loglik,6));
+			}
 		}
 	}
+	
+	if (vrb.is_debug()) {
+		vrb.debug("HMM Forward complete: haplotype=" + stb.str(hap) + " final_loglik=" + stb.str(loglik,6));
+	}
+	
 	return loglik;
 }
 
@@ -116,6 +134,10 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 	aligned_vector32 < float > alphaXbeta_prev = aligned_vector32 < float >(nstates, 0.0f);
 
 	//vpath = vector < int > (C.n_scaffold_variants, -1);
+	
+	if (vrb.is_debug()) {
+		vrb.debug("HMM Backward: haplotype=" + stb.str(hap) + " nstates=" + stb.str(nstates) + " n_scaffold_variants=" + stb.str(C.n_scaffold_variants));
+	}
 
 	for (int vs = C.n_scaffold_variants - 1 ; vs >= 0 ; vs --) {
 
@@ -139,6 +161,10 @@ void hmm_scaffold::backward(vector < vector < unsigned int > > & cevents, vector
 				offset += 8;
 			}
 			for (; offset < nstates ; offset ++) beta[offset] = (beta[offset]*f1+f0);
+			
+			if (vrb.is_debug() && (vs >= C.n_scaffold_variants - 5)) {
+				vrb.debug("HMM Backward vs=" + stb.str(vs) + " transition: f0=" + stb.str(f0,6) + " f1=" + stb.str(f1,6));
+			}
 		}
 
 		//Products

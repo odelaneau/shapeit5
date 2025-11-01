@@ -1,0 +1,12 @@
+# Large test files (>50MB) 
+test/scripts/expected/phase.wgs.family.vcf
+test/scripts/expected/phase.wgs.haploid.vcf
+test/scripts/expected/phase.wgs.unrelated.vcf
+test/array/reference.bcf
+test/wgs/*.bcf*
+**tmp**
+*bcf.csi
+*log
+*txt
+tests/bin/
+tests/obj/
