@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install dependencies
+      run: |
+        sudo apt install libboost-program-options-dev libboost-iostreams-dev libboost-serialization-dev libcurl4-openssl-dev liblzma-dev libdeflate-dev git -y
+        wget https://github.com/samtools/htslib/releases/download/1.16/htslib-1.16.tar.bz2
+        tar -xf htslib-1.16.tar.bz2
+        mv htslib-1.16 htslib
+        cd htslib
+        autoheader; autoconf; ./configure; #optional
+        make -j$(nproc)
+        sudo make install
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Build
+      run: make -j$(nproc)
+
+#    - name: Build Static EXE
+#      run: make static_exe -j$(nproc)

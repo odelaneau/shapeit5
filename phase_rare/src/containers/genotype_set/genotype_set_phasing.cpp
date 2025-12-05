@@ -61,21 +61,19 @@ void genotype_set::phaseLiAndStephens(unsigned int vr, unsigned int hap, aligned
 			GRvar_genotypes[vr][tidx].prob = p[1] / (p[0] + p[1]);
 		} else {
 			assert(GRvar_genotypes[vr][tidx].prob >= 0.0f);
-			float pp = GRvar_genotypes[vr][tidx].prob;
-			GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
+			if (haploids[GRvar_genotypes[vr][tidx].idx]) GRvar_genotypes[vr][tidx].impute(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
+			else GRvar_genotypes[vr][tidx].phase(GRvar_genotypes[vr][tidx].prob, p[1] / (p[0] + p[1]));
+			assert(!isnan(GRvar_genotypes[vr][tidx].prob));
+			assert(!isinf(GRvar_genotypes[vr][tidx].prob));
 			if (GRvar_genotypes[vr][tidx].het && GRvar_genotypes[vr][tidx].prob < threshold) {
 				GRvar_genotypes[vr][tidx].prob = -1.0f;
 				GRvar_genotypes[vr][tidx].pha = 0;
-			} else {
-				GRvar_genotypes[vr][tidx].pha = 1;
-				nhets_imputation += GRvar_genotypes[vr][tidx].het;
-				nmiss_imputation += GRvar_genotypes[vr][tidx].mis;
-			}
+			} else GRvar_genotypes[vr][tidx].pha = 1;
 		}
 	}
 }
 
-void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pathH0, vector < int > & pathH1, hmm_parameters & M) {
+void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pathH0, vector < int > & pathH1, hmm_parameters & M, bool score_singletons) {
 	 //
 	 vector < int > starts0, ends0, starts1, ends1;
 	 starts0.push_back(0);
@@ -131,11 +129,9 @@ void genotype_set::phaseCoalescentViterbi(unsigned int ind, vector < int > & pat
 				GRind_genotypes[ind][vr].al1 = 0;
 			}
 
-			if (GRvar_genotypes[idx].size() == 1) {
-			//	cout << ind << " " << vr << " " << idx << " " << w0 << " " << w1 << endl;
-			}
-
-			GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
+			//GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
+			if (score_singletons) GRind_genotypes[ind][vr].prob = max(w0, w1) / (w0+w1);
+			else GRind_genotypes[ind][vr].prob = 0.5f;
 		}
 	}
 }

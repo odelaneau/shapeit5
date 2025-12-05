@@ -25,8 +25,8 @@
 
 #include <utils/otools.h>
 
-inline static unsigned int abracadabra(const unsigned int &i1, const unsigned int &i2) {
-	return static_cast<unsigned int>((static_cast<unsigned long int>(i1) * static_cast<unsigned long int>(i2)) >> 32);
+inline static uint32_t abracadabra(const uint32_t &i1, const uint32_t &i2) {
+	return static_cast<uint32_t>((static_cast<uint64_t>(i1) * static_cast<uint64_t>(i2)) >> 32);
 }
 
 class bitmatrix	{
@@ -38,12 +38,16 @@ public:
 	~bitmatrix();
 
 	int subset(bitmatrix & BM, std::vector < unsigned int > rows, unsigned int col_from, unsigned int col_to);
-	void getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
-	void getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
+	//void getMatchHetCount(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
+	//void getMatchHetCount_seq(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop, int & c1, int & m1);
+	float getMatchHets(unsigned int i0, unsigned int i1, unsigned int start, unsigned int stop);
+
 	void allocate(unsigned int nrow, unsigned int ncol);
 	void allocateFast(unsigned int nrow, unsigned int ncol);
 	void set(unsigned int row, unsigned int col, unsigned char bit);
 	unsigned char get(unsigned int row, unsigned int col);
+	unsigned char getByte(unsigned int row, unsigned int col);
+
 	void transpose(bitmatrix & BM, unsigned int _max_row, unsigned int _max_col);
 	void transpose(bitmatrix & BM);
 };
@@ -62,5 +66,11 @@ unsigned char bitmatrix::get(unsigned int row, unsigned int col) {
 	unsigned long targetAddr = ((unsigned long)row) * (n_cols>>3) +  (col>>3);
 	return (this->bytes[targetAddr] >> (7 - (col%8))) & 1;
 }
+
+inline
+unsigned char bitmatrix::getByte(unsigned int row, unsigned int col) {
+	return bytes[((unsigned long)row) * (n_cols>>3) +  (col>>3)];
+}
+
 
 #endif

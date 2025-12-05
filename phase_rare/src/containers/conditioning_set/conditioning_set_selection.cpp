@@ -112,7 +112,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 		//Minimal number of states is 50
 		if (buffer.size() < 50) {
 			while (buffer.size() < 50) {
-				if (shuffledO[shuffledI]/2 != h/2) buffer.push_back(rng.getInt(n_haplotypes));
+				if (!checkIBD2(shuffledO[shuffledI], h)) buffer.push_back(rng.getInt(n_haplotypes));
 				shuffledI = (shuffledI<(n_haplotypes-1))?(shuffledI+1):0;
 			}
 			sort(buffer.begin(), buffer.end());
@@ -131,7 +131,7 @@ void conditioning_set::select(variant_map & V, genotype_set & G) {
 	vrb.bullet2("#collisions = "+ stb.str(ncollisions) + " / #pushes = "+ stb.str(npushes) + " / rate = " + stb.str(npushes * 100.0 / (npushes + ncollisions), 2) + "%");
 }
 
-void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & G) {
+void conditioning_set::storeRare(vector < int > & R, vector < sparse_genotype > & G) {
 	vector < pair < int, int > > N;
 	for (int g = 0 ; g < G.size() ; g ++) {
 		if (!G[g].mis) {
@@ -149,14 +149,16 @@ void conditioning_set::storeRare(vector < int > & R, vector < rare_genotype > & 
 		while (nstored < (2*depth_rare) && !done) {
 			done = 1;
 			if (h-offset >= 0) {
-				if (N[h-offset].second/2 != target_hap/2) {
+				//if (N[h-offset].second/2 != target_hap/2) {
+				if (!checkIBD2(N[h-offset].second, target_hap)) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h-offset].second));
 					nstored ++;
 				}
 				done = 0;
 			}
 			if (h+offset < N.size()) {
-				if (N[h+offset].second/2 != target_hap/2) {
+				//if (N[h+offset].second/2 != target_hap/2) {
+				if (!checkIBD2(N[h+offset].second, target_hap)) {
 					indexes_pbwt_neighbour_serialized.push_back(pair < unsigned int, unsigned int > (target_hap, N[h+offset].second));
 					nstored ++;
 				}
@@ -173,11 +175,13 @@ void conditioning_set::storeCommon(vector < int > & A, vector < int > & M) {
 		for (int n_added = 0 ; n_added < depth_common ; ) {
 			if ((h-offset0)>=0) {
 				hap_guess0 = A[h-offset0];
-				add_guess0 = (hap_guess0/2 != chap/2);
+				//add_guess0 = (hap_guess0/2 != chap/2);
+				add_guess0 = !checkIBD2(hap_guess0/2, chap/2);
 			} else add_guess0 = 0;
 			if ((h+offset1)<n_haplotypes) {
 				hap_guess1 = A[h+offset1];
-				add_guess1 = (hap_guess1/2 != chap/2);
+				//add_guess1 = (hap_guess1/2 != chap/2);
+				add_guess1 = !checkIBD2(hap_guess1/2, chap/2);
 			} else add_guess1 = 0;
 			if (add_guess0 && add_guess1) {
 				if (hap_guess0 != M[chap * depth_common + n_added]) {

@@ -77,12 +77,12 @@ public:
 	unsigned int n_storage_events;			// Number of storage having been done
 	unsigned char curr_dipcodes [64];		// List of diplotypes in a given segment (buffer style variable)
 	unsigned char curr_hapcodes [16];		// List of diplotypes in a given segment (buffer style variable)
-	bool double_precision;
-
+	bool double_precision;					//If I get underflows using float, move to double
+	bool haploid;							//Is this sample haploid?
 
 	// VARIANT / HAPLOTYPE / DIPLOTYPE DATA
 	std::vector < unsigned char > Variants;		// 0.5 byte per variant
-	std::vector < unsigned char > Ambiguous;		// 1 byte per ambiguous variant
+	std::vector < unsigned char > Ambiguous;	// 1 byte per ambiguous variant
 	std::vector < unsigned long > Diplotypes;	// 8 bytes per segment
 	std::vector < unsigned short > Lengths;		// 2 bytes per segment
 
@@ -101,13 +101,14 @@ public:
 	void sample(std::vector < double > &, std::vector < float > &);
 	void sampleForward(std::vector < double > &, std::vector < float > &);
 	void sampleBackward(std::vector < double > &, std::vector < float > &);
-	void solve();
 	void mapMerges(std::vector < double > &, double , std::vector < bool > &);
 	void performMerges(std::vector < double > &, std::vector < bool > &);
 	void store(std::vector < double > &, std::vector < float > &);
+	void solve();
 	void scaffoldTrio(genotype *, genotype *, std::vector < unsigned int > &);
 	void scaffoldDuoFather(genotype *, std::vector < unsigned int > &);
 	void scaffoldDuoMother(genotype *, std::vector < unsigned int > &);
+	uint32_t setHetsAsMissing();
 
 	//INLINES
 	unsigned int countDiplotypes(unsigned long);

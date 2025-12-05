@@ -24,8 +24,8 @@
 
 using namespace std;
 
-float rare_genotype::ee = 0.9999f;
-float rare_genotype::ed = 0.0001f;
+float sparse_genotype::ee = 0.9999f;
+float sparse_genotype::ed = 0.0001f;
 
 genotype_set::genotype_set() {
 	clear();
@@ -43,7 +43,8 @@ void genotype_set::clear() {
 	GRind_genotypes.clear();
 	nmiss_total = 0;
 	nmiss_imputation = 0;
-	nmiss_singleton = 0;
+	nmiss_families = 0;
+	nmiss_monomorphic = 0;
 	nhets_total = 0;
 	nhets_families = 0;
 	nhets_imputation = 0;
@@ -57,11 +58,11 @@ void genotype_set::imputeMonomorphic() {
 			if (!GRvar_genotypes[vr][r].mis) mono = false;
 		}
 		if (mono) {
-			nmiss_singleton += GRvar_genotypes[vr].size();
+			nmiss_monomorphic += GRvar_genotypes[vr].size();
 			GRvar_genotypes[vr].clear();
 		}
 	}
-	vrb.bullet(stb.str(nmiss_singleton) + " missing genotypes imputed at monomorphic sites");
+	vrb.bullet(stb.str(nmiss_monomorphic) + " missing genotypes imputed at monomorphic sites");
 }
 
 void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned int _n_scaffold_variants, unsigned int _n_rare_variants) {
@@ -72,8 +73,8 @@ void genotype_set::allocate(variant_map & V, unsigned int _n_samples, unsigned i
 	n_rare_variants = _n_rare_variants;
 	n_samples = _n_samples;
 
-	GRvar_genotypes = vector < vector < rare_genotype > > (n_rare_variants);
-	GRind_genotypes = vector < vector < rare_genotype > > (n_samples);
+	GRvar_genotypes = vector < vector < sparse_genotype > > (n_rare_variants);
+	GRind_genotypes = vector < vector < sparse_genotype > > (n_samples);
 	MAP_R2S = vector < unsigned int > (n_rare_variants);
 	major_alleles = vector < bool > (n_rare_variants, false);
 	for (int r = 0 ; r < V.sizeRare() ; r ++) major_alleles[r] = !V.vec_rare[r]->minor;
@@ -115,7 +116,9 @@ void genotype_set::merge_by_transpose_I2V() {
 	tac.clock();
 
 	//Merge
-	unsigned int ndone = 0;
+	nhets_coalescent = 0;
+	nhets_imputation = 0;
+	nmiss_imputation = 0;
 	for (int i = 0 ; i < n_samples ; i ++) {
 		for (int r = 0 ; r < GRind_genotypes[i].size() ; r ++) {
 			unsigned int var_idx = GRind_genotypes[i][r].idx;
@@ -123,19 +126,22 @@ void genotype_set::merge_by_transpose_I2V() {
 			for (int e = 0 ; e < GRvar_genotypes[var_idx].size() && !found; e ++ ) {
 				if (GRvar_genotypes[var_idx][e].idx == i) {
 					if (!GRvar_genotypes[var_idx][e].pha) {
+						GRvar_genotypes[var_idx][e].pha = 1;
 						GRvar_genotypes[var_idx][e].al0 = GRind_genotypes[i][r].al0;
 						GRvar_genotypes[var_idx][e].al1 = GRind_genotypes[i][r].al1;
 						GRvar_genotypes[var_idx][e].prob = GRind_genotypes[i][r].prob;
-						ndone++;
+						nhets_coalescent ++;
+					} else if (GRvar_genotypes[var_idx][e].prob < 2.0f) {
+						nmiss_imputation += GRvar_genotypes[var_idx][e].mis;
+						nhets_imputation += GRvar_genotypes[var_idx][e].het;
 					}
 					found = true;
 				}
 			}
-
 			assert(found);
 		}
 	}
-	vrb.bullet("Genotype set transpose merge I2V [n=" + stb.str(ndone) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
+	vrb.bullet("Genotype set transpose merge I2V [n=" + stb.str(nhets_coalescent) + "] (" + stb.str(tac.rel_time()*1.0/1000, 2) + "s)");
 }
 
 void genotype_set::mapUnphasedOntoScaffold(int ind, vector < vector < unsigned int > > & map) {
@@ -149,4 +155,14 @@ void genotype_set::mapUnphasedOntoScaffold(int ind, vector < vector < unsigned i
 	}
 }
 
+unsigned int genotype_set::countHet() {
+	unsigned c = 0;
+	for (int vr = 0 ; vr < n_rare_variants ; vr ++) for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) c+= GRvar_genotypes[vr][r].het ;
+	return c;
+}
 
+unsigned int genotype_set::countUnphased() {
+	unsigned c = 0;
+	for (int vr = 0 ; vr < n_rare_variants ; vr ++) for (int r = 0 ; r < GRvar_genotypes[vr].size() ; r ++) c+= (GRvar_genotypes[vr][r].pha == 0);
+	return c;
+}

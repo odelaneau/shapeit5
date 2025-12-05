@@ -25,6 +25,7 @@
 
 #include <utils/otools.h>
 #include <objects/hmm_parameters.h>
+
 #include <models/haplotype_segment_single.h>
 #include <models/haplotype_segment_double.h>
 

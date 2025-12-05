@@ -7,9 +7,6 @@ parent: Tutorials
 # UK Biobank WES data
 {: .no_toc }
 
-{: .warning }
-Website under construction: content not available yet!
-
 ## Table of contents
 {: .no_toc .text-delta }
 
@@ -18,6 +15,9 @@ Website under construction: content not available yet!
 
 ---
 
+**For any question on this pipeline, please contact [Robin J. Hofmeister](https://github.com/RJHFMSTR) and [Olivier Delaneau](https://github.com/odelaneau).** 
+ 
+---
 
 ## Rationale
 Similar to the WGS data, the WES data can be phased in two steps, separating common and rare markers. However, the specificity of the WES phasing is that we first merged it with the SNP array data to increase the density of common markers, in particular in between genes.
@@ -38,7 +38,9 @@ dx mkdir -p Phasing/PhasingWES/step2_phase_rare/chunks/
 
 ### Merging WES and SNP array datas
 
-To merge WES and SNP array data, we proceed in several steps as follows:
+To merge WES and SNP array data, we proceed in several steps as follows.
+
+Important note: This uses some files produced as part of the UK Biobank SNP array tutorial, such as the SNP QC list (that should be located here after following the tutorial Phasing/PhasingSNParray/step1_dataqc/SNPlist.filtered.QC.txt)
 
 **1. SNP array lifting over.**
 
@@ -56,7 +58,7 @@ for CHR in {1..22}; do
 	array="/Phasing/PhasingSNParray/step4_liftover/full_c$CHR\_b0_v2.b38.sorted.vcf.gz"
 	array_overlapping_samples=full_c${CHR}_b0_v2.b38.sorted.overlap_exome.vcf.gz
 	threads=16
-	dx run app-swiss-army-knife -icmd="bcftools query -l ${exome_chunks1} > chr${CHR}.exome_samples && bcftools query -l ${array} | cut -d '_' -f 1 > chr${CHR}.array_samples && cat chr${CHR}.exome_samples chr${CHR}.array_samples > chr${CHR}.samples && sort chr${CHR}.samples | uniq -c | gawk '\$1==2{print \$2}' > chr${CHR}.overlapping_samples && bcftools reheader --threads ${threads} -s chr${CHR}.array_samples ${array} | bcftools view --threads ${threads} -S chr${CHR}.overlapping_samples -Oz -o ${array_overlapping_samples} && bcftools index -c --threads ${threads} ${array_overlapping_samples} && rm chr${CHR}.exome_samples && rm chr${CHR}.array_samples && rm chr${CHR}.samples && bcftools annotate -x ^INFO/AC,INFO/AN ${array_overlapping_samples} | bcftools view -i 'ID=@/mnt/project/UKB_PHASING_EXOME_ARRAY/SNPs_in_phasing.QC.txt' | bcftools annotate --threads ${threads} --set-id '%CHROM\_%POS\_%REF\_%ALT' -Oz -o full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && tabix -p vcf -f full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && rm full_c${CHR}_b0_v2.b38.sorted.overlap_exome.vcf.gz* && bcftools view -r chr20:1-10 -Oz -o array_header.chr${CHR}.vcf.gz full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && bcftools index array_header.chr${CHR}.vcf.gz && bcftools query -f '%ID\n' full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz > chr${CHR}.array_snps_kept.txt" --tag chr${CHR} --tag overlap_samples --instance-type mem1_ssd1_v2_x16 --folder="./Phasing/PhasingWES/step0_merge/support/" --name overlap_indiv_chr${CHR}_SNParray --priority normal -y
+	dx run app-swiss-army-knife -icmd="bcftools query -l ${exome_chunks1} > chr${CHR}.exome_samples && bcftools query -l ${array} | cut -d '_' -f 1 > chr${CHR}.array_samples && cat chr${CHR}.exome_samples chr${CHR}.array_samples > chr${CHR}.samples && sort chr${CHR}.samples | uniq -c | gawk '\$1==2{print \$2}' > chr${CHR}.overlapping_samples && bcftools reheader --threads ${threads} -s chr${CHR}.array_samples ${array} | bcftools view --threads ${threads} -S chr${CHR}.overlapping_samples -Oz -o ${array_overlapping_samples} && bcftools index -c --threads ${threads} ${array_overlapping_samples} && rm chr${CHR}.exome_samples && rm chr${CHR}.array_samples && rm chr${CHR}.samples && bcftools annotate -x ^INFO/AC,INFO/AN ${array_overlapping_samples} | bcftools view -i 'ID=@/mnt/project//Phasing/PhasingSNParray/step1_dataqc/SNPlist.filtered.QC.txt' | bcftools annotate --threads ${threads} --set-id '%CHROM\_%POS\_%REF\_%ALT' -Oz -o full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && tabix -p vcf -f full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && rm full_c${CHR}_b0_v2.b38.sorted.overlap_exome.vcf.gz* && bcftools view -r chr20:1-10 -Oz -o array_header.chr${CHR}.vcf.gz full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz && bcftools index array_header.chr${CHR}.vcf.gz && bcftools query -f '%ID\n' full_c${CHR}_b0_v2.b38.sorted.overlap_exome.TAGS.vcf.gz > chr${CHR}.array_snps_kept.txt" --tag chr${CHR} --tag overlap_samples --instance-type mem1_ssd1_v2_x16 --folder="./Phasing/PhasingWES/step0_merge/support/" --name overlap_indiv_chr${CHR}_SNParray --priority normal -y
 done
 
 

@@ -20,9 +20,11 @@ permalink: /docs/installation/build_from_source/compile_shapeit5
 Download the last version of the SHAPEIT5 code using:
 <div class="code-example" markdown="1">
 ```bash
-git clone https://github.com/odelaneau/shapeit5.git
+git clone --recurse-submodules https://github.com/odelaneau/shapeit5.git
 ```
 </div>
+
+Adding `--recurse-submodules` allows cloning automatically the xcftools submodule required by shapeit5. 
 
 Navigate to the downloaded folder using `cd shapeit5`.
 
@@ -31,14 +33,16 @@ You'll find there a folder containing all the software packages are other utilit
 - **docker**: all scripts needed to build a docker file comprising all binaries
 - **docs**: documentation in html
 - **ligate**: ligate multiple phased BCF/VCF files into a chromosome length file
-- **maps**: genetics maps in b37 and b38
 - **phase_common**: phase common sites, typically SNP array data
 - **phase_rare**: phase rare variants onto a scaffold of common variants
+- **resources**: genetics maps [b37/b38] and coordinates for [5/20] cM chunks  
 - **static_bins**: static binaries of all executables
 - **switch**: compute switch error rate and genotyping error rate given simulated or trio data
 - **tasks**: scripts used to phase large datasets, good base to start pipelining
 - **test**: simulated data for first-step testing of the method
 - **versions**: versioning
+- **xcftools**: tool to handle XCF file format
+
 
 Each software in the suite contains the same folder structure:
 
